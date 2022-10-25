@@ -1,0 +1,10 @@
+{
+	"dependencies": {
+		"dotenv": "^16.0.3",
+		"node-notifier": "^10.0.1",
+		"puppeteer": "^19.1.2"
+	},
+	"scripts": {
+		"start": "node -r dotenv/config index.js"
+	}
+}
