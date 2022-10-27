@@ -1,8 +1,12 @@
 import * as vscode from 'vscode';
 
+const extensionOutput = vscode.window.createOutputChannel("C$G");
+
 const TOP_OF_DOCUMENT = new vscode.Range(0, 0, 0, 0);
 const TEST_EXPRESSION = /^def test_.*\(/gm;
 const ALL_METHODS_EXPRESSION = /^def .*\(/gm;
+
+const POSSIBLE_FLAGS = ["-v", "-vv", "--pdb", "--exitfirst"];
 
 const RUN_TESTS_FILE = 'extension.runTestsFile';
 const RUN_TEST_METHOD = 'extension.runTestMethod';
@@ -10,71 +14,80 @@ const RUN_TEST_METHOD = 'extension.runTestMethod';
 const COPY_IMPORT_STATEMENT = 'extension.copyImportStatement';
 const OPEN_CONSOLE_WITH_THIS_IMPORTED = 'extension.openConsoleWithThisImported';
 
-const extensionOutput = vscode.window.createOutputChannel("C$G");
+
+function _filePath() {
+	const fileName = vscode.window.activeTextEditor?.document.fileName!;
+	return vscode.workspace.asRelativePath(fileName);
+}
+
+function _importStatement(method: string) {
+	const filePath = _filePath();
+	const fileAsMethod = filePath.replace('srv/', '').replace('.py', '').replace(/\//g, '.');
+
+	if (method) {
+		return `from ${fileAsMethod} import ${method}`;
+	}
+
+	const pathToModule = fileAsMethod.split('.');
+	const module = pathToModule.pop();
+
+	return `from ${pathToModule.join('.')} import ${module}`;
+}
+
+async function _testFlags(openConfig: boolean) {
+	if (!openConfig) {
+		return [];
+	}
+
+	const picks = await vscode.window.showQuickPick(POSSIBLE_FLAGS, { title: "Choose your flags", canPickMany: true });
+	return picks || [];
+}
+
+async function _withMigrations(openConfig: boolean) {
+	const pick = await vscode.window.showQuickPick(["Yes", "No"], { title: "With migration" });
+	return pick === "Yes";
+}
+
+function _testCommand(withMigrations: boolean) {
+	return withMigrations ? 'docker-test' : 'docker-test-without-migration';
+}
+
+async function runTestsFile(openConfig = false) {
+	const flags = await _testFlags(openConfig);
+	const withMigrations = await _withMigrations(openConfig);
+	const terminal = vscode.window.createTerminal("Running your tests");
+	terminal.sendText(`make ${_testCommand(withMigrations)} TEST_PATH="${flags.join(' ')} ${_filePath()}"`);
+}
+
+async function runTestMethod(method: string, openConfig = false) {
+	const flags = await _testFlags(openConfig);
+	const withMigrations = await _withMigrations(openConfig);
+	const terminal = vscode.window.createTerminal("Running your tests");
+	terminal.sendText(`make ${_testCommand(withMigrations)} TEST_PATH="${flags.join(' ')} ${_filePath()}::${method}"`);
+}
+
+async function copyImportStatement(method: string) {
+	vscode.env.clipboard.writeText(_importStatement(method));
+}
+
+async function openConsoleWithThisImported(method: string) {
+	const integration = await vscode.window.showQuickPick(["facebook", "tiktok", "pinterest"], { title: "Choose integration" });
+	if (!integration) {
+		return;
+	}
+
+	const environment = await vscode.window.showQuickPick(["development", "staging", "production"], { title: "Choose env" });
+	if (!integration) {
+		return;
+	}
+
+	const terminal = vscode.window.createTerminal("The console you wanted");
+	terminal.sendText(`make ${integration}-${environment}-console EXTRA="-c '${_importStatement(method)}'"`);
+}
+
 
 export function activate(context: vscode.ExtensionContext) {
-	function _filePath() {
-		const fileName = vscode.window.activeTextEditor?.document.fileName!;
-		return vscode.workspace.asRelativePath(fileName);
-	}
-
-	function _importStatement(method: string) {
-		const filePath = _filePath();
-		const fileAsMethod = filePath.replace('srv/', '').replace('.py', '').replace(/\//g, '.');
-
-		if (method) {
-			return `from ${fileAsMethod} import ${method}`;
-		}
-
-		const pathToModule = fileAsMethod.split('.');
-		const module = pathToModule.pop();
-
-		return `from ${pathToModule.join('.')} import ${module}`;
-	}
-
-	async function testConfig() {
-		const picks = await vscode.window.showQuickPick(
-			["-v", "-vv", "--pdb", "--exitfirst"],
-			{ title: "Choose your flags", canPickMany: true }
-		);
-		return picks || [];
-	}
-
-	async function runTestsFile(openConfig = false) {
-		const flags = openConfig ? await testConfig() : [];
-		const terminal = vscode.window.createTerminal("Applying git diff from current editor");
-		terminal.sendText(`make docker-test TEST_PATH="${flags.join(' ')} ${_filePath()}"`);
-	}
-
-	async function runTestMethod(method: string, openConfig = false) {
-		const flags = openConfig ? await testConfig() : [];
-		const terminal = vscode.window.createTerminal("Applying git diff from current editor");
-		terminal.sendText(`make docker-test TEST_PATH="${flags.join(' ')} ${_filePath()}::${method}"`);
-	}
-
-	async function copyImportStatement(method: string) {
-		vscode.env.clipboard.writeText(_importStatement(method));
-	}
-
-	async function openConsoleWithThisImported(method: string) {
-		const integration = await vscode.window.showQuickPick(
-			["facebook", "tiktok", "pinterest"], { title: "Choose integration" }
-		);
-		if (!integration) {
-			return;
-		}
-
-		const environment = await vscode.window.showQuickPick(
-			["development", "staging", "production"], { title: "Choose env" }
-		);
-		if (!integration) {
-			return;
-		}
-
-		const terminal = vscode.window.createTerminal("The console you wanted");
-		terminal.sendText(`make ${integration}-${environment}-console EXTRA="-c '${_importStatement(method)}'"`);
-	}
-
+	// Register the providers
 	context.subscriptions.push(
 		vscode.languages.registerCodeLensProvider(
 			{ scheme: 'file', language: 'python', pattern: '**/*.py' },
@@ -84,6 +97,10 @@ export function activate(context: vscode.ExtensionContext) {
 			{ scheme: 'file', language: 'python', pattern: '**/test_*.py' },
 			new C4gTestsCodeLensProvider()
 		),
+	);
+
+	// Register the commands
+	context.subscriptions.push(
 		vscode.commands.registerCommand(RUN_TESTS_FILE, runTestsFile),
 		vscode.commands.registerCommand(RUN_TEST_METHOD, runTestMethod),
 		vscode.commands.registerCommand(COPY_IMPORT_STATEMENT, copyImportStatement),
@@ -91,91 +108,87 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 }
 
-export function deactivate() { }
+function _addCodeLenses(document: vscode.TextDocument, expression: RegExp, func: (range: vscode.Range, match: string) => Array<vscode.CodeLens>) {
+	const text = document.getText();
 
+	const codeLenses = [];
 
-const runTestMethodCommand = (method: string, openConfig = false): vscode.Command => ({
-	command: RUN_TEST_METHOD,
-	title: 'Run' + (openConfig ? ' with config' : ''),
-	arguments: [method, openConfig],
-});
+	const regex = new RegExp(expression);
+	let matches = regex.exec(text);
+	while (matches) {
+		const line = document.lineAt(document.positionAt(matches.index).line);
 
-const runTestsFileCommand = (openConfig = false): vscode.Command => ({
-	command: RUN_TESTS_FILE,
-	title: 'Run' + (openConfig ? ' with config' : ''),
-	arguments: [openConfig],
-});
+		const indexOf = line.text.indexOf(matches[0]);
+		const position = new vscode.Position(line.lineNumber, indexOf);
 
-const copyImportStatementCommand = (method: string): vscode.Command => ({
-	command: COPY_IMPORT_STATEMENT,
-	title: 'Copy import',
-	arguments: [method],
-});
+		const range = document.getWordRangeAtPosition(position, new RegExp(expression));
 
-const openConsoleWithThisImportedCommand = (method: string): vscode.Command => ({
-	command: OPEN_CONSOLE_WITH_THIS_IMPORTED,
-	title: 'Open console',
-	arguments: [method],
-});
-
-class CodeLensProvider {
-	_addCodeLenses(document: vscode.TextDocument, expression: RegExp, func: (range: vscode.Range, match: string) => Array<vscode.CodeLens>) {
-		const text = document.getText();
-
-		const codeLenses = [];
-
-		const regex = new RegExp(expression);
-		let matches = regex.exec(text);
-		while (matches) {
-			const line = document.lineAt(document.positionAt(matches.index).line);
-
-			const indexOf = line.text.indexOf(matches[0]);
-			const position = new vscode.Position(line.lineNumber, indexOf);
-
-			const range = document.getWordRangeAtPosition(position, new RegExp(expression));
-
-			if (range) {
-				codeLenses.push(...func(range, matches[0]));
-			}
-
-			matches = regex.exec(text);
+		if (range) {
+			codeLenses.push(...func(range, matches[0]));
 		}
 
-		return codeLenses;
+		matches = regex.exec(text);
 	}
+
+	return codeLenses;
 }
 
-class C4gTestsCodeLensProvider extends CodeLensProvider implements vscode.CodeLensProvider {
+class C4gTestsCodeLensProvider implements vscode.CodeLensProvider {
+	runTestMethodCommand = (method: string, openConfig = false): vscode.Command => ({
+		command: RUN_TEST_METHOD,
+		title: 'Run' + (openConfig ? ' with config' : ''),
+		arguments: [method, openConfig],
+	});
+
+	runTestsFileCommand = (openConfig = false): vscode.Command => ({
+		command: RUN_TESTS_FILE,
+		title: 'Run' + (openConfig ? ' with config' : ''),
+		arguments: [openConfig],
+	});
+
 	async provideCodeLenses(document: vscode.TextDocument): Promise<vscode.CodeLens[]> {
 		return [
-			new vscode.CodeLens(TOP_OF_DOCUMENT, runTestsFileCommand()),
-			new vscode.CodeLens(TOP_OF_DOCUMENT, runTestsFileCommand(true)),
-			...this._addCodeLenses(document, TEST_EXPRESSION, (range: vscode.Range, match: string) => {
+			new vscode.CodeLens(TOP_OF_DOCUMENT, this.runTestsFileCommand()),
+			new vscode.CodeLens(TOP_OF_DOCUMENT, this.runTestsFileCommand(true)),
+			..._addCodeLenses(document, TEST_EXPRESSION, (range: vscode.Range, match: string) => {
 				let method = match.replace('def ', '').replace('(', '');
 
 				return [
-					new vscode.CodeLens(range, runTestMethodCommand(method)),
-					new vscode.CodeLens(range, runTestMethodCommand(method, true)),
+					new vscode.CodeLens(range, this.runTestMethodCommand(method)),
+					new vscode.CodeLens(range, this.runTestMethodCommand(method, true)),
 				];
 			})
 		];
 	}
 }
 
-class C4gImportCodeLensProvider extends CodeLensProvider implements vscode.CodeLensProvider {
+class C4gImportCodeLensProvider implements vscode.CodeLensProvider {
+	copyImportStatementCommand = (method: string): vscode.Command => ({
+		command: COPY_IMPORT_STATEMENT,
+		title: 'Copy import',
+		arguments: [method],
+	});
+
+	openConsoleWithThisImportedCommand = (method: string): vscode.Command => ({
+		command: OPEN_CONSOLE_WITH_THIS_IMPORTED,
+		title: 'Open console',
+		arguments: [method],
+	});
+
 	async provideCodeLenses(document: vscode.TextDocument): Promise<vscode.CodeLens[]> {
 		return [
-			new vscode.CodeLens(TOP_OF_DOCUMENT, copyImportStatementCommand('')),
-			new vscode.CodeLens(TOP_OF_DOCUMENT, openConsoleWithThisImportedCommand('')),
-			...this._addCodeLenses(document, ALL_METHODS_EXPRESSION, (range: vscode.Range, match: string) => {
+			new vscode.CodeLens(TOP_OF_DOCUMENT, this.copyImportStatementCommand('')),
+			new vscode.CodeLens(TOP_OF_DOCUMENT, this.openConsoleWithThisImportedCommand('')),
+			..._addCodeLenses(document, ALL_METHODS_EXPRESSION, (range: vscode.Range, match: string) => {
 				let method = match.replace('def ', '').replace('(', '');
 
 				return [
-					new vscode.CodeLens(range, copyImportStatementCommand(method)),
-					new vscode.CodeLens(range, openConsoleWithThisImportedCommand(method)),
+					new vscode.CodeLens(range, this.copyImportStatementCommand(method)),
+					new vscode.CodeLens(range, this.openConsoleWithThisImportedCommand(method)),
 				];
 			})
 		];
 	}
 }
 
+export function deactivate() { /* noop */ }
