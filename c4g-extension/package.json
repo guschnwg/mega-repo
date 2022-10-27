@@ -2,7 +2,7 @@
 	"name": "c4g-extension",
 	"displayName": "c4g-extension",
 	"description": "",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"publisher": "GiovannaZanardini",
 	"license": "MIT",
 	"engines": {
