@@ -32,14 +32,24 @@ export function activate(context: vscode.ExtensionContext) {
 		return `from ${pathToModule.join('.')} import ${module}`;
 	}
 
+	async function testConfig() {
+		const picks = await vscode.window.showQuickPick(
+			["-v", "-vv", "--pdb", "--exitfirst"],
+			{ title: "Choose your flags", canPickMany: true }
+		);
+		return picks || [];
+	}
+
 	async function runTestsFile(openConfig = false) {
+		const flags = openConfig ? await testConfig() : [];
 		const terminal = vscode.window.createTerminal("Applying git diff from current editor");
-		terminal.sendText(`make docker-test TEST_PATH="${_filePath()}"`);
+		terminal.sendText(`make docker-test TEST_PATH="${flags.join(' ')} ${_filePath()}"`);
 	}
 
 	async function runTestMethod(method: string, openConfig = false) {
+		const flags = openConfig ? await testConfig() : [];
 		const terminal = vscode.window.createTerminal("Applying git diff from current editor");
-		terminal.sendText(`make docker-test TEST_PATH="${_filePath()}::${method}"`);
+		terminal.sendText(`make docker-test TEST_PATH="${flags.join(' ')} ${_filePath()}::${method}"`);
 	}
 
 	async function copyImportStatement(method: string) {
