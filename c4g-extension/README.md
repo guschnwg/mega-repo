@@ -2,10 +2,10 @@
 
 Just run it
 
-![Regular file](./regular_file.png "Regular File")
+![Regular file](https://github.com/guschnwg/mega-repo/raw/main/c4g-extension/regular_file.png "Regular File")
 
 
-![Test file](./test_file.png "Test File")
+![Test file]((https://github.com/guschnwg/mega-repo/raw/main/c4g-extension/test_file.png "Test File")
 
 
 ## Commands
