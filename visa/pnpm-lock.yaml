@@ -4,11 +4,13 @@ specifiers:
   dotenv: ^16.0.3
   node-notifier: ^10.0.1
   puppeteer: ^19.1.2
+  say: ^0.16.0
 
 dependencies:
   dotenv: 16.0.3
   node-notifier: 10.0.1
   puppeteer: 19.1.2
+  say: 0.16.0
 
 packages:
 
@@ -364,6 +366,10 @@ packages:
       wrappy: 1.0.2
     dev: false
 
+  /one-time/0.0.4:
+    resolution: {integrity: sha512-qAMrwuk2xLEutlASoiPiAMW3EN3K96Ka/ilSXYr6qR1zSVXw2j7+yDSqGTC4T9apfLYxM3tLLjKvgPdAUK7kYQ==}
+    dev: false
+
   /parent-module/1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -473,6 +479,13 @@ packages:
 
   /safe-buffer/5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
+    dev: false
+
+  /say/0.16.0:
+    resolution: {integrity: sha512-yEfncNu3I6lcZ6RIrXgE9DqbrEmvV5uQQ8ReM14u/DodlvJYpveqNphO55RLMSj77b06ZKNif/FLmhzQxcuUXg==}
+    engines: {node: '>=6.9'}
+    dependencies:
+      one-time: 0.0.4
     dev: false
 
   /semver/7.3.8:
