@@ -76,7 +76,14 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	context.subscriptions.push(
-		vscode.languages.registerCodeLensProvider({ scheme: 'file', language: 'python', pattern: '**/*.py' }, new C4gTestsCodeLensProvider()),
+		vscode.languages.registerCodeLensProvider(
+			{ scheme: 'file', language: 'python', pattern: '**/*.py' },
+			new C4gImportCodeLensProvider()
+		),
+		vscode.languages.registerCodeLensProvider(
+			{ scheme: 'file', language: 'python', pattern: '**/test_*.py' },
+			new C4gTestsCodeLensProvider()
+		),
 		vscode.commands.registerCommand(RUN_TESTS_FILE, runTestsFile),
 		vscode.commands.registerCommand(RUN_TEST_METHOD, runTestMethod),
 		vscode.commands.registerCommand(COPY_IMPORT_STATEMENT, copyImportStatement),
@@ -111,7 +118,7 @@ const openConsoleWithThisImportedCommand = (method: string): vscode.Command => (
 	arguments: [method],
 });
 
-class C4gTestsCodeLensProvider implements vscode.CodeLensProvider {
+class CodeLensProvider {
 	_addCodeLenses(document: vscode.TextDocument, expression: RegExp, func: (range: vscode.Range, match: string) => Array<vscode.CodeLens>) {
 		const text = document.getText();
 
@@ -136,40 +143,39 @@ class C4gTestsCodeLensProvider implements vscode.CodeLensProvider {
 
 		return codeLenses;
 	}
+}
 
-	addTestCodeLenses(document: vscode.TextDocument) {
-		return this._addCodeLenses(document, TEST_EXPRESSION, (range: vscode.Range, match: string) => {
-			let method = match.replace('def ', '').replace('(', '');
-
-			return [
-				new vscode.CodeLens(range, runTestMethodCommand(method)),
-				new vscode.CodeLens(range, runTestMethodCommand(method, true)),
-			];
-		});
-	}
-
-	addCopyImportCodeLenses(document: vscode.TextDocument) {
-		return this._addCodeLenses(document, ALL_METHODS_EXPRESSION, (range: vscode.Range, match: string) => {
-			let method = match.replace('def ', '').replace('(', '');
-
-			return [
-				new vscode.CodeLens(range, copyImportStatementCommand(method)),
-				new vscode.CodeLens(range, openConsoleWithThisImportedCommand(method)),
-			];
-		});
-	}
-
+class C4gTestsCodeLensProvider extends CodeLensProvider implements vscode.CodeLensProvider {
 	async provideCodeLenses(document: vscode.TextDocument): Promise<vscode.CodeLens[]> {
-		let codeLenses = [
+		return [
 			new vscode.CodeLens(TOP_OF_DOCUMENT, runTestsFileCommand()),
 			new vscode.CodeLens(TOP_OF_DOCUMENT, runTestsFileCommand(true)),
-			new vscode.CodeLens(TOP_OF_DOCUMENT, copyImportStatementCommand('')),
+			...this._addCodeLenses(document, TEST_EXPRESSION, (range: vscode.Range, match: string) => {
+				let method = match.replace('def ', '').replace('(', '');
+
+				return [
+					new vscode.CodeLens(range, runTestMethodCommand(method)),
+					new vscode.CodeLens(range, runTestMethodCommand(method, true)),
+				];
+			})
 		];
+	}
+}
 
-		codeLenses.push(...this.addTestCodeLenses(document));
-		codeLenses.push(...this.addCopyImportCodeLenses(document));
+class C4gImportCodeLensProvider extends CodeLensProvider implements vscode.CodeLensProvider {
+	async provideCodeLenses(document: vscode.TextDocument): Promise<vscode.CodeLens[]> {
+		return [
+			new vscode.CodeLens(TOP_OF_DOCUMENT, copyImportStatementCommand('')),
+			new vscode.CodeLens(TOP_OF_DOCUMENT, openConsoleWithThisImportedCommand('')),
+			...this._addCodeLenses(document, ALL_METHODS_EXPRESSION, (range: vscode.Range, match: string) => {
+				let method = match.replace('def ', '').replace('(', '');
 
-		return codeLenses;
+				return [
+					new vscode.CodeLens(range, copyImportStatementCommand(method)),
+					new vscode.CodeLens(range, openConsoleWithThisImportedCommand(method)),
+				];
+			})
+		];
 	}
 }
 

@@ -1,3 +1,22 @@
 # c4g-extension
 
 Just run it
+
+![Regular file](./regular_file.png "Regular File")
+
+
+![Test file](./test_file.png "Test File")
+
+
+## Commands
+
+- Copy Import: it loads to your clipboard the import python command
+  - In the File: `from cats4gold.facebook.services import ads`
+  - In the Method: `from cats4gold.facebook.services.ads import kick_ad`
+
+- Open Console: opens a console in a new Terminal with the imported command already loaded.
+  - Opens a Quick Pick letting you choose the Integration and the Env
+
+- Run: Just runs the test method/file without any real deal.
+
+- Run with config: Open a Quick Pick to let you choose the flags.
