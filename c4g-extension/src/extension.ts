@@ -23,7 +23,7 @@ function _filePath() {
 
 function _importStatement(method: string) {
 	const filePath = _filePath();
-	const fileAsMethod = filePath.replace('srv/', '').replace('.py', '').replace(/\//g, '.');
+	const fileAsMethod = filePath.replace('srv/', '').replace('.py', '').replace(/\//g, '.').replace(/\.__init__/g, '');
 
 	if (method) return `from ${fileAsMethod} import ${method}`;
 
@@ -40,7 +40,7 @@ async function _testFlags(openConfig: boolean) {
 }
 
 async function _withMigrations(openConfig: boolean) {
-	if (!openConfig) return true;
+	if (!openConfig) return false;
 
 	return await vscode.window.showQuickPick(["Yes", "No"], { title: "With migration" }) === "Yes";
 }
