@@ -1,24 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "emojipicker",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/htmlprogrammist/EmojiPicker",
-      "state" : {
-        "revision" : "532367baea149fb34f7403873b78cb5a1636a4a0",
-        "version" : "1.0.3"
-      }
-    },
-    {
-      "identity" : "isemojiview",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/isaced/ISEmojiView",
-      "state" : {
-        "revision" : "d6f2becd766f8c935bedff3bd987491678cb7c6b",
-        "version" : "0.3.3"
-      }
-    },
-    {
       "identity" : "swift-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms.git",

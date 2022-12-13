@@ -11,6 +11,8 @@ import SwiftUI
 struct FeelingSelectionView: View {
     var data: StoreData
 
+    @State var showNewEmojiPicker: Bool = false
+
     var body: some View {
         VStack {
             Text("How are you feeling today?")
@@ -39,6 +41,14 @@ struct FeelingSelectionView: View {
                             }
                         }
                     }.padding(20)
+
+                    Button("Add new emoji") {
+                        showNewEmojiPicker = true
+                    }
+                    .buttonStyle(.bordered)
+                    .popover(isPresented: $showNewEmojiPicker) {
+                        EmojiPickerView()
+                    }
                 }
             }
         }
