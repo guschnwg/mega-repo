@@ -1,6 +1,16 @@
 {
     "countries": [
         {
+            "country": "BR",
+            "coordinates": {
+                "lat": -22.9522413,
+                "lng": -43.2104268
+            },
+            "tips": [
+                ""
+            ]
+        },
+        {
             "country": "FR",
             "coordinates": {
                 "lat": 48.8568849,

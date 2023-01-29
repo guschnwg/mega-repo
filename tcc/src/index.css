@@ -62,8 +62,11 @@
   fill: white;
 }
 
+
 .land.selected {
-  mix-blend-mode: color;
+  /* mix-blend-mode: color; */
+    animation: pulse 1s ease;
+    animation-iteration-count: infinite;
 }
 
 .land.disabled {
@@ -134,4 +137,17 @@ body {
 
 #map {
   background: powderblue;
+}
+@keyframes pulse {
+  0% {
+    fill-opacity: 1;
+  }
+
+  50% {
+    fill-opacity: .5;
+  }
+
+  100% {
+    fill-opacity: 1;
+  }
 }

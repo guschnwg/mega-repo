@@ -147,7 +147,7 @@ function Timer({ start, run, limit = 5, onEnd }) {
       if (!run) return;
 
       const next = (Date.now() - start) / 1000;
-      if (next > (limit + 1)) {
+      if (limit && next > (limit + 1)) {
         onEnd();
       } else {
         setCurrent(next);
@@ -200,6 +200,10 @@ function Game({ timeLimit, guessLimit }) {
   const [showGuessExceeded, setShowGuessExceeded] = useState(false);
 
   const country = GAME.countries[level];
+  const isTutorial = level === 0;
+
+  const canGuess = !showGuessAttempt && !showRightAttempt && !showTimeExceeded && !showGuessExceeded;
+  const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded;
 
   const handleGuess = guess => {
     const isRight = guess.country.id === country.country;
@@ -210,7 +214,7 @@ function Game({ timeLimit, guessLimit }) {
       setShowRightAttempt(true);
     }
 
-    if (guesses.length + 1 >= guessLimit) {
+    if (!isTutorial && guesses.length + 1 >= guessLimit) {
       setShowGuessExceeded(true);
     }
   }
@@ -232,16 +236,13 @@ function Game({ timeLimit, guessLimit }) {
     return <EndGame game={game} />;
   }
 
-  const canGuess = !showGuessAttempt && !showRightAttempt && !showTimeExceeded && !showGuessExceeded;
-  const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded;
-
   return (
     <div className='app'>
       <div>
         <Timer
           start={time}
           run={timeRunning}
-          limit={timeLimit}
+          limit={!isTutorial && timeLimit}
           onEnd={() => {
             setShowTimeExceeded(true);
             setShowGuessAttempt(false);
