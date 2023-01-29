@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, has_app_context
 from redis import Redis
 import os
 import threading
@@ -21,6 +21,18 @@ FORMAT = ('%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] '
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger(__name__)
 log.level = logging.INFO
+
+class RequestDataFilter(logging.Filter):
+    """
+    This is a filter which injects contextual information into the log.
+    """
+
+    def filter(self, record):
+        record.my_test = "oi"
+        return True
+
+for handler in log.handlers:
+    handler.addFilter(RequestDataFilter())
 
 
 app = Flask(__name__)
