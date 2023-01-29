@@ -1,0 +1,54 @@
+{
+    "countries": [
+        {
+            "country": "FR",
+            "coordinates": {
+                "lat": 48.8568849,
+                "lng": 2.2968119
+            },
+            "tips": [
+                ""
+            ]
+        },
+        {
+            "country": "NL",
+            "coordinates": {
+                "lat": 52.3585948,
+                "lng": 4.8804924
+            },
+            "tips": [
+                ""
+            ]
+        },
+        {
+            "country": "AR",
+            "coordinates": {
+                "lat": -34.6083088,
+                "lng": -58.3709003
+            },
+            "tips": [
+                ""
+            ]
+        },
+        {
+            "country": "GR",
+            "coordinates": {
+                "lat": 37.9715285,
+                "lng": 23.7267166
+            },
+            "tips": [
+                ""
+            ]
+        },
+        {
+            "country": "UA",
+            "coordinates": {
+                "lat": 51.3067206,
+                "lng": 30.0662756
+            },
+            "tips": [
+                ""
+            ]
+        }
+    ]
+}
