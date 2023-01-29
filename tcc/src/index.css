@@ -1,7 +1,68 @@
+#guess-container {
+  width: 500px;
+  height: 500px;
+
+  position: relative;
+}
+
+#guess-container>.react-transform-wrapper {
+  width: 500px;
+  height: 500px;
+}
+
+.tooltip {
+  position: fixed;
+  background: white;
+  padding: 10px;
+  z-index: 99999;
+}
 .land {
   fill: #CCCCCC;
   fill-opacity: 1;
   stroke: white;
   stroke-opacity: 1;
   stroke-width: 0.5;
+}
+[class*="África"] {
+  fill: red;
+}
+
+[class*="América do Sul"] {
+  fill: violet;
+}
+
+[class*="América do Norte"] {
+  fill: green;
+}
+
+[class*="Europa"] {
+  fill: tomato;
+}
+
+[class*="Oceania"] {
+  fill: salmon;
+}
+
+
+[class*="Ásia"] {
+  fill: slateblue;
+}
+
+[class*="Antártida"] {
+  fill: white;
+}
+
+.land.selected {
+  mix-blend-mode: color;
+}
+
+.controls {
+  position: absolute;
+  z-index: 8888;
+
+  left: 10px;
+  bottom: 10px;
+
+  display: flex;
+  flex-direction: row;
 }
