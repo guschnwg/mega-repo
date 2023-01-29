@@ -15,12 +15,15 @@ async function run() {
     const response = await fetch(`https://nominatim.openstreetmap.org/search?country=${country.title}&accept-language=pt-BR&format=json`);
     const data = await response.json();
     if (!data || !data.length) {
+      console.log("skipped " + country.title);
       continue;
     }
 
     delete country.title;
     country.name = data[0].display_name;
-    country.continent = continents[countryMap[country.id]];
+
+    const countryContinent = countryMap[country.id];
+    country.continent = continents[countryContinent] || "Not found";
   }
 
   fs.writeFileSync('../src/world.json', JSON.stringify(world, null, 2));
