@@ -38,7 +38,8 @@ const Table = ({
   while (debitBalance > 0) {
     const extraAmortizations = amortizations
       .filter((a) => month % a.every === 0)
-      .map((a) => a.value);
+      .filter(a => a.from <= month && a.to >= month)
+      .map((a) => a.value * (a.multiplier ** (month - a.from)));
 
     const installmentInterest = (debitBalance * monthlyInterest) / 100;
     const installmentAmortizations = [monthlyAmortization].concat(
@@ -130,12 +131,12 @@ const Table = ({
 
 export default function App() {
   const [months, setMonths] = React.useState(120);
-  const [value, setValue] = React.useState(439_990);
-  const [downPayment, setDownPayment] = React.useState(139_990);
-  const [interest, setInterest] = React.useState(8.7);
+  const [value, setValue] = React.useState(450_000);
+  const [downPayment, setDownPayment] = React.useState(124_000);
+  const [interest, setInterest] = React.useState(11.47);
 
   const [amortizations, setAmortizations] = React.useState([
-    { id: Math.random(), every: 12, value: 2500 },
+    { id: Math.random(), every: 12, value: 2500, from: 0, to: months, multiplier: 1 },
   ]);
 
   const monthlyInterest = (Math.pow(1 + interest / 100, 1 / 12) - 1) * 100;
@@ -201,6 +202,54 @@ export default function App() {
                 }
               />{' '}
               Reais
+
+              -
+
+              De
+              <input
+                value={a.from}
+                onChange={(event) =>
+                  setAmortizations((_prev) => {
+                    const prev = [..._prev];
+                    const theOne = prev.find((p) => p.id === a.id);
+                    theOne.from = parseFloat(event.target.value);
+                    return prev;
+                  })
+                }
+              />
+
+              -
+
+              Até
+              <input
+                value={a.to}
+                onChange={(event) =>
+                  setAmortizations((_prev) => {
+                    const prev = [..._prev];
+                    const theOne = prev.find((p) => p.id === a.id);
+                    theOne.to = parseFloat(event.target.value);
+                    return prev;
+                  })
+                }
+              />{' '}
+
+              --
+
+              xx
+              <input
+                value={a.multiplier}
+                onChange={(event) =>
+                  setAmortizations((_prev) => {
+                    const prev = [..._prev];
+                    const theOne = prev.find((p) => p.id === a.id);
+                    theOne.multiplier = parseFloat(event.target.value);
+                    return prev;
+                  })
+                }
+              />{' '}
+
+              --
+
               <button
                 onClick={(event) =>
                   setAmortizations((prev) => prev.filter((p) => p.id !== a.id))
@@ -216,7 +265,7 @@ export default function App() {
             onClick={() =>
               setAmortizations((prev) => [
                 ...prev,
-                { id: Math.random(), every: 1, value: 0 },
+                { id: Math.random(), every: 1, value: 0, from: 0, to: months },
               ])
             }
           >
