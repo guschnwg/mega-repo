@@ -265,7 +265,7 @@ export default function App() {
             onClick={() =>
               setAmortizations((prev) => [
                 ...prev,
-                { id: Math.random(), every: 1, value: 0, from: 0, to: months },
+                { id: Math.random(), every: 1, value: 0, from: 0, to: months, multiplier: 1 },
               ])
             }
           >
