@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { GoogleMap, StreetViewPanorama, useJsApiLoader } from '@react-google-maps/api';
 
 import useMouse from '@react-hook/mouse-position';
+import usePortal from 'react-useportal'
+
 
 const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLeave }) => {
   const ref = useRef(false);
@@ -158,7 +160,11 @@ function Timer({ start, run, limit = 5, onEnd }) {
     }
   }, [start, run, limit, onEnd]);
 
-  return <span>{Math.floor(current)}s</span>;
+  return (
+    <span id='tutorial-timer'>
+      {Math.floor(current)}s
+    </span>
+  );
 }
 
 function RightAttempt({ onNext }) {
@@ -186,6 +192,37 @@ function GuessExceeded({ onNext }) {
       <button onClick={onNext}>Próximo nível</button>
     </div>
   )
+}
+
+function Tutorial({ onSkip }) {
+  const [tutorial, setTutorial] = useState({
+    timer: { show: false, completed: false },
+    navigation: { show: false, completed: false },
+    tips: { show: false, completed: false },
+    guess: { show: false, completed: false },
+    wrongGuess: { show: false, completed: false },
+    rightGuess: { show: false, completed: false },
+    step: 0,
+    steps: ['timer', 'navigation', 'tips', 'guess', 'wrongGuess', 'rightGuess',]
+  });
+
+  const { Portal } = usePortal()
+
+  return (
+    <>
+      <button
+        className="skip-tutorial-button"
+        onClick={onSkip}
+      >
+        Pular tutorial
+      </button>
+      <Portal>
+        <div id='tutorial'>
+          This text is portaled at the end of document.body!
+        </div>
+      </Portal>
+    </>
+  );
 }
 
 function Game({ timeLimit, guessLimit }) {
@@ -279,6 +316,8 @@ function Game({ timeLimit, guessLimit }) {
           Já sei!
         </button>
       )}
+
+      {isTutorial && <Tutorial onSkip={handleNext} />}
     </div>
   );
 }
@@ -293,3 +332,5 @@ function App() {
 }
 
 export default App;
+
+// Object.assign(['one', 'two', 'three'], {one: 1, two: 2, three: 3 })
