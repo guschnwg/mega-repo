@@ -24,7 +24,14 @@ function _filePath() {
 
 function _importStatement(method: string) {
 	const filePath = _filePath();
-	const fileAsMethod = filePath.replace('srv/', '').replace('.py', '').replace(/\//g, '.').replace(/\.__init__/g, '');
+
+	const fileAsMethod = filePath
+		.replace('srv/', '')
+		.replace('.py', '')
+		.replace(/\//g, '.')
+		.replace(/\.__init__/g, '')
+		.replace(/^(src\.)/, "")
+		.replace(/^(api.src\.)/, "");
 
 	if (method) return `from ${fileAsMethod} import ${method}`;
 
