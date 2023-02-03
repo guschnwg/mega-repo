@@ -5,7 +5,7 @@ const extensionOutput = vscode.window.createOutputChannel("C$G");
 const TOP_OF_DOCUMENT = new vscode.Range(0, 0, 0, 0);
 const TEST_EXPRESSION = /^def test_.*\(/gm;
 const ALL_METHODS_EXPRESSION = /^def .*\(/gm;
-const ALL_CLASSES_EXPRESSION = /^class .*\(/gm;
+const ALL_CLASSES_EXPRESSION = /^class .*(\(|:)/gm;
 
 const POSSIBLE_FLAGS = ["-v", "-vv", "--pdb", "--exitfirst"];
 const INTEGRATIONS = ["facebook", "tiktok", "pinterest"];
