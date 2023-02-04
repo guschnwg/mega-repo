@@ -2,13 +2,12 @@
   background: powderblue;
 
   position: absolute;
-  
-    z-index: 99999;
-  
-    top: 20%;
-    left: 20%;
-    right: 20%;
-    bottom: 20%;
+z-index: 99999;
+
+  top: 20%;
+  left: 20%;
+  right: 20%;
+  bottom: 20%;
 }
 
 .guess-container>.react-transform-wrapper {
@@ -64,14 +63,13 @@
 
 
 .land.selected {
-  /* mix-blend-mode: color; */
-    animation: pulse 1s ease;
-    animation-iteration-count: infinite;
+  fill-opacity: .5;
 }
 
 .land.disabled {
   fill: red;
 }
+
 .controls {
   position: absolute;
   z-index: 8888;
@@ -82,6 +80,7 @@
   display: flex;
   flex-direction: row;
 }
+
 .app {
   background: salmon;
   padding: 20px;
@@ -138,6 +137,7 @@ body {
 #map {
   background: powderblue;
 }
+
 @keyframes pulse {
   0% {
     fill-opacity: 1;
@@ -152,6 +152,47 @@ body {
   }
 }
 
+@keyframes scale {
+  0% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.2;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes scale-less {
+  0% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.05;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes scale-lessy {
+  0% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.02;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
 .skip-tutorial-button {
   position: fixed;
   z-index: 99999999999;
@@ -159,15 +200,7 @@ body {
   right: 10px;
 }
 
-#tutorial {
-  position: fixed;
-  z-index: 999999999;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-}
-
+/* 
 #tutorial::after {
   content: 'aaaaaa';
   background: rgba(0, 0, 0, .3);
@@ -177,4 +210,31 @@ body {
   left: 0;
   POSITION: ABSOLUTE;
   -webkit-mask-image: radial-gradient(ellipse 90vw 84px at 50% 91%, transparent 45vw, red 0);
+}
+*/ .ReactModal__Overlay {
+  z-index: 999999999999;
+}
+
+.timer {
+  display: inline-block;
+}
+
+[data-tutorial="active"]:not(:hover) {
+  animation: pulse .3s infinite, scale .3s infinite;
+}
+
+#guess-button[data-tutorial="active"]:not(:hover) {
+  animation: pulse .3s infinite, scale-less .3s infinite;
+}
+
+#game-container[data-tutorial="active"]:not(:hover) {
+  animation: pulse .3s infinite, scale-lessy .3s infinite;
+}
+
+path[data-tutorial="active"]:not(:hover) {
+  animation: pulse .3s infinite;
+}
+
+.react-tooltip {
+  z-index: 999999999999;
 }
