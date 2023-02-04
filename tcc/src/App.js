@@ -2,13 +2,12 @@ import WORLD from "./world.json";
 import GAME from "./game.json";
 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 
 import { GoogleMap, StreetViewPanorama, useJsApiLoader } from '@react-google-maps/api';
 
 import useMouse from '@react-hook/mouse-position';
-import usePortal from 'react-useportal'
 
 
 const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLeave }) => {
@@ -28,9 +27,25 @@ const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLe
 }
 
 const World = ({ disabledCountries, selectedCountry, onClick, onMouseEnter, onMouseLeave }) => {
+  const ref = useRef();
+  const { setElement } = useContext(TutorialContext);
+
+  useEffect(() => {
+    if (ref.current) {
+      setElement('wrongGuess', ref.current.querySelector('#IN'));
+      setElement('rightGuess', ref.current.querySelector('#BR'));
+    }
+
+    return () => {
+      setElement('wrongGuess', null);
+      setElement('rightGuess', null);
+    }
+  }, [ref, setElement])
+
   return (
     <svg
       id='map'
+      ref={ref}
       style={{ backgroundColor: "powderblue" }}
       height={1010}
       width={1010}
@@ -107,10 +122,17 @@ function Guess({ guesses, onGuess, onHide }) {
 }
 
 function StreetView({ country }) {
+  const { steps, setElement } = useContext(TutorialContext);
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
   });
+
+  useEffect(() => {
+    return () => {
+      setElement('navigation', null);
+    }
+  }, [setElement]);
 
   if (!isLoaded) {
     return null;
@@ -118,6 +140,15 @@ function StreetView({ country }) {
 
   return (
     <GoogleMap
+      ref={ref => {
+        if (!steps.navigation.element && ref) {
+          setElement('navigation', ref);
+        }
+      }}
+      // onUnmount={() => {
+      //   debugger;
+      //   setElement('navigation', null)
+      // }}
       mapContainerStyle={{ height: '100%', width: '100%' }}
     >
       <StreetViewPanorama
@@ -143,6 +174,8 @@ function EndGame({ game }) {
 
 function Timer({ start, run, limit = 5, onEnd }) {
   const [current, setCurrent] = useState(0);
+  const ref = useRef();
+  const { setElement } = useContext(TutorialContext);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -160,8 +193,18 @@ function Timer({ start, run, limit = 5, onEnd }) {
     }
   }, [start, run, limit, onEnd]);
 
+  useEffect(() => {
+    if (ref.current) {
+      setElement('timer', ref.current);
+    }
+
+    return () => {
+      setElement('timer', null);
+    }
+  }, [ref, setElement]);
+
   return (
-    <span id='tutorial-timer'>
+    <span id='tutorial-timer' ref={ref}>
       {Math.floor(current)}s
     </span>
   );
@@ -194,39 +237,65 @@ function GuessExceeded({ onNext }) {
   )
 }
 
-function Tutorial({ onSkip }) {
-  const [tutorial, setTutorial] = useState({
-    timer: { show: false, completed: false },
-    navigation: { show: false, completed: false },
-    tips: { show: false, completed: false },
-    guess: { show: false, completed: false },
-    wrongGuess: { show: false, completed: false },
-    rightGuess: { show: false, completed: false },
-    step: 0,
-    steps: ['timer', 'navigation', 'tips', 'guess', 'wrongGuess', 'rightGuess',]
+// function Tutorial({ onSkip }) {
+//   const [tutorial, setTutorial] = useState({
+//     timer: { show: false, completed: false, ref: null },
+//     navigation: { show: false, completed: false, ref: null },
+//     tips: { show: false, completed: false, ref: null },
+//     guess: { show: false, completed: false, ref: null },
+//     wrongGuess: { show: false, completed: false, ref: null },
+//     rightGuess: { show: false, completed: false, ref: null },
+//     step: 0,
+//     steps: ['timer', 'navigation', 'tips', 'guess', 'wrongGuess', 'rightGuess',]
+//   });
+
+//   const { Portal } = usePortal()
+
+//   return (
+//     <>
+//       <button
+//         className="skip-tutorial-button"
+//         onClick={onSkip}
+//       >
+//         Pular tutorial
+//       </button>
+//       <Portal>
+//         <div id='tutorial'>
+//           This text is portaled at the end of document.body!
+//         </div>
+//       </Portal>
+//     </>
+//   );
+// }
+const TutorialContext = React.createContext();
+const Tutorial = ({ show, children }) => {
+  const [steps, setSteps] = useState({
+    timer: { show: false, completed: false, element: null },
+    navigation: { show: false, completed: false, element: null },
+    tips: { show: false, completed: false, element: null },
+    guess: { show: false, completed: false, element: null },
+    wrongGuess: { show: false, completed: false, element: null },
+    rightGuess: { show: false, completed: false, element: null },
   });
 
-  const { Portal } = usePortal()
+  const setElement = useCallback((step, element) => {
+    setSteps(prev => ({ ...prev, [step]: { ...prev[step], element } }));
+  }, []);
 
   return (
-    <>
-      <button
-        className="skip-tutorial-button"
-        onClick={onSkip}
-      >
-        Pular tutorial
-      </button>
-      <Portal>
-        <div id='tutorial'>
-          This text is portaled at the end of document.body!
-        </div>
-      </Portal>
-    </>
-  );
+    <TutorialContext.Provider
+      value={{
+        steps,
+        setElement,
+      }}
+    >
+      {children}
+    </TutorialContext.Provider>
+  )
 }
 
-function Game({ timeLimit, guessLimit }) {
-  const [level, setLevel] = useState(0);
+function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
+
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
   const [game, setGame] = useState([]);
@@ -236,8 +305,13 @@ function Game({ timeLimit, guessLimit }) {
   const [showTimeExceeded, setShowTimeExceeded] = useState(false);
   const [showGuessExceeded, setShowGuessExceeded] = useState(false);
 
+  const guessRef = useRef();
+
+  const { setElement } = useContext(TutorialContext);
+
+  //
+
   const country = GAME.countries[level];
-  const isTutorial = level === 0;
 
   const canGuess = !showGuessAttempt && !showRightAttempt && !showTimeExceeded && !showGuessExceeded;
   const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded;
@@ -257,7 +331,7 @@ function Game({ timeLimit, guessLimit }) {
   }
 
   const handleNext = () => {
-    setLevel(prev => prev + 1);
+    onChangeLevel(level + 1);
     setGame(prev => [...prev, { start: time, country, guesses }]);
     setGuesses([]);
     setTime(Date.now());
@@ -269,65 +343,83 @@ function Game({ timeLimit, guessLimit }) {
     setShowGuessExceeded(false);
   };
 
+  useEffect(() => {
+    if (guessRef.current) {
+      setElement('guess', guessRef.current);
+    }
+
+    return () => {
+      setElement('guess', null);
+    }
+  }, [guessRef, setElement]);
+
   if (!country) {
     return <EndGame game={game} />;
   }
 
   return (
-    <div className='app'>
-      <div>
-        <Timer
-          start={time}
-          run={timeRunning}
-          limit={!isTutorial && timeLimit}
-          onEnd={() => {
-            setShowTimeExceeded(true);
-            setShowGuessAttempt(false);
-          }}
-        />
+    <>
+      <div className='app'>
+        <div>
+          <Timer
+            start={time}
+            run={timeRunning}
+            limit={!isTutorial && timeLimit}
+            onEnd={() => {
+              setShowTimeExceeded(true);
+              setShowGuessAttempt(false);
+            }}
+          />
+        </div>
+
+        <div className="game-container">
+          <StreetView
+            key={level}
+            country={country}
+          />
+        </div>
+
+        {showGuessAttempt && (
+          <Guess
+            guesses={guesses}
+            onGuess={handleGuess}
+            onHide={() => setShowGuessAttempt(false)}
+          />
+        )}
+
+        {showRightAttempt && <RightAttempt onNext={handleNext} />}
+
+        {showTimeExceeded && <TimeExceeded onNext={handleNext} />}
+
+        {showGuessExceeded && <GuessExceeded onNext={handleNext} />}
+
+        {canGuess && (
+          <button
+            ref={guessRef}
+            className="guess-button"
+            onClick={() => setShowGuessAttempt(true)}
+          >
+            Já sei!
+          </button>
+        )}
       </div>
-
-      <div className="game-container">
-        <StreetView
-          key={level}
-          country={country}
-        />
-      </div>
-
-      {showGuessAttempt && (
-        <Guess
-          guesses={guesses}
-          onGuess={handleGuess}
-          onHide={() => setShowGuessAttempt(false)}
-        />
-      )}
-
-      {showRightAttempt && <RightAttempt onNext={handleNext} />}
-
-      {showTimeExceeded && <TimeExceeded onNext={handleNext} />}
-
-      {showGuessExceeded && <GuessExceeded onNext={handleNext} />}
-
-      {canGuess && (
-        <button
-          className="guess-button"
-          onClick={() => setShowGuessAttempt(true)}
-        >
-          Já sei!
-        </button>
-      )}
-
-      {isTutorial && <Tutorial onSkip={handleNext} />}
-    </div>
+    </>
   );
 }
 
 function App() {
+  const [level, setLevel] = useState(0);
+
   return (
-    <Game
-      timeLimit={15}
-      guessLimit={5}
-    />
+    <Tutorial>
+      <Game
+        level={level}
+        isTutorial={level === 0}
+        timeLimit={15}
+        guessLimit={5}
+        onChangeLevel={setLevel}
+      />
+    </Tutorial>
   )
 }
 
