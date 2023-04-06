@@ -3,3 +3,6 @@ node_modules
 .env
 .DS_Store
 c4g-extension/out
+jupyter/.ipynb_checkpoints/Untitled-checkpoint.ipynb
+jupyter/.cache-giznrdni
+jupyter/.cache
