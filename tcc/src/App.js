@@ -1,179 +1,20 @@
-import WORLD from "./world.json";
 import GAME from "./game.json";
 
 import 'react-tooltip/dist/react-tooltip.css'
 
 
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Modal from 'react-modal';
-import { Tooltip as ReactTooltip } from 'react-tooltip'
 
 
-
-
-import { GoogleMap, StreetViewPanorama, useJsApiLoader } from '@react-google-maps/api';
-
-import useMouse from '@react-hook/mouse-position';
+import { TutorialContext, Tutorial } from "./TutorialContext";
+import { Guess } from "./Guess";
+import { StreetView } from "./StreetView";
+import { Timer } from "./Timer";
+import { Tips } from "./Tips";
 
 Modal.setAppElement('#modal');
 
-
-const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLeave }) => {
-  const ref = useRef(false);
-
-  return (
-    <path
-      className={`land ${selected && 'selected'} ${disabled && 'disabled'} ${country.continent}`}
-      {...country}
-      onMouseEnter={() => onMouseEnter(country)}
-      onMouseLeave={() => onMouseLeave(country)}
-      onMouseDown={() => ref.current = false}
-      onMouseMove={() => ref.current = true}
-      onMouseUp={() => !ref.current && onClick(country)}
-    />
-  );
-}
-
-const World = ({ disabledCountries, selectedCountry, onClick, onMouseEnter, onMouseLeave }) => {
-  const ref = useRef();
-  const { setElement } = useContext(TutorialContext);
-
-  useEffect(() => {
-    if (ref.current) {
-      setElement('wrongGuess', ref.current.querySelector('#IN'));
-      setElement('rightGuess', ref.current.querySelector('#BR'));
-    }
-
-    return () => {
-      setElement('wrongGuess', null);
-      setElement('rightGuess', null);
-    }
-  }, [ref, setElement])
-
-  return (
-    <svg
-      id='map'
-      ref={ref}
-      style={{ backgroundColor: "powderblue" }}
-      height={1010}
-      width={1010}
-    >
-      <g>
-        {WORLD.map(country => (
-          <Country
-            key={country.id}
-            disabled={disabledCountries.some(d => d.id === country.id)}
-            selected={selectedCountry?.id === country.id}
-            country={country}
-            onClick={onClick}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-          />
-        ))}
-      </g>
-    </svg>
-  );
-};
-
-const Tooltip = ({ country }) => {
-  const mouse = useMouse(document.body);
-
-  if (!country) {
-    return null;
-  };
-
-  return (
-    <div
-      className="tooltip"
-      style={{ top: mouse.clientY + 20, left: mouse.clientX + 10 }}
-    >
-      {country.name || country.title}
-    </div>
-  )
-}
-
-function Guess({ guesses, onGuess, onHide }) {
-  const [selectedCountry, setSelectedCountry] = useState();
-
-  return (
-    <div className='guess-container'>
-      <TransformWrapper
-        centerOnInit
-        doubleClick={{ disabled: true }}
-        zoomAnimation={{ disabled: true }}
-        disablePadding
-      >
-        {(utils) => (
-          <>
-            <div className='controls'>
-              <button onClick={() => utils.zoomIn()}>+</button>
-              <button onClick={() => utils.zoomOut()}>-</button>
-            </div>
-
-            <TransformComponent>
-              <World
-                disabledCountries={guesses.filter(g => !g.isRight).map(g => g.data.country)}
-                selectedCountry={selectedCountry}
-                onMouseEnter={setSelectedCountry}
-                onMouseLeave={() => setSelectedCountry(null)}
-                onClick={country => onGuess({ time: Date.now(), country })}
-              />
-            </TransformComponent>
-          </>
-        )}
-      </TransformWrapper>
-      <Tooltip country={selectedCountry} />
-
-      <button className="guess-close" onClick={onHide}>X</button>
-    </div>
-  );
-}
-
-function StreetView({ country }) {
-  const { steps, setElement } = useContext(TutorialContext);
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
-  });
-
-  useEffect(() => {
-    return () => {
-      setElement('navigation', null);
-    }
-  }, [setElement]);
-
-  if (!isLoaded) {
-    return null;
-  }
-
-  return (
-    <div className="game-container" id="game-container">
-      <GoogleMap
-        ref={ref => {
-          if (!steps.navigation.element && ref) {
-            setElement('navigation', ref);
-          }
-        }}
-        // onUnmount={() => {
-        //   debugger;
-        //   setElement('navigation', null)
-        // }}
-        mapContainerStyle={{ height: '100%', width: '100%' }}
-      >
-        <StreetViewPanorama
-          options={{
-            position: country.coordinates,
-            pov: { heading: 0, pitch: 0 },
-            zoom: 1,
-            visible: true,
-            enableCloseButton: false,
-          }}
-        />
-      </GoogleMap>
-    </div>
-  )
-}
 
 function EndGame({ game }) {
   return (
@@ -183,184 +24,65 @@ function EndGame({ game }) {
   );
 }
 
-function Timer({ start, run, limit = 5, onEnd }) {
-  const [current, setCurrent] = useState(0);
-  const ref = useRef();
-  const { setElement } = useContext(TutorialContext);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!run) return;
-
-      const next = (Date.now() - start) / 1000;
-      if (limit && next > (limit + 1)) {
-        onEnd();
-      } else {
-        setCurrent(next);
-      }
-    }, 250);
-    return () => {
-      clearInterval(interval);
-    }
-  }, [start, run, limit, onEnd]);
-
-  useEffect(() => {
-    if (ref.current) {
-      setElement('timer', ref.current);
-    }
-
-    return () => {
-      setElement('timer', null);
-    }
-  }, [ref, setElement]);
-
+function RightAttempt({ country, onNext }) {
   return (
-    <div className="timer" ref={ref} id="timer">
-      {Math.floor(current)}s
-    </div>
-  );
-}
+    <Modal isOpen>
+      <div className='right-attempt'>
+        <div className="info">
+          <div className="country-name">
+            <h2>{country.name}</h2>
+            <div className="flag">{country.flag}</div>
+          </div>
 
-function RightAttempt({ onNext }) {
-  return (
-    <div className='guess-container'>
-      OIOI
-      <button onClick={onNext}>Próximo nível</button>
-    </div>
+          <p>Curiosidades:</p>
+
+          <ul>
+            {country.facts.map((curiosidade, index) => (
+              <li key={index}>{curiosidade}</li>
+            ))}
+          </ul>
+        </div>
+
+        <button onClick={onNext}>Próximo nível</button>
+      </div>
+    </Modal>
   )
 }
 
 function TimeExceeded({ onNext }) {
   return (
-    <div className='guess-container'>
-      FUCK
-      <button onClick={onNext}>Próximo nível</button>
-    </div>
+    <Modal isOpen>
+      <div className="right-attempt">
+        <div className="info">
+          <h2>Que pena!</h2>
+          <p>O jogo acabou porque você usou todas as suas chances.</p>
+          <p>Isso significa que você já tentou adivinhar o país várias vezes, mas não acertou.</p>
+          <p>Não fique triste, é normal não acertar sempre de primeira!</p>
+          <p>Vamos jogar de novo e tentar acertar mais países da próxima vez!</p>
+        </div>
+
+        <button onClick={onNext}>Próximo nível</button>
+      </div>
+
+    </Modal>
   )
 }
 
 function GuessExceeded({ onNext }) {
   return (
-    <div className='guess-container'>
+    <Modal isOpen>
       FUCK
       <button onClick={onNext}>Próximo nível</button>
-    </div>
+    </Modal>
   )
 }
 
-const TutorialContext = React.createContext();
-const Tutorial = ({ active, children }) => {
-  const [steps, setSteps] = useState({
-    timer: { completed: false, element: null },
-    navigation: { completed: false, element: null },
-    tips: { completed: false, element: null },
-    guess: { completed: false, element: null },
-    wrongGuess: { completed: false, element: null },
-    rightGuess: { completed: false, element: null },
-  });
-  const [currentStep, setCurrentStep] = useState('timer');
-  const [info, setInfo] = useState(false);
-
-  const setElement = useCallback((step, element) => {
-    setSteps(prev => ({ ...prev, [step]: { ...prev[step], element } }));
-  }, []);
-
-  const nextStep = () => {
-    const possibleSteps = Object.keys(steps);
-    const nextStep = possibleSteps.findIndex(s => s === currentStep) + 1;
-    setCurrentStep(possibleSteps[nextStep]);
-    setInfo(false);
-  }
-
-  useEffect(() => {
-    if (currentStep) {
-      const element = steps?.[currentStep]?.element;
-      if (element) {
-        const theRealElement = element.mapRef?.parentElement || element;
-        theRealElement.dataset.tutorial = 'active';
-      }
-    }
-
-    return () => {
-      if (currentStep) {
-        const element = steps?.[currentStep]?.element;
-        if (element) {
-          const theRealElement = element.mapRef?.parentElement || element;
-          theRealElement.dataset.tutorial = 'inactive';
-        }
-      }
-    };
-  }, [currentStep, steps]);
-
-  const element = steps?.[currentStep]?.element;
-  const theRealElement = element?.mapRef?.parentElement || element;
-
-  return (
-    <TutorialContext.Provider
-      value={{
-        steps,
-        setElement,
-        nextStep,
-      }}
-    >
-      {children}
-
-      {active && currentStep && (
-        <>
-          {theRealElement && theRealElement.id && (
-            <ReactTooltip anchorId={theRealElement.id} clickable>
-              <button className="btn-show-info" onClick={() => setInfo(true)}>
-                ?
-              </button>
-            </ReactTooltip>
-          )}
-          {info && (
-            <Modal
-              isOpen
-              onRequestClose={() => setInfo(false)}
-            >
-              INFO
-
-              <button className="btn-show-info" onClick={nextStep}>
-                Aprendi
-              </button>
-            </Modal>
-          )}
-        </>
-      )}
-    </TutorialContext.Provider>
-  )
-}
-
-function Tips({ tips }) {
-  const [show, setShow] = useState(false);
-  const ref = useRef();
-  const { setElement } = useContext(TutorialContext);
-
-  useEffect(() => {
-    if (ref.current) {
-      setElement('tips', ref.current)
-    }
-    return () => {
-      setElement('tips', null)
-    }
-  }, [ref, setElement])
-
-  return (
-    <>
-      <button onClick={() => setShow(true)} id="tips-button" ref={ref}>TIPS</button>
-      <Modal isOpen={show} onRequestClose={() => setShow(false)}>
-        {JSON.stringify(tips, null, 2)}
-      </Modal>
-    </>
-  )
-}
-
-function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
+function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLevel }) {
 
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
   const [game, setGame] = useState([]);
+  const [tipsViewed, setTipsViewed] = useState([]);
 
   const [showGuessAttempt, setShowGuessAttempt] = useState(false);
   const [showRightAttempt, setShowRightAttempt] = useState(false);
@@ -369,13 +91,12 @@ function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
 
   const guessRef = useRef();
 
-  const { setElement } = useContext(TutorialContext);
+  const { steps, setElement, clear, currentStep, nextStep } = useContext(TutorialContext);
 
   //
 
   const country = GAME.countries[level];
 
-  const canGuess = !showGuessAttempt && !showRightAttempt && !showTimeExceeded && !showGuessExceeded;
   const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded;
 
   const handleGuess = guess => {
@@ -392,11 +113,20 @@ function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
     }
   }
 
+  const handleTipView = tip => {
+    if (tipsViewed.length >= tipsLimit) {
+      return;
+    }
+    setTipsViewed(prev => [...prev, tip]);
+  }
+
   const handleNext = () => {
     onChangeLevel(level + 1);
-    setGame(prev => [...prev, { start: time, country, guesses }]);
+    setGame(prev => [...prev, { start: time, country, guesses, tipsViewed }]);
     setGuesses([]);
+    setTipsViewed([]);
     setTime(Date.now());
+    clear();
 
     // Hide modals
     setShowGuessAttempt(false);
@@ -422,7 +152,7 @@ function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
   return (
     <>
       <div className='app'>
-        <div>
+        <div className='header'>
           <Timer
             start={time}
             run={timeRunning}
@@ -434,8 +164,28 @@ function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
           />
 
           <Tips
-            tips={level.tips}
+            tips={country.tips}
+            viewed={tipsViewed}
+            canViewTip={tipsViewed.length < tipsLimit}
+            onView={handleTipView}
           />
+
+          <button
+            data-disabled={!steps.tips.completed}
+            ref={guessRef}
+            className="guess-button"
+            id="guess-button"
+            onClick={() => {
+              if (steps.tips.completed) {
+                setShowGuessAttempt(true)
+                if (currentStep === 'guess') {
+                  nextStep();
+                }
+              }
+            }}
+          >
+            JÁ SEI! {guesses.length}/{guessLimit}
+          </button>
         </div>
 
         <StreetView
@@ -446,27 +196,17 @@ function Game({ level, isTutorial, timeLimit, guessLimit, onChangeLevel }) {
         {showGuessAttempt && (
           <Guess
             guesses={guesses}
+            guessLimit={guessLimit}
             onGuess={handleGuess}
             onHide={() => setShowGuessAttempt(false)}
           />
         )}
 
-        {showRightAttempt && <RightAttempt onNext={handleNext} />}
+        {showRightAttempt && <RightAttempt country={country} onNext={handleNext} />}
 
         {showTimeExceeded && <TimeExceeded onNext={handleNext} />}
 
         {showGuessExceeded && <GuessExceeded onNext={handleNext} />}
-
-        {canGuess && (
-          <button
-            ref={guessRef}
-            className="guess-button"
-            id="guess-button"
-            onClick={() => setShowGuessAttempt(true)}
-          >
-            Já sei!
-          </button>
-        )}
       </div>
     </>
   );
@@ -480,8 +220,9 @@ function App() {
       <Game
         level={level}
         isTutorial={level === 0}
-        timeLimit={15}
+        timeLimit={60}
         guessLimit={5}
+        tipsLimit={4}
         onChangeLevel={setLevel}
       />
     </Tutorial>

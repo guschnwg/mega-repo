@@ -7,7 +7,28 @@
                 "lng": -43.2104268
             },
             "tips": [
-                ""
+                "Este país tem muitas praias bonitas e ensolaradas",
+                "As pessoas aqui gostam muito de samba e carnaval",
+                "O futebol é um esporte muito popular nesse país",
+                "Eles têm muitas frutas tropicais, como a manga e a goiaba",
+                "Este país é famoso pela sua floresta amazônica, que tem muitos animais diferentes",
+                "Aqui as pessoas falam português",
+                "Eles têm muitos monumentos e edifícios históricos bonitos, como o Cristo Redentor",
+                "É o maior produtor mundial de café",
+                "Aqui tem muitos pássaros coloridos e bonitos, como o papagaio",
+                "O carnaval de rua de Salvador é um dos maiores do mundo"
+            ],
+            "name": "Brasil",
+            "facts": [
+                "Melhor carnaval do mundo com muita música, dança e fantasias coloridas.",
+                "A estátua do Cristo Redentor no Rio de Janeiro é um dos pontos turísticos mais famosos do mundo.",
+                "Feijoada é um prato típico do Brasil feito com feijão preto, carne de porco e outros ingredientes. É muito popular durante os finais de semana e feriados."
+            ],
+            "flag": "🇧🇷",
+            "facts_pictures": [
+                "https://bookers.s3.amazonaws.com/pages/rio-carnival-sambadrome-2020-view.jpg",
+                "https://upload.wikimedia.org/wikipedia/commons/4/4f/Christ_the_Redeemer_-_Cristo_Redentor.jpg",
+                "https://veganapratica.com/wp-content/uploads/2018/06/IMG_2621-copy.jpg"
             ]
         },
         {
@@ -17,7 +38,28 @@
                 "lng": 2.2968119
             },
             "tips": [
-                ""
+                "Há uma torre famosa neste país feita de metal e muito alta.",
+                "As pessoas neste país falam uma língua que soa diferente do inglês.",
+                "A comida neste país é muito deliciosa, especialmente pão e queijo.",
+                "A bandeira deste país tem três cores: azul, branco e vermelho.",
+                "A forma deste país se parece com um hexágono com seis lados.",
+                "Muitos artistas famosos, como Monet e Van Gogh, vêm deste país.",
+                "Este país é conhecido por sua moda e estilo, e muitos designers de moda famosos vêm daqui.",
+                "A capital deste país é Paris, que é famosa por seus marcos históricos e belas paisagens.",
+                "O vinho é produzido neste país a partir de uvas cultivadas em áreas especiais chamadas vinhas.",
+                "Um feriado chamado Dia da Bastilha é comemorado em 14 de julho neste país para lembrar um grande evento de sua história."
+            ],
+            "name": "França",
+            "facts": [
+                "A festa da queda da Bastilha é comemorada todos os anos em 14 de julho e é uma das maiores celebrações do país.",
+                "A Torre Eiffel em Paris é um dos monumentos mais visitados do mundo.",
+                "Croissant é um pão típico da França, folhado e em forma de meia-lua. É frequentemente servido no café da manhã."
+            ],
+            "flag": "🇫🇷",
+            "facts_pictures": [
+                "https://cdn.britannica.com/83/191383-050-04962456/Storming-of-the-Bastille-July-14-1789.jpg",
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/640px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg",
+                "https://www.theflavorbender.com/wp-content/uploads/2020/05/French-Croissants-SM-2363.jpg"
             ]
         },
         {
@@ -27,8 +69,24 @@
                 "lng": 4.8804924
             },
             "tips": [
-                ""
-            ]
+                "Existe um país onde as pessoas gostam de andar de bicicleta por todo o lugar, até mesmo em canais!",
+                "Neste país, as pessoas constroem casas e prédios em cima de água, em barcos chamados de houseboats.",
+                "As pessoas deste país usam tamancos de madeira chamados klompen, que são muito barulhentos!",
+                "Este país é famoso por ter moinhos de vento, que são usados para moer grãos em farinha.",
+                "Existem muitos campos de tulipas coloridas neste país que as pessoas adoram visitar.",
+                "As pessoas deste país adoram comer queijo, especialmente o tipo chamado Gouda.",
+                "Este país é conhecido por ter muitas pontes e canais, onde as pessoas podem andar de barco.",
+                "Existem muitos museus neste país, incluindo um famoso museu de arte chamado Rijksmuseum.",
+                "As pessoas deste país comem um prato chamado stroopwafel, que é uma sobremesa feita com duas finas camadas de massa e caramelo.",
+                "Este país é o lar de um time de futebol famoso chamado Ajax, que joga em uma cidade chamada Amsterdam."
+            ],
+            "name": "Holanda",
+            "facts": [
+                "O Dia do Rei é comemorado todos os anos em 27 de abril com festividades em todo o país.",
+                "Os moinhos de vento na Holanda são um símbolo do país e podem ser encontrados em todo o país.",
+                "Stroopwafel é um biscoito holandês feito de duas camadas finas de waffles com um recheio de xarope de caramelo."
+            ],
+            "flag": "🇳🇱"
         },
         {
             "country": "AR",
@@ -37,8 +95,24 @@
                 "lng": -58.3709003
             },
             "tips": [
-                ""
-            ]
+                "Existe um país onde as pessoas adoram dançar um tipo especial de dança chamada tango.",
+                "Este país é conhecido por ter bifes grandes e suculentos que são cozidos em uma grelha chamada parilla.",
+                "Neste país, as pessoas jogam um esporte com uma bola redonda que chutam com os pés chamado futebol.",
+                "Existem montanhas altas e nevadas neste país onde as pessoas gostam de esquiar e praticar snowboard.",
+                "Este país tem uma cachoeira grande e bonita chamada Cataratas do Iguaçu que as pessoas adoram visitar.",
+                "As pessoas deste país falam um idioma chamado espanhol, que é falado em muitos outros países também.",
+                "Este país é o lar de um animal especial chamado lhama, que tem pescoço longo e pelagem macia e lanosa.",
+                "Existem grandes campos abertos neste país onde os gaúchos montam cavalos e conduzem o gado.",
+                "Neste país, as pessoas celebram um dia especial chamado Carnaval com muita música, dança e fantasias coloridas.",
+                "Existe um tipo especial de salgado neste país chamado empanada, que é como uma mini torta recheada com ingredientes deliciosos."
+            ],
+            "name": "Argentina",
+            "facts": [
+                "O Carnaval de Gualeguaychú é uma das maiores festas do país, com muita música, dança e desfiles.",
+                "As Cataratas do Iguaçu na fronteira com o Brasil são uma das maiores atrações turísticas da Argentina.",
+                "O bife de chorizo é um corte de carne bovina muito popular na Argentina e geralmente é servido com chimichurri."
+            ],
+            "flag": "🇦🇷"
         },
         {
             "country": "GR",
@@ -47,8 +121,24 @@
                 "lng": 23.7267166
             },
             "tips": [
-                ""
-            ]
+                "Foi berço da civilização ocidental e tem muitas histórias mitológicas interessantes",
+                "Tem muitas ilhas belíssimas, que são um destino turístico muito popular",
+                "A comida é deliciosa e saudável, com muitos pratos a base de azeite, queijo feta e iogurte",
+                "As casas brancas com teto azul são muito características da arquitetura local",
+                "O alfabeto foi criado nesse país e muitas palavras em português vem do idioma desse país",
+                "Foi a sede dos Jogos Olímpicos antigos, e as Olimpíadas modernas foram inspiradas por eles",
+                "O mito da Medusa, que tinha serpentes no cabelo, é uma história famosa desse país",
+                "Tem muitos monumentos históricos famosos, como o Partenon, a Acrópole e o Templo de Zeus",
+                "Foi o país de origem de grandes filósofos como Platão, Aristóteles e Sócrates",
+                "A bandeira tem muitas listras azuis e brancas e um cantinho com um símbolo bem conhecido"
+            ],
+            "name": "Grécia",
+            "facts": [
+                "Carnaval de Patras, que é uma das maiores festas populares da Grécia",
+                "Acrópole de Atenas, que é um Patrimônio Mundial da UNESCO",
+                "Moussaka, que é um prato de berinjela, carne moída e molho bechamel"
+            ],
+            "flag": "🇬🇷"
         },
         {
             "country": "UA",
@@ -57,8 +147,102 @@
                 "lng": 30.0662756
             },
             "tips": [
-                ""
-            ]
+                "Existe um país onde as pessoas falam uma língua diferente, que usa um alfabeto diferente também.",
+                "Neste país, as pessoas dançam uma dança tradicional chamada hopak, que é muito animada e colorida.",
+                "As pessoas deste país comem um prato especial chamado borsch, que é uma sopa vermelha feita com beterraba.",
+                "Este país é famoso por ter muitos prédios antigos e bonitos, incluindo igrejas com cúpulas douradas.",
+                "As pessoas deste país usam roupas tradicionais muito bonitas, incluindo bordados coloridos e flores.",
+                "Este país é conhecido por ter muitas fazendas onde as pessoas criam galinhas e vacas para fazer queijo e ovos.",
+                "As pessoas deste país celebram um dia especial chamado Páscoa, que é uma festa muito importante para a religião ortodoxa.",
+                "Neste país, as pessoas gostam de brincar com ovos de Páscoa pintados, que são muito bonitos e decorados.",
+                "Este país é o lar de um rio muito grande e famoso chamado Dnieper, onde as pessoas gostam de passear de barco.",
+                "As pessoas deste país são muito boas em dançar e cantar, e muitas vezes participam de festivais de música e dança."
+            ],
+            "name": "Ucrânia",
+            "facts": [
+                "A Ucrânia é conhecida por seus costumes e tradições folclóricas únicas",
+                "A Catedral de Santa Sofia, em Kiev, é um Patrimônio Mundial da UNESCO",
+                "O prato nacional é o borscht, uma sopa de beterraba com carne e legumes"
+            ],
+            "flag": "🇺🇦"
+        },
+        {
+            "country": "ES",
+            "coordinates": {
+                "lat": 39.4699,
+                "lng": -0.3774
+            },
+            "tips": [
+                "Existe um país onde as pessoas falam uma língua diferente, chamada espanhol, e comem muitos pratos de frutos do mar, como paella.",
+                "Neste país, as pessoas dançam uma dança tradicional chamada flamenco, que é muito animada e colorida.",
+                "As pessoas deste país comem um lanche especial chamado churros, que é uma sobremesa frita e doce.",
+                "Este país é famoso por ter muitos prédios antigos e bonitos, incluindo a Sagrada Família em Barcelona.",
+                "As pessoas deste país usam roupas tradicionais muito bonitas, incluindo trajes típicos de flamenco com muitas camadas de tecido.",
+                "Este país é conhecido por ter muitas praias bonitas, como a Playa de la Concha em San Sebastián.",
+                "As pessoas deste país celebram uma festa especial chamada La Tomatina, onde jogam tomates uns nos outros.",
+                "Neste país, as pessoas gostam de fazer uma sesta no meio do dia, quando fica muito quente.",
+                "Este país é o lar de um clube de futebol famoso chamado Barcelona, que tem muitos torcedores em todo o mundo.",
+                "As pessoas deste país bebem um refresco muito popular chamado tinto de verano, que é vinho com refrigerante."
+            ],
+            "name": "Espanha",
+            "facts": [
+                "A famosa festa de La Tomatina acontece em Buñol, na Espanha, onde milhares de pessoas jogam tomates uns nos outros",
+                "A Sagrada Família em Barcelona é uma das atrações turísticas mais populares da Espanha",
+                "A paella é um prato espanhol tradicional que consiste em arroz cozido com frutos do mar, carne e legumes"
+            ],
+            "flag": "🇪🇸"
+        },
+        {
+            "country": "IT",
+            "coordinates": {
+                "lat": 41.890251,
+                "lng": 12.492373
+            },
+            "tips": [
+                "Este país é famoso por sua pizza deliciosa",
+                "É o lar do Papa e do Vaticano",
+                "Os carros que eles fazem são super rápidos e caros",
+                "Eles têm muitas ruínas antigas, como o Coliseu",
+                "A bandeira deste país tem verde, branco e vermelho",
+                "As pessoas falam italiano neste país",
+                "O personagem de desenho animado Mario é deste país",
+                "Este país tem uma torre inclinada muito famosa",
+                "Eles têm muitos canais em suas cidades, como Veneza",
+                "O café expresso foi inventado aqui"
+            ],
+            "name": "Itália",
+            "facts": [
+                "O Carnaval de Veneza é um dos eventos mais famosos da Itália, conhecido por suas máscaras e trajes extravagantes",
+                "O Coliseu de Roma é uma das sete maravilhas do mundo antigo",
+                "A pizza é um prato italiano famoso em todo o mundo, com diversos sabores e ingredientes"
+            ],
+            "flag": "🇮🇹"
+        },
+        {
+            "country": "JP",
+            "coordinates": {
+                "lat": 35.6585805,
+                "lng": 139.7454329
+            },
+            "tips": [
+                "As pessoas usam roupas muito bonitas e coloridas",
+                "Eles têm muitos desenhos animados e jogos divertidos",
+                "Este país é famoso por seus sushis e tempuras deliciosos",
+                "Os carros que eles fazem são super modernos e rápidos",
+                "As pessoas falam japonês neste país",
+                "Eles têm muitos prédios altos e brilhantes, como em Tóquio",
+                "Este país inventou o origami, a arte de dobrar papel",
+                "Eles têm muitas flores bonitas, como as cerejeiras",
+                "Os lutadores de sumô são famosos neste país",
+                "Os robôs são muito comuns aqui"
+            ],
+            "name": "Japão",
+            "facts": [
+                "O Festival de Gion, em Quioto, é um dos festivais mais antigos e famosos do Japão",
+                "O Monte Fuji é o ponto mais alto do Japão e um símbolo nacional",
+                "O sushi é um prato japonês popular em todo o mundo, feito com arroz temperado e frutos do mar crus ou cozidos"
+            ],
+            "flag": "🇯🇵"
         }
     ]
 }

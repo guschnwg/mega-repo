@@ -1,20 +1,8 @@
-.guess-container {
-  background: powderblue;
-
-  position: absolute;
-z-index: 99999;
-
-  top: 20%;
-  left: 20%;
-  right: 20%;
-  bottom: 20%;
-}
-
-.guess-container>.react-transform-wrapper {
-  width: 100%;
-  height: 100%;
-  border: 10px solid white;
-  border-radius: 10px;
+.ReactModal__Content {
+  background: #be6464 !important;
+  border: 3px solid #783d3b !important;
+  border-radius: 5px;
+  padding: 0 !important;
 }
 
 .tooltip {
@@ -52,7 +40,6 @@ z-index: 99999;
   fill: yellow;
 }
 
-
 [class*="Ásia"] {
   fill: slateblue;
 }
@@ -60,7 +47,6 @@ z-index: 99999;
 [class*="Antártida"] {
   fill: white;
 }
-
 
 .land.selected {
   fill-opacity: .5;
@@ -73,28 +59,47 @@ z-index: 99999;
 .controls {
   position: absolute;
   z-index: 8888;
-
   left: 10px;
   bottom: 10px;
-
   display: flex;
   flex-direction: row;
 }
 
+button {
+  background: #3EA9AD;
+  border: #66F4FA 3px solid;
+  border-radius: 5px;
+  margin: 5px;
+  padding-inline: 20px;
+  color: #ffffff;
+  font-weight: bold;
+
+  position: relative;
+  cursor: pointer;
+}
+button:disabled {
+  filter: brightness(.5);
+}
+
 .app {
   background: salmon;
-  padding: 20px;
+  padding-inline: 20px;
+  padding-bottom: 20px;
   display: flex;
   height: 100vh;
   box-sizing: border-box;
-
   position: relative;
-
   flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
 }
 
 body {
   margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
 }
 
 .game-container {
@@ -105,20 +110,48 @@ body {
   border-style: solid;
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .game-container>div {
   border-radius: 5px;
 }
 
-.guess-button {
-  position: absolute;
-  bottom: 50px;
-  left: 50px;
-  right: 50px;
-  z-index: 9999;
-  padding: 10px;
+.how-to-navigate {
+  display: none;
 }
+
+.game-container[data-tutorial="active"] .how-to-navigate {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, .72);
+  z-index: 999999999;
+
+  padding: 10%;
+  color: #ffcbce;
+  font-weight: bold;
+  font-size: 18px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-container[data-tutorial="active"] .how-to-navigate > p,
+.game-container[data-tutorial="active"] .how-to-navigate > h1 {
+  width: 100%;
+}
+
+.game-container[data-tutorial="active"] > div:first-child {
+  filter: blur(2px);
+}
+
+.guess-button {}
 
 .guess-close {
   position: absolute;
@@ -145,6 +178,7 @@ body {
 
   50% {
     fill-opacity: .5;
+    fill: salmon;
   }
 
   100% {
@@ -193,6 +227,7 @@ body {
     scale: 1;
   }
 }
+
 .skip-tutorial-button {
   position: fixed;
   z-index: 99999999999;
@@ -200,23 +235,27 @@ body {
   right: 10px;
 }
 
-/* 
-#tutorial::after {
-  content: 'aaaaaa';
-  background: rgba(0, 0, 0, .3);
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  POSITION: ABSOLUTE;
-  -webkit-mask-image: radial-gradient(ellipse 90vw 84px at 50% 91%, transparent 45vw, red 0);
-}
-*/ .ReactModal__Overlay {
-  z-index: 999999999999;
+.ReactModal__Overlay {
+  z-index: 999999;
 }
 
 .timer {
   display: inline-block;
+  color: white;
+  font-size: 24px;
+  padding: 10px;
+}
+@keyframes scale-and-shake {
+  from {
+    transform: rotate(5deg);
+  }
+
+  to {
+    transform: rotate(-5deg);
+  }
+}
+.timer[data-shake="true"] {
+  animation: scale-and-shake infinite alternate .2s ease;
 }
 
 [data-tutorial="active"]:not(:hover) {
@@ -228,7 +267,7 @@ body {
 }
 
 #game-container[data-tutorial="active"]:not(:hover) {
-  animation: pulse .3s infinite, scale-lessy .3s infinite;
+  animation: unset;
 }
 
 path[data-tutorial="active"]:not(:hover) {
@@ -237,4 +276,156 @@ path[data-tutorial="active"]:not(:hover) {
 
 .react-tooltip {
   z-index: 999999999999;
+  background-color: #AD6158 !important;
+  border: #783d3b 2px solid;
+  max-width: 300px;
+}
+
+.react-tooltip-arrow {
+  background-color: #783d3b !important;
+  width: 10px !important;
+  height: 6px !important;
+  transform: unset !important;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%) !important;
+  top: -6px !important;
+}
+
+.tooltip-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.the-arrow {
+  width: 120px;
+  background: #f0ad4e;
+  height: 6px;
+
+  position: fixed;
+
+  z-index: 9999999999;
+
+
+  margin-top: 32px;
+  margin-bottom: 32px;
+  
+  border-radius: 50%;
+  box-shadow: 0px 0px 20px 2px #f0ad4e;
+}
+
+.the-arrow:after {
+  content: '';
+  background: #f0ad4e;
+  width: 5px;
+  height: 50px;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 14px;
+  top: -5px;
+  border-radius: 50%;
+  box-shadow: 0px 0px 20px 2px #f0ad4e;
+}
+
+.the-arrow:before {
+  content: '';
+  background: #f0ad4e;
+  width: 5px;
+  height: 50px;
+  position: absolute;
+  transform: rotate(45deg);
+  left: 14px;
+  top: -39px;
+  border-radius: 50%;
+  box-shadow: 0px 0px 20px 2px #f0ad4e;
+}
+
+.ReactModal__Content > .react-transform-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+
+button[data-disabled="true"]:after {
+  content: '🔓';
+  position: absolute;
+  top: -5px;
+  left: -10px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 2px;
+  height: 18px;
+  width: 18px;
+}
+
+.right-attempt {
+  padding: 5%;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.right-attempt > .info {
+  flex: 1;
+}
+.right-attempt > .info > .country-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.right-attempt > .info > .country-name > h2 {
+  font-size: 48px;
+}
+@keyframes shake {
+  from {
+    transform: rotate(-20deg);
+  }
+  to {
+    transform: rotate(20deg);
+  }
+}
+.right-attempt > .info > .country-name > .flag {
+  animation: shake infinite alternate 2s cubic-bezier(0.52,-0.43, 0.61, 1.41);
+  display: inline-block;
+  font-size: 96px;
+}
+.right-attempt > .info li {
+  margin-bottom: 10px;
+}
+.right-attempt > button {
+  width: 100%;
+}
+
+.guesses-info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: salmon;
+  border-radius: 2px;
+  padding: 5px;
+  z-index: 99;
+  border: 1px solid #783d3b;
+}
+
+.tip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.tip p {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+.tip button {
+  white-space: nowrap;
+  margin-right: 10px;
+  width: 120px;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.close-modal-button {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 }
