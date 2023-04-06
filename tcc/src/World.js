@@ -19,7 +19,7 @@ const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLe
 };
 export const World = ({ disabledCountries, selectedCountry, onClick, onMouseEnter, onMouseLeave }) => {
   const ref = useRef();
-  const { steps, currentStep, setElement, nextStep } = useContext(TutorialContext);
+  const { currentStep, setElement, nextStep } = useContext(TutorialContext);
 
   useEffect(() => {
     if (ref.current) {

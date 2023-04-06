@@ -2,6 +2,7 @@ import GAME from "./game.json";
 
 import 'react-tooltip/dist/react-tooltip.css'
 
+import confetti from 'canvas-confetti';
 
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Modal from 'react-modal';
@@ -104,6 +105,7 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
     setGuesses(prev => [...prev, { data: guess, isRight }]);
 
     if (isRight) {
+      confetti({ zIndex: Number.MAX_SAFE_INTEGER, particleCount: 200, spread: 100, gravity: 2 });
       setShowGuessAttempt(false);
       setShowRightAttempt(true);
     }
