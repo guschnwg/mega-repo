@@ -6,7 +6,7 @@ ship:
 		mv build ../.ship/tcc; \
 		cd ../.ship; \
 		git init; \
-		git remote add gh-pages git@github.com:guschnwg/mega-repo.git; \
+		git remote add gh-pages https://github.com/guschnwg/mega-repo.git; \
 		git checkout -b gh-pages; \
 		git add -A; \
 		git commit -m '🚢'; \
