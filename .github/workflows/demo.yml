@@ -10,7 +10,22 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: git config --global user.email "guschoneweg@hotmail.com"
-      - run: git config --global user.name "Shipper"
-      - run: git config --global --add --bool push.autoSetupRemote true
-      - run: make ship
+      - run: |
+          export ROOT_ORIGIN=$(git remote get-url origin)
+          mkdir .ship
+          cd tcc
+          yarn
+          yarn build
+          mv build ../.ship/tcc
+          cd ../.ship
+          git init
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git config --add --bool push.autoSetupRemote true
+          git remote add gh-pages $ROOT_ORIGIN
+          git checkout -b gh-pages
+          git add -A
+          git commit -m '🚢'
+          git push -f
+          cd ..
+          rm -rf .ship
