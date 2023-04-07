@@ -22,8 +22,8 @@ jobs:
 
       - name: Cleaning up the root
         run: |
+          git checkout -b gh-pages
           git rm -rf .
-          git clean -fxd
       
       - name: Setting up the root
         run: mv ${{ runner.temp }}/.ship/* ./
