@@ -25,7 +25,7 @@ export function Tips({ tips, viewed, canViewTip, onView }) {
             nextStep();
           }
         }
-      }} id="tips-button" ref={ref}>TIPS</button>
+      }} id="tips-button" ref={ref}>Dicas</button>
 
       <Modal isOpen={show} onRequestClose={() => setShow(false)}>
         <div className="right-attempt tips-modal">
