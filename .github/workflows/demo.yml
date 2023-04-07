@@ -11,26 +11,31 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: |
-          mkdir ${{ runner.temp }}/.ship
-
+      - name: Setting up directory
+        run: mkdir ${{ runner.temp }}/.ship
+      - name: Building the tcc project
+        run: |
           cd tcc
           yarn
           yarn build
           mv build ${{ runner.temp }}/.ship/tcc
 
-          cd ../
-
+      - name: Cleaning up the root
+        run: |
           git rm -rf .
           git clean -fxd
-
+      
+      - name: Setting up the root
+        run: mv ${{ runner.temp }}/.ship/* ./
+      
+      - name: Configuring git
+        run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-
           git checkout -b gh-pages
-          
-          mv ${{ runner.temp }}/.ship/* ./
-
+      
+      - name: Pushing it
+        run: |
           git add -A
           git commit -m '🚢'
           git push --set-upstream origin gh-pages -f
