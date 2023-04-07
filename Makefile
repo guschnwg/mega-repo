@@ -1,8 +1,15 @@
 ship:
-	git push origin -d gh-pages \
-	git branch -d gh-pages \
-	cd tcc; \
-	yarn; \
-	yarn build; \
-	git checkout --orphan gh-pages \
-	git rm -rf .
+	mkdir .ship; \
+		cd tcc; \
+		yarn; \
+		yarn build; \
+		mv build ../.ship/tcc; \
+		cd ../.ship; \
+		git init; \
+		git remote add gh-pages git@github.com:guschnwg/mega-repo.git; \
+		git checkout -b gh-pages; \
+		git add -A; \
+		git commit -m '🚢'; \
+		git push -f; \
+		cd ..; \
+		rm -rf .ship;

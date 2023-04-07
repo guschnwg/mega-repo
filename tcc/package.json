@@ -2,6 +2,7 @@
   "name": "tcc",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://guschnwg.github.io/mega-repo/tcc/",
   "dependencies": {
     "@amcharts/amcharts4-geodata": "^4.1.26",
     "@react-google-maps/api": "^2.18.1",
