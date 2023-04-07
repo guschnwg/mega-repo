@@ -33,4 +33,4 @@ jobs:
 
           git add -A
           git commit -m '🚢'
-          git push -f
+          git push --set-upstream origin gh-pages -f
