@@ -12,21 +12,25 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: |
-          export ROOT_ORIGIN=$(git remote get-url origin)
-          mkdir .ship
+          mkdir /temp/.ship
+
           cd tcc
           yarn
           yarn build
-          mv build ../.ship/tcc
-          cd ../.ship
-          git init
+          mv build /temp/.ship/tcc
+
+          cd ../
+
+          git rm -rf .
+          git clean -fxd
+
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git config --add --bool push.autoSetupRemote true
-          git remote add gh-pages $ROOT_ORIGIN
+
           git checkout -b gh-pages
+          
+          mv /temp/.ship ./
+
           git add -A
           git commit -m '🚢'
           git push -f
-          cd ..
-          rm -rf .ship
