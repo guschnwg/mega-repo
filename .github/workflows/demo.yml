@@ -22,7 +22,7 @@ jobs:
 
       - name: Cleaning up the root
         run: |
-          git checkout -b gh-pages
+          git checkout gh-pages
           git rm -rf .
       
       - name: Setting up the root
