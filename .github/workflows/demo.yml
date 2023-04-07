@@ -19,11 +19,14 @@ jobs:
           yarn
           yarn build
           mv build ${{ runner.temp }}/.ship/tcc
+          
+      - name: Changing to gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
 
       - name: Cleaning up the root
-        run: |
-          git checkout gh-pages
-          git rm -rf .
+        run: git rm -rf .
       
       - name: Setting up the root
         run: mv ${{ runner.temp }}/.ship/* ./
