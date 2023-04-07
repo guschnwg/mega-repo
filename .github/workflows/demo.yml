@@ -10,4 +10,7 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v3
+      - run: git config --global user.email "guschoneweg@hotmail.com"
+      - run: git config --global user.name "Shipper"
+      - run: git config --global --add --bool push.autoSetupRemote true
       - run: make ship
