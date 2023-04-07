@@ -12,12 +12,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: |
-          mkdir /temp/.ship
+          mkdir ${{ runner.temp }}/.ship
 
           cd tcc
           yarn
           yarn build
-          mv build /temp/.ship/tcc
+          mv build ${{ runner.temp }}/.ship/tcc
 
           cd ../
 
@@ -29,7 +29,7 @@ jobs:
 
           git checkout -b gh-pages
           
-          mv /temp/.ship ./
+          mv ${{ runner.temp }}/.ship ./
 
           git add -A
           git commit -m '🚢'
