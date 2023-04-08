@@ -19,6 +19,13 @@ jobs:
           yarn
           yarn build
           mv build ${{ runner.temp }}/.ship/tcc
+
+      - name: Building the financing calculator project
+        run: |
+          cd financing-calculator
+          yarn
+          yarn build
+          mv build ${{ runner.temp }}/.ship/financing-calculator
           
       - name: Changing to gh-pages
         uses: actions/checkout@v3
