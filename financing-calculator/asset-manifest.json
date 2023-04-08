@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.4e644acf.css",
-    "main.js": "/static/js/main.51106992.js",
-    "index.html": "/index.html",
-    "main.4e644acf.css.map": "/static/css/main.4e644acf.css.map",
-    "main.51106992.js.map": "/static/js/main.51106992.js.map"
+    "main.css": "/mega-repo/financing-calculator/static/css/main.4e644acf.css",
+    "main.js": "/mega-repo/financing-calculator/static/js/main.51106992.js",
+    "index.html": "/mega-repo/financing-calculator/index.html",
+    "main.4e644acf.css.map": "/mega-repo/financing-calculator/static/css/main.4e644acf.css.map",
+    "main.51106992.js.map": "/mega-repo/financing-calculator/static/js/main.51106992.js.map"
   },
   "entrypoints": [
     "static/css/main.4e644acf.css",
