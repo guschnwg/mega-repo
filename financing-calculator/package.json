@@ -2,6 +2,7 @@
   "name": "react",
   "version": "0.0.0",
   "private": true,
+  "homepage": "https://guschnwg.github.io/mega-repo/financing-calculator/",
   "dependencies": {
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
