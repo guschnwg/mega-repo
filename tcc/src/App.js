@@ -4,11 +4,10 @@ import 'react-tooltip/dist/react-tooltip.css'
 
 import confetti from 'canvas-confetti';
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Modal from 'react-modal';
 
 
-import { TutorialContext, Tutorial } from "./TutorialContext";
 import { Guess } from "./Guess";
 import { StreetView } from "./StreetView";
 import { Timer } from "./Timer";
@@ -56,6 +55,23 @@ function TimeExceeded({ onNext }) {
       <div className="right-attempt">
         <div className="info">
           <h2>Que pena!</h2>
+          <p>O jogo acabou porque o tempo para este nível acabou.</p>
+          <p>Não fique triste, é normal não acertar sempre, ainda mais com o tempo limitado!</p>
+          <p>Vamos jogar de novo e tentar acertar mais países da próxima vez!</p>
+        </div>
+
+        <button onClick={onNext}>Próximo nível</button>
+      </div>
+    </Modal>
+  )
+}
+
+function GuessExceeded({ onNext }) {
+  return (
+    <Modal isOpen>
+      <div className="right-attempt">
+        <div className="info">
+          <h2>Que pena!</h2>
           <p>O jogo acabou porque você usou todas as suas chances.</p>
           <p>Isso significa que você já tentou adivinhar o país várias vezes, mas não acertou.</p>
           <p>Não fique triste, é normal não acertar sempre de primeira!</p>
@@ -69,16 +85,7 @@ function TimeExceeded({ onNext }) {
   )
 }
 
-function GuessExceeded({ onNext }) {
-  return (
-    <Modal isOpen>
-      FUCK
-      <button onClick={onNext}>Próximo nível</button>
-    </Modal>
-  )
-}
-
-function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLevel }) {
+function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel }) {
 
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
@@ -90,15 +97,11 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
   const [showTimeExceeded, setShowTimeExceeded] = useState(false);
   const [showGuessExceeded, setShowGuessExceeded] = useState(false);
 
-  const guessRef = useRef();
-
-  const { steps, setElement, clear, currentStep, nextStep } = useContext(TutorialContext);
-
   //
 
   const country = GAME.countries[level];
 
-  const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded;
+  const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded && playing;
 
   const handleGuess = guess => {
     const isRight = guess.country.id === country.country;
@@ -108,9 +111,7 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
       confetti({ zIndex: Number.MAX_SAFE_INTEGER, particleCount: 200, spread: 100, gravity: 2 });
       setShowGuessAttempt(false);
       setShowRightAttempt(true);
-    }
-
-    if (!isTutorial && guesses.length + 1 >= guessLimit) {
+    } else if (canLose && guesses.length + 1 >= guessLimit) {
       setShowGuessExceeded(true);
     }
   }
@@ -128,7 +129,6 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
     setGuesses([]);
     setTipsViewed([]);
     setTime(Date.now());
-    clear();
 
     // Hide modals
     setShowGuessAttempt(false);
@@ -136,16 +136,6 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
     setShowTimeExceeded(false);
     setShowGuessExceeded(false);
   };
-
-  useEffect(() => {
-    if (guessRef.current) {
-      setElement('guess', guessRef.current);
-    }
-
-    return () => {
-      setElement('guess', null);
-    }
-  }, [guessRef, setElement]);
 
   if (!country) {
     return <EndGame game={game} />;
@@ -157,34 +147,28 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
         <div className='header'>
           <Timer
             start={time}
-            run={timeRunning}
-            limit={!isTutorial && timeLimit}
+            active={timeRunning}
+            countdown
+            limit={timeLimit}
             onEnd={() => {
-              setShowTimeExceeded(true);
-              setShowGuessAttempt(false);
+              if (canLose) {
+                setShowTimeExceeded(true);
+                setShowGuessAttempt(false);
+              }
             }}
           />
 
           <Tips
             tips={country.tips}
             viewed={tipsViewed}
-            canViewTip={tipsViewed.length < tipsLimit}
+            tipsLimit={tipsLimit}
             onView={handleTipView}
           />
 
           <button
-            data-disabled={!steps.tips.completed}
-            ref={guessRef}
             className="guess-button"
             id="guess-button"
-            onClick={() => {
-              if (steps.tips.completed) {
-                setShowGuessAttempt(true)
-                if (currentStep === 'guess') {
-                  nextStep();
-                }
-              }
-            }}
+            onClick={() => setShowGuessAttempt(true)}
           >
             JÁ SEI! {guesses.length}/{guessLimit}
           </button>
@@ -214,20 +198,71 @@ function Game({ level, isTutorial, timeLimit, guessLimit, tipsLimit, onChangeLev
   );
 }
 
+function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose }) {
+  return (
+    <div className="tutorial">
+      <h1>
+        Olá! Este é o tutorial!
+      </h1>
+
+      <p>
+        Para ensinar como jogar bla bla bla
+      </p>
+
+      <p>
+        O jogo terá 5 níveis
+      </p>
+
+      <p>
+        Você tem {timeLimit} segundos para jogar cada nível
+      </p>
+
+      <p>
+        Cada nível você estará em um país do mundo, seu objetivo é tentar acertar em qual país está
+      </p>
+
+      <p>
+        Você terá {tipsLimit} dicas pra usar...
+      </p>
+
+      <p>
+        Você poderá fazer {guessLimit} tentativas
+      </p>
+
+      <p>Aqui está um video de como jogar....</p>
+
+      <p>O primeiro nível não tem limite de tempo e nem de tentativas</p>
+
+      <button onClick={onClose}>Bora</button>
+
+    </div>
+  )
+}
+
 function App() {
   const [level, setLevel] = useState(0);
+  const [isTutorial, setIsTutorial] = useState(true);
 
   return (
-    <Tutorial active={level === 0}>
+    <>
       <Game
         level={level}
-        isTutorial={level === 0}
+        playing={!isTutorial}
+        canLose={level !== 0}
         timeLimit={60}
         guessLimit={5}
         tipsLimit={4}
         onChangeLevel={setLevel}
       />
-    </Tutorial>
+
+      {isTutorial && (
+        <Tutorial
+          timeLimit={60}
+          guessLimit={5}
+          tipsLimit={4}
+          onClose={() => setIsTutorial(false)}
+        />)}
+    </>
   )
 }
 

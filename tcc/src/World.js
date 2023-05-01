@@ -1,7 +1,6 @@
 import WORLD from "./world.json";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import useMouse from '@react-hook/mouse-position';
-import { TutorialContext } from "./TutorialContext";
 
 const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLeave }) => {
   const ref = useRef(false);
@@ -14,29 +13,13 @@ const Country = ({ country, disabled, selected, onClick, onMouseEnter, onMouseLe
       onMouseLeave={() => onMouseLeave(country)}
       onMouseDown={() => ref.current = false}
       onMouseMove={() => ref.current = true}
-      onMouseUp={() => !ref.current && onClick(country)} />
+      onMouseUp={() => !ref.current && !disabled && onClick(country)} />
   );
 };
 export const World = ({ disabledCountries, selectedCountry, onClick, onMouseEnter, onMouseLeave }) => {
-  const ref = useRef();
-  const { currentStep, setElement, nextStep } = useContext(TutorialContext);
-
-  useEffect(() => {
-    if (ref.current) {
-      setElement('wrongGuess', ref.current.querySelector('#MG'));
-      setElement('rightGuess', ref.current.querySelector('#BR'));
-    }
-
-    return () => {
-      setElement('wrongGuess', null);
-      setElement('rightGuess', null);
-    };
-  }, [ref, setElement]);
-
   return (
     <svg
       id='map'
-      ref={ref}
       style={{ backgroundColor: "powderblue" }}
       height={1010}
       width={1010}
@@ -48,16 +31,7 @@ export const World = ({ disabledCountries, selectedCountry, onClick, onMouseEnte
             disabled={disabledCountries.some(d => d.id === country.id)}
             selected={selectedCountry?.id === country.id}
             country={country}
-            onClick={country => {
-              if (currentStep === 'wrongGuess' && country.id !== 'MG') {
-                return;
-              }
-              if (currentStep === 'rightGuess' && country.id !== 'BR') {
-                return;
-              }
-              nextStep();
-              onClick(country);
-            }}
+            onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave} />
         ))}

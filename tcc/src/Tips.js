@@ -1,31 +1,14 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Modal from 'react-modal';
-import { TutorialContext } from "./TutorialContext";
 
-export function Tips({ tips, viewed, canViewTip, onView }) {
+export function Tips({ tips, viewed, tipsLimit, onView }) {
   const [show, setShow] = useState(false);
-  const ref = useRef();
-  const { steps, setElement, nextStep, currentStep } = useContext(TutorialContext);
 
-  useEffect(() => {
-    if (ref.current) {
-      setElement('tips', ref.current);
-    }
-    return () => {
-      setElement('tips', null);
-    };
-  }, [ref, setElement]);
+  const canViewTip = tipsLimit > viewed.length;
 
   return (
     <>
-      <button data-disabled={!steps.timer.completed} onClick={() => {
-        if (steps.timer.completed) {
-          setShow(true);
-          if (currentStep === 'tips') {
-            nextStep();
-          }
-        }
-      }} id="tips-button" ref={ref}>Dicas</button>
+      <button onClick={() => setShow(true)} id="tips-button">Dicas</button>
 
       <Modal isOpen={show} onRequestClose={() => setShow(false)}>
         <div className="right-attempt tips-modal">
@@ -41,8 +24,16 @@ export function Tips({ tips, viewed, canViewTip, onView }) {
 
             return (
               <div className="tip" key={tip}>
-                <button disabled={!canViewTip} onClick={() => onView(tip)}>{canViewTip ? 'Ver dica' : 'Já viu 4'}</button>
-                <p>{tip.replace(/[^ ]/g, "*")}</p>
+                <button
+                  disabled={!canViewTip}
+                  onClick={() => onView(tip)}
+                >
+                  {canViewTip ? 'Ver dica' : `Já viu ${tipsLimit}`}
+                </button>
+
+                <p>
+                  {tip.replace(/[^ ]/g, "*")}
+                </p>
               </div>
             );
           })}

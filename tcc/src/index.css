@@ -59,10 +59,46 @@
 .controls {
   position: absolute;
   z-index: 8888;
-  left: 10px;
-  bottom: 10px;
-  display: flex;
-  flex-direction: row;
+  bottom: 2px;
+}
+
+.controls.zoom {
+  left: 2px;
+}
+
+.controls.position {
+  height: 80px;
+  width: 80px;
+  right: 2px;
+}
+
+.controls.position > button {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
+.controls.position .top {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 15px);
+}
+.controls.position .bottom {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - 15px);
+}
+.controls.position .left {
+  position: absolute;
+  top: calc(50% - 15px);
+  left: 0;
+}
+.controls.position .right {
+  position: absolute;
+  top: calc(50% - 15px);
+  right: 0;
 }
 
 button {
@@ -119,36 +155,6 @@ body {
 
 .how-to-navigate {
   display: none;
-}
-
-.game-container[data-tutorial="active"] .how-to-navigate {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, .72);
-  z-index: 999999999;
-
-  padding: 10%;
-  color: #ffcbce;
-  font-weight: bold;
-  font-size: 18px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.game-container[data-tutorial="active"] .how-to-navigate > p,
-.game-container[data-tutorial="active"] .how-to-navigate > h1 {
-  width: 100%;
-}
-
-.game-container[data-tutorial="active"] > div:first-child {
-  filter: blur(2px);
 }
 
 .guess-button {}
@@ -228,13 +234,6 @@ body {
   }
 }
 
-.skip-tutorial-button {
-  position: fixed;
-  z-index: 99999999999;
-  top: 10px;
-  right: 10px;
-}
-
 .ReactModal__Overlay {
   z-index: 999999;
 }
@@ -256,22 +255,6 @@ body {
 }
 .timer[data-shake="true"] {
   animation: scale-and-shake infinite alternate .2s ease;
-}
-
-[data-tutorial="active"]:not(:hover) {
-  animation: pulse .3s infinite, scale .3s infinite;
-}
-
-#guess-button[data-tutorial="active"]:not(:hover) {
-  animation: pulse .3s infinite, scale-less .3s infinite;
-}
-
-#game-container[data-tutorial="active"]:not(:hover) {
-  animation: unset;
-}
-
-path[data-tutorial="active"]:not(:hover) {
-  animation: pulse .3s infinite;
 }
 
 .react-tooltip {
@@ -428,4 +411,18 @@ button[data-disabled="true"]:after {
   position: absolute;
   right: 10px;
   bottom: 10px;
+}
+
+.tutorial {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background: rgba(0, 0, 0, .8);
+
+  z-index: 99999;
+
+  color: white;
 }
