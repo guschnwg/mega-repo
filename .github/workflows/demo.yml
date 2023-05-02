@@ -8,8 +8,8 @@ jobs:
     env:
       REACT_APP_GOOGLE_MAPS_API_KEY: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
     steps:
-      - run: echo $REACT_APP_GOOGLE_MAPS_API_KEY | wc -c
-      - run: echo ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }} | wc -c
+      - run: echo $REACT_APP_GOOGLE_MAPS_API_KEY | wc
+      - run: echo ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }} | wc
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Setting up directory
