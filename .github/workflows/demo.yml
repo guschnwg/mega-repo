@@ -1,25 +1,11 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
-env:
-  # Setting an environment variable with the value of a configuration variable
-  enva: ${{ vars.REACT_APP_GOOGLE_MAPS_API_KEY }}
-  envi: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
-  enve: OI
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - run: echo ${{ env.enva }}
-      - run: echo ${{ env.envo }}
-      - run: echo ${{ env.envi }}
-      - run: echo ${{ env.enve }}
-      - run: echo $enva
-      - run: echo $envo
-      - run: echo $envi
-      - run: echo $enve
-      - run: echo $REACT_APP_GOOGLE_MAPS_API_KEY
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Setting up directory
