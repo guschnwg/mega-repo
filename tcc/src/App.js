@@ -39,7 +39,7 @@ function EndLevel({ country, showRightAttempt, showTimeExceeded, showGuessExceed
             </div>
           )}
 
-          {showTimeExceeded || showGuessExceeded && (
+          {(showTimeExceeded || showGuessExceeded) && (
             <>
 
               <div className="country-name">
