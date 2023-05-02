@@ -340,7 +340,7 @@ button[data-disabled="true"]:after {
 }
 
 .right-attempt {
-  padding: 5%;
+  padding: 20px;
   color: white;
   display: flex;
   flex-direction: column;
@@ -351,12 +351,12 @@ button[data-disabled="true"]:after {
 .right-attempt > .info {
   flex: 1;
 }
-.right-attempt > .info > .country-name {
+.right-attempt > .info .country-name {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.right-attempt > .info > .country-name > h2 {
+.right-attempt > .info .country-name > h2 {
   font-size: 48px;
 }
 @keyframes shake {
@@ -367,10 +367,10 @@ button[data-disabled="true"]:after {
     transform: rotate(20deg);
   }
 }
-.right-attempt > .info > .country-name > .flag {
+.right-attempt > .info .country-name > .flag {
   animation: shake infinite alternate 2s cubic-bezier(0.52,-0.43, 0.61, 1.41);
   display: inline-block;
-  font-size: 96px;
+  font-size: 72px;
 }
 .right-attempt > .info li {
   margin-bottom: 10px;

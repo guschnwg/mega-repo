@@ -7,29 +7,19 @@
                 "lng": -43.2104268
             },
             "tips": [
-                "Este país tem muitas praias bonitas e ensolaradas",
-                "As pessoas aqui gostam muito de samba e carnaval",
-                "O futebol é um esporte muito popular nesse país",
-                "Eles têm muitas frutas tropicais, como a manga e a goiaba",
-                "Este país é famoso pela sua floresta amazônica, que tem muitos animais diferentes",
-                "Aqui as pessoas falam português",
-                "Eles têm muitos monumentos e edifícios históricos bonitos, como o Cristo Redentor",
-                "É o maior produtor mundial de café",
-                "Aqui tem muitos pássaros coloridos e bonitos, como o papagaio",
-                "O carnaval de rua de Salvador é um dos maiores do mundo"
+                "O país é o maior da América do Sul em extensão territorial e possui uma grande variedade de paisagens, como praias, florestas tropicais e montanhas.",
+                "A língua oficial do país é o português, que é falado por quase todos os habitantes.",
+                "A maior floresta tropical do mundo, conhecida como 'o pulmão do mundo', está localizada neste país.",
+                "Durante muitos anos, o país foi colonizado por europeus que exploraram suas riquezas naturais, como ouro, diamantes e madeira.",
+                "Em 1822, o país se tornou independente de Portugal e se tornou uma república em 1889.",
+                "O país foi o último das Américas a abolir a escravidão, em 1888.",
+                "A história do país inclui importantes conflitos armados, como a Guerra do Paraguai e a Revolução Constitucionalista de 1932.",
+                "O país viveu sob uma ditadura militar entre os anos de 1964 e 1985.",
+                "O país é um importante produtor de café, soja e outros produtos agrícolas.",
+                "O país foi o anfitrião de importantes eventos esportivos, como a Copa do Mundo de Futebol em 2014 e as Olimpíadas em 2016."
             ],
             "name": "Brasil",
-            "facts": [
-                "Melhor carnaval do mundo com muita música, dança e fantasias coloridas.",
-                "A estátua do Cristo Redentor no Rio de Janeiro é um dos pontos turísticos mais famosos do mundo.",
-                "Feijoada é um prato típico do Brasil feito com feijão preto, carne de porco e outros ingredientes. É muito popular durante os finais de semana e feriados."
-            ],
-            "flag": "🇧🇷",
-            "facts_pictures": [
-                "https://bookers.s3.amazonaws.com/pages/rio-carnival-sambadrome-2020-view.jpg",
-                "https://upload.wikimedia.org/wikipedia/commons/4/4f/Christ_the_Redeemer_-_Cristo_Redentor.jpg",
-                "https://veganapratica.com/wp-content/uploads/2018/06/IMG_2621-copy.jpg"
-            ]
+            "flag": "🇧🇷"
         },
         {
             "country": "FR",
@@ -38,29 +28,19 @@
                 "lng": 2.2968119
             },
             "tips": [
-                "Há uma torre famosa neste país feita de metal e muito alta.",
-                "As pessoas neste país falam uma língua que soa diferente do inglês.",
-                "A comida neste país é muito deliciosa, especialmente pão e queijo.",
-                "A bandeira deste país tem três cores: azul, branco e vermelho.",
-                "A forma deste país se parece com um hexágono com seis lados.",
-                "Muitos artistas famosos, como Monet e Van Gogh, vêm deste país.",
-                "Este país é conhecido por sua moda e estilo, e muitos designers de moda famosos vêm daqui.",
-                "A capital deste país é Paris, que é famosa por seus marcos históricos e belas paisagens.",
-                "O vinho é produzido neste país a partir de uvas cultivadas em áreas especiais chamadas vinhas.",
-                "Um feriado chamado Dia da Bastilha é comemorado em 14 de julho neste país para lembrar um grande evento de sua história."
+                "A Revolução Francesa, ocorrida em 1789, foi um evento importante na história da França e do mundo, que trouxe mudanças políticas e sociais significativas.",
+                "Napoleão Bonaparte foi um importante líder militar e político que governou este país e parte da Europa no início do século XIX.",
+                "Foi um dos países que lutou na Primeira e Segunda Guerras Mundiais.",
+                "Conhecida por sua rica cultura, que inclui importantes movimentos artísticos como o Impressionismo e o Surrealismo.",
+                "País com uma rica tradição literária, tendo produzido escritores famosos como Victor Hugo, Júlio Verne e Albert Camus.",
+                "Foi uma das principais potências colonizadoras do mundo, tendo estabelecido colônias em diversas partes do globo, como a América do Norte, a África e a Ásia.",
+                "É conhecida por suas conquistas científicas, como o desenvolvimento do radar, da televisão e da vacinação.",
+                "Um dos países fundadores da União Europeia, um bloco econômico e político que busca a integração dos países europeus.",
+                "Do ano 751 a 768, este país foi reinado pelo rei Pepino",
+                "As cores da bandeira deste país são Vermelho, Branco e Azul"
             ],
             "name": "França",
-            "facts": [
-                "A festa da queda da Bastilha é comemorada todos os anos em 14 de julho e é uma das maiores celebrações do país.",
-                "A Torre Eiffel em Paris é um dos monumentos mais visitados do mundo.",
-                "Croissant é um pão típico da França, folhado e em forma de meia-lua. É frequentemente servido no café da manhã."
-            ],
-            "flag": "🇫🇷",
-            "facts_pictures": [
-                "https://cdn.britannica.com/83/191383-050-04962456/Storming-of-the-Bastille-July-14-1789.jpg",
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/640px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg",
-                "https://www.theflavorbender.com/wp-content/uploads/2020/05/French-Croissants-SM-2363.jpg"
-            ]
+            "flag": "🇫🇷"
         },
         {
             "country": "NL",
@@ -69,23 +49,18 @@
                 "lng": 4.8804924
             },
             "tips": [
-                "Existe um país onde as pessoas gostam de andar de bicicleta por todo o lugar, até mesmo em canais!",
-                "Neste país, as pessoas constroem casas e prédios em cima de água, em barcos chamados de houseboats.",
-                "As pessoas deste país usam tamancos de madeira chamados klompen, que são muito barulhentos!",
-                "Este país é famoso por ter moinhos de vento, que são usados para moer grãos em farinha.",
-                "Existem muitos campos de tulipas coloridas neste país que as pessoas adoram visitar.",
-                "As pessoas deste país adoram comer queijo, especialmente o tipo chamado Gouda.",
-                "Este país é conhecido por ter muitas pontes e canais, onde as pessoas podem andar de barco.",
-                "Existem muitos museus neste país, incluindo um famoso museu de arte chamado Rijksmuseum.",
-                "As pessoas deste país comem um prato chamado stroopwafel, que é uma sobremesa feita com duas finas camadas de massa e caramelo.",
-                "Este país é o lar de um time de futebol famoso chamado Ajax, que joga em uma cidade chamada Amsterdam."
+                "País localizado no noroeste da Europa, fazendo fronteira com a Alemanha e a Bélgica.",
+                "Famosa por seus moinhos de vento, que foram usados por séculos para moer grãos, bombear água e drenar áreas de terra abaixo do nível do mar.",
+                "Foram os primeiros europeus a estabelecerem rotas comerciais com a Ásia, África e América do Sul.",
+                "Durante a Segunda Guerra Mundial, foi invadida pela Alemanha nazista e sofreu terríveis perdas, incluindo o famoso episódio da cidade de Rotterdam que foi quase completamente destruída.",
+                "População de cerca de 17 milhões de habitantes em um território relativamente pequeno.",
+                "Famosa por sua arte e arquitetura, com artistas como Vincent Van Gogh e Rembrandt Harmenszoon van Rijn e uma arquitetura moderna inovadora.",
+                "Um dos líderes mundiais em tecnologia de energia sustentável.",
+                "A maior parte do território está abaixo do nível mar",
+                "Foi uma das primeiras nações a abolir a escravidão, em 1863, nas colônias do Suriname e das Antilhas Holandesas.",
+                "Neste país existem mais bicicletas do que carros"
             ],
             "name": "Holanda",
-            "facts": [
-                "O Dia do Rei é comemorado todos os anos em 27 de abril com festividades em todo o país.",
-                "Os moinhos de vento na Holanda são um símbolo do país e podem ser encontrados em todo o país.",
-                "Stroopwafel é um biscoito holandês feito de duas camadas finas de waffles com um recheio de xarope de caramelo."
-            ],
             "flag": "🇳🇱"
         },
         {
@@ -95,23 +70,18 @@
                 "lng": -58.3709003
             },
             "tips": [
-                "Existe um país onde as pessoas adoram dançar um tipo especial de dança chamada tango.",
-                "Este país é conhecido por ter bifes grandes e suculentos que são cozidos em uma grelha chamada parilla.",
-                "Neste país, as pessoas jogam um esporte com uma bola redonda que chutam com os pés chamado futebol.",
-                "Existem montanhas altas e nevadas neste país onde as pessoas gostam de esquiar e praticar snowboard.",
-                "Este país tem uma cachoeira grande e bonita chamada Cataratas do Iguaçu que as pessoas adoram visitar.",
-                "As pessoas deste país falam um idioma chamado espanhol, que é falado em muitos outros países também.",
-                "Este país é o lar de um animal especial chamado lhama, que tem pescoço longo e pelagem macia e lanosa.",
-                "Existem grandes campos abertos neste país onde os gaúchos montam cavalos e conduzem o gado.",
-                "Neste país, as pessoas celebram um dia especial chamado Carnaval com muita música, dança e fantasias coloridas.",
-                "Existe um tipo especial de salgado neste país chamado empanada, que é como uma mini torta recheada com ingredientes deliciosos."
+                "A língua oficial da Argentina é o espanhol, mas também existem outras línguas minoritárias faladas no país, como o guarani, o quíchua e o mapudungun.",
+                "Colonizada pelos espanhóis em 1536 e tornou-se independente da Espanha em 1816.",
+                "Maior produtor mundial de vinho da América do Sul, com a região de Mendoza sendo a principal produtora de vinho do país.",
+                "Possui uma das maiores reservas de gás e petróleo do mundo",
+                "É um país que possui uma das maiores usinas hidrelétricas do mundo, a Usina Hidrelétrica de Yacyretá.",
+                "O papa Francisco, atual líder da Igreja Católica, nasceu em na capital deste país, em 1936.",
+                "O período de independência no século XIX foi liderado por figuras como o general José de San Martín e o político Juan Manuel de Rosas.",
+                "Este país participou da Guerra do Paraguai, que ocorreu entre 1864 e 1870 e que envolveu também o Brasil e o Uruguai.",
+                "A recuperação da democracia foi em 1983, após o fim da ditadura militar",
+                "A moeda oficial é o Peso"
             ],
             "name": "Argentina",
-            "facts": [
-                "O Carnaval de Gualeguaychú é uma das maiores festas do país, com muita música, dança e desfiles.",
-                "As Cataratas do Iguaçu na fronteira com o Brasil são uma das maiores atrações turísticas da Argentina.",
-                "O bife de chorizo é um corte de carne bovina muito popular na Argentina e geralmente é servido com chimichurri."
-            ],
             "flag": "🇦🇷"
         },
         {
@@ -121,50 +91,19 @@
                 "lng": 23.7267166
             },
             "tips": [
-                "Foi berço da civilização ocidental e tem muitas histórias mitológicas interessantes",
-                "Tem muitas ilhas belíssimas, que são um destino turístico muito popular",
-                "A comida é deliciosa e saudável, com muitos pratos a base de azeite, queijo feta e iogurte",
-                "As casas brancas com teto azul são muito características da arquitetura local",
-                "O alfabeto foi criado nesse país e muitas palavras em português vem do idioma desse país",
-                "Foi a sede dos Jogos Olímpicos antigos, e as Olimpíadas modernas foram inspiradas por eles",
-                "O mito da Medusa, que tinha serpentes no cabelo, é uma história famosa desse país",
-                "Tem muitos monumentos históricos famosos, como o Partenon, a Acrópole e o Templo de Zeus",
-                "Foi o país de origem de grandes filósofos como Platão, Aristóteles e Sócrates",
-                "A bandeira tem muitas listras azuis e brancas e um cantinho com um símbolo bem conhecido"
+                "A democracia foi inventada nesse país, onde os cidadãos participavam diretamente da tomada de decisões políticas.",
+                "A Guerra do Peloponeso foi um conflito entre as duas cidades-estado deste país: Atenas e Esparta, e durou de 431 a.C. a 404 a.C. e teve grande impacto na história do país.",
+                "Durante a Segunda Guerra Mundial, foi invadida pela Itália fascista e depois pela Alemanha nazista, resultando em uma brutal ocupação que durou até 1944.",
+                "A cidade de Atenas sediou os primeiros Jogos Olímpicos da era moderna em 1896",
+                "Composta por mais de 2.000 ilhas, muitas das quais são populares destinos turísticos.",
+                "Berço de muitos filósofos famosos, como Sócrates, Platão e Aristóteles, que influenciaram profundamente o pensamento ocidental.",
+                "A Guerra de Troia, narrada na Ilíada de Homero, é considerada um dos eventos mais importantes da história",
+                "Já fez parte do Império Bizantino e do Império Otomano",
+                "É membro da União Europeia desde 1981 e adotou o euro como sua moeda em 2001.",
+                "Localizado no sudeste da Europa, fazendo fronteira com a Albânia, a Macedônia do Norte, a Bulgária e a Turquia. Também é cercado pelo Mar Egeu, Mar Jônico e Mar Mediterrâneo. Sua capital é Atenas."
             ],
             "name": "Grécia",
-            "facts": [
-                "Carnaval de Patras, que é uma das maiores festas populares da Grécia",
-                "Acrópole de Atenas, que é um Patrimônio Mundial da UNESCO",
-                "Moussaka, que é um prato de berinjela, carne moída e molho bechamel"
-            ],
             "flag": "🇬🇷"
-        },
-        {
-            "country": "UA",
-            "coordinates": {
-                "lat": 51.3067206,
-                "lng": 30.0662756
-            },
-            "tips": [
-                "Existe um país onde as pessoas falam uma língua diferente, que usa um alfabeto diferente também.",
-                "Neste país, as pessoas dançam uma dança tradicional chamada hopak, que é muito animada e colorida.",
-                "As pessoas deste país comem um prato especial chamado borsch, que é uma sopa vermelha feita com beterraba.",
-                "Este país é famoso por ter muitos prédios antigos e bonitos, incluindo igrejas com cúpulas douradas.",
-                "As pessoas deste país usam roupas tradicionais muito bonitas, incluindo bordados coloridos e flores.",
-                "Este país é conhecido por ter muitas fazendas onde as pessoas criam galinhas e vacas para fazer queijo e ovos.",
-                "As pessoas deste país celebram um dia especial chamado Páscoa, que é uma festa muito importante para a religião ortodoxa.",
-                "Neste país, as pessoas gostam de brincar com ovos de Páscoa pintados, que são muito bonitos e decorados.",
-                "Este país é o lar de um rio muito grande e famoso chamado Dnieper, onde as pessoas gostam de passear de barco.",
-                "As pessoas deste país são muito boas em dançar e cantar, e muitas vezes participam de festivais de música e dança."
-            ],
-            "name": "Ucrânia",
-            "facts": [
-                "A Ucrânia é conhecida por seus costumes e tradições folclóricas únicas",
-                "A Catedral de Santa Sofia, em Kiev, é um Patrimônio Mundial da UNESCO",
-                "O prato nacional é o borscht, uma sopa de beterraba com carne e legumes"
-            ],
-            "flag": "🇺🇦"
         },
         {
             "country": "ES",
@@ -173,23 +112,18 @@
                 "lng": -0.3774
             },
             "tips": [
-                "Existe um país onde as pessoas falam uma língua diferente, chamada espanhol, e comem muitos pratos de frutos do mar, como paella.",
-                "Neste país, as pessoas dançam uma dança tradicional chamada flamenco, que é muito animada e colorida.",
-                "As pessoas deste país comem um lanche especial chamado churros, que é uma sobremesa frita e doce.",
-                "Este país é famoso por ter muitos prédios antigos e bonitos, incluindo a Sagrada Família em Barcelona.",
-                "As pessoas deste país usam roupas tradicionais muito bonitas, incluindo trajes típicos de flamenco com muitas camadas de tecido.",
-                "Este país é conhecido por ter muitas praias bonitas, como a Playa de la Concha em San Sebastián.",
-                "As pessoas deste país celebram uma festa especial chamada La Tomatina, onde jogam tomates uns nos outros.",
-                "Neste país, as pessoas gostam de fazer uma sesta no meio do dia, quando fica muito quente.",
-                "Este país é o lar de um clube de futebol famoso chamado Barcelona, que tem muitos torcedores em todo o mundo.",
-                "As pessoas deste país bebem um refresco muito popular chamado tinto de verano, que é vinho com refrigerante."
+                "Foi um dos impérios mais poderosos do mundo nos séculos 16 e 17, com vastos territórios nas Américas, Ásia e África.",
+                "Cristóvão Colombo partiu de Palos, em 1492, em sua viagem para invadir as Américas.",
+                "Maior produtor de azeite do mundo, produzindo cerca de metade do azeite global.",
+                "A Guerra Hispano-Americana, em 1898, resultou na perda das últimas colônias nas Américas, incluindo Cuba, Porto Rico e as Filipinas.",
+                "É um país multicultural e multilingue, com várias línguas regionais, incluindo catalão, basco e galego.",
+                "É o lar de muitos artistas e escritores famosos, incluindo Pablo Picasso, Salvador Dalí, Diego Velázquez, Francisco Goya, Miguel de Cervantes e Federico García Lorca.",
+                "Lar de série de festivais e celebrações únicas, incluindo a \"La Tomatina\", em que as pessoas se divertem jogando tomates umas nas outras, e a \"Feria de Abril\", um festival de uma semana de duração em Sevilha com música, dança, comida e cavalos.",
+                "Durante a Guerra Civil (1936-1939), forças republicanas e nacionalistas lutaram pelo controle do país, resultando em uma vitória para o general Francisco Franco e o estabelecimento de uma ditadura fascista.",
+                "A região da Catalunha, no nordeste, tem uma cultura e língua distintas, e muitos catalães lutam pela independência da Espanha.",
+                "Durante o século XVI, se tornou um dos impérios mais poderosos do mundo, graças à sua riqueza em ouro e prata das colônias americanas."
             ],
             "name": "Espanha",
-            "facts": [
-                "A famosa festa de La Tomatina acontece em Buñol, na Espanha, onde milhares de pessoas jogam tomates uns nos outros",
-                "A Sagrada Família em Barcelona é uma das atrações turísticas mais populares da Espanha",
-                "A paella é um prato espanhol tradicional que consiste em arroz cozido com frutos do mar, carne e legumes"
-            ],
             "flag": "🇪🇸"
         },
         {
@@ -199,23 +133,18 @@
                 "lng": 12.492373
             },
             "tips": [
-                "Este país é famoso por sua pizza deliciosa",
-                "É o lar do Papa e do Vaticano",
-                "Os carros que eles fazem são super rápidos e caros",
-                "Eles têm muitas ruínas antigas, como o Coliseu",
+                "Berço do Império Romano, um dos impérios mais poderosos da história.",
+                "Durante o Renascimento, se tornou o centro das artes e das ciências, produzindo grandes nomes como Leonardo da Vinci, Michelangelo e Galileu Galilei.",
+                "Durante a Primeira Guerra Mundial, se juntou aos Aliados em 1915.",
+                "O Vaticano é um país independente dentro de Roma, a capital, e é o menor país do mundo em termos de área e população.",
                 "A bandeira deste país tem verde, branco e vermelho",
-                "As pessoas falam italiano neste país",
+                "A cidade de Pompéia foi destruída pela erupção do vulcão Vesúvio em 79 d.C., e as ruínas ainda podem ser visitadas hoje.",
                 "O personagem de desenho animado Mario é deste país",
-                "Este país tem uma torre inclinada muito famosa",
-                "Eles têm muitos canais em suas cidades, como Veneza",
-                "O café expresso foi inventado aqui"
+                "A cidade de Pisa é famosa por sua Torre Inclinada, que foi construída no século XII",
+                "É o lar de muitas marcas de luxo, como a Ferrari, Lamborghini, Gucci e Prada, que são conhecidas em todo o mundo.",
+                "Galileo Galilei fez importantes descobertas em astronomia, física e matemática no século XVII, mas foi perseguido pela Igreja Católica por suas ideias."
             ],
             "name": "Itália",
-            "facts": [
-                "O Carnaval de Veneza é um dos eventos mais famosos da Itália, conhecido por suas máscaras e trajes extravagantes",
-                "O Coliseu de Roma é uma das sete maravilhas do mundo antigo",
-                "A pizza é um prato italiano famoso em todo o mundo, com diversos sabores e ingredientes"
-            ],
             "flag": "🇮🇹"
         },
         {
@@ -225,23 +154,18 @@
                 "lng": 139.7454329
             },
             "tips": [
-                "As pessoas usam roupas muito bonitas e coloridas",
-                "Eles têm muitos desenhos animados e jogos divertidos",
-                "Este país é famoso por seus sushis e tempuras deliciosos",
-                "Os carros que eles fazem são super modernos e rápidos",
-                "As pessoas falam japonês neste país",
-                "Eles têm muitos prédios altos e brilhantes, como em Tóquio",
-                "Este país inventou o origami, a arte de dobrar papel",
-                "Eles têm muitas flores bonitas, como as cerejeiras",
-                "Os lutadores de sumô são famosos neste país",
-                "Os robôs são muito comuns aqui"
+                "É um arquipélago localizado no Oceano Pacífico, composto por quatro ilhas principais e diversas ilhas menores, em um total de quase 6800.",
+                "A história deste país é dividida em períodos, como o período Jomon (cerca de 14.000 a.C. a 300 a.C.), o período Yayoi (cerca de 300 a.C. a 300 d.C.), o período Nara (710-794) e assim por diante.",
+                "O samurai, um guerreiro honorável e habilidoso, era uma figura importante na sociedade feudal.",
+                "Se tornou uma potência industrial e militar no início do século XX, e participou da Primeira Guerra Mundial ao lado dos Aliados.",
+                "Na Segunda Guerra Mundial, foi um dos principais membros do Eixo, mas se rendeu após as bombas atômicas de Hiroshima e Nagasaki",
+                "O Monte Fuji, um vulcão ativo e a montanha mais alta do país, é um símbolo importante da cultura.",
+                "O Shintoismo e o Budismo são as duas principais religiões",
+                "É um líder em tecnologia e é conhecido por suas inovações em eletrônicos, robótica e transporte.",
+                "O período Heian (794-1185) foi um importante período cultural no qual a literatura, a poesia, a arte e a arquitetura floresceram.",
+                "População de cerca de 126 milhões de pessoas."
             ],
             "name": "Japão",
-            "facts": [
-                "O Festival de Gion, em Quioto, é um dos festivais mais antigos e famosos do Japão",
-                "O Monte Fuji é o ponto mais alto do Japão e um símbolo nacional",
-                "O sushi é um prato japonês popular em todo o mundo, feito com arroz temperado e frutos do mar crus ou cozidos"
-            ],
             "flag": "🇯🇵"
         }
     ]

@@ -24,63 +24,58 @@ function EndGame({ game }) {
   );
 }
 
-function RightAttempt({ country, onNext }) {
+function EndLevel({ country, showRightAttempt, showTimeExceeded, showGuessExceeded, onNext }) {
+
+
+
   return (
-    <Modal isOpen>
+    <Modal isOpen={showRightAttempt || showTimeExceeded || showGuessExceeded}>
       <div className='right-attempt'>
         <div className="info">
-          <div className="country-name">
-            <h2>{country.name}</h2>
-            <div className="flag">{country.flag}</div>
-          </div>
+          {showRightAttempt && (
+            <div className="country-name">
+              <h2>Parabéns! {country.name}!!! Continue assim!</h2>
+              <div className="flag">{country.flag}</div>
+            </div>
+          )}
 
-          <p>Curiosidades:</p>
+          {showTimeExceeded || showGuessExceeded && (
+            <>
+
+              <div className="country-name">
+                <h2>Que pena! Era {country.name}</h2>
+                <div className="flag">{country.flag}</div>
+              </div>
+
+              <div>
+                {showTimeExceeded && (
+                  <p>
+                    O jogo acabou porque o tempo para este nível acabou.
+                    Não fique triste, é normal não acertar sempre, ainda mais com o tempo limitado!
+                  </p>
+                )}
+                {showGuessExceeded && (
+                  <p>
+                    O nível acabou porque você usou todas as suas chances.
+                    Isso significa que você já tentou adivinhar o país várias vezes, mas não acertou.
+                    Não fique triste, é normal não acertar sempre de primeira!
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          <h4>Curiosidades:</h4>
 
           <ul>
-            {country.facts.map((curiosidade, index) => (
-              <li key={index}>{curiosidade}</li>
+            {country.tips.map((tip, index) => (
+              <li key={index}>{tip}</li>
             ))}
           </ul>
         </div>
 
         <button onClick={onNext}>Próximo nível</button>
       </div>
-    </Modal>
-  )
-}
-
-function TimeExceeded({ onNext }) {
-  return (
-    <Modal isOpen>
-      <div className="right-attempt">
-        <div className="info">
-          <h2>Que pena!</h2>
-          <p>O jogo acabou porque o tempo para este nível acabou.</p>
-          <p>Não fique triste, é normal não acertar sempre, ainda mais com o tempo limitado!</p>
-          <p>Vamos jogar de novo e tentar acertar mais países da próxima vez!</p>
-        </div>
-
-        <button onClick={onNext}>Próximo nível</button>
-      </div>
-    </Modal>
-  )
-}
-
-function GuessExceeded({ onNext }) {
-  return (
-    <Modal isOpen>
-      <div className="right-attempt">
-        <div className="info">
-          <h2>Que pena!</h2>
-          <p>O jogo acabou porque você usou todas as suas chances.</p>
-          <p>Isso significa que você já tentou adivinhar o país várias vezes, mas não acertou.</p>
-          <p>Não fique triste, é normal não acertar sempre de primeira!</p>
-          <p>Vamos jogar de novo e tentar acertar mais países da próxima vez!</p>
-        </div>
-
-        <button onClick={onNext}>Próximo nível</button>
-      </div>
-
     </Modal>
   )
 }
@@ -112,6 +107,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
       setShowGuessAttempt(false);
       setShowRightAttempt(true);
     } else if (canLose && guesses.length + 1 >= guessLimit) {
+      setShowGuessAttempt(false);
       setShowGuessExceeded(true);
     }
   }
@@ -188,11 +184,13 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
           />
         )}
 
-        {showRightAttempt && <RightAttempt country={country} onNext={handleNext} />}
-
-        {showTimeExceeded && <TimeExceeded onNext={handleNext} />}
-
-        {showGuessExceeded && <GuessExceeded onNext={handleNext} />}
+        <EndLevel
+          showRightAttempt={showRightAttempt}
+          showTimeExceeded={showTimeExceeded}
+          showGuessExceeded={showGuessExceeded}
+          country={country}
+          onNext={handleNext}
+        />
       </div>
     </>
   );
@@ -240,8 +238,8 @@ function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose }) {
 }
 
 function App() {
-  const [level, setLevel] = useState(0);
-  const [isTutorial, setIsTutorial] = useState(true);
+  const [level, setLevel] = useState(1);
+  const [isTutorial, setIsTutorial] = useState(level === 0);
 
   return (
     <>
