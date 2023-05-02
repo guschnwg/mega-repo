@@ -4,7 +4,6 @@ on: [push]
 env:
   # Setting an environment variable with the value of a configuration variable
   enva: ${{ vars.REACT_APP_GOOGLE_MAPS_API_KEY }}
-  envo: ${{ env.REACT_APP_GOOGLE_MAPS_API_KEY }}
   envi: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
   enve: OI
 jobs:
