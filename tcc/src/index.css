@@ -358,6 +358,7 @@ button[data-disabled="true"]:after {
 }
 .right-attempt > .info .country-name > h2 {
   font-size: 48px;
+  margin: 0;
 }
 @keyframes shake {
   from {
