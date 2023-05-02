@@ -426,3 +426,7 @@ button[data-disabled="true"]:after {
 
   color: white;
 }
+
+.react-transform-wrapper {
+  background: powderblue !important;
+}

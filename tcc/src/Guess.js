@@ -18,13 +18,10 @@ export function Guess({ guesses, guessLimit, onGuess, onHide }) {
   return (
     <Modal isOpen>
       <TransformWrapper
-        centerOnInit
         doubleClick={{ disabled: true }}
-        wheel={{ disabled: true }}
-        panning={{ disabled: true }}
-        initialScale={1}
         disablePadding
-        limitToBounds
+        centerOnInit
+        centerZoomedOut
       >
         {(utils) => (
           <>
