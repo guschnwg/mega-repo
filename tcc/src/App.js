@@ -12,6 +12,7 @@ import { Guess } from "./Guess";
 import { StreetView } from "./StreetView";
 import { Timer } from "./Timer";
 import { Tips } from "./Tips";
+import { Tutorial } from "./Tutorial";
 
 Modal.setAppElement('#modal');
 
@@ -88,6 +89,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   const [tipsViewed, setTipsViewed] = useState([]);
 
   const [showGuessAttempt, setShowGuessAttempt] = useState(false);
+  const [showTips, setShowTips] = useState(false);
   const [showRightAttempt, setShowRightAttempt] = useState(false);
   const [showTimeExceeded, setShowTimeExceeded] = useState(false);
   const [showGuessExceeded, setShowGuessExceeded] = useState(false);
@@ -96,7 +98,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 
   const country = GAME.countries[level];
 
-  const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded && playing;
+  const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded && playing && !showGuessAttempt && !showTips;
 
   const handleGuess = guess => {
     const isRight = guess.country.id === country.country;
@@ -117,6 +119,15 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
       return;
     }
     setTipsViewed(prev => [...prev, tip]);
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    const toSpeak = new SpeechSynthesisUtterance(tip);
+    const possibleVoices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'pt-BR');
+    toSpeak.rate = .9;
+    toSpeak.voice = possibleVoices[Math.floor(Math.random() * possibleVoices.length)];
+    window.speechSynthesis.speak(toSpeak);
   }
 
   const handleNext = () => {
@@ -155,11 +166,20 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
           />
 
           <Tips
+            show={showTips}
             tips={country.tips}
             viewed={tipsViewed}
             tipsLimit={tipsLimit}
             onView={handleTipView}
+            onHide={() => setShowTips(false)}
           />
+
+          <button
+            onClick={() => setShowTips(true)}
+            id="tips-button"
+          >
+            Dicas {tipsViewed.length}/{tipsLimit}
+          </button>
 
           <button
             className="guess-button"
@@ -196,49 +216,8 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   );
 }
 
-function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose }) {
-  return (
-    <div className="tutorial">
-      <h1>
-        Olá! Este é o tutorial!
-      </h1>
-
-      <p>
-        Para ensinar como jogar bla bla bla
-      </p>
-
-      <p>
-        O jogo terá 5 níveis
-      </p>
-
-      <p>
-        Você tem {timeLimit} segundos para jogar cada nível
-      </p>
-
-      <p>
-        Cada nível você estará em um país do mundo, seu objetivo é tentar acertar em qual país está
-      </p>
-
-      <p>
-        Você terá {tipsLimit} dicas pra usar...
-      </p>
-
-      <p>
-        Você poderá fazer {guessLimit} tentativas
-      </p>
-
-      <p>Aqui está um video de como jogar....</p>
-
-      <p>O primeiro nível não tem limite de tempo e nem de tentativas</p>
-
-      <button onClick={onClose}>Bora</button>
-
-    </div>
-  )
-}
-
 function App() {
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState(0);
   const [isTutorial, setIsTutorial] = useState(level === 0);
 
   return (

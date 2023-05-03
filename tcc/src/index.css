@@ -426,8 +426,22 @@ button[data-disabled="true"]:after {
   z-index: 99999;
 
   color: white;
+  padding: 20px;
+  backdrop-filter: blur(2px);
 }
 
 .react-transform-wrapper {
   background: powderblue !important;
+}
+
+.tutorial .controls {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.tutorial .close {
+  position: absolute;
+  right: 20px;
+  top: 20px;
 }
