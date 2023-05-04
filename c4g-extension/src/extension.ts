@@ -171,7 +171,7 @@ class C4gImportCodeLensProvider implements vscode.CodeLensProvider {
 				];
 			}),
 			..._addCodeLenses(document, ALL_CLASSES_EXPRESSION, (range: vscode.Range, match: string) => {
-				let method = match.replace('class ', '').replace('(', '');
+				let method = match.replace('class ', '').replace(':', '').split('(')[0];
 
 				return [
 					new vscode.CodeLens(range, this.copyImportStatementCommand(method)),
