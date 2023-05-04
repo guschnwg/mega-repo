@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import Modal from 'react-modal';
 import { World, Tooltip } from "./World";
 
-export function Guess({ guesses, guessLimit, onGuess, onHide }) {
+export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
   const [selectedCountry, setSelectedCountry] = useState();
+  const [canGuess, setCanGuess] = useState(true);
 
   const betweenBounds = (utils, desiredPositionX, desiredPositionY) => {
     const bounds = utils.instance.bounds;
@@ -26,7 +27,9 @@ export function Guess({ guesses, guessLimit, onGuess, onHide }) {
         {(utils) => (
           <>
             <div className="guesses-info">
-              Você usou {guesses.length} dos {guessLimit} palpites disponíveis
+              Você usou {guesses.length} dos {guessLimit} palpites disponíveis.
+
+              {!canGuess && <div>Você já deu o palpite nesta tentativa, feche a janela e tente de novo</div>}
             </div>
 
             <div className="controls zoom">
@@ -67,7 +70,15 @@ export function Guess({ guesses, guessLimit, onGuess, onHide }) {
                 selectedCountry={selectedCountry}
                 onMouseEnter={setSelectedCountry}
                 onMouseLeave={() => setSelectedCountry(null)}
-                onClick={country => onGuess({ time: Date.now(), country })} />
+                onClick={country => {
+                  if (canGuess) {
+                    onGuess({ time: Date.now(), country });
+                    if (onlyOnce) {
+                      setCanGuess(false);
+                    }
+                  }
+                }}
+              />
             </TransformComponent>
           </>
         )}

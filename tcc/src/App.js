@@ -4,7 +4,7 @@ import 'react-tooltip/dist/react-tooltip.css'
 
 import confetti from 'canvas-confetti';
 
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import Modal from 'react-modal';
 
 
@@ -25,57 +25,77 @@ function EndGame({ game }) {
   );
 }
 
-function EndLevel({ country, showRightAttempt, showTimeExceeded, showGuessExceeded, onNext }) {
+function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, showGuessExceeded, onNext }) {
+  const [viewDetails, setViewDetails] = useState(false)
 
-
+  const rightGuess = guesses.find(guess => guess.isRight);
 
   return (
     <Modal isOpen={showRightAttempt || showTimeExceeded || showGuessExceeded}>
       <div className='right-attempt'>
         <div className="info">
-          {showRightAttempt && (
-            <div className="country-name">
-              <h2>Parabéns! {country.name}!!! Continue assim!</h2>
-              <div className="flag">{country.flag}</div>
+          {!viewDetails ? (
+            <div className="general">
+              {showRightAttempt && (
+                <div className="country-data">
+                  <div className="flag">{country.flag}</div>
+                  <div className="country-name">
+                    <h2>Parabéns! {country.name}!!! Continue assim!</h2>
+                  </div>
+                </div>
+              )}
+
+              {(showTimeExceeded || showGuessExceeded) && (
+                <>
+
+                  <div className="country-name">
+                    <h2>Que pena! Era {country.name}</h2>
+                    <div className="flag">{country.flag}</div>
+                  </div>
+
+                  <div>
+                    {showTimeExceeded && <p>O jogo acabou porque o tempo para este nível acabou.</p>}
+                    {showGuessExceeded && <p>O nível acabou porque você usou todas as suas chances.</p>}
+                  </div>
+                </>
+              )}
+
+              {rightGuess ? (
+                <div>
+                  <h3>Você acertou em {guesses.length} tentativas!</h3>
+
+                  <p>Você levou {rightGuess.timeElapsed} segundos!</p>
+                  <p>Você usou {tips.length} dicas!</p>
+                </div>
+              ) : (
+                <div>
+
+                </div>
+              )}
+
+              <button onClick={() => setViewDetails(true)}>Ver detalhes</button>
+            </div>
+          ) : (
+            <div className="details">
+              <h4>Fatos curiosos:</h4>
+
+              <ul>
+                {country.facts.map((tip, index) => (
+                  <li key={index}>{tip}</li>
+                ))}
+              </ul>
+
+                <h4>Curiosidades:</h4>
+
+                <ul>
+                  {country.tips.map((tip, index) => (
+                    <li key={index}>{tip}</li>
+                  ))}
+                </ul>
+                <button onClick={onNext}>Próximo nível</button>
             </div>
           )}
-
-          {(showTimeExceeded || showGuessExceeded) && (
-            <>
-
-              <div className="country-name">
-                <h2>Que pena! Era {country.name}</h2>
-                <div className="flag">{country.flag}</div>
-              </div>
-
-              <div>
-                {showTimeExceeded && (
-                  <p>
-                    O jogo acabou porque o tempo para este nível acabou.
-                    Não fique triste, é normal não acertar sempre, ainda mais com o tempo limitado!
-                  </p>
-                )}
-                {showGuessExceeded && (
-                  <p>
-                    O nível acabou porque você usou todas as suas chances.
-                    Isso significa que você já tentou adivinhar o país várias vezes, mas não acertou.
-                    Não fique triste, é normal não acertar sempre de primeira!
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-
-          <h4>Curiosidades:</h4>
-
-          <ul>
-            {country.tips.map((tip, index) => (
-              <li key={index}>{tip}</li>
-            ))}
-          </ul>
         </div>
-
-        <button onClick={onNext}>Próximo nível</button>
       </div>
     </Modal>
   )
@@ -94,6 +114,8 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   const [showTimeExceeded, setShowTimeExceeded] = useState(false);
   const [showGuessExceeded, setShowGuessExceeded] = useState(false);
 
+  const timeElapsed = useRef();
+
   //
 
   const country = GAME.countries[level];
@@ -102,7 +124,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 
   const handleGuess = guess => {
     const isRight = guess.country.id === country.country;
-    setGuesses(prev => [...prev, { data: guess, isRight }]);
+    setGuesses(prev => [...prev, { data: guess, timeElapsed: timeElapsed.current, isRight }]);
 
     if (isRight) {
       confetti({ zIndex: Number.MAX_SAFE_INTEGER, particleCount: 200, spread: 100, gravity: 2 });
@@ -136,6 +158,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
     setGuesses([]);
     setTipsViewed([]);
     setTime(Date.now());
+    timeElapsed.current = 0;
 
     // Hide modals
     setShowGuessAttempt(false);
@@ -143,6 +166,8 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
     setShowTimeExceeded(false);
     setShowGuessExceeded(false);
   };
+
+  const onTimerChange = useCallback(time => timeElapsed.current = time, []);
 
   if (!country) {
     return <EndGame game={game} />;
@@ -157,6 +182,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
             active={timeRunning}
             countdown
             limit={timeLimit}
+            onChange={onTimerChange}
             onEnd={() => {
               if (canLose) {
                 setShowTimeExceeded(true);
@@ -199,18 +225,23 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
           <Guess
             guesses={guesses}
             guessLimit={guessLimit}
+            onlyOnce
             onGuess={handleGuess}
             onHide={() => setShowGuessAttempt(false)}
           />
         )}
 
-        <EndLevel
-          showRightAttempt={showRightAttempt}
-          showTimeExceeded={showTimeExceeded}
-          showGuessExceeded={showGuessExceeded}
-          country={country}
-          onNext={handleNext}
-        />
+        {(showRightAttempt || showTimeExceeded || showGuessExceeded) && (
+          <EndLevel
+            guesses={guesses}
+            tips={tipsViewed}
+            showRightAttempt={showRightAttempt}
+            showTimeExceeded={showTimeExceeded}
+            showGuessExceeded={showGuessExceeded}
+            country={country}
+            onNext={handleNext}
+          />
+        )}
       </div>
     </>
   );

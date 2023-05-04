@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export function Timer({ start, active, countdown, limit = 5, onEnd }) {
+export function Timer({ start, active, countdown, limit = 5, onChange, onEnd }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState({ since: start, accumulated: 0, total: 0 });
 
@@ -17,6 +17,7 @@ export function Timer({ start, active, countdown, limit = 5, onEnd }) {
 
       const next = (Date.now() - start - paused.total) / 1000;
       setCurrent(next);
+      onChange(next);
       if (limit && next > limit) {
         onEnd();
       }
@@ -25,7 +26,7 @@ export function Timer({ start, active, countdown, limit = 5, onEnd }) {
     return () => {
       clearInterval(interval);
     };
-  }, [start, active, limit, onEnd, paused]);
+  }, [start, active, limit, onEnd, onChange, paused]);
 
   const toShow = countdown ? limit - current : current;
   const ensureBetweenLimits = Math.min(Math.max(toShow, 0), limit);

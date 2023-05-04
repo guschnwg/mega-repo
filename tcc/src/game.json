@@ -6,6 +6,11 @@
                 "lat": -22.9522413,
                 "lng": -43.2104268
             },
+            "facts": [
+                "Festa mais importante: Carnaval",
+                "Comida típica: Feijoada",
+                "Pessoas famosas: Pelé e Fernanda Montenegro"
+            ],
             "tips": [
                 "O país é o maior da América do Sul em extensão territorial e possui uma grande variedade de paisagens, como praias, florestas tropicais e montanhas.",
                 "A língua oficial do país é o português, que é falado por quase todos os habitantes.",
@@ -27,6 +32,11 @@
                 "lat": 48.8568849,
                 "lng": 2.2968119
             },
+            "facts": [
+                "Festa mais importante: Dia da Bastilha",
+                "Comida típica: Croissant",
+                "Pessoas famosas: Napoleão Bonaparte e Marie Curie"
+            ],
             "tips": [
                 "A Revolução Francesa, ocorrida em 1789, foi um evento importante na história da França e do mundo, que trouxe mudanças políticas e sociais significativas.",
                 "Napoleão Bonaparte foi um importante líder militar e político que governou este país e parte da Europa no início do século XIX.",
@@ -48,6 +58,11 @@
                 "lat": 52.3585948,
                 "lng": 4.8804924
             },
+            "facts": [
+                "Festa mais importante: Koningsdag (Dia do Rei)",
+                "Comida típica: Stroopwafel",
+                "Pessoas famosas: Vincent van Gogh e Annelies Marie Frank"
+            ],
             "tips": [
                 "País localizado no noroeste da Europa, fazendo fronteira com a Alemanha e a Bélgica.",
                 "Famosa por seus moinhos de vento, que foram usados por séculos para moer grãos, bombear água e drenar áreas de terra abaixo do nível do mar.",
@@ -69,6 +84,11 @@
                 "lat": -34.6083088,
                 "lng": -58.3709003
             },
+            "facts": [
+                "Festa mais importante: Dia da Independência",
+                "Comida típica: Asado",
+                "Pessoas famosas: Lionel Messi e Eva Perón"
+            ],
             "tips": [
                 "A língua oficial da Argentina é o espanhol, mas também existem outras línguas minoritárias faladas no país, como o guarani, o quíchua e o mapudungun.",
                 "Colonizada pelos espanhóis em 1536 e tornou-se independente da Espanha em 1816.",
@@ -90,6 +110,11 @@
                 "lat": 37.9715285,
                 "lng": 23.7267166
             },
+            "facts": [
+                "Festa mais importante: Páscoa Ortodoxa",
+                "Comida típica: Moussaka",
+                "Pessoas famosas: Sócrates e Asioteia de Filos"
+            ],
             "tips": [
                 "A democracia foi inventada nesse país, onde os cidadãos participavam diretamente da tomada de decisões políticas.",
                 "A Guerra do Peloponeso foi um conflito entre as duas cidades-estado deste país: Atenas e Esparta, e durou de 431 a.C. a 404 a.C. e teve grande impacto na história do país.",
@@ -108,9 +133,14 @@
         {
             "country": "ES",
             "coordinates": {
-                "lat": 39.4699,
-                "lng": -0.3774
+                "lat": 41.4026033,
+                "lng": 2.1729783
             },
+            "facts": [
+                "Festa mais importante: La Tomatina",
+                "Comida típica: Paella",
+                "Pessoas famosas: Pablo Picasso e Dolores Ibarruri"
+            ],
             "tips": [
                 "Foi um dos impérios mais poderosos do mundo nos séculos 16 e 17, com vastos territórios nas Américas, Ásia e África.",
                 "Cristóvão Colombo partiu de Palos, em 1492, em sua viagem para invadir as Américas.",
@@ -129,9 +159,14 @@
         {
             "country": "IT",
             "coordinates": {
-                "lat": 41.890251,
-                "lng": 12.492373
+                "lat": 41.8892844,
+                "lng": 12.4918613
             },
+            "facts": [
+                "Festa mais importante: Carnaval de Veneza",
+                "Comida típica: Pizza",
+                "Pessoas famosas: Leonardo da Vinci e Rita Levi Montalcini"
+            ],
             "tips": [
                 "Berço do Império Romano, um dos impérios mais poderosos da história.",
                 "Durante o Renascimento, se tornou o centro das artes e das ciências, produzindo grandes nomes como Leonardo da Vinci, Michelangelo e Galileu Galilei.",
@@ -150,9 +185,14 @@
         {
             "country": "JP",
             "coordinates": {
-                "lat": 35.6585805,
-                "lng": 139.7454329
+                "lat": 35.7143865,
+                "lng": 139.7963642
             },
+            "facts": [
+                "Festa mais importante: Festival Gion Matsuri",
+                "Comida típica: Sushi",
+                "Pessoas famosas: Akira Kurosawa e Chiaki Mukai"
+            ],
             "tips": [
                 "É um arquipélago localizado no Oceano Pacífico, composto por quatro ilhas principais e diversas ilhas menores, em um total de quase 6800.",
                 "A história deste país é dividida em períodos, como o período Jomon (cerca de 14.000 a.C. a 300 a.C.), o período Yayoi (cerca de 300 a.C. a 300 d.C.), o período Nara (710-794) e assim por diante.",
@@ -167,6 +207,136 @@
             ],
             "name": "Japão",
             "flag": "🇯🇵"
+        },
+        {
+            "country": "AU",
+            "coordinates": {
+                "lat": -33.8585692,
+                "lng": 151.2134119
+            },
+            "facts": [
+                "Festa mais importante: Dia do País, que é a comemoração do aniversário de fundação da colônia de Nova Gales do Sul",
+                "Comida típica: Vegemite (um creme de levedura usado como condimento para passar no pão)",
+                "Pessoas famosas: Hugh Jackman e Nicole Kidman"
+            ],
+            "tips": [
+                "Os povos aborígenes habitaram este país por pelo menos 60.000 anos antes da chegada dos europeus.",
+                "Em 1770, o explorador britânico James Cook chegou à costa leste do país e reivindicou o território para a Grã-Bretanha.",
+                "Em 1788, a Grã-Bretanha estabeleceu uma colônia penal para abrigar os condenados enviados da Inglaterra.",
+                "Descoberta de ouro na década de 1850",
+                "Em 1901, se tornou uma nação independente quando as colônias britânicas se uniram para formar a Comunidade da Austrália.",
+                "Durante a Primeira Guerra Mundial, lutou ao lado dos Aliados e as participaram de várias batalhas importantes.",
+                "Na década de 1970, tornou-se um líder global no movimento pelos direitos das mulheres, com a adoção de políticas progressistas em relação à igualdade de gênero e direitos reprodutivos.",
+                "É conhecida por sua fauna única e diversa, incluindo cangurus, coalas, wallabies, wombats e muitas espécies de marsupiais e aves endêmicas.",
+                "O deserto do país é conhecido como \"Outback\" e abrange uma área de cerca de 2,5 milhões de quilômetros quadrados, ou seja, cerca de 70% da área terrestre é deserto. É um ambiente extremamente difícil de sobreviver para a maioria das espécies, mas abriga uma grande variedade de animais adaptados a condições adversas, como cangurus, emas, lagartos e serpentes venenosas.",
+                "São animais amados por muitos, os cangurus são agora considerados \"uma praga\", já que o seu número aumentou de 27 para 50 milhões nos últimos anos. Existem 4 espécies principais: canguru-vermelho, canguru-cinzento, canguru-de-wallaby e canguru-anão"
+            ],
+            "name": "Austrália",
+            "flag": "🇦🇺"
+        },
+        {
+            "country": "CA",
+            "coordinates": {
+                "lat": 43.6405963,
+                "lng": -79.38803
+            },
+            "facts": [
+                "Festa mais importante: Dia da Ação de Graças",
+                "Comida típica: Poutine (batatas fritas cobertas com queijo e molho)",
+                "Pessoas famosas: Celine Dion e Alexander Graham Bell"
+            ],
+            "tips": [
+                "O segundo maior país do mundo em área territorial, cobrindo quase 10 milhões de quilômetros quadrados.",
+                "O inglês e o francês são as línguas oficiais",
+                "O sistema de saúde é universal e gratuito para todos os cidadãos e residentes permanentes.",
+                "Um dos principais produtores de petróleo e gás natural do mundo.",
+                "Os povos indígenas habitaram o território por milhares de anos antes da chegada dos europeus.",
+                "Este país ainda considera a monarquia da Inglaterra como chefe de estado",
+                "Durante a Primeira Guerra Mundial, este país ajudou a Grã-Bretanha, contribuindo com tropas e suprimentos.",
+                "Durante a Segunda Guerra Mundial, lutou ao lado dos Aliados, e a participação no Dia D foi particularmente notável.",
+                "Justin Bieber nasceu neste país",
+                "Em 2015, Justin Trudeau, líder do Partido Liberal, tornou-se o 23º primeiro-ministro do país, liderando um governo que promoveu uma agenda progressista, incluindo questões de imigração, meio ambiente e direitos das minorias."
+            ],
+            "name": "Canadá",
+            "flag": "🇨🇦"
+        },
+        {
+            "country": "IN",
+            "coordinates": {
+                "lat": 25.3100147,
+                "lng": 83.0134964
+            },
+            "facts": [
+                "Festa mais importante: Diwali, também conhecido como o Festival das Luzes. Durante o Diwali, as pessoas acendem velas e lâmpadas para comemorar a vitória do bem sobre o mal.",
+                "Comida típica: O curry, o biryani, o samosa e o tandoori",
+                "Pessoas famosas: Mahatma Ghandi, líder da luta pela independência, e Kalpana Chawla, uma astronauta e engenheira aeroespacial que se tornou a primeira mulher de origem indiana a viajar para o espaço"
+            ],
+            "tips": [
+                "Abrigou uma das primeiras civilizações urbanas do mundo, a Civilização do Vale do Indo, que floresceu entre 2600 a.C. e 1900 a.C. As principais cidades desta civilização incluíam Harappa e Mohenjo-Daro.",
+                "O Império Maurya foi um dos maiores impérios deste país, governado por uma dinastia que se estendeu de 321 a.C. a 185 a.C.",
+                "A Dinastia Gupta governou de 320 d.C. a 550 d.C. Este período é considerado como uma \"Era de Ouro\"",
+                ": A partir do século VIII, foi invadida por muçulmanos vindos da Ásia Central. ",
+                "A partir de 1858, foi governada pela Coroa Britânica, em um período conhecido como Raj britânico. A luta pela independência indiana, liderada por Mahatma Gandhi e outros líderes, culminou na independência em 1947.",
+                "Em 1947, foi dividida em dois países independentes: este país (de maioria hindu) e o Paquistão (de maioria muçulmana). A partição levou a uma grande migração de pessoas entre os dois países e a violentos conflitos religiosos.",
+                "Em 1974, detonou sua primeira bomba nuclear, tornando-se o sexto país do mundo a ter essa capacidade. Isso levou a tensões com o Paquistão e outras nações.",
+                "O Taj Mahal é um dos monumentos mais icônicos. Foi construído pelo imperador Mughal Shah Jahan em homenagem à sua esposa falecida e é considerado um exemplo de arquitetura Mughal.",
+                "O movimento Swadeshi: O movimento Swadeshi foi um movimento de boicote aos produtos britânicos, liderado por Mahatma Gandhi. O movimento tinha como objetivo promover a produção e o consumo de produtos nacionais e enfraquecer a economia britânica.",
+                "A Revolta dos Cipaios foi uma rebelião contra o domínio britânico no país em 1857. Embora a revolta tenha sido suprimida pelos britânicos, ela foi um ponto de virada na luta pela independência."
+            ],
+            "name": "Índia",
+            "flag": "🇮🇳"
+        },
+        {
+            "country": "NG",
+            "coordinates": {
+                "lat": 25.3100147,
+                "lng": 83.0134964
+            },
+            "facts": [
+                "Festa mais importante: celebração do Eid al-Fitr, que marca o fim do mês sagrado do Ramadã no calendário islâmico",
+                "Comida típica: Jollof Rice - um prato de arroz cozido com tomate, cebola, pimentão e outras especiarias.",
+                "Pessoas famosas: Wole Soyinka, o primeiro africano a receber o Prêmio Nobel de Literatura e Chimamanda Ngozi Adichie, autoram ativista feminista e uma defensora dos direitos das mulheres"
+            ],
+            "tips": [
+                "Tornou-se uma colônia britânica em 1901, após a conquista do Reino de Lagos pelos britânicos.",
+                "Em 1960, tornou-se independente do Reino Unido, com o primeiro presidente, Nnamdi Azikiwe, tomando posse.",
+                "De 1966 a 1979, passou por uma série de golpes militares, com vários líderes militares assumindo o poder.",
+                "Em 1999, realizou eleições presidenciais e uma nova era democrática começou, com Olusegun Obasanjo sendo eleito presidente.",
+                "Maior produtor de petróleo da África e o décimo segundo maior produtor do mundo.",
+                "País mais populoso da África, com mais de 200 milhões de habitantes.",
+                "Conhecida por sua rica cultura, incluindo a arte Nok, uma das primeiras culturas conhecidas a produzir esculturas em bronze, e a música afrobeat, criada pelo lendário músico Fela Kuti.",
+                "Sediou a Copa Africana de Nações em 1980, 2000 e 2010, vencendo a competição três vezes.",
+                "Lar de muitos grupos étnicos, incluindo os Igbo, Yoruba e Hausa-Fulani.",
+                "É um membro fundador da Organização dos Países Exportadores de Petróleo (OPEP), um cartel de países produtores de petróleo que controlam uma grande parcela do suprimento mundial de petróleo."
+            ],
+            "name": "Nigéria",
+            "flag": "🇳🇬"
+        },
+        {
+            "country": "ZA",
+            "coordinates": {
+                "lat": 25.3100147,
+                "lng": 83.0134964
+            },
+            "facts": [
+                "Festa mais importante: O Dia da Liberdade comemora a primeira eleição democrática, após o apartheid",
+                "Comida típica: Bobotie - um prato de carne picada com curry, pão de forma e ovos, geralmente servido com arroz.",
+                "Pessoas famosas: Nelson Mandela - líder político e ativista anti-apartheid que se tornou o primeiro presidente negro da África do Sul. Miriam Makeba - cantora e ativista pelos direitos humanos, conhecida como \"Mama Africa\"."
+            ],
+            "tips": [
+                "O julgamento de Rivonia - Em 1964, Nelson Mandela e outros líderes do Congresso Nacional Africano foram julgados e condenados à prisão perpétua por sabotagem e conspiração contra o governo.",
+                "A verdade e reconciliação - Em 1996, a Comissão de Verdade e Reconciliação foi criada para investigar e processar crimes cometidos durante o apartheid.",
+                "A Copa do Mundo de 2010 - Foi o primeiro país africano a sediar a Copa do Mundo de Futebol da FIFA em 2010, o que ajudou a impulsionar a economia e a imagem internacional do país.",
+                "As primeiras eleições democráticas - Em 1994, realizou suas primeiras eleições democráticas, com Nelson Mandela eleito como o primeiro presidente negro do país.",
+                "A descoberta do Homo naledi - Em 2013, foi descoberto o esqueleto do Homo naledi em uma caverna Sul, mudando a compreensão dos especialistas sobre a evolução humana.",
+                "A Revolta dos Zulus - Em 1906, a Revolta dos Zulus contra o governo colonial britânico deixou milhares de mortos e acabou reprimida.",
+                "A criação do CNA - O Congresso Nacional Africano (CNA) foi fundado em 1912 para lutar contra a discriminação racial e se tornou o principal partido político do país durante o apartheid e após a sua queda.",
+                "A Conferência de Durban - Em 2001, a Conferência de Durban sobre Racismo foi realizada no país, atraindo atenção internacional para a luta contra o racismo em todo o mundo.",
+                "A construção da cidade de Joanesburgo - Em 1886, a descoberta de ouro na região de Witwatersrand levou à construção da cidade de Joanesburgo, que se tornou o centro financeiro do país.",
+                "O movimento Black Consciousness - Na década de 1970, o líder negro Steve Biko fundou o movimento Black Consciousness, que promovia a auto-estima e a unidade entre os negros do país."
+            ],
+            "name": "África do Sul",
+            "flag": "🇿🇦"
         }
     ]
 }
