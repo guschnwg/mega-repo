@@ -4,6 +4,8 @@ export function Timer({ start, active, countdown, limit = 5, onChange, onEnd }) 
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState({ since: start, accumulated: 0, total: 0 });
 
+  console.log(start, active, countdown, limit, current, paused.total);
+
   useEffect(() => {
     setPaused(prev => ({ ...prev, since: Date.now(), total: prev.total + prev.accumulated, accumulated: 0 }))
   }, [active]);

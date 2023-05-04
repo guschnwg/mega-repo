@@ -31,34 +31,22 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
   const rightGuess = guesses.find(guess => guess.isRight);
 
   return (
-    <Modal isOpen={showRightAttempt || showTimeExceeded || showGuessExceeded}>
+    <Modal isOpen>
       <div className='right-attempt'>
         <div className="info">
           {!viewDetails ? (
             <div className="general">
-              {showRightAttempt && (
-                <div className="country-data">
-                  <div className="flag">{country.flag}</div>
-                  <div className="country-name">
-                    <h2>Parabéns! {country.name}!!! Continue assim!</h2>
-                  </div>
-                </div>
+              <div className="flag">{country.flag}</div>
+
+              {showRightAttempt ? (
+                <h2> Parabéns! {country.name}!!! Continue assim!</h2>
+              ) : (
+                <h2>Que pena! Era {country.name}... Vamos tentar outro país?</h2>
               )}
 
-              {(showTimeExceeded || showGuessExceeded) && (
-                <>
+              {showTimeExceeded && <p>O jogo acabou porque o tempo para este nível acabou.</p>}
 
-                  <div className="country-name">
-                    <h2>Que pena! Era {country.name}</h2>
-                    <div className="flag">{country.flag}</div>
-                  </div>
-
-                  <div>
-                    {showTimeExceeded && <p>O jogo acabou porque o tempo para este nível acabou.</p>}
-                    {showGuessExceeded && <p>O nível acabou porque você usou todas as suas chances.</p>}
-                  </div>
-                </>
-              )}
+              {showGuessExceeded && <p>O nível acabou porque você usou todas as suas chances.</p>}
 
               {rightGuess ? (
                 <div>
@@ -92,6 +80,7 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
                     <li key={index}>{tip}</li>
                   ))}
                 </ul>
+
                 <button onClick={onNext}>Próximo nível</button>
             </div>
           )}
@@ -178,6 +167,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
       <div className='app'>
         <div className='header'>
           <Timer
+            key={level}
             start={time}
             active={timeRunning}
             countdown
