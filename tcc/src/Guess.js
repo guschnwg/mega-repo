@@ -28,9 +28,17 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
           <>
             <div className="guesses-info">
               Você usou {guesses.length} dos {guessLimit} palpites disponíveis.
-
-              {!canGuess && <div>Você já deu o palpite nesta tentativa, feche a janela e tente de novo</div>}
             </div>
+
+            {!canGuess && (
+              <Modal isOpen className="already-guessed" overlayClassName="already-guessed-overlay">
+                <p>Você deu o palpite nesta rodada.</p>
+                <p>Infelizmente não é {guesses.at(-1).data.country.name}...</p>
+                <p>Vamos tentar de novo?</p>
+
+                <button onClick={onHide}>Vamos!</button>
+              </Modal>
+            )}
 
             <div className="controls zoom">
               <button onClick={() => utils.zoomIn(.5, null)}>+</button>
