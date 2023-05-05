@@ -82,7 +82,7 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
                 onMouseLeave={() => setSelectedCountry(null)}
                 onClick={country => {
                   if (canGuess) {
-                    onGuess({ time: Date.now(), country });
+                    onGuess({ time: Date.now(), country: { id: country.id, name: country.name, continent: country.continent } });
                     if (onlyOnce) {
                       setCanGuess(false);
                     }

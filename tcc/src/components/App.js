@@ -117,7 +117,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 
   const handleGuess = guess => {
     const isRight = guess.country.id === country.country;
-    setGuesses(prev => [...prev, { data: guess, timeElapsed: timeElapsed.current, isRight }]);
+    setGuesses(prev => [...prev, { data: guess, tipsViewed, timeElapsed: timeElapsed.current, isRight }]);
 
     if (isRight) {
       confetti({ zIndex: Number.MAX_SAFE_INTEGER, particleCount: 200, spread: 100, gravity: 2 });
@@ -147,7 +147,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 
   const handleNext = () => {
     onChangeLevel(level + 1);
-    setGame(prev => [...prev, { start: time, country, guesses, tipsViewed }]);
+    setGame(prev => [...prev, { start: time, country, guesses }]);
     setGuesses([]);
     setTipsViewed([]);
     setTime(Date.now());
