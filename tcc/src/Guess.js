@@ -2,10 +2,12 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import React, { useState } from "react";
 import Modal from 'react-modal';
 import { World, Tooltip } from "./World";
+import { Timer } from "./Timer";
 
 export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
   const [selectedCountry, setSelectedCountry] = useState();
   const [canGuess, setCanGuess] = useState(true);
+  const [start] = useState(Date.now())
 
   const betweenBounds = (utils, desiredPositionX, desiredPositionY) => {
     const bounds = utils.instance.bounds;
@@ -93,7 +95,21 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
       </TransformWrapper>
       <Tooltip country={selectedCountry} />
 
-      <button className="guess-close" onClick={onHide}>X</button>
+      <button className="guess-close" onClick={onHide}>
+        Sair
+
+
+
+        <Timer
+          start={start}
+          active
+          countdown
+          limit={30}
+          houses={0}
+          hideClock
+          onEnd={onHide}
+        />
+      </button>
     </Modal>
   );
 }

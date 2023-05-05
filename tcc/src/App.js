@@ -181,14 +181,15 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
             }}
           />
 
-          <Tips
-            show={showTips}
-            tips={country.tips}
-            viewed={tipsViewed}
-            tipsLimit={tipsLimit}
-            onView={handleTipView}
-            onHide={() => setShowTips(false)}
-          />
+          {showTips && (
+            <Tips
+              tips={country.tips}
+              viewed={tipsViewed}
+              tipsLimit={tipsLimit}
+              onView={handleTipView}
+              onHide={() => setShowTips(false)}
+            />
+          )}
 
           <button
             onClick={() => setShowTips(true)}

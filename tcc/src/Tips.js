@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from 'react-modal';
 
-export function Tips({ show, tips, viewed, tipsLimit, onView, onHide }) {
+import { Timer } from './Timer';
 
+export function Tips({ tips, viewed, tipsLimit, onView, onHide }) {
+  const [start] = useState(Date.now())
   const canViewTip = tipsLimit > viewed.length;
 
   return (
     <>
-      <Modal isOpen={show} onRequestClose={onHide}>
+      <Modal isOpen>
         <div className="right-attempt tips-modal">
           {tips.map(tip => {
             if (viewed.includes(tip)) {
@@ -36,7 +38,19 @@ export function Tips({ show, tips, viewed, tipsLimit, onView, onHide }) {
           })}
         </div>
 
-        <button className="close-modal-button" onClick={onHide}>Sair</button>
+        <button className="close-modal-button" onClick={onHide}>
+          Sair
+
+          <Timer
+            start={start}
+            active
+            countdown
+            limit={30}
+            houses={0}
+            hideClock
+            onEnd={onHide}
+          />
+        </button>
       </Modal>
     </>
   );

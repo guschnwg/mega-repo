@@ -101,7 +101,7 @@
   right: 0;
 }
 
-button {
+button, .fake-button {
   background: #3EA9AD;
   border: #66F4FA 3px solid;
   border-radius: 5px;
@@ -112,6 +112,12 @@ button {
 
   position: relative;
   cursor: pointer;
+}
+.fake-button {
+  display: inline;
+  padding: 5px;
+  font-size: 10px;
+  vertical-align: middle;
 }
 button:disabled {
   filter: brightness(.5);
@@ -429,6 +435,12 @@ button[data-disabled="true"]:after {
   bottom: 10px;
 }
 
+.close-modal-button .timer, .guess-close .timer {
+  font-size: 16px;
+  padding: 0;
+  padding-left: 10px;
+}
+
 .tutorial {
   position: fixed;
   top: 0;
@@ -441,8 +453,12 @@ button[data-disabled="true"]:after {
   z-index: 99999;
 
   color: white;
-  padding: 20px;
+  padding: 10px 20% 50px;
   backdrop-filter: blur(2px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .react-transform-wrapper {
@@ -459,6 +475,10 @@ button[data-disabled="true"]:after {
   position: absolute;
   right: 20px;
   top: 20px;
+}
+
+.tutorial  p {
+  font-size: 22px;
 }
 
 h4 {

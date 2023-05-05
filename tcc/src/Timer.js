@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-export function Timer({ start, active, countdown, limit = 5, onChange, onEnd }) {
+export function Timer({ start, active, countdown, hideClock = false, limit = 5, houses = 3, onChange, onEnd }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState({ since: start, accumulated: 0, total: 0 });
-
-  console.log(start, active, countdown, limit, current, paused.total);
 
   useEffect(() => {
     setPaused(prev => ({ ...prev, since: Date.now(), total: prev.total + prev.accumulated, accumulated: 0 }))
@@ -19,7 +17,7 @@ export function Timer({ start, active, countdown, limit = 5, onChange, onEnd }) 
 
       const next = (Date.now() - start - paused.total) / 1000;
       setCurrent(next);
-      onChange(next);
+      onChange && onChange(next);
       if (limit && next > limit) {
         onEnd();
       }
@@ -35,7 +33,7 @@ export function Timer({ start, active, countdown, limit = 5, onChange, onEnd }) 
 
   return (
     <div className="timer" id="timer" data-shake={(current * 100) / limit > 80}>
-      ⏱️ {ensureBetweenLimits.toFixed(3)}s
+      {!hideClock && '⏱️'} {ensureBetweenLimits.toFixed(houses)}s
     </div>
   );
 }
