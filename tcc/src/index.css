@@ -511,3 +511,74 @@ h4 {
   align-items: center;
   justify-content: center;
 }
+
+.level-info {
+  color: white;
+  font-weight: bold;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+}
+
+.request-name {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+input, textarea {
+  margin: 5px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 2px solid #a3a3a3;
+  font-size: 28px;
+}
+
+.end-game {
+  display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #be6464;
+    height: 100%;
+    width: 100%;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+}
+
+.end-game p {
+  font-size: 22px;
+  margin: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+textarea {
+  height: 200px;
+  width: 80%;
+  font-size: 20px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.summary .points {
+  font-weight: bold;
+}
+
+.summary .points .number-of-points {
+  font-size: 26px;
+}
+
+#root {
+  height: 100%;
+}

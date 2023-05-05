@@ -2,8 +2,8 @@
 
 import { sql } from "@vercel/postgres";
 
-const finishGame = async game => {
-  await sql`insert into games (name, data) values ('No name yet', ${JSON.stringify(game)});`;
+const finishGame = async (name, game, feedback) => {
+  await sql`insert into games (name, data, feedback) values (${name}, ${JSON.stringify(game)}, ${feedback});`;
 
   return { ok: true, game };
 };

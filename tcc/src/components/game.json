@@ -1,32 +1,34 @@
 {
+    "tutorial": {
+        "continent": "América do Sul",
+        "country": "BR",
+        "coordinates": {
+            "lat": -22.9522413,
+            "lng": -43.2104268
+        },
+        "facts": [
+            "Festa mais importante: Carnaval",
+            "Comida típica: Feijoada",
+            "Pessoas famosas: Pelé e Fernanda Montenegro"
+        ],
+        "tips": [
+            "O país é o maior da América do Sul em extensão territorial e possui uma grande variedade de paisagens, como praias, florestas tropicais e montanhas.",
+            "A língua oficial do país é o português, que é falado por quase todos os habitantes.",
+            "A maior floresta tropical do mundo, conhecida como 'o pulmão do mundo', está localizada neste país.",
+            "Durante muitos anos, o país foi colonizado por europeus que exploraram suas riquezas naturais, como ouro, diamantes e madeira.",
+            "Em 1822, o país se tornou independente de Portugal e se tornou uma república em 1889.",
+            "O país foi o último das Américas a abolir a escravidão, em 1888.",
+            "A história do país inclui importantes conflitos armados, como a Guerra do Paraguai e a Revolução Constitucionalista de 1932.",
+            "O país viveu sob uma ditadura militar entre os anos de 1964 e 1985.",
+            "O país é um importante produtor de café, soja e outros produtos agrícolas.",
+            "O país foi o anfitrião de importantes eventos esportivos, como a Copa do Mundo de Futebol em 2014 e as Olimpíadas em 2016."
+        ],
+        "name": "Brasil",
+        "flag": "🇧🇷"
+    },
     "countries": [
         {
-            "country": "BR",
-            "coordinates": {
-                "lat": -22.9522413,
-                "lng": -43.2104268
-            },
-            "facts": [
-                "Festa mais importante: Carnaval",
-                "Comida típica: Feijoada",
-                "Pessoas famosas: Pelé e Fernanda Montenegro"
-            ],
-            "tips": [
-                "O país é o maior da América do Sul em extensão territorial e possui uma grande variedade de paisagens, como praias, florestas tropicais e montanhas.",
-                "A língua oficial do país é o português, que é falado por quase todos os habitantes.",
-                "A maior floresta tropical do mundo, conhecida como 'o pulmão do mundo', está localizada neste país.",
-                "Durante muitos anos, o país foi colonizado por europeus que exploraram suas riquezas naturais, como ouro, diamantes e madeira.",
-                "Em 1822, o país se tornou independente de Portugal e se tornou uma república em 1889.",
-                "O país foi o último das Américas a abolir a escravidão, em 1888.",
-                "A história do país inclui importantes conflitos armados, como a Guerra do Paraguai e a Revolução Constitucionalista de 1932.",
-                "O país viveu sob uma ditadura militar entre os anos de 1964 e 1985.",
-                "O país é um importante produtor de café, soja e outros produtos agrícolas.",
-                "O país foi o anfitrião de importantes eventos esportivos, como a Copa do Mundo de Futebol em 2014 e as Olimpíadas em 2016."
-            ],
-            "name": "Brasil",
-            "flag": "🇧🇷"
-        },
-        {
+            "continent": "Europa",
             "country": "FR",
             "coordinates": {
                 "lat": 48.8568849,
@@ -53,6 +55,7 @@
             "flag": "🇫🇷"
         },
         {
+            "continent": "Europa",
             "country": "NL",
             "coordinates": {
                 "lat": 52.3585948,
@@ -79,6 +82,7 @@
             "flag": "🇳🇱"
         },
         {
+            "continent": "América do Sul",
             "country": "AR",
             "coordinates": {
                 "lat": -34.6083088,
@@ -105,6 +109,7 @@
             "flag": "🇦🇷"
         },
         {
+            "continent": "Europa",
             "country": "GR",
             "coordinates": {
                 "lat": 37.9715285,
@@ -131,6 +136,7 @@
             "flag": "🇬🇷"
         },
         {
+            "continent": "Europa",
             "country": "ES",
             "coordinates": {
                 "lat": 41.4026033,
@@ -157,6 +163,7 @@
             "flag": "🇪🇸"
         },
         {
+            "continent": "Europa",
             "country": "IT",
             "coordinates": {
                 "lat": 41.8892844,
@@ -183,6 +190,7 @@
             "flag": "🇮🇹"
         },
         {
+            "continent": "Ásia",
             "country": "JP",
             "coordinates": {
                 "lat": 35.7143865,
@@ -209,6 +217,7 @@
             "flag": "🇯🇵"
         },
         {
+            "continent": "Oceania",
             "country": "AU",
             "coordinates": {
                 "lat": -33.8585692,
@@ -235,6 +244,7 @@
             "flag": "🇦🇺"
         },
         {
+            "continent": "América do Norte",
             "country": "CA",
             "coordinates": {
                 "lat": 43.6405963,
@@ -261,6 +271,7 @@
             "flag": "🇨🇦"
         },
         {
+            "continent": "Ásia",
             "country": "IN",
             "coordinates": {
                 "lat": 25.3100147,
@@ -287,6 +298,7 @@
             "flag": "🇮🇳"
         },
         {
+            "continent": "África",
             "country": "NG",
             "coordinates": {
                 "lat": 6.4779633,
@@ -313,6 +325,7 @@
             "flag": "🇳🇬"
         },
         {
+            "continent": "África",
             "country": "ZA",
             "coordinates": {
                 "lat": -26.2387107,

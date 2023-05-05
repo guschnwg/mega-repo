@@ -19,12 +19,95 @@ import { Tutorial } from "./Tutorial";
 Modal.setAppElement('#modal');
 
 
-function EndGame({ game, onFinish }) {
+const CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
+const VALID_COUNTRIES = CONTINENTS.map(continent => {
+  const possible = GAME.countries.filter(country => country.continent === continent);
+  return possible[Math.floor(Math.random() * possible.length)];
+}).sort(() => 0.5 - Math.random())
+
+
+function points(level) {
+  const totalOfPoints = 1000;
+
+  // If there are no right guesses, then we already lose 100 points.
+  const noRightGuessLost = level.guesses.find(guess => guess.isRight) ? 0 : 50;
+
+  // In 5 guesses, you can lower your score by 250 points max
+  // The max is 50 points per level, so 50 * 5 guesses
+  const guessLost = level.guesses.filter(guess => !guess.isRight).length * 50;
+
+  // In 4 tips, you can lower your score by 300 points
+  // The max is 4 tips per guess, so 4 tips * 15 points * 5 guesses
+  const tipsLost = level.guesses.reduce((agg, crr) => agg + crr.tipsViewed.length * 15, 0);
+
+  // In 5 guesses, you can lower your score by 300 points
+  // The max is 60 points per level, so 60 * 5
+  const timeLost = level.guesses.reduce((agg, crr) => agg + parseInt(crr.timeElapsed), 0);
+
+  console.log(level.guesses, noRightGuessLost, guessLost, tipsLost, timeLost);
+
+  // The minimum amount of points is 50 points, the max is 1000, but that is very difficult
+  return totalOfPoints - noRightGuessLost - guessLost - tipsLost - timeLost;
+}
+
+
+function EndGame({ name, game, onFinish }) {
+  const [submitted, setSubmitted] = useState(false);
+  const [feedback, setFeedback] = useState('');
+
+  const [tutorial, ...realGame] = game;
+
   return (
-    <div>
+    <div className="end-game">
       <h1>Acabouuuuu :D</h1>
 
-      {onFinish && <button onClick={() => onFinish(game)}> Finalizar</button>}
+      <p>Valeu por jogar nosso joguinho, {name}!</p>
+
+      {onFinish && !submitted && (
+        <>
+          <p>O que achou?</p>
+
+          <textarea type="text" value={feedback} onChange={event => setFeedback(event.target.value)} />
+
+          <button
+            onClick={() => {
+              onFinish(name, game, feedback);
+              setSubmitted(true);
+            }}
+          >Finalizar</button>
+        </>
+      )}
+
+      {(!onFinish || submitted) && (
+        <div className="summary">
+          <iframe
+            src="https://giphy.com/embed/kFNghExveIAk7fp6GX"
+            width="180px"
+            height="180px"
+            style={{ pointerEvents: 'none', border: 'none', transform: 'scale(1.8)' }}
+            class="giphy-embed"
+            allowFullScreen
+            title="Minion dançando"
+          />
+
+          < div >
+            No Tutorial, que o país era {tutorial.country.name}, que fica na {tutorial.country.continent}, a pontuação foi de:
+            {' '}
+            <span className="points"><span className="number-of-points">{points(tutorial)}</span> pontos!</span>
+          </div>
+
+          {
+            realGame.map((real, i) => (
+              <div>
+                No nível {i + 1}, que era {real.country.name}, que fica na {real.country.continent}, você fez um total de:
+                {' '}
+                <span className="points"><span className="number-of-points">{points(real)}</span> pontos!</span>
+              </div>
+            ))
+          }
+        </div >
+      )
+      }
     </div>
   );
 }
@@ -94,7 +177,7 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
   )
 }
 
-function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish }) {
+function Game({ name, country, level, levelCount, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish }) {
 
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
@@ -110,8 +193,6 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   const timeElapsed = useRef();
 
   //
-
-  const country = GAME.countries[level];
 
   const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded && playing && !showGuessAttempt && !showTips;
 
@@ -163,7 +244,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   const onTimerChange = useCallback(time => timeElapsed.current = time, []);
 
   if (!country) {
-    return <EndGame game={game} onFinish={onFinish} />;
+    return <EndGame name={name} game={game} onFinish={onFinish} />;
   }
 
   return (
@@ -184,6 +265,8 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
               }
             }}
           />
+
+          <div className="level-info">Nível {level + 1}/{levelCount}</div>
 
           {showTips && (
             <Tips
@@ -245,11 +328,19 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 function App({ onFinish }) {
   const [level, setLevel] = useState(0);
   const [isTutorial, setIsTutorial] = useState(level === 0);
+  const [name, setName] = useState(null);
+
+  console.log("Will play", VALID_COUNTRIES);
+
+  const country = level === 0 ? GAME.tutorial : VALID_COUNTRIES[level - 1];
 
   return (
     <>
       <Game
+        name={name}
+        country={country}
         level={level}
+        levelCount={VALID_COUNTRIES.length + 1}
         playing={!isTutorial}
         canLose={level !== 0}
         timeLimit={60}
@@ -265,6 +356,7 @@ function App({ onFinish }) {
           guessLimit={5}
           tipsLimit={4}
           onClose={() => setIsTutorial(false)}
+          onName={setName}
         />)}
     </>
   )

@@ -30,7 +30,7 @@ const Time = ({ limit }) => (
 
     <p>Para ser um jogo mais interessante, adicionamos um tempo para que você tenha uma dificuldade extra.</p>
 
-    <p>Você terá 60 segundos para se movimentar pelo jogo.</p>
+    <p>Você terá {limit} segundos para se movimentar pelo jogo.</p>
 
     <p>O tempo pausará enquanto você estiver vendo as dicas ou vendo o mapa para dar um palpite.</p>
   </div>
@@ -106,8 +106,9 @@ const Guess = ({ limit }) => (
   </div>
 );
 
-export function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose }) {
-  const [step, setStep] = useState('game');
+export function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose, onName }) {
+  const [step, setStep] = useState('name');
+  const [name, setName] = useState('');
 
   const steps = {
     game: { label: 'O jogo', comp: <TheGame /> },
@@ -119,18 +120,30 @@ export function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose }) {
 
   return (
     <div className="tutorial">
-      <button className="close" onClick={onClose}>
-        Sair
-      </button>
+
 
       {step === 'name' ? (
-        <div>
+        <div className="request-name">
           <h1>
-            Olá! Qual o seu nome?
+            Olá! Qual o nome do time?
           </h1>
+
+          <input type="text" value={name} onChange={event => setName(event.target.value)} />
+
+          <button onClick={() => {
+            if (!name) {
+              return;
+            }
+            onName(name);
+            setStep('game');
+          }}>Confirmo!</button>
         </div>
       ) : (
         <>
+            <button className="close" onClick={onClose}>
+              Sair
+            </button>
+
           {steps[step]?.comp}
           <div className="controls">
             {Object.entries(steps).map(([key, data]) => (
