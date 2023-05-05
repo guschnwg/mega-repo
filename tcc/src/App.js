@@ -1,3 +1,5 @@
+'use client';
+
 import GAME from "./game.json";
 
 import 'react-tooltip/dist/react-tooltip.css'
@@ -17,11 +19,14 @@ import { Tutorial } from "./Tutorial";
 Modal.setAppElement('#modal');
 
 
-function EndGame({ game }) {
+function EndGame({ game, onFinish }) {
   return (
-    <pre>
-      {JSON.stringify(game, null, 2)}
-    </pre>
+    // {/* {JSON.stringify(game, null, 2)} */ }
+    <div>
+      <h1>Acabouuuuu</h1>
+
+      {onFinish && <button onClick={() => onFinish(game)}> Finalizar</button>}
+    </div>
   );
 }
 
@@ -90,7 +95,7 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
   )
 }
 
-function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel }) {
+function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish }) {
 
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
@@ -107,7 +112,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 
   //
 
-  const country = GAME.countries[level];
+  const country = level === 1 ? null : GAME.countries[level];
 
   const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded && playing && !showGuessAttempt && !showTips;
 
@@ -159,7 +164,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   const onTimerChange = useCallback(time => timeElapsed.current = time, []);
 
   if (!country) {
-    return <EndGame game={game} />;
+    return <EndGame game={game} onFinish={onFinish} />;
   }
 
   return (
@@ -238,7 +243,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
   );
 }
 
-function App() {
+function App({ onFinish }) {
   const [level, setLevel] = useState(0);
   const [isTutorial, setIsTutorial] = useState(level === 0);
 
@@ -252,6 +257,7 @@ function App() {
         guessLimit={5}
         tipsLimit={4}
         onChangeLevel={setLevel}
+        onFinish={onFinish}
       />
 
       {isTutorial && (
