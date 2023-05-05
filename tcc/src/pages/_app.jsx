@@ -10,7 +10,7 @@ export const metadata = {
   }
 }
 
-export default function Layout({ \Component, pageProps }) {
+export default function Layout({ Component, pageProps }) {
   return (
     <>
       <Component {...pageProps} />
