@@ -21,9 +21,8 @@ Modal.setAppElement('#modal');
 
 function EndGame({ game, onFinish }) {
   return (
-    // {/* {JSON.stringify(game, null, 2)} */ }
     <div>
-      <h1>Acabouuuuu</h1>
+      <h1>Acabouuuuu :D</h1>
 
       {onFinish && <button onClick={() => onFinish(game)}> Finalizar</button>}
     </div>
@@ -78,15 +77,15 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
                 ))}
               </ul>
 
-                <h4>Curiosidades:</h4>
+              <h4>Curiosidades:</h4>
 
-                <ul>
-                  {country.tips.map((tip, index) => (
-                    <li key={index}>{tip}</li>
-                  ))}
-                </ul>
+              <ul>
+                {country.tips.map((tip, index) => (
+                  <li key={index}>{tip}</li>
+                ))}
+              </ul>
 
-                <button onClick={onNext}>Próximo nível</button>
+              <button onClick={onNext}>Próximo nível</button>
             </div>
           )}
         </div>
@@ -112,7 +111,7 @@ function Game({ level, playing, canLose, timeLimit, guessLimit, tipsLimit, onCha
 
   //
 
-  const country = level === 1 ? null : GAME.countries[level];
+  const country = GAME.countries[level];
 
   const timeRunning = !showTimeExceeded && !showRightAttempt && !showGuessExceeded && playing && !showGuessAttempt && !showTips;
 
