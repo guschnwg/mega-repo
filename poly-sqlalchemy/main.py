@@ -57,6 +57,9 @@ class GoogleCampaign(Entity):
     @property
     def test():
         return "oi"
+    
+    def __repr__(self) -> str:
+        return f"GoogleCampaign(id={self.id}, eid={self.eid}, type={self.type}, sub_type={self.sub_type}, data={self.data})"
 
 
 class GoogleAdgroup(Entity):
@@ -75,6 +78,9 @@ class GoogleAdgroup(Entity):
         foreign_keys=[campaign_eid],
         primaryjoin=remote(GoogleCampaign.eid)==foreign(campaign_eid)
     )
+    
+    def __repr__(self) -> str:
+        return f"GoogleAdgroup(id={self.id}, eid={self.eid}, type={self.type}, sub_type={self.sub_type}, data={self.data}, campaign_eid={self.campaign_eid})"
 
 
 class GoogleAd(Entity):
@@ -93,6 +99,9 @@ class GoogleAd(Entity):
         foreign_keys=[adgroup_eid],
         primaryjoin=remote(GoogleAdgroup.eid)==foreign(adgroup_eid)
     )
+    
+    def __repr__(self) -> str:
+        return f"GoogleAd(id={self.id}, eid={self.eid}, type={self.type}, sub_type={self.sub_type}, data={self.data}, adgroup_eid={self.adgroup_eid})"
 
 ##
 
@@ -127,19 +136,19 @@ class EntityFactory(factory.Factory):
 class GoogleEntityFactory(EntityFactory):
     type = 'google'
 
-class GoogleCampaignFactory(EntityFactory):
+class GoogleCampaignFactory(GoogleEntityFactory):
     class Meta:
         model = GoogleCampaign
 
     sub_type = 'campaign'
 
-class GoogleAdgroupFactory(EntityFactory):
+class GoogleAdgroupFactory(GoogleEntityFactory):
     class Meta:
         model = GoogleAdgroup
 
     sub_type = 'ad_group'
 
-class GoogleAdFactory(EntityFactory):
+class GoogleAdFactory(GoogleEntityFactory):
     class Meta:
         model = GoogleAd
 
@@ -147,10 +156,10 @@ class GoogleAdFactory(EntityFactory):
 
 ##
 
-google_one = GoogleCampaignFactory(type='google', sub_type='campaign')
-google_two = GoogleAdgroupFactory(parent=google_one, type='google', sub_type='ad_group')
-google_three = GoogleAdgroupFactory(parent=google_one, type='google', sub_type='ad_group')
-google_four = EntityFactory(parent=google_three, type='google', sub_type='ad')
+google_one = GoogleCampaignFactory()
+google_two = GoogleAdgroupFactory(parent=google_one)
+google_three = GoogleAdgroupFactory(parent=google_one)
+google_four = GoogleAdFactory(parent=google_three)
 
 pinterest_one = EntityFactory(type='pinterest', sub_type='campaign')
 tiktok_one = EntityFactory(type='tiktok', sub_type='campaign')
@@ -169,5 +178,25 @@ adg = session.query(GoogleAdgroup).filter(GoogleAdgroup.eid==google_three.eid).f
 assert adg.campaign
 assert adg in adg.campaign.adgroups
 assert adg.ads
-# Need to firure this out... ads[0] is not mapped to the specific model...
 assert adg.ads[0].adgroup == adg
+
+ad = session.query(GoogleAd).filter(GoogleAd.eid==google_four.eid).first()
+assert ad.adgroup == adg
+
+##
+
+another_one = EntityFactory(type='google', sub_type='campaign')
+session.add(another_one)
+session.commit()
+assert another_one.__class__ == Entity # Why this does not work? should be GoogleCampaign already
+another_one = session.query(GoogleCampaign).filter(GoogleCampaign.eid==another_one.eid).first()
+assert another_one.__class__ == Entity # Why this does not work? should be GoogleCampaign at least in here
+
+another_session = sessionmaker(engine)()
+another_one = another_session.query(GoogleCampaign).filter(GoogleCampaign.eid==another_one.eid).first()
+
+assert another_one.__class__ == GoogleCampaign
+
+##
+
+other_google_one = another_session.query(GoogleCampaign).filter(GoogleCampaign.eid==google_one.eid).first()
