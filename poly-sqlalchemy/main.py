@@ -1,9 +1,8 @@
-from sqlalchemy import String, create_engine, text, cast, func
+from sqlalchemy import String, create_engine, text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker, column_property, relationship, foreign, remote
 from sqlalchemy.dialects.sqlite import JSON
 import factory
 import factory.fuzzy
-from pprint import pprint
 
 
 ##
