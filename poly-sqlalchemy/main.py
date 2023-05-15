@@ -67,9 +67,6 @@ class GoogleAdgroup(Entity):
         "polymorphic_identity": "google-ad_group",
     }
 
-    # this does not work, but should
-    # campaign_eid = column_property(Entity.data.op('->>')('parent_id'))
-
     # the replace is because sqlite uses json_quote
     campaign_eid = column_property(func.REPLACE(Entity.data['parent_id'], '"', ''))
 
@@ -88,8 +85,11 @@ class GoogleAd(Entity):
         "polymorphic_identity": "google-ad",
     }
 
-    # this does not work, but should
-    # adgroup_eid = column_property(Entity.data.op('->>')('parent_id'))
+    # Same for GoogleAdgroup above
+    # this does not work, but should - it tries to use JSONDecoder for some reason
+    # adgroup_eid: Mapped[str] = column_property(Entity.data.op('->>')('parent_id'))
+    # this works, but too much work
+    # adgroup_eid: Mapped[str] = column_property(func.REPLACE(func.JSON_QUOTE(Entity.data.op('->>')('parent_id')), '"', ''))
 
     # the replace is because sqlite uses json_quote
     adgroup_eid = column_property(func.REPLACE(Entity.data['parent_id'], '"', ''))
