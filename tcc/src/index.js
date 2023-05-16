@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './components/App';
+import App, { getConfig, getGame } from './components/App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const params = Object.fromEntries(new URLSearchParams(window.location.search));

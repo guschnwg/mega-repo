@@ -343,7 +343,7 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
 }
 
 export function getGame(continents) {
-  const chosenContinents = continents.filter(c => AVAILABLE_CONTINENTS.includes(c));
+  const chosenContinents = (continents || []).filter(c => AVAILABLE_CONTINENTS.includes(c));
   const validContinents = chosenContinents.length ? chosenContinents : AVAILABLE_CONTINENTS;
   const validCountries = validContinents.map(continent => {
     const possible = GAME.countries.filter(country => country.continent === continent);
