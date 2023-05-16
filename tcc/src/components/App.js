@@ -238,7 +238,8 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
     const toSpeak = new SpeechSynthesisUtterance(tip);
     const possibleVoices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'pt-BR');
     toSpeak.rate = .9;
-    toSpeak.voice = possibleVoices[Math.floor(Math.random() * possibleVoices.length)];
+    const googleVoice = possibleVoices.find(voice => voice.name.includes('Google'));
+    toSpeak.voice = googleVoice || possibleVoices[Math.floor(Math.random() * possibleVoices.length)];
     window.speechSynthesis.speak(toSpeak);
   }
 
