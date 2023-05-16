@@ -2,10 +2,29 @@
     "tutorial": {
         "continent": "América do Sul",
         "country": "BR",
-        "coordinates": {
-            "lat": -22.9522413,
-            "lng": -43.2104268
-        },
+        "places": [
+            {
+                "name": "Cristo Redentor",
+                "coordinates": {
+                    "lat": -22.9522413,
+                    "lng": -43.2104268
+                }
+            },
+            {
+                "name": "Jardim Botânico de Curitiba",
+                "coordinates": {
+                    "lat": -25.4430282,
+                    "lng": -49.2387007
+                }
+            },
+            {
+                "name": "Pelourinho",
+                "coordinates": {
+                    "lat": -12.9731231,
+                    "lng": -38.5102158
+                }
+            }
+        ],
         "facts": [
             "Festa mais importante: Carnaval",
             "Comida típica: Feijoada",
@@ -30,10 +49,29 @@
         {
             "continent": "Europa",
             "country": "FR",
-            "coordinates": {
-                "lat": 48.8568849,
-                "lng": 2.2968119
-            },
+            "places": [
+                {
+                    "name": "Torre Eiffel",
+                    "coordinates": {
+                        "lat": 48.8568849,
+                        "lng": 2.2968119
+                    }
+                },
+                {
+                    "name": "Mont Saint-Michel",
+                    "coordinates": {
+                        "lat": 48.63506,
+                        "lng": -1.5110104
+                    }
+                },
+                {
+                    "name": "Louvre",
+                    "coordinates": {
+                        "lat": 48.86129,
+                        "lng": 2.3358956
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Dia da Bastilha",
                 "Comida típica: Croissant",
@@ -57,10 +95,29 @@
         {
             "continent": "Europa",
             "country": "NL",
-            "coordinates": {
-                "lat": 52.3585948,
-                "lng": 4.8804924
-            },
+            "places": [
+                {
+                    "name": "Museu Van Gogh",
+                    "coordinates": {
+                        "lat": 52.3585948,
+                        "lng": 4.8804924
+                    }
+                },
+                {
+                    "name": "Estação Central",
+                    "coordinates": {
+                        "lat": 52.3780204,
+                        "lng": 4.8994553
+                    }
+                },
+                {
+                    "name": "Rua",
+                    "coordinates": {
+                        "lat": 52.3735961,
+                        "lng": 4.8938445
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Koningsdag (Dia do Rei)",
                 "Comida típica: Stroopwafel",
@@ -84,17 +141,36 @@
         {
             "continent": "América do Sul",
             "country": "AR",
-            "coordinates": {
-                "lat": -34.6083088,
-                "lng": -58.3709003
-            },
+            "places": [
+                {
+                    "name": "Casa Rosada",
+                    "coordinates": {
+                        "lat": -34.6083088,
+                        "lng": -58.3709003
+                    }
+                },
+                {
+                    "name": "La Bombonera",
+                    "coordinates": {
+                        "lat": -34.6353045,
+                        "lng": -58.3652215
+                    }
+                },
+                {
+                    "name": "Obelisco",
+                    "coordinates": {
+                        "lat": -34.6032505,
+                        "lng": -58.3813982
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Dia da Independência",
                 "Comida típica: Asado",
                 "Pessoas famosas: Lionel Messi e Eva Perón"
             ],
             "tips": [
-                "A língua oficial da Argentina é o espanhol, mas também existem outras línguas minoritárias faladas no país, como o guarani, o quíchua e o mapudungun.",
+                "A língua oficial é o espanhol, mas também existem outras línguas minoritárias faladas no país, como o guarani, o quíchua e o mapudungun.",
                 "Colonizada pelos espanhóis em 1536 e tornou-se independente da Espanha em 1816.",
                 "Maior produtor mundial de vinho da América do Sul, com a região de Mendoza sendo a principal produtora de vinho do país.",
                 "Possui uma das maiores reservas de gás e petróleo do mundo",
@@ -111,10 +187,29 @@
         {
             "continent": "Europa",
             "country": "GR",
-            "coordinates": {
-                "lat": 37.9715285,
-                "lng": 23.7267166
-            },
+            "places": [
+                {
+                    "name": "Acrópolis",
+                    "coordinates": {
+                        "lat": 37.9715285,
+                        "lng": 23.7267166
+                    }
+                },
+                {
+                    "name": "Vista de cima",
+                    "coordinates": {
+                        "lat": 37.9752468,
+                        "lng": 23.7218394
+                    }
+                },
+                {
+                    "name": "Fórum Romano de Atenas",
+                    "coordinates": {
+                        "lat": 37.9745367,
+                        "lng": 23.7253658
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Páscoa Ortodoxa",
                 "Comida típica: Moussaka",
@@ -138,10 +233,29 @@
         {
             "continent": "Europa",
             "country": "ES",
-            "coordinates": {
-                "lat": 41.4026033,
-                "lng": 2.1729783
-            },
+            "places": [
+                {
+                    "name": "Sagrada Família",
+                    "coordinates": {
+                        "lat": 41.4029647,
+                        "lng": 2.173898
+                    }
+                },
+                {
+                    "name": "Camp Nou",
+                    "coordinates": {
+                        "lat": 41.3814032,
+                        "lng": 2.1226756
+                    }
+                },
+                {
+                    "name": "Fonte de Netuno",
+                    "coordinates": {
+                        "lat": 40.4149751,
+                        "lng": -3.69425
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: La Tomatina",
                 "Comida típica: Paella",
@@ -165,10 +279,29 @@
         {
             "continent": "Europa",
             "country": "IT",
-            "coordinates": {
-                "lat": 41.8892844,
-                "lng": 12.4918613
-            },
+            "places": [
+                {
+                    "name": "Coliseu",
+                    "coordinates": {
+                        "lat": 41.8892844,
+                        "lng": 12.4918613
+                    }
+                },
+                {
+                    "name": "Panteão",
+                    "coordinates": {
+                        "lat": 41.8990912,
+                        "lng": 12.4769128
+                    }
+                },
+                {
+                    "name": "Palácio Real de Milão",
+                    "coordinates": {
+                        "lat": 45.4633152,
+                        "lng": 9.1912208
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Carnaval de Veneza",
                 "Comida típica: Pizza",
@@ -192,10 +325,29 @@
         {
             "continent": "Ásia",
             "country": "JP",
-            "coordinates": {
-                "lat": 35.7143865,
-                "lng": 139.7963642
-            },
+            "places": [
+                {
+                    "name": "",
+                    "coordinates": {
+                        "lat": 35.7143865,
+                        "lng": 139.7963642
+                    }
+                },
+                {
+                    "name": "Osaka Castle",
+                    "coordinates": {
+                        "lat": 34.6872769,
+                        "lng": 135.5259283
+                    }
+                },
+                {
+                    "name": "Museu da Ciência de Nagoya",
+                    "coordinates": {
+                        "lat": 35.1649846,
+                        "lng": 136.9000221
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Festival Gion Matsuri",
                 "Comida típica: Sushi",
@@ -219,10 +371,29 @@
         {
             "continent": "Oceania",
             "country": "AU",
-            "coordinates": {
-                "lat": -33.8585692,
-                "lng": 151.2134119
-            },
+            "places": [
+                {
+                    "name": "",
+                    "coordinates": {
+                        "lat": -33.8585692,
+                        "lng": 151.2134119
+                    }
+                },
+                {
+                    "name": "Museu de Arte Contemporânea",
+                    "coordinates": {
+                        "lat": -33.8595501,
+                        "lng": 151.2087742
+                    }
+                },
+                {
+                    "name": "Jardim Botânico de Melbourne",
+                    "coordinates": {
+                        "lat": -37.827461,
+                        "lng": 144.9766128
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Dia do País, que é a comemoração do aniversário de fundação da colônia de Nova Gales do Sul",
                 "Comida típica: Vegemite (um creme de levedura usado como condimento para passar no pão)",
@@ -246,10 +417,29 @@
         {
             "continent": "América do Norte",
             "country": "CA",
-            "coordinates": {
-                "lat": 43.6405963,
-                "lng": -79.38803
-            },
+            "places": [
+                {
+                    "name": "",
+                    "coordinates": {
+                        "lat": 43.6405963,
+                        "lng": -79.38803
+                    }
+                },
+                {
+                    "name": "CN Tower",
+                    "coordinates": {
+                        "lat": 43.6420128,
+                        "lng": -79.3857449
+                    }
+                },
+                {
+                    "name": "Nathan Phillips Square",
+                    "coordinates": {
+                        "lat": 43.6519939,
+                        "lng": -79.3834248
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Dia da Ação de Graças",
                 "Comida típica: Poutine (batatas fritas cobertas com queijo e molho)",
@@ -273,10 +463,29 @@
         {
             "continent": "Ásia",
             "country": "IN",
-            "coordinates": {
-                "lat": 25.3100147,
-                "lng": 83.0134964
-            },
+            "places": [
+                {
+                    "name": "Ganges",
+                    "coordinates": {
+                        "lat": 25.3100147,
+                        "lng": 83.0134964
+                    }
+                },
+                {
+                    "name": "Taj Mahal",
+                    "coordinates": {
+                        "lat": 27.1738819,
+                        "lng": 78.0422919
+                    }
+                },
+                {
+                    "name": "Templo do Buda",
+                    "coordinates": {
+                        "lat": 28.6155088,
+                        "lng": 77.1772888
+                    }
+                }
+            ],
             "facts": [
                 "Festa mais importante: Diwali, também conhecido como o Festival das Luzes. Durante o Diwali, as pessoas acendem velas e lâmpadas para comemorar a vitória do bem sobre o mal.",
                 "Comida típica: O curry, o biryani, o samosa e o tandoori",
@@ -299,38 +508,77 @@
         },
         {
             "continent": "África",
-            "country": "NG",
-            "coordinates": {
-                "lat": 6.4779633,
-                "lng": 3.36872
-            },
+            "country": "EG",
+            "places": [
+                {
+                    "name": "Pirâmides",
+                    "coordinates": {
+                        "lat": 29.9777345,
+                        "lng": 31.1327496
+                    }
+                },
+                {
+                    "name": "Mesquita de Muhammad Ali",
+                    "coordinates": {
+                        "lat": 30.0297723,
+                        "lng": 31.2604191
+                    }
+                },
+                {
+                    "name": "Canal de Suez",
+                    "coordinates": {
+                        "lat": 30.04254,
+                        "lng": 32.5746352
+                    }
+                }
+            ],
             "facts": [
-                "Festa mais importante: celebração do Eid al-Fitr, que marca o fim do mês sagrado do Ramadã no calendário islâmico",
-                "Comida típica: Jollof Rice - um prato de arroz cozido com tomate, cebola, pimentão e outras especiarias.",
-                "Pessoas famosas: Wole Soyinka, o primeiro africano a receber o Prêmio Nobel de Literatura e Chimamanda Ngozi Adichie, autoram ativista feminista e uma defensora dos direitos das mulheres"
+                "Festa mais importante: Eid al-Fitr, que marca o fim do mês sagrado do Ramadã",
+                "Comida típica: Kushari",
+                "Pessoas famosas: Mohamed Salah, jogador de futebol. Yousra, atriz e ativista."
             ],
             "tips": [
-                "Tornou-se uma colônia britânica em 1901, após a conquista do Reino de Lagos pelos britânicos.",
-                "Em 1960, tornou-se independente do Reino Unido, com o primeiro presidente, Nnamdi Azikiwe, tomando posse.",
-                "De 1966 a 1979, passou por uma série de golpes militares, com vários líderes militares assumindo o poder.",
-                "Em 1999, realizou eleições presidenciais e uma nova era democrática começou, com Olusegun Obasanjo sendo eleito presidente.",
-                "Maior produtor de petróleo da África e o décimo segundo maior produtor do mundo.",
-                "País mais populoso da África, com mais de 200 milhões de habitantes.",
-                "Conhecida por sua rica cultura, incluindo a arte Nok, uma das primeiras culturas conhecidas a produzir esculturas em bronze, e a música afrobeat, criada pelo lendário músico Fela Kuti.",
-                "Sediou a Copa Africana de Nações em 1980, 2000 e 2010, vencendo a competição três vezes.",
-                "Lar de muitos grupos étnicos, incluindo os Igbo, Yoruba e Hausa-Fulani.",
-                "É um membro fundador da Organização dos Países Exportadores de Petróleo (OPEP), um cartel de países produtores de petróleo que controlam uma grande parcela do suprimento mundial de petróleo."
+                "Bandeira preta, branca e vermelha com um brasão de águia de duas cabeças.",
+                "Fica na divisa entre a África e a Ásia",
+                "Neste país há um canal que liga o Mar Mediterrâneo ao Mar Vermelho",
+                "Clima e vegetação predeminantemente desértico",
+                "Uma das mais antigas do mundo. Os antigos desenvolveram uma complexa sociedade, com avanços notáveis na arquitetura, escrita, medicina e engenharia.",
+                "Grande parte do território é ocupado pelo Deserto do Saara",
+                "Neste país está uma das 7 maravilhas do mundo",
+                "A religião predominante é o islamismo, sendo a maioria muçulmanos. A religião influencia a cultura, a política e a vida cotidiana do país.",
+                "Agraciado com o Rio Nilo, um dos rios mais longos do mundo",
+                "Uma das figuras mais famosas da história é Cleópatra VII. Ela foi a última rainha."
             ],
-            "name": "Nigéria",
-            "flag": "🇳🇬"
+            "name": "Egito",
+            "flag": "🇪🇬"
         },
         {
             "continent": "África",
             "country": "ZA",
-            "coordinates": {
-                "lat": -26.2387107,
-                "lng": 27.9088017
-            },
+            "places": [
+                {
+                    "name": "Casa de Nelson Mandela",
+                    "coordinates": {
+                        "lat": -26.2387107,
+                        "lng": 27.9088017
+                    }
+                },
+                {
+                    "name": "Museu do Apartheid",
+                    "coordinates": {
+                        "lat": -26.2375035,
+                        "lng": 28.0091372
+                    }
+                },
+                {
+                    "name": "Cabo da Boa Esperança",
+                    "coordinates": {
+                        "lat": -34.3571225,
+                        "lng": 18.4739196
+                    }
+                }
+                
+            ],
             "facts": [
                 "Festa mais importante: O Dia da Liberdade comemora a primeira eleição democrática, após o apartheid",
                 "Comida típica: Bobotie - um prato de carne picada com curry, pão de forma e ovos, geralmente servido com arroz.",

@@ -125,7 +125,7 @@ export function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose, onName }) 
       {step === 'name' ? (
         <div className="request-name">
           <h1>
-            Olá! Qual o nome do time?
+            Olá! Qual o nome do grupo?
           </h1>
 
           <input type="text" value={name} onChange={event => setName(event.target.value)} />

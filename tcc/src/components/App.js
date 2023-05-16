@@ -18,36 +18,62 @@ import { Tutorial } from "./Tutorial";
 
 Modal.setAppElement('#modal');
 
+const AVAILABLE_CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
 
-const CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
+const params = new URLSearchParams(window.location.search);
+const CHOSEN_CONTINENTS = params.getAll('continents').filter(c => AVAILABLE_CONTINENTS.includes(c));
+const TIME_LIMIT = params.get('time_limit') || 60;
+const GUESS_LIMIT = params.get('guess_limit') || 5;
+const TIPS_LIMIT = params.get('tips_limit') || 5;
+const SKIP_TUTORIAL = params.has('skip_tutorial') || false;
+
+const CONTINENTS = CHOSEN_CONTINENTS.length ? CHOSEN_CONTINENTS : AVAILABLE_CONTINENTS;
 const VALID_COUNTRIES = CONTINENTS.map(continent => {
   const possible = GAME.countries.filter(country => country.continent === continent);
-  return possible[Math.floor(Math.random() * possible.length)];
-}).sort(() => 0.5 - Math.random())
+  return possible[random(0, possible.length - 1)];
+}).sort(() => 0.5 - Math.random());
 
+function random(min = 200, max = 450) {
+  return (Math.round(Math.pow(10, 14) * Math.random() * Math.random()) % (max - min + 1)) + min;
+}
 
-function points(level) {
-  const totalOfPoints = 1000;
+function convertValue(fromScale, toScale, value) {
+  return toScale.min - ((fromScale.min - value) / fromScale.max) * toScale.max;
+}
 
-  // If there are no right guesses, then we already lose 100 points.
-  const noRightGuessLost = level.guesses.find(guess => guess.isRight) ? 0 : 50;
+function pointsCalculator(guesses, timeLimit, guessLimit, tipsLimit) {
+  const totalOfPoints = 1_000_000;
 
-  // In 5 guesses, you can lower your score by 250 points max
-  // The max is 50 points per level, so 50 * 5 guesses
-  const guessLost = level.guesses.filter(guess => !guess.isRight).length * 50;
+  // If there are no right guesses, then we already lose 1000 points.
+  const noRightGuessLost = guesses.find(guess => guess.isRight) ? 0 : 1000 * random();
 
-  // In 4 tips, you can lower your score by 300 points
-  // The max is 4 tips per guess, so 4 tips * 15 points * 5 guesses
-  const tipsLost = level.guesses.reduce((agg, crr) => agg + crr.tipsViewed.length * 15, 0);
+  // In 5 guesses, you can lower your score by 2500 points max
+  // The max is 50 points per level, so 500 * 5 guesses
+  const guessLost = convertValue({ min: 0, max: 5 }, { min: 0, max: guessLimit }, guesses.filter(guess => !guess.isRight).length) * 500 * random();
+
+  // In 4 tips, you can lower your score by 3000 points
+  // The max is 4 tips per guess, so 4 tips * 150 points * 5 guesses
+  const tipsLost = guesses.reduce((agg, crr) => agg + convertValue({ min: 0, max: 4 }, { min: 0, max: tipsLimit }, parseInt(crr.tipsViewed.length)) * 150 * random(), 0);
 
   // In 5 guesses, you can lower your score by 300 points
   // The max is 60 points per level, so 60 * 5
-  const timeLost = level.guesses.reduce((agg, crr) => agg + parseInt(crr.timeElapsed), 0);
+  const timeLost = guesses.reduce((agg, crr) => agg + (convertValue({ min: 0, max: 60 }, { min: 0, max: timeLimit }, parseInt(crr.timeElapsed))) * random(), 0);
 
-  console.log(level.guesses, noRightGuessLost, guessLost, tipsLost, timeLost);
+  // The minimum amount of points is ?? points, the max is 999_999, but that is very difficult
+  return totalOfPoints - parseInt(noRightGuessLost) - parseInt(guessLost) - parseInt(tipsLost) - parseInt(timeLost) - random(1, 9);
+}
 
-  // The minimum amount of points is 50 points, the max is 1000, but that is very difficult
-  return totalOfPoints - noRightGuessLost - guessLost - tipsLost - timeLost;
+
+function Points({ points }) {
+  return (
+    <p className="points">
+      Você fez{' '}
+      <span className="number-of-points">
+        {new Intl.NumberFormat('pt-BR').format(points)}
+      </span>
+      {' '}pontos!
+    </p>
+  )
 }
 
 
@@ -55,7 +81,8 @@ function EndGame({ name, game, onFinish }) {
   const [submitted, setSubmitted] = useState(false);
   const [feedback, setFeedback] = useState('');
 
-  const [tutorial, ...realGame] = game;
+  const tutorial = game.find(g => g.isTutorial);
+  const realGame = game.filter(g => !g.isTutorial);
 
   return (
     <div className="end-game">
@@ -65,9 +92,9 @@ function EndGame({ name, game, onFinish }) {
 
       {onFinish && !submitted && (
         <>
-          <p>O que achou?</p>
+          {/* <p>O que achou?</p>
 
-          <textarea type="text" value={feedback} onChange={event => setFeedback(event.target.value)} />
+          <textarea type="text" value={feedback} onChange={event => setFeedback(event.target.value)} /> */}
 
           <button
             onClick={() => {
@@ -90,21 +117,21 @@ function EndGame({ name, game, onFinish }) {
             title="Minion dançando"
           />
 
-          < div >
-            No Tutorial, que o país era {tutorial.country.name}, que fica na {tutorial.country.continent}, a pontuação foi de:
-            {' '}
-            <span className="points"><span className="number-of-points">{points(tutorial)}</span> pontos!</span>
-          </div>
+          {tutorial && (
+            <div>
+              No Tutorial, que o país era {tutorial.country.name}, que fica na {tutorial.country.continent}, a pontuação foi de:
+              {' '}
+              <Points points={tutorial.points} />
+            </div>
+          )}
 
-          {
-            realGame.map((real, i) => (
-              <div>
-                No nível {i + 1}, que era {real.country.name}, que fica na {real.country.continent}, você fez um total de:
-                {' '}
-                <span className="points"><span className="number-of-points">{points(real)}</span> pontos!</span>
-              </div>
-            ))
-          }
+          {realGame.map((real, i) => (
+            <div>
+              No nível {i + 1}, que era {real.country.name}, que fica na {real.country.continent}, você fez um total de:
+              {' '}
+              <Points points={real.points} />
+            </div>
+          ))}
         </div >
       )
       }
@@ -112,8 +139,9 @@ function EndGame({ name, game, onFinish }) {
   );
 }
 
-function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, showGuessExceeded, onNext }) {
-  const [viewDetails, setViewDetails] = useState(false)
+function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, showRightAttempt, showTimeExceeded, showGuessExceeded, onNext }) {
+  const [viewDetails, setViewDetails] = useState(false);
+  const [points] = useState(pointsCalculator(guesses, timeLimit, guessLimit, tipsLimit));
 
   const rightGuess = guesses.find(guess => guess.isRight);
 
@@ -135,16 +163,14 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
 
               {showGuessExceeded && <p>O nível acabou porque você usou todas as suas chances.</p>}
 
-              {rightGuess ? (
+              <Points points={points} />
+
+              {rightGuess && (
                 <div>
                   <h3>Você acertou em {guesses.length} tentativas!</h3>
 
                   <p>Você levou {rightGuess.timeElapsed} segundos!</p>
                   <p>Você usou {tips.length} dicas!</p>
-                </div>
-              ) : (
-                <div>
-
                 </div>
               )}
 
@@ -168,7 +194,7 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
                 ))}
               </ul>
 
-              <button onClick={onNext}>Próximo nível</button>
+              <button onClick={() => onNext(points)}>Próximo nível</button>
             </div>
           )}
         </div>
@@ -177,12 +203,12 @@ function EndLevel({ country, guesses, tips, showRightAttempt, showTimeExceeded, 
   )
 }
 
-function Game({ name, country, level, levelCount, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish }) {
-
+function Game({ name, country, level, isTutorial, levelCount, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish }) {
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
   const [game, setGame] = useState([]);
   const [tipsViewed, setTipsViewed] = useState([]);
+  const [place, setPlace] = useState(() => random(0, country.places.length - 1));
 
   const [showGuessAttempt, setShowGuessAttempt] = useState(false);
   const [showTips, setShowTips] = useState(false);
@@ -198,7 +224,7 @@ function Game({ name, country, level, levelCount, playing, canLose, timeLimit, g
 
   const handleGuess = guess => {
     const isRight = guess.country.id === country.country;
-    setGuesses(prev => [...prev, { data: guess, tipsViewed, timeElapsed: timeElapsed.current, isRight }]);
+    setGuesses(prev => [...prev, { data: guess, tipsViewed, timeElapsed: timeElapsed.current, isRight, place: country.places[place] }]);
 
     if (isRight) {
       confetti({ zIndex: Number.MAX_SAFE_INTEGER, particleCount: 200, spread: 100, gravity: 2 });
@@ -226,12 +252,13 @@ function Game({ name, country, level, levelCount, playing, canLose, timeLimit, g
     window.speechSynthesis.speak(toSpeak);
   }
 
-  const handleNext = () => {
+  const handleNext = (points) => {
     onChangeLevel(level + 1);
-    setGame(prev => [...prev, { start: time, country, guesses }]);
+    setGame(prev => [...prev, { start: time, country, guesses, points, isTutorial }]);
     setGuesses([]);
     setTipsViewed([]);
     setTime(Date.now());
+    setPlace(random(0, country.places.length - 1));
     timeElapsed.current = 0;
 
     // Hide modals
@@ -296,7 +323,7 @@ function Game({ name, country, level, levelCount, playing, canLose, timeLimit, g
 
         <StreetView
           key={level}
-          country={country}
+          country={country.places[place]}
         />
 
         {showGuessAttempt && (
@@ -313,6 +340,9 @@ function Game({ name, country, level, levelCount, playing, canLose, timeLimit, g
           <EndLevel
             guesses={guesses}
             tips={tipsViewed}
+            timeLimit={timeLimit}
+            guessLimit={guessLimit}
+            tipsLimit={tipsLimit}
             showRightAttempt={showRightAttempt}
             showTimeExceeded={showTimeExceeded}
             showGuessExceeded={showGuessExceeded}
@@ -326,7 +356,7 @@ function Game({ name, country, level, levelCount, playing, canLose, timeLimit, g
 }
 
 function App({ onFinish }) {
-  const [level, setLevel] = useState(0);
+  const [level, setLevel] = useState(SKIP_TUTORIAL ? 1 : 0);
   const [isTutorial, setIsTutorial] = useState(level === 0);
   const [name, setName] = useState(null);
 
@@ -342,19 +372,20 @@ function App({ onFinish }) {
         level={level}
         levelCount={VALID_COUNTRIES.length + 1}
         playing={!isTutorial}
+        isTutorial={isTutorial}
         canLose={level !== 0}
-        timeLimit={60}
-        guessLimit={5}
-        tipsLimit={4}
+        timeLimit={TIME_LIMIT}
+        guessLimit={GUESS_LIMIT}
+        tipsLimit={TIPS_LIMIT}
         onChangeLevel={setLevel}
         onFinish={onFinish}
       />
 
       {isTutorial && (
         <Tutorial
-          timeLimit={60}
-          guessLimit={5}
-          tipsLimit={4}
+          timeLimit={TIME_LIMIT}
+          guessLimit={GUESS_LIMIT}
+          tipsLimit={TIPS_LIMIT}
           onClose={() => setIsTutorial(false)}
           onName={setName}
         />)}

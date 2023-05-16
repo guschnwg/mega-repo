@@ -571,11 +571,11 @@ textarea {
   align-items: center;
 }
 
-.summary .points {
+.points {
   font-weight: bold;
 }
 
-.summary .points .number-of-points {
+.points .number-of-points {
   font-size: 26px;
 }
 
