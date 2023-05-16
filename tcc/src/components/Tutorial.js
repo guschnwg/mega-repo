@@ -118,8 +118,6 @@ export function Tutorial({ name: initialName = '', timeLimit, tipsLimit, guessLi
     guess: { label: 'Palpite', comp: <Guess limit={guessLimit} /> },
   };
 
-  console.log(name);
-
   return (
     <div className="tutorial">
       {step === 'name' ? (

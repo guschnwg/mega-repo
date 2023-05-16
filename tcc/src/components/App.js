@@ -37,15 +37,17 @@ function pointsCalculator(guesses, timeLimit, guessLimit, tipsLimit) {
 
   // In 5 guesses, you can lower your score by 2500 points max
   // The max is 50 points per level, so 500 * 5 guesses
-  const guessLost = convertValue({ min: 0, max: 5 }, { min: 0, max: guessLimit }, guesses.filter(guess => !guess.isRight).length) * 500 * random();
+  const guessLost = convertValue({ min: 0, max: 5 }, { min: 0, max: guessLimit }, guesses.filter(guess => !guess.isRight).length) * 100 * random();
 
   // In 4 tips, you can lower your score by 3000 points
   // The max is 4 tips per guess, so 4 tips * 150 points * 5 guesses
-  const tipsLost = guesses.reduce((agg, crr) => agg + convertValue({ min: 0, max: 4 }, { min: 0, max: tipsLimit }, parseInt(crr.tipsViewed.length)) * 150 * random(), 0);
+  const tipsLost = guesses.reduce((agg, crr) => agg + convertValue({ min: 0, max: tipsLimit }, { min: 0, max: 4 }, parseInt(crr.tipsViewed.length)) * 50 * random(), 0);
 
   // In 5 guesses, you can lower your score by 300 points
   // The max is 60 points per level, so 60 * 5
-  const timeLost = guesses.reduce((agg, crr) => agg + (convertValue({ min: 0, max: 60 }, { min: 0, max: timeLimit }, parseInt(crr.timeElapsed))) * random(), 0);
+  const timeLost = guesses.reduce((agg, crr) => agg + (convertValue({ min: 0, max: timeLimit }, { min: 0, max: 60 }, parseInt(crr.timeElapsed))) * random(), 0);
+
+  console.log(totalOfPoints, parseInt(noRightGuessLost), parseInt(guessLost), parseInt(tipsLost), parseInt(timeLost));
 
   // The minimum amount of points is ?? points, the max is 999_999, but that is very difficult
   return totalOfPoints - parseInt(noRightGuessLost) - parseInt(guessLost) - parseInt(tipsLost) - parseInt(timeLost) - random(1, 9);
@@ -237,7 +239,6 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
     }
     const toSpeak = new SpeechSynthesisUtterance(tip);
     const possibleVoices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'pt-BR');
-    toSpeak.rate = .9;
     const googleVoice = possibleVoices.find(voice => voice.name.includes('Google'));
     toSpeak.voice = googleVoice || possibleVoices[Math.floor(Math.random() * possibleVoices.length)];
     window.speechSynthesis.speak(toSpeak);
@@ -387,7 +388,12 @@ export function getConfig(params) {
   const tipsLimit = params.tips_limit || 5;
   const skipTutorial = params.skip_tutorial || false;
 
-  const config = { timeLimit, guessLimit, tipsLimit, skipTutorial };
+  const config = {
+    timeLimit: parseInt(timeLimit),
+    guessLimit: parseInt(guessLimit),
+    tipsLimit: parseInt(tipsLimit),
+    skipTutorial: Boolean(skipTutorial)
+  };
 
   console.log("With config", config);
 
@@ -395,6 +401,10 @@ export function getConfig(params) {
 }
 
 function initRUM() {
+  if (datadogRum.getInternalContext()) {
+    return;
+  }
+
   datadogRum.init({
     applicationId: 'cf748bb2-2fc6-44de-9d27-6d4a023fc374',
     clientToken: 'pub2e0179eacedc9a07d642961cb1bef15d',
@@ -423,9 +433,11 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
 
   useEffect(() => {
     initRUM();
+    // Prepare
+    window.speechSynthesis.getVoices();
   }, []);
 
-  console.log({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial })
+  console.log("Game config", { countries, timeLimit, guessLimit, tipsLimit, skipTutorial });
 
   return (
     <>
