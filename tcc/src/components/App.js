@@ -20,19 +20,6 @@ Modal.setAppElement('#modal');
 
 const AVAILABLE_CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
 
-const params = new URLSearchParams(window.location.search);
-const CHOSEN_CONTINENTS = params.getAll('continents').filter(c => AVAILABLE_CONTINENTS.includes(c));
-const TIME_LIMIT = params.get('time_limit') || 60;
-const GUESS_LIMIT = params.get('guess_limit') || 5;
-const TIPS_LIMIT = params.get('tips_limit') || 5;
-const SKIP_TUTORIAL = params.has('skip_tutorial') || false;
-
-const CONTINENTS = CHOSEN_CONTINENTS.length ? CHOSEN_CONTINENTS : AVAILABLE_CONTINENTS;
-const VALID_COUNTRIES = CONTINENTS.map(continent => {
-  const possible = GAME.countries.filter(country => country.continent === continent);
-  return possible[random(0, possible.length - 1)];
-}).sort(() => 0.5 - Math.random());
-
 function random(min = 200, max = 450) {
   return (Math.round(Math.pow(10, 14) * Math.random() * Math.random()) % (max - min + 1)) + min;
 }
@@ -112,7 +99,7 @@ function EndGame({ name, game, onFinish }) {
             width="180px"
             height="180px"
             style={{ pointerEvents: 'none', border: 'none', transform: 'scale(1.8)' }}
-            class="giphy-embed"
+            className="giphy-embed"
             allowFullScreen
             title="Minion dançando"
           />
@@ -126,7 +113,7 @@ function EndGame({ name, game, onFinish }) {
           )}
 
           {realGame.map((real, i) => (
-            <div>
+            <div key={i}>
               No nível {i + 1}, que era {real.country.name}, que fica na {real.country.continent}, você fez um total de:
               {' '}
               <Points points={real.points} />
@@ -355,14 +342,33 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
   );
 }
 
-function App({ onFinish }) {
-  const [level, setLevel] = useState(SKIP_TUTORIAL ? 1 : 0);
+export function getGame(continents) {
+  const chosenContinents = continents.filter(c => AVAILABLE_CONTINENTS.includes(c));
+  const validContinents = chosenContinents.length ? chosenContinents : AVAILABLE_CONTINENTS;
+  const validCountries = validContinents.map(continent => {
+    const possible = GAME.countries.filter(country => country.continent === continent);
+    return possible[random(0, possible.length - 1)];
+  }).sort(() => 0.5 - Math.random());
+  return validCountries;
+}
+
+export function getConfig(params) {
+  const timeLimit = params.time_limit || 60;
+  const guessLimit = params.guess_limit || 5;
+  const tipsLimit = params.tips_limit || 5;
+  const skipTutorial = params.skip_tutorial || false;
+
+  return { timeLimit, guessLimit, tipsLimit, skipTutorial };
+}
+
+function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
+  const [level, setLevel] = useState(skipTutorial ? 1 : 0);
   const [isTutorial, setIsTutorial] = useState(level === 0);
   const [name, setName] = useState(null);
 
-  console.log("Will play", VALID_COUNTRIES);
+  const country = level === 0 ? GAME.tutorial : countries[level - 1];
 
-  const country = level === 0 ? GAME.tutorial : VALID_COUNTRIES[level - 1];
+  console.log("Will play", countries);
 
   return (
     <>
@@ -370,22 +376,22 @@ function App({ onFinish }) {
         name={name}
         country={country}
         level={level}
-        levelCount={VALID_COUNTRIES.length + 1}
-        playing={!isTutorial}
+        levelCount={countries.length + 1}
+        playing={!isTutorial && name}
         isTutorial={isTutorial}
         canLose={level !== 0}
-        timeLimit={TIME_LIMIT}
-        guessLimit={GUESS_LIMIT}
-        tipsLimit={TIPS_LIMIT}
+        timeLimit={timeLimit}
+        guessLimit={guessLimit}
+        tipsLimit={tipsLimit}
         onChangeLevel={setLevel}
         onFinish={onFinish}
       />
 
-      {isTutorial && (
+      {(isTutorial || !name) && (
         <Tutorial
-          timeLimit={TIME_LIMIT}
-          guessLimit={GUESS_LIMIT}
-          tipsLimit={TIPS_LIMIT}
+          timeLimit={timeLimit}
+          guessLimit={guessLimit}
+          tipsLimit={tipsLimit}
           onClose={() => setIsTutorial(false)}
           onName={setName}
         />)}
