@@ -106,9 +106,9 @@ const Guess = ({ limit }) => (
   </div>
 );
 
-export function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose, onName }) {
-  const [step, setStep] = useState('name');
-  const [name, setName] = useState('');
+export function Tutorial({ name: initialName = '', timeLimit, tipsLimit, guessLimit, onClose, onName }) {
+  const [step, setStep] = useState(initialName ? 'game' : 'name');
+  const [name, setName] = useState(initialName);
 
   const steps = {
     game: { label: 'O jogo', comp: <TheGame /> },
@@ -118,10 +118,10 @@ export function Tutorial({ timeLimit, tipsLimit, guessLimit, onClose, onName }) 
     guess: { label: 'Palpite', comp: <Guess limit={guessLimit} /> },
   };
 
+  console.log(name);
+
   return (
     <div className="tutorial">
-
-
       {step === 'name' ? (
         <div className="request-name">
           <h1>

@@ -190,7 +190,7 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
   )
 }
 
-function Game({ name, country, level, isTutorial, levelCount, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish }) {
+function Game({ name, country, level, isTutorial, levelCount, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish, onRequestTutorial }) {
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
   const [game, setGame] = useState([]);
@@ -313,6 +313,22 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
           country={country.places[place]}
         />
 
+        <div className="footer">
+          <div>
+            <button onClick={onRequestTutorial}>?</button>
+          </div>
+
+          <div>
+            {country.places.map((place, i) => (
+              <button key={place.name} onClick={() => setPlace(i)}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+
+          <div />
+        </div>
+
         {showGuessAttempt && (
           <Guess
             guesses={guesses}
@@ -363,8 +379,10 @@ export function getConfig(params) {
 
 function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
   const [level, setLevel] = useState(skipTutorial ? 1 : 0);
-  const [isTutorial, setIsTutorial] = useState(level === 0);
-  const [name, setName] = useState(null);
+  const isTutorialLevel = level === 0;
+
+  const [tutorialOpen, setTutorialOpen] = useState(isTutorialLevel);
+  const [name, setName] = useState('');
 
   const country = level === 0 ? GAME.tutorial : countries[level - 1];
 
@@ -377,22 +395,24 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
         country={country}
         level={level}
         levelCount={countries.length + 1}
-        playing={!isTutorial && name}
-        isTutorial={isTutorial}
+        playing={!tutorialOpen && name}
+        isTutorial={tutorialOpen}
         canLose={level !== 0}
         timeLimit={timeLimit}
         guessLimit={guessLimit}
         tipsLimit={tipsLimit}
         onChangeLevel={setLevel}
         onFinish={onFinish}
+        onRequestTutorial={() => setTutorialOpen(true)}
       />
 
-      {(isTutorial || !name) && (
+      {(tutorialOpen || !name) && (
         <Tutorial
+          name={name}
           timeLimit={timeLimit}
           guessLimit={guessLimit}
           tipsLimit={tipsLimit}
-          onClose={() => setIsTutorial(false)}
+          onClose={() => setTutorialOpen(false)}
           onName={setName}
         />)}
     </>

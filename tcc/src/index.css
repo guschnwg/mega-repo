@@ -125,8 +125,7 @@ button:disabled {
 
 .app {
   background: salmon;
-  padding-inline: 20px;
-  padding-bottom: 20px;
+  padding-inline: 5px;
   display: flex;
   height: 100vh;
   box-sizing: border-box;
@@ -153,6 +152,7 @@ body {
   width: 100%;
   height: 100%;
   position: relative;
+  box-sizing: border-box;
 }
 
 .game-container>div {
@@ -581,4 +581,10 @@ textarea {
 
 #root {
   height: 100%;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
