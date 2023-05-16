@@ -588,3 +588,8 @@ textarea {
   align-items: center;
   justify-content: space-between;
 }
+
+.flag img {
+  height: 72px;
+  border-radius: 10px;
+}

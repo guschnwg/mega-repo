@@ -138,7 +138,9 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
         <div className="info">
           {!viewDetails ? (
             <div className="general">
-              <div className="flag">{country.flag}</div>
+              <div className="flag">
+                <img alt="Bandeira" src={`https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/${country.country.toLowerCase()}.svg`} />
+              </div>
 
               {showRightAttempt ? (
                 <h2> Parabéns! {country.name}!!! Continue assim!</h2>
@@ -359,12 +361,21 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
 }
 
 export function getGame(continents) {
-  const chosenContinents = (continents || []).filter(c => AVAILABLE_CONTINENTS.includes(c));
+  let validatedContinents = continents || [];
+  validatedContinents = Array.isArray(continents) ? continents : [continents];
+
+  const chosenContinents = validatedContinents.filter(c => AVAILABLE_CONTINENTS.includes(c));
   const validContinents = chosenContinents.length ? chosenContinents : AVAILABLE_CONTINENTS;
+
+  console.log("Selected continents", chosenContinents);
+
   const validCountries = validContinents.map(continent => {
     const possible = GAME.countries.filter(country => country.continent === continent);
     return possible[random(0, possible.length - 1)];
   }).sort(() => 0.5 - Math.random());
+
+  console.log("Will play", validCountries);
+
   return validCountries;
 }
 
@@ -374,7 +385,11 @@ export function getConfig(params) {
   const tipsLimit = params.tips_limit || 5;
   const skipTutorial = params.skip_tutorial || false;
 
-  return { timeLimit, guessLimit, tipsLimit, skipTutorial };
+  const config = { timeLimit, guessLimit, tipsLimit, skipTutorial };
+
+  console.log("With config", config);
+
+  return config;
 }
 
 function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
@@ -385,8 +400,6 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
   const [name, setName] = useState('');
 
   const country = level === 0 ? GAME.tutorial : countries[level - 1];
-
-  console.log("Will play", countries);
 
   return (
     <>
