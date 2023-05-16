@@ -425,6 +425,8 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
     initRUM();
   }, []);
 
+  console.log({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial })
+
   return (
     <>
       <Game
