@@ -79,7 +79,7 @@ function Points({ points }) {
 
 function EndGame({ name, game, onFinish }) {
   const [submitted, setSubmitted] = useState(false);
-  const [feedback, setFeedback] = useState('');
+  const [feedback] = useState('');
 
   const tutorial = game.find(g => g.isTutorial);
   const realGame = game.filter(g => !g.isTutorial);
