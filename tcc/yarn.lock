@@ -1716,6 +1716,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@datadog/browser-core@npm:4.42.2":
+  version: 4.42.2
+  resolution: "@datadog/browser-core@npm:4.42.2"
+  checksum: fe0a22c0d59741f604e0b9d89dac27edd04d72d9cfb66412d4d586c1565836c230e774998480c79810b122b22ff910bbf9d569dec843399d020f5833ffe87124
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum-core@npm:4.42.2":
+  version: 4.42.2
+  resolution: "@datadog/browser-rum-core@npm:4.42.2"
+  dependencies:
+    "@datadog/browser-core": 4.42.2
+  checksum: a0a987a50aa0a0cff3edea9ea7dce2c1ddf660d2e3453a938f4458437f177ae88f61d71dee2b590d954ccc2fe8d022d1714660d786951e1f76673fc18233d38d
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum@npm:^4.42.2":
+  version: 4.42.2
+  resolution: "@datadog/browser-rum@npm:4.42.2"
+  dependencies:
+    "@datadog/browser-core": 4.42.2
+    "@datadog/browser-rum-core": 4.42.2
+  peerDependencies:
+    "@datadog/browser-logs": 4.42.2
+  peerDependenciesMeta:
+    "@datadog/browser-logs":
+      optional: true
+  checksum: 34bb53a2b9a5ff1f8daf8d98afa08961ba36245e40c35fbd822de9a7d4ab7283530d806af3bb59f58102d0a0c0a9d8e3fd93fff656fcae4d33a2a9a196f50b7e
+  languageName: node
+  linkType: hard
+
 "@eslint-community/eslint-utils@npm:^4.2.0":
   version: 4.4.0
   resolution: "@eslint-community/eslint-utils@npm:4.4.0"
@@ -12609,6 +12640,7 @@ __metadata:
   resolution: "tcc@workspace:."
   dependencies:
     "@amcharts/amcharts4-geodata": ^4.1.26
+    "@datadog/browser-rum": ^4.42.2
     "@react-google-maps/api": ^2.18.1
     "@react-hook/mouse-position": ^4.1.3
     "@testing-library/jest-dom": ^5.16.5

@@ -2,11 +2,12 @@
 
 import GAME from "./game.json";
 
+import { datadogRum } from '@datadog/browser-rum';
 import 'react-tooltip/dist/react-tooltip.css'
 
 import confetti from 'canvas-confetti';
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Modal from 'react-modal';
 
 
@@ -392,6 +393,24 @@ export function getConfig(params) {
   return config;
 }
 
+function initRUM() {
+  datadogRum.init({
+    applicationId: 'cf748bb2-2fc6-44de-9d27-6d4a023fc374',
+    clientToken: 'pub2e0179eacedc9a07d642961cb1bef15d',
+    site: 'us5.datadoghq.com',
+    service: 'country-guesser-tcc',
+    env: 'dev',
+    // Specify a version number to identify the deployed version of your application in Datadog 
+    // version: '1.0.0',
+    sessionSampleRate: 100,
+    premiumSampleRate: 100,
+    trackUserInteractions: true,
+    defaultPrivacyLevel: 'mask-user-input'
+  });
+
+  datadogRum.startSessionReplayRecording();
+}
+
 function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
   const [level, setLevel] = useState(skipTutorial ? 1 : 0);
   const isTutorialLevel = level === 0;
@@ -400,6 +419,10 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
   const [name, setName] = useState('');
 
   const country = level === 0 ? GAME.tutorial : countries[level - 1];
+
+  useEffect(() => {
+    initRUM();
+  }, []);
 
   return (
     <>
