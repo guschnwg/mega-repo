@@ -16,18 +16,20 @@ import { StreetView } from "./StreetView";
 import { Timer } from "./Timer";
 import { Tips } from "./Tips";
 import { Tutorial } from "./Tutorial";
-import { Points, pointsCalculator, random } from "./Points";
+import { Points, RawPoints, pointsCalculator, random } from "./Points";
+import { Flag } from "./Flag";
 
 Modal.setAppElement('#modal');
 
 const AVAILABLE_CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
 
 function EndGame({ name, game, onFinish }) {
-  const [submitted, setSubmitted] = useState(false);
-  const [feedback] = useState('');
+  const [submitted, setSubmitted] = useState(!onFinish);
 
   const tutorial = game.find(g => g.isTutorial);
   const realGame = game.filter(g => !g.isTutorial);
+
+  const finalScore = realGame.reduce((agg, crr) => agg + crr.points, 0)
 
   return (
     <div className="end-game">
@@ -35,47 +37,42 @@ function EndGame({ name, game, onFinish }) {
 
       <p>Valeu por jogar nosso joguinho, {name}!</p>
 
-      {onFinish && !submitted && (
-        <>
-          <button
-            onClick={() => {
-              onFinish(name, game, feedback);
-              setSubmitted(true);
-            }}
-          >Finalizar</button>
-        </>
+      <Points points={finalScore} />
+
+      <div className="summary">
+        <iframe
+          src="https://giphy.com/embed/kFNghExveIAk7fp6GX"
+          width="180px"
+          height="180px"
+          style={{ pointerEvents: 'none', border: 'none', transform: 'scale(1.8)' }}
+          className="giphy-embed"
+          allowFullScreen
+          title="Minion dançando"
+        />
+
+        {tutorial && (
+          <div>
+            Tutorial: {tutorial.country.name} <Flag country={tutorial.country.country} /> na {tutorial.country.continent}:{' '}
+            <RawPoints points={tutorial.points} /> pontos!
+          </div>
+        )}
+
+        {realGame.map((real, i) => (
+          <div key={i}>
+            Nível {i + 1}: {real.country.name} <Flag country={real.country.country} /> na {real.country.continent}:{' '}
+            <RawPoints points={real.points} /> pontos!
+          </div>
+        ))}
+      </div>
+
+      {!submitted && (
+        <button
+          onClick={() => {
+            onFinish(name, game, '');
+            setSubmitted(true);
+          }}
+        >Finalizar</button>
       )}
-
-      {(!onFinish || submitted) && (
-        <div className="summary">
-          <iframe
-            src="https://giphy.com/embed/kFNghExveIAk7fp6GX"
-            width="180px"
-            height="180px"
-            style={{ pointerEvents: 'none', border: 'none', transform: 'scale(1.8)' }}
-            className="giphy-embed"
-            allowFullScreen
-            title="Minion dançando"
-          />
-
-          {tutorial && (
-            <div>
-              No Tutorial, que o país era {tutorial.country.name}, que fica na {tutorial.country.continent}, a pontuação foi de:
-              {' '}
-              <Points points={tutorial.points} />
-            </div>
-          )}
-
-          {realGame.map((real, i) => (
-            <div key={i}>
-              No nível {i + 1}, que era {real.country.name}, que fica na {real.country.continent}, você fez um total de:
-              {' '}
-              <Points points={real.points} />
-            </div>
-          ))}
-        </div >
-      )
-      }
     </div>
   );
 }
@@ -92,9 +89,7 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
         <div className="info">
           {!viewDetails ? (
             <div className="general">
-              <div className="flag">
-                <img alt="Bandeira" src={`https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/${country.country.toLowerCase()}.svg`} />
-              </div>
+              <Flag country={country.country} />
 
               {showRightAttempt ? (
                 <h2> Parabéns! {country.name}!!! Continue assim!</h2>
@@ -117,7 +112,9 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
                 </div>
               )}
 
-              <button onClick={() => setViewDetails(true)}>Ver detalhes</button>
+              <button className="big" onClick={() => setViewDetails(true)}>
+                CURIOSIDADES
+              </button>
             </div>
           ) : (
             <div className="details">
@@ -146,7 +143,7 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
   )
 }
 
-function Game({ name, country, level, isTutorial, levelCount, playing, canLose, timeLimit, guessLimit, tipsLimit, onChangeLevel, onFinish, onRequestTutorial }) {
+function Game({ name, country, level, isTutorial, levelCount, playing, timeLimit, guessLimit, tipsLimit, onNext, onFinish, onRequestTutorial }) {
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
   const [game, setGame] = useState([]);
@@ -173,7 +170,7 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
       confetti({ zIndex: Number.MAX_SAFE_INTEGER, particleCount: 200, spread: 100, gravity: 2 });
       setShowGuessAttempt(false);
       setShowRightAttempt(true);
-    } else if (canLose && guesses.length + 1 >= guessLimit) {
+    } else if (!isTutorial && guesses.length + 1 >= guessLimit) {
       setShowGuessAttempt(false);
       setShowGuessExceeded(true);
     }
@@ -196,7 +193,6 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
   }
 
   const handleNext = (points) => {
-    onChangeLevel(level + 1);
     setGame(prev => [...prev, { start: time, country, guesses, points, isTutorial }]);
     setGuesses([]);
     setTipsViewed([]);
@@ -209,6 +205,8 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
     setShowRightAttempt(false);
     setShowTimeExceeded(false);
     setShowGuessExceeded(false);
+
+    onNext();
   };
 
   const onTimerChange = useCallback(time => timeElapsed.current = time, []);
@@ -222,21 +220,29 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
       <div className='app'>
         <div className='header'>
           <Timer
-            key={level}
+            key={country.country}
             start={time}
             active={timeRunning}
             countdown
             limit={timeLimit}
             onChange={onTimerChange}
             onEnd={() => {
-              if (canLose) {
+              if (!isTutorial) {
                 setShowTimeExceeded(true);
                 setShowGuessAttempt(false);
               }
             }}
           />
 
-          <div className="level-info">Nível {level + 1}/{levelCount}</div>
+          {isTutorial ? (
+            <div className="level-info">
+              Tutorial
+            </div>
+          ) : (
+            <div className="level-info">
+              Nível {level + 1}/{levelCount}
+            </div>
+          )}
 
           {showTips && (
             <Tips
@@ -265,7 +271,7 @@ function Game({ name, country, level, isTutorial, levelCount, playing, canLose, 
         </div>
 
         <StreetView
-          key={level}
+          key={country.country}
           country={country.places[place]}
         />
 
@@ -374,13 +380,12 @@ function initRUM() {
 }
 
 function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
-  const [level, setLevel] = useState(skipTutorial ? 1 : 0);
-  const isTutorialLevel = level === 0;
-
-  const [tutorialOpen, setTutorialOpen] = useState(isTutorialLevel);
+  const [level, setLevel] = useState(0);
+  const [tutorialCompleted, setTutorialCompleted] = useState(skipTutorial);
+  const [tutorialOpen, setTutorialOpen] = useState(!skipTutorial);
   const [name, setName] = useState('');
 
-  const country = level === 0 ? GAME.tutorial : countries[level - 1];
+  const country = !tutorialCompleted ? GAME.tutorial : countries[level];
 
   useEffect(() => {
     initRUM();
@@ -396,14 +401,18 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
         name={name}
         country={country}
         level={level}
-        levelCount={countries.length + 1}
+        levelCount={countries.length}
         playing={!tutorialOpen && name}
-        isTutorial={tutorialOpen}
-        canLose={level !== 0}
+        isTutorial={!tutorialCompleted}
         timeLimit={timeLimit}
         guessLimit={guessLimit}
         tipsLimit={tipsLimit}
-        onChangeLevel={setLevel}
+        onNext={() => {
+          setTutorialCompleted(true);
+          if (tutorialCompleted) {
+            setLevel(prev => prev + 1);
+          }
+        }}
         onFinish={onFinish}
         onRequestTutorial={() => setTutorialOpen(true)}
       />

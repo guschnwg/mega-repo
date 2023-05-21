@@ -11340,13 +11340,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-zoom-pan-pinch@npm:^2.2.1":
-  version: 2.6.1
-  resolution: "react-zoom-pan-pinch@npm:2.6.1"
+"react-zoom-pan-pinch@npm:3.0.7":
+  version: 3.0.7
+  resolution: "react-zoom-pan-pinch@npm:3.0.7"
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: aad883309f8e7300ab22a91a1c9ef660dd213e8efb50bd081ec1a28f89ace247c7374ffb96f617e030698bee185a860491af7722b5b35abbc38423794e6ea8d8
+  checksum: f3c65ea802c80e30f8f91a881d27dc3f6b5cb1bcd3e1997ddc5b421434d8a0812ddee6ca26a1d67195ebc90b9031f24c062c43c8927604e7519ce6024e4716db
   languageName: node
   linkType: hard
 
@@ -12657,7 +12657,7 @@ __metadata:
     react-simple-maps: ^3.0.0
     react-tooltip: ^5.7.4
     react-useportal: ^1.0.17
-    react-zoom-pan-pinch: ^2.2.1
+    react-zoom-pan-pinch: 3.0.7
     web-vitals: ^2.1.4
   languageName: unknown
   linkType: soft

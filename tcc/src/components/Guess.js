@@ -1,8 +1,9 @@
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import React, { useState } from "react";
 import Modal from 'react-modal';
-import { World, Tooltip } from "./World";
+import { World, Tooltip, CONTINENTS } from "./World";
 import { Timer } from "./Timer";
+import { Flag } from "./Flag";
 
 export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
   const [selectedCountry, setSelectedCountry] = useState();
@@ -28,14 +29,12 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
       >
         {(utils) => (
           <>
-            <div className="guesses-info">
-              Você usou {guesses.length} dos {guessLimit} palpites disponíveis.
-            </div>
-
             {!canGuess && (
               <Modal isOpen className="already-guessed" overlayClassName="already-guessed-overlay">
-                <p>Você deu o palpite nesta rodada.</p>
-                <p>Infelizmente não é {guesses.at(-1).data.country.name}...</p>
+                <p>Seu palpite dessa rodada foi...</p>
+                <Flag country={guesses.at(-1).data.country.id} />
+                <p>{guesses.at(-1).data.country.name}</p>
+                <p>Infelizmente não é esse país...</p>
                 <p>Vamos tentar de novo?</p>
 
                 <button onClick={onHide}>Vamos!</button>
@@ -45,6 +44,19 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
             <div className="controls zoom">
               <button onClick={() => utils.zoomIn(.5, null)}>+</button>
               <button onClick={() => utils.zoomOut(.5, null)}>-</button>
+            </div>
+
+            <div className="controls continents">
+              {CONTINENTS.map(continent => (
+                <button
+                  key={continent}
+                  onClick={() => utils.zoomToElement(continent)}
+                >{continent}</button>)
+              )}
+            </div>
+
+            <div className="guesses-info">
+              Você usou {guesses.length} dos {guessLimit} palpites disponíveis.
             </div>
 
             <div className="controls position">
@@ -97,8 +109,6 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
 
       <button className="guess-close" onClick={onHide}>
         Sair
-
-
 
         <Timer
           start={start}

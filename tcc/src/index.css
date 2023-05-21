@@ -403,13 +403,21 @@ button[data-disabled="true"]:after {
 
 .guesses-info {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: salmon;
-  border-radius: 2px;
+  bottom: 10px;
+  left: 150px;
+  background: #ff4e39;
+  border-radius: 5px;
   padding: 5px;
   z-index: 99;
-  border: 1px solid #783d3b;
+  color: white;
+}
+
+.controls.continents {
+  top: 10px;
+  left: 10px;
+  bottom: unset;
+  display: flex;
+  flex-direction: column;
 }
 
 .tip {
@@ -592,4 +600,25 @@ textarea {
 .flag img {
   height: 72px;
   border-radius: 10px;
+}
+
+button.big {
+  padding: 20px;
+  font-size: 22px;
+}
+
+.end-game .flag {
+  display: inline;
+}
+
+.end-game .flag img {
+  height: 30px;
+  vertical-align: -10px;
+}
+
+button:hover {
+  filter: brightness(0.9);
+}
+button:active {
+  filter: brightness(0.7);
 }

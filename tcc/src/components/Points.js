@@ -45,14 +45,17 @@ export function pointsCalculator(guesses, timeLimit = 60, guessLimit = 5, tipsLi
   const losses = lossesCalculator(guesses, timeLimit, guessLimit, tipsLimit);
   return 1000000 - losses.reduce((agg, crr) => agg + crr, 0);
 }
+export function RawPoints({ points }) {
+  return (
+    <span className="number-of-points">
+      {new Intl.NumberFormat('pt-BR').format(points)}
+    </span>
+  );
+}
 export function Points({ points }) {
   return (
     <p className="points">
-      Você fez{' '}
-      <span className="number-of-points">
-        {new Intl.NumberFormat('pt-BR').format(points)}
-      </span>
-      {' '}pontos!
+      Você fez <RawPoints points={points} /> pontos!
     </p>
   );
 }
