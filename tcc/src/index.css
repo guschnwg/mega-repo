@@ -119,9 +119,6 @@ button, .fake-button {
   font-size: 10px;
   vertical-align: middle;
 }
-button:disabled {
-  filter: brightness(.5);
-}
 
 .app {
   background: salmon;
@@ -621,4 +618,7 @@ button:hover {
 }
 button:active {
   filter: brightness(0.7);
+}
+button:disabled {
+  filter: brightness(.5);
 }
