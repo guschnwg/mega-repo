@@ -16,56 +16,11 @@ import { StreetView } from "./StreetView";
 import { Timer } from "./Timer";
 import { Tips } from "./Tips";
 import { Tutorial } from "./Tutorial";
+import { Points, pointsCalculator, random } from "./Points";
 
 Modal.setAppElement('#modal');
 
 const AVAILABLE_CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
-
-function random(min = 200, max = 450) {
-  return (Math.round(Math.pow(10, 14) * Math.random() * Math.random()) % (max - min + 1)) + min;
-}
-
-function convertValue(fromScale, toScale, value) {
-  return toScale.min - ((fromScale.min - value) / fromScale.max) * toScale.max;
-}
-
-function pointsCalculator(guesses, timeLimit, guessLimit, tipsLimit) {
-  const totalOfPoints = 1_000_000;
-
-  // If there are no right guesses, then we already lose 1000 points.
-  const noRightGuessLost = guesses.find(guess => guess.isRight) ? 0 : 1000 * random();
-
-  // In 5 guesses, you can lower your score by 2500 points max
-  // The max is 50 points per level, so 500 * 5 guesses
-  const guessLost = convertValue({ min: 0, max: 5 }, { min: 0, max: guessLimit }, guesses.filter(guess => !guess.isRight).length) * 100 * random();
-
-  // In 4 tips, you can lower your score by 3000 points
-  // The max is 4 tips per guess, so 4 tips * 150 points * 5 guesses
-  const tipsLost = guesses.reduce((agg, crr) => agg + convertValue({ min: 0, max: tipsLimit }, { min: 0, max: 4 }, parseInt(crr.tipsViewed.length)) * 50 * random(), 0);
-
-  // In 5 guesses, you can lower your score by 300 points
-  // The max is 60 points per level, so 60 * 5
-  const timeLost = guesses.reduce((agg, crr) => agg + (convertValue({ min: 0, max: timeLimit }, { min: 0, max: 60 }, parseInt(crr.timeElapsed))) * random(), 0);
-
-  console.log(totalOfPoints, parseInt(noRightGuessLost), parseInt(guessLost), parseInt(tipsLost), parseInt(timeLost));
-
-  // The minimum amount of points is ?? points, the max is 999_999, but that is very difficult
-  return totalOfPoints - parseInt(noRightGuessLost) - parseInt(guessLost) - parseInt(tipsLost) - parseInt(timeLost) - random(1, 9);
-}
-
-
-function Points({ points }) {
-  return (
-    <p className="points">
-      Você fez{' '}
-      <span className="number-of-points">
-        {new Intl.NumberFormat('pt-BR').format(points)}
-      </span>
-      {' '}pontos!
-    </p>
-  )
-}
-
 
 function EndGame({ name, game, onFinish }) {
   const [submitted, setSubmitted] = useState(false);
@@ -82,10 +37,6 @@ function EndGame({ name, game, onFinish }) {
 
       {onFinish && !submitted && (
         <>
-          {/* <p>O que achou?</p>
-
-          <textarea type="text" value={feedback} onChange={event => setFeedback(event.target.value)} /> */}
-
           <button
             onClick={() => {
               onFinish(name, game, feedback);
