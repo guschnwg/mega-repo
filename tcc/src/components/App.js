@@ -281,8 +281,12 @@ function Game({ name, country, level, isTutorial, levelCount, playing, timeLimit
           </div>
 
           <div>
-            {country.places.map((place, i) => (
-              <button key={place.name} onClick={() => setPlace(i)}>
+            {country.places.map((p, i) => (
+              <button
+                key={p.name}
+                className={i === place ? 'active' : ''}
+                onClick={() => setPlace(i)}
+              >
                 {i + 1}
               </button>
             ))}

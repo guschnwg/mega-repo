@@ -613,12 +613,26 @@ button.big {
   vertical-align: -10px;
 }
 
+button.active {
+  animation: pulse .5s infinite alternate;
+}
 button:hover {
   filter: brightness(0.9);
+  animation: none;
 }
 button:active {
   filter: brightness(0.7);
+  animation: none;
 }
 button:disabled {
   filter: brightness(.5);
+  animation: none;
+}
+@keyframes pulse {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(.7);
+  }
 }
