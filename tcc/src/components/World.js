@@ -1,6 +1,7 @@
 import WORLD from "./world.json";
 import React, { useRef } from "react";
 import useMouse from '@react-hook/mouse-position';
+import { Flag } from "./Flag";
 
 export const CONTINENTS = Array.from(new Set(WORLD.reduce((agg, crr) => agg.concat([crr.group]), []))).filter(v => v);
 
@@ -50,12 +51,14 @@ export const Tooltip = ({ country }) => {
     return null;
   };
 
+  console.log(country)
+
   return (
     <div
       className="tooltip"
       style={{ top: mouse.clientY + 20, left: mouse.clientX + 10 }}
     >
-      {country.name || country.title}
+      {country.name || country.title} <Flag country={country.id} />
     </div>
   );
 };

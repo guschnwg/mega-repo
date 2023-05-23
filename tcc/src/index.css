@@ -10,6 +10,17 @@
   background: white;
   padding: 10px;
   z-index: 99999;
+
+  display: flex;
+  align-items: center;
+}
+
+.tooltip .flag {
+  height: 32px;
+  margin-left: 10px;
+}
+.tooltip .flag img {
+  height: 32px;
 }
 
 .land {
