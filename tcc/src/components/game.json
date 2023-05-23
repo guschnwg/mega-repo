@@ -598,6 +598,98 @@
             ],
             "name": "África do Sul",
             "flag": "🇿🇦"
+        },
+        {
+            "continent": "América do Sul",
+            "country": "CL",
+            "places": [
+                {
+                    "name": "Museo Nacional de Bellas Artes",
+                    "coordinates": {
+                        "lat": -33.4354575,
+                        "lng": -70.6429753
+                    }
+                },
+                {
+                    "name": "Palacio de La Moneda",
+                    "coordinates": {
+                        "lat": -33.4440994,
+                        "lng": -70.6536275
+                    }
+                },
+                {
+                    "name": "Plaza de Las Almas",
+                    "coordinates": {
+                        "lat": -33.4383934,
+                        "lng": -70.6503555
+                    }
+                }
+            ],
+            "facts": [
+                "Festa mais importante: 18 de Setembro, considerado o dia nacional do país",
+                "Comida típica: Cazuela",
+                "Pessoas famosas: Pablo Neruda, escritor. Isabel Allende, escritora."
+            ],
+            "tips": [
+                "Está na América do Sul e tem uma extensão territorial de cerca de 4.300 quilômetros de comprimento, enquanto sua largura média é de apenas 177 quilômetros.",
+                "Lar de grande parte da Cordilheira dos Andes",
+                "Abriga o Deserto do Atacama",
+                "Administra a famosa Ilha de Páscoa, que fica no Oceano Pacífico",
+                "Muito famosa por seus vinhos",
+                "O maior grupo étnico indígena no país são os Mapuches",
+                "Compartilha com a Argentina parte da Patagônia",
+                "Bastante suscetível a atividades de vulcões, pois se encontra na região conhecida como \"Anel de fogo do Pacífico\"",
+                "Vegetação varia entre árida, florestas temperadas e tundra.",
+                "O \"Festival Internacional de la Canción de Viña del Mar\" apresenta uma mistura de música popular, artistas internacionais e competições de música."
+            ],
+            "name": "Chile",
+            "flag": "🇨🇱"
         }
-    ]
+    ],
+    "structure": {
+        "continent": "",
+        "country": "",
+        "places": [
+            {
+                "name": "",
+                "coordinates": {
+                    "lat": 0,
+                    "lng": 0
+                }
+            },
+            {
+                "name": "",
+                "coordinates": {
+                    "lat": 0,
+                    "lng": 0
+                }
+            },
+            {
+                "name": "",
+                "coordinates": {
+                    "lat": 0,
+                    "lng": 0
+                }
+            }
+        ],
+        "facts": [
+            "",
+            "",
+            ""
+        ],
+        "tips": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ],
+        "name": "",
+        "flag": ""
+    }
 }
