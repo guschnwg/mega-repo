@@ -18,10 +18,9 @@ import { Tips } from "./Tips";
 import { Tutorial } from "./Tutorial";
 import { Points, RawPoints, pointsCalculator, random } from "./Points";
 import { Flag } from "./Flag";
+import { AVAILABLE_CONTINENTS } from '../utils/config';
 
 Modal.setAppElement('#modal');
-
-const AVAILABLE_CONTINENTS = ["África", "América do Sul", "Ásia", "Oceania", "América do Norte", "Europa"];
 
 function EndGame({ name, game, onFinish }) {
   const [submitted, setSubmitted] = useState(!onFinish);
@@ -37,41 +36,47 @@ function EndGame({ name, game, onFinish }) {
 
       <p>Valeu por jogar nosso joguinho, {name}!</p>
 
-      <Points points={finalScore} />
+      {!submitted ? (
+        <div className="drums">
+          <button
+            onClick={() => {
+              onFinish(game, finalScore);
+              setSubmitted(true);
+            }}
+          >VER PONTUAÇÃO</button>
 
-      <div className="summary">
-        <iframe
-          src="https://giphy.com/embed/kFNghExveIAk7fp6GX"
-          width="180px"
-          height="180px"
-          style={{ pointerEvents: 'none', border: 'none', transform: 'scale(1.8)' }}
-          className="giphy-embed"
-          allowFullScreen
-          title="Minion dançando"
-        />
+          <audio controls src="https://www.myinstants.com/media/sounds/y2mate_YpWYqZD.mp3" autoPlay />
+        </div>
+      ) : (
+        <>
+          <Points points={finalScore} />
 
-        {tutorial && (
-          <div>
-            Tutorial: {tutorial.country.name} <Flag country={tutorial.country.country} /> na {tutorial.country.continent}:{' '}
-            <RawPoints points={tutorial.points} /> pontos!
+          <div className="summary">
+            <iframe
+              src="https://giphy.com/embed/kFNghExveIAk7fp6GX"
+              width="180px"
+              height="180px"
+              style={{ pointerEvents: 'none', border: 'none', transform: 'scale(1.8)' }}
+              className="giphy-embed"
+              allowFullScreen
+              title="Minion dançando"
+            />
+
+            {tutorial && (
+              <div>
+                Tutorial: {tutorial.country.name} <Flag country={tutorial.country.country} /> na {tutorial.country.continent}:{' '}
+                <RawPoints points={tutorial.points} /> pontos!
+              </div>
+            )}
+
+            {realGame.map((real, i) => (
+              <div key={i}>
+                Nível {i + 1}: {real.country.name} <Flag country={real.country.country} /> na {real.country.continent}:{' '}
+                <RawPoints points={real.points} /> pontos!
+              </div>
+            ))}
           </div>
-        )}
-
-        {realGame.map((real, i) => (
-          <div key={i}>
-            Nível {i + 1}: {real.country.name} <Flag country={real.country.country} /> na {real.country.continent}:{' '}
-            <RawPoints points={real.points} /> pontos!
-          </div>
-        ))}
-      </div>
-
-      {!submitted && (
-        <button
-          onClick={() => {
-            onFinish(name, game, '');
-            setSubmitted(true);
-          }}
-        >Finalizar</button>
+        </>
       )}
     </div>
   );
@@ -148,7 +153,7 @@ function Game({ name, country, level, isTutorial, levelCount, playing, timeLimit
   const [guesses, setGuesses] = useState([]);
   const [game, setGame] = useState([]);
   const [tipsViewed, setTipsViewed] = useState([]);
-  const [place, setPlace] = useState(() => random(0, country.places.length - 1));
+  const [place, setPlace] = useState(random(0, country ? country.places.length - 1 : 0));
 
   const [showGuessAttempt, setShowGuessAttempt] = useState(false);
   const [showTips, setShowTips] = useState(false);
@@ -193,7 +198,7 @@ function Game({ name, country, level, isTutorial, levelCount, playing, timeLimit
   }
 
   const handleNext = (points) => {
-    setGame(prev => [...prev, { start: time, country, guesses, points, isTutorial }]);
+    setGame(prev => [...prev, { start: time, country: { country: country.country, name: country.name, continent: country.continent }, guesses, points, isTutorial }]);
     setGuesses([]);
     setTipsViewed([]);
     setTime(Date.now());
@@ -335,30 +340,13 @@ export function getGame(continents) {
 
   const validCountries = validContinents.map(continent => {
     const possible = GAME.countries.filter(country => country.continent === continent);
+    console.log("Choosing from", possible, "for", continent);
     return possible[random(0, possible.length - 1)];
   }).sort(() => 0.5 - Math.random());
 
   console.log("Will play", validCountries);
 
   return validCountries;
-}
-
-export function getConfig(params) {
-  const timeLimit = params.time_limit || 60;
-  const guessLimit = params.guess_limit || 5;
-  const tipsLimit = params.tips_limit || 5;
-  const skipTutorial = params.skip_tutorial || false;
-
-  const config = {
-    timeLimit: parseInt(timeLimit),
-    guessLimit: parseInt(guessLimit),
-    tipsLimit: parseInt(tipsLimit),
-    skipTutorial: Boolean(skipTutorial)
-  };
-
-  console.log("With config", config);
-
-  return config;
 }
 
 function initRUM() {
@@ -383,7 +371,7 @@ function initRUM() {
   datadogRum.startSessionReplayRecording();
 }
 
-function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
+function App({ continents, countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
   const [level, setLevel] = useState(0);
   const [tutorialCompleted, setTutorialCompleted] = useState(skipTutorial);
   const [tutorialOpen, setTutorialOpen] = useState(!skipTutorial);
@@ -417,7 +405,19 @@ function App({ countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFini
             setLevel(prev => prev + 1);
           }
         }}
-        onFinish={onFinish}
+        onFinish={(levels, score) => {
+          const data = {
+            tutorial: levels.find(l => l.isTutorial),
+            levels: levels.filter(l => !l.isTutorial),
+            timeLimit,
+            guessLimit,
+            tipsLimit,
+            continents,
+            countries,
+            score,
+          };
+          onFinish(name, data, '');
+        }}
         onRequestTutorial={() => setTutorialOpen(true)}
       />
 

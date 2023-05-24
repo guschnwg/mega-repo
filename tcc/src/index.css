@@ -681,3 +681,11 @@ button:disabled {
 .config ol input {
   width: unset;
 }
+.drums {
+  display: flex;
+  flex-direction: column;
+}
+
+.drums audio {
+  visibility: hidden;
+}

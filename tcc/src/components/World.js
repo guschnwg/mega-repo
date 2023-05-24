@@ -51,8 +51,6 @@ export const Tooltip = ({ country }) => {
     return null;
   };
 
-  console.log(country)
-
   return (
     <div
       className="tooltip"
