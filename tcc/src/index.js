@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App, { getConfig, getGame } from './components/App';
+import App, { getGame } from './components/App';
+import { getConfig } from './utils/config';
 // import Debug from './components/Debug';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

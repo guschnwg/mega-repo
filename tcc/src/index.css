@@ -137,10 +137,10 @@ button, .fake-button {
   background: salmon;
   padding-inline: 5px;
   display: flex;
-  height: 100vh;
   box-sizing: border-box;
   position: relative;
   flex-direction: column;
+  height: 100%;
 }
 
 .header {
