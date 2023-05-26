@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/mega-repo/tcc/static/css/main.c665c2b1.css",
-    "main.js": "/mega-repo/tcc/static/js/main.e231716d.js",
+    "main.js": "/mega-repo/tcc/static/js/main.9295e5c0.js",
     "index.html": "/mega-repo/tcc/index.html",
     "main.c665c2b1.css.map": "/mega-repo/tcc/static/css/main.c665c2b1.css.map",
-    "main.e231716d.js.map": "/mega-repo/tcc/static/js/main.e231716d.js.map"
+    "main.9295e5c0.js.map": "/mega-repo/tcc/static/js/main.9295e5c0.js.map"
   },
   "entrypoints": [
     "static/css/main.c665c2b1.css",
-    "static/js/main.e231716d.js"
+    "static/js/main.9295e5c0.js"
   ]
 }
