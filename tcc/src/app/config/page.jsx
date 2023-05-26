@@ -67,6 +67,7 @@ export default function Index() {
         className='big'
         onClick={() => {
           const params = new URLSearchParams(config);
+          debugger;
           window.location.href = '/?' + params.toString();
         }}
       >JOGAR</button>
