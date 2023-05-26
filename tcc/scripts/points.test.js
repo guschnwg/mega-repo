@@ -9,6 +9,10 @@ function convertValue(fromScale, toScale, value) {
 }
 
 function lossesCalculator(guesses, timeLimit = 60, guessLimit = 5, tipsLimit = 4) {
+  if (!guesses.length) {
+    return [225_000, 500_000, 225_000, random(1, 9)]
+  }
+
   // In 5 guesses, you can lower your score by 225_000 points max
   // In the worst case scenario: 5 * 100 * 450 = 225_000
   // In the worst/best case scenario: 5 * 100 * 300 = 150_000
@@ -66,3 +70,6 @@ for (let scenario of [bestCaseScenario, realCaseScenario, worstCaseScenario]) {
   const losses = lossesCalculator(scenario, 30, 8, 8).reduce((agg, crr) => agg + crr, 0);
   console.log(TOTAL_OF_POINTS - losses);
 }
+
+const nothing = []
+console.log(lossesCalculator(nothing));
