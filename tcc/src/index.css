@@ -367,7 +367,7 @@ button[data-disabled="true"]:after {
 .right-attempt > .info {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 .right-attempt > .info .country-name {
