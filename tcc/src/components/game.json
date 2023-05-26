@@ -33,7 +33,7 @@
         "tips": [
             "O país é o maior da América do Sul em extensão territorial e possui uma grande variedade de paisagens, como praias, florestas tropicais e montanhas.",
             "A língua oficial do país é o português, que é falado por quase todos os habitantes.",
-            "A maior floresta tropical do mundo, conhecida como 'o pulmão do mundo', está localizada neste país.",
+            "A maior floresta tropical, conhecida como 'o pulmão do mundo', está localizada neste país.",
             "Durante muitos anos, o país foi colonizado por europeus que exploraram suas riquezas naturais, como ouro, diamantes e madeira.",
             "Em 1822, o país se tornou independente de Portugal e se tornou uma república em 1889.",
             "O país foi o último das Américas a abolir a escravidão, em 1888.",
@@ -127,7 +127,7 @@
                 "País localizado no noroeste da Europa, fazendo fronteira com a Alemanha e a Bélgica.",
                 "Famosa por seus moinhos de vento, que foram usados por séculos para moer grãos, bombear água e drenar áreas de terra abaixo do nível do mar.",
                 "Foram os primeiros europeus a estabelecerem rotas comerciais com a Ásia, África e América do Sul.",
-                "Durante a Segunda Guerra Mundial, foi invadida pela Alemanha nazista e sofreu terríveis perdas, incluindo o famoso episódio da cidade de Rotterdam que foi quase completamente destruída.",
+                "As cores da bandeira são vermelho, branco e azul. A cor laranja também é bem famosa em homenagem à monarquia.",
                 "População de cerca de 17 milhões de habitantes em um território relativamente pequeno.",
                 "Famosa por sua arte e arquitetura, com artistas como Vincent Van Gogh e Rembrandt Harmenszoon van Rijn e uma arquitetura moderna inovadora.",
                 "Um dos líderes mundiais em tecnologia de energia sustentável.",
@@ -135,7 +135,7 @@
                 "Foi uma das primeiras nações a abolir a escravidão, em 1863, nas colônias do Suriname e das Antilhas Holandesas.",
                 "Neste país existem mais bicicletas do que carros"
             ],
-            "name": "Holanda",
+            "name": "Países Baixos",
             "flag": "🇳🇱"
         },
         {
@@ -179,7 +179,7 @@
                 "O período de independência no século XIX foi liderado por figuras como o general José de San Martín e o político Juan Manuel de Rosas.",
                 "Este país participou da Guerra do Paraguai, que ocorreu entre 1864 e 1870 e que envolveu também o Brasil e o Uruguai.",
                 "A recuperação da democracia foi em 1983, após o fim da ditadura militar",
-                "A moeda oficial é o Peso"
+                "A moeda oficial é o Peso, e a bandeira é azul e branca, com um sol no centro."
             ],
             "name": "Argentina",
             "flag": "🇦🇷"
@@ -644,6 +644,52 @@
             ],
             "name": "Chile",
             "flag": "🇨🇱"
+        },
+        {
+            "continent": "América do Sul",
+            "country": "CO",
+            "places": [
+                {
+                    "name": "Monumento Ventana al Mundo",
+                    "coordinates": {
+                        "lat": 11.0329751,
+                        "lng": -74.8309316
+                    }
+                },
+                {
+                    "name": "Cristo Rey",
+                    "coordinates": {
+                        "lat": 3.4360092,
+                        "lng": -76.5647059
+                    }
+                },
+                {
+                    "name": "Plaza de Toros",
+                    "coordinates": {
+                        "lat": 4.6131984,
+                        "lng": -74.0681915
+                    }
+                }
+            ],
+            "facts": [
+                "Festa mais importante: Carnaval de Barranquilla",
+                "Comida típica: ",
+                "Pessoas famosas: Gabriel García Márquez, escritor. Policarpa Salavarrieta, heroína da independência"
+            ],
+            "tips": [
+                "Fica na divisa entre a América do Sul e a América Central",
+                "Após a queda do Cartel de Medellín, liderado por Pablo Escobar, nos anos 1990, o Cartel de Cali se tornou o principal grupo de tráfico de drogas do país.",
+                "Em 1499, o explorador espanhol Alonso de Ojeda chegou. O primeiro assentamento permanente foi estabelecido em Santa Marta, em 1525.",
+                "O país se tornou um importante centro de negócios na América Latina, com setores como o petróleo, mineração, agricultura e turismo impulsionando sua economia.",
+                "A cor da bandeira é amarela, azul e vermelha. E é bem semelhante a outras bandeiras de países do mesmo continente",
+                "Guerra dos Mil Dias: A Guerra dos Mil Dias foi um conflito civil que ocorreu entre 1899 e 1902, envolvendo liberais e conservadores.",
+                "Seção do Panamá: Em 1903, o Panamá se separou deste país com o apoio dos Estados Unidos, que buscavam construir o Canal do Panamá. A separação foi um evento controverso e levou a um período de tensões entre os dois países.",
+                "Antes da invasão européia, o país era habitado por várias civilizações indígenas, incluindo os Muiscas, Tayronas e Quimbayas",
+                "Em 20 de julho de 1810, ocorreu o Grito de Independência em Bogotá, marcando o início do processo de independência da Espanha. A luta pela independência durou mais de uma década e foi liderada por figuras como Simón Bolívar e Francisco de Paula Santander.",
+                "A cantora Shakira nasceu neste país"
+            ],
+            "name": "Colômbia",
+            "flag": "🇨🇴"
         }
     ],
     "structure": {
@@ -673,9 +719,9 @@
             }
         ],
         "facts": [
-            "",
-            "",
-            ""
+            "Festa mais importante: ",
+            "Comida típica: ",
+            "Pessoas famosas: "
         ],
         "tips": [
             "",

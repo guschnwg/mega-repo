@@ -123,6 +123,11 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
             </div>
           ) : (
             <div className="details">
+              <h2>
+                {country.name} 
+                <button onClick={() => onNext(points)}>Próximo nível </button>
+              </h2>
+
               <h4>Fatos curiosos:</h4>
 
               <ul>
@@ -138,8 +143,6 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
                   <li key={index}>{tip}</li>
                 ))}
               </ul>
-
-              <button onClick={() => onNext(points)}>Próximo nível</button>
             </div>
           )}
         </div>
@@ -391,11 +394,11 @@ function initRUM() {
   datadogRum.startSessionReplayRecording();
 }
 
-function App({ continents, countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
+function App({ name: initialName, continents, countries, timeLimit, guessLimit, tipsLimit, skipTutorial, onFinish }) {
   const [level, setLevel] = useState(0);
   const [tutorialCompleted, setTutorialCompleted] = useState(skipTutorial);
   const [tutorialOpen, setTutorialOpen] = useState(!skipTutorial);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName);
 
   const country = !tutorialCompleted ? GAME.tutorial : countries[level];
 

@@ -58,6 +58,9 @@ export function Guess({ guesses, guessLimit, onlyOnce, onGuess, onHide }) {
             <div className="guesses-info">
               Você usou {guesses.length} dos {guessLimit} palpites disponíveis.
             </div>
+            <div className="guesses-info simple">
+              Palpites {guesses.length}/{guessLimit}
+            </div>
 
             <div className="controls position">
               <button

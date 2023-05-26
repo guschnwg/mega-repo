@@ -14,7 +14,7 @@ export function Tips({ tips, viewed, tipsLimit, onView, onHide }) {
           {tips.map(tip => {
             if (viewed.includes(tip)) {
               return (
-                <div className="tip" key={tip}>
+                <div className="tip active" key={tip}>
                   <button disabled>Dica vista</button>
                   <p>{tip}</p>
                 </div>

@@ -6,6 +6,7 @@ export function getConfig(params) {
   const tipsLimit = params.tips_limit || params.tipsLimit || 5;
   const skipTutorial = params.skip_tutorial || params.skipTutorial || "false";
   const continents = params.continents || AVAILABLE_CONTINENTS;
+  const name = params.name || '';
 
   const config = {
     timeLimit: parseInt(timeLimit),
@@ -13,6 +14,7 @@ export function getConfig(params) {
     tipsLimit: parseInt(tipsLimit),
     skipTutorial: skipTutorial === 'true',
     continents: Array.isArray(continents) ? continents : [continents],
+    name,
   };
 
   console.log("With config", config);
