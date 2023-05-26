@@ -45,7 +45,7 @@ function EndGame({ name, game, onFinish }) {
             }}
           >VER PONTUAÇÃO</button>
 
-          <audio controls src="https://www.myinstants.com/media/sounds/y2mate_YpWYqZD.mp3" autoPlay />
+          <audio controls src="https://www.myinstants.com/media/sounds/suspense-drums.mp3" autoPlay loop />
         </div>
       ) : (
         <>
