@@ -169,6 +169,10 @@ function getPreferredVoice() {
   if (compactVoice) {
     return compactVoice;
   }
+  const femaleVoice = possibleVoices.find(voice => voice.voiceURI.toLowerCase().includes('female'));
+  if (femaleVoice) {
+    return femaleVoice;
+  }
   // Fallback to the first one from the language that we want
   return possibleVoices[0];
 }
