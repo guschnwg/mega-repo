@@ -148,6 +148,28 @@ function EndLevel({ country, guesses, tips, timeLimit, guessLimit, tipsLimit, sh
   )
 }
 
+function getPreferredVoice() {
+  const possibleVoices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'pt-BR');
+  const googleVoice = possibleVoices.find(voice => voice.name.includes('Google'));
+  if (googleVoice) {
+    return googleVoice;
+  }
+  const premiumVoice = possibleVoices.find(voice => voice.voiceURI.includes('premium'));
+  if (premiumVoice) {
+    return premiumVoice
+  }
+  const enhancedVoice = possibleVoices.find(voice => voice.voiceURI.toLowerCase().includes('enhanced') || voice.voiceURI.toLowerCase().includes('aprimorada'));
+  if (enhancedVoice) {
+    return enhancedVoice;
+  }
+  const compactVoice = possibleVoices.find(voice => voice.voiceURI.toLowerCase().includes('compact'));
+  if (compactVoice) {
+    return compactVoice;
+  }
+  // Fallback to the first one from the language that we want
+  return possibleVoices[0];
+}
+
 function Game({ name, country, level, isTutorial, levelCount, playing, timeLimit, guessLimit, tipsLimit, onNext, onFinish, onRequestTutorial }) {
   const [time, setTime] = useState(Date.now());
   const [guesses, setGuesses] = useState([]);
@@ -191,9 +213,7 @@ function Game({ name, country, level, isTutorial, levelCount, playing, timeLimit
       window.speechSynthesis.cancel();
     }
     const toSpeak = new SpeechSynthesisUtterance(tip);
-    const possibleVoices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'pt-BR');
-    const googleVoice = possibleVoices.find(voice => voice.name.includes('Google'));
-    toSpeak.voice = googleVoice || possibleVoices[Math.floor(Math.random() * possibleVoices.length)];
+    toSpeak.voice = getPreferredVoice();
     window.speechSynthesis.speak(toSpeak);
   }
 
