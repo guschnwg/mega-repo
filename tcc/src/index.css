@@ -366,6 +366,7 @@ button[data-disabled="true"]:after {
 
 .right-attempt > .info {
   flex: 1;
+  display: flex;
 }
 .right-attempt > .info .country-name {
   display: flex;
@@ -420,6 +421,9 @@ button[data-disabled="true"]:after {
   padding: 5px;
   z-index: 99;
   color: white;
+}
+.guesses-info.simple {
+  display: none;
 }
 
 .controls.continents {
@@ -613,7 +617,7 @@ textarea {
 }
 
 button.big {
-  padding: 20px;
+  padding: 10px 20px;
   font-size: 22px;
 }
 
@@ -631,10 +635,6 @@ button.active {
 }
 button:hover {
   filter: brightness(0.9);
-  animation: none;
-}
-button:active {
-  filter: brightness(0.7);
   animation: none;
 }
 button:disabled {
@@ -688,4 +688,92 @@ button:disabled {
 
 .drums audio {
   visibility: hidden;
+}
+
+.details > h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 0;
+}
+
+@media screen and (max-width: 768px) {
+  button {
+    padding: 5px;
+    font-size: 12px;
+  }
+
+  .timer {
+    font-size: 15px;
+  }
+  .level-info {
+      font-size: 12px;
+  }
+
+  #tips-button {
+      padding-inline: 5px;
+      font-size: 12px;
+  }
+  #guess-button {
+      padding-inline: 5px;
+      font-size: 12px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  p {
+    text-align: center;
+  }
+
+  button.big {
+    padding: 5px 10px;
+    font-size: 18px;
+  }
+
+  .tip button {
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .tip > p {
+    display: none;
+  }
+
+  .tip.active > p {
+    display: block;
+  }
+  .tip.active > button {
+    display: none;
+  }
+
+  .controls {
+    flex-wrap: wrap;
+  } 
+
+  .tutorial p {
+    font-size: 15px;
+  }
+
+  .guesses-info {
+    display: none;
+  }
+  .guesses-info.simple {
+    display: block;
+    left: 100px;
+  }
+
+  .ReactModal__Content {
+    inset: 0 !important;
+  }
+
+  button {
+    min-width: 32px;
+  }
 }
