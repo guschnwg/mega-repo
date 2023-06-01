@@ -31,6 +31,7 @@ while IFS= read -r FILE; do
     NOT_ALLOWED_FILES="\$NOT_ALLOWED_FILES\n\$FILE"
   fi
 done <<< "\$FILES"
+
 if [[ "\$NOT_ALLOWED_FILES" != "" ]]; then
   echo "You have stuff from a changelist in the commit, remove it, then 🚢"
   echo \$NOT_ALLOWED_FILES
