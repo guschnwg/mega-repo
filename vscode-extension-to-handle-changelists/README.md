@@ -71,7 +71,7 @@ vscode-extension-to-handle-changelists/do-not-commit.js
 ```
 
 ```bash
-➜  mega-repo git:(main) ✗ git commit -m 'test'                
+➜  mega-repo git:(main) ✗ git commit -m 'test'
 You have stuff from a changelist in the commit, remove it, then 🚢
 
 vscode-extension-to-handle-changelists/do-not-commit.js
