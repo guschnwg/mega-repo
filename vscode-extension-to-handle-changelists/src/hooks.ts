@@ -23,29 +23,27 @@ fi`;
 function getRepoRoot(workspaceFolder: string) {
   return childProcess.execSync(`cd ${workspaceFolder} && git rev-parse --show-toplevel`).toString().trim();
 }
-function getPreCommitHook() {
+
+function getFilePath() {
   const workspaceFolder = getWorkspaceRoot();
   if (!workspaceFolder) {
     return '';
   }
 
   const folder = getRepoRoot(workspaceFolder);
+
+  return `${folder}/.git/hooks/pre-commit`
+}
+
+function getPreCommitHook() {
   try {
-    return fs.readFileSync(`${folder}/.git/hooks/pre-commit`).toString();
+    return fs.readFileSync(getFilePath()).toString();
   } catch {
     return '';
   }
 }
 function savePreCommit(data: string) {
-  const workspaceFolder = getWorkspaceRoot();
-  if (!workspaceFolder) {
-    return false;
-  }
-
-  console.log(workspaceFolder);
-
-  const folder = getRepoRoot(workspaceFolder);
-  const path = `${folder}/.git/hooks/pre-commit`;
+  const path = getFilePath();
 
   if (data) {
     fs.writeFileSync(path, data);
@@ -55,9 +53,22 @@ function savePreCommit(data: string) {
     } catch { }
   }
 }
-export function isHookInstalled() {
+
+function isScriptInFile() {
   const preCommit = getPreCommitHook();
   return preCommit.includes(SCRIPT);
+}
+
+function isExecutable() {
+  try {
+    fs.accessSync(getFilePath(), fs.constants.X_OK)
+    return true
+  } catch {
+    return false
+  }
+}
+export function isHookInstalled() {
+  return isScriptInFile() && isExecutable();
 }
 export function uninstallHook() {
   const preCommit = getPreCommitHook();
@@ -65,13 +76,14 @@ export function uninstallHook() {
   savePreCommit(newPreCommit.trim());
 }
 export function installHook() {
-  if (isHookInstalled()) {
-    return;
+  if (!isScriptInFile()) {
+    const preCommit = getPreCommitHook();
+    const newPreCommit = `${SCRIPT}\n\n${preCommit}`;
+    savePreCommit(newPreCommit.trim());
   }
-
-  const preCommit = getPreCommitHook();
-  const newPreCommit = `${SCRIPT}\n\n${preCommit}`;
-  savePreCommit(newPreCommit.trim());
+  if (!isExecutable()) {
+    return childProcess.execSync(`chmod u+x ${getFilePath()}`).toString().trim();
+  }
 }
 
 export function getWorkspaceRoot() {
