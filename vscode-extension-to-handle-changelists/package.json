@@ -30,6 +30,10 @@
 				"title": "Check Hook"
 			},
 			{
+				"command": "viewGitPreCommitFile",
+				"title": "View Git PreCommit File"
+			},
+			{
 				"command": "uninstall",
 				"title": "Uninstall Hook"
 			}

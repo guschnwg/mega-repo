@@ -18,19 +18,22 @@ export class Provider implements vscode.TreeDataProvider<vscode.TreeItem> {
   getHookCommands() {
     const installHook = new vscode.TreeItem('Install Hook');
     const checkHook = new vscode.TreeItem('Check Hook');
+    const viewGitPreCommitFile = new vscode.TreeItem('View Git PreCommit File');
     const uninstallHook = new vscode.TreeItem('Uninstall Hook');
 
     installHook.command = { title: 'Install', command: 'install' };
     checkHook.command = { title: 'Check', command: 'check' };
+    viewGitPreCommitFile.command = { title: 'View Git PreCommit Hook', command: 'viewGitPreCommitFile' };
     uninstallHook.command = { title: 'Check', command: 'uninstall' };
 
     installHook.iconPath = new vscode.ThemeIcon('debug-start');
     checkHook.iconPath = new vscode.ThemeIcon('debug-restart');
+    viewGitPreCommitFile.iconPath = new vscode.ThemeIcon('notebook-open-as-text');
     uninstallHook.iconPath = new vscode.ThemeIcon('debug-stop');
 
     const actionHook = isHookInstalled() ? uninstallHook : installHook;
 
-    return [actionHook, checkHook];
+    return [actionHook, checkHook, viewGitPreCommitFile];
   }
 
   getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {

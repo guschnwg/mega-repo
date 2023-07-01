@@ -24,7 +24,7 @@ function getRepoRoot(workspaceFolder: string) {
   return childProcess.execSync(`cd ${workspaceFolder} && git rev-parse --show-toplevel`).toString().trim();
 }
 
-function getFilePath() {
+export function getFilePath() {
   const workspaceFolder = getWorkspaceRoot();
   if (!workspaceFolder) {
     return '';

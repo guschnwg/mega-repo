@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Provider } from './provider';
-import { installHook, isHookInstalled, uninstallHook } from './hooks';
+import { getFilePath, installHook, isHookInstalled, uninstallHook } from './hooks';
 
 //
 
@@ -16,6 +16,13 @@ export function checkHookCommand(treeDataProvider: Provider) {
     treeDataProvider.refresh();
     const msg = isHookInstalled() ? "Installed!" : "Not installed!";
     vscode.window.showInformationMessage(msg);
+  };
+}
+
+export function viewGitPreCommitFile(treeDataProvider: Provider) {
+  return () => {
+    const path = getFilePath();
+    vscode.commands.executeCommand('workbench.action.quickOpen', path);
   };
 }
 
