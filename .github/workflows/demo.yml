@@ -29,6 +29,7 @@ jobs:
       - name: Building the changelists extension
         run: |
           cd vscode-extension-to-handle-changelists
+          yarn
           yarn compile
           yarn ship
           mv changelists*.vsix ${{ runner.temp }}/.ship/
