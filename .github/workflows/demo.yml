@@ -25,6 +25,13 @@ jobs:
           yarn
           yarn build
           mv build ${{ runner.temp }}/.ship/financing-calculator
+
+      - name: Building the changelists extension
+        run: |
+          cd vscode-extension-to-handle-changelists
+          yarn compile
+          yarn ship
+          mv changelists*.vsix ${{ runner.temp }}/.ship/
           
       - name: Changing to gh-pages
         uses: actions/checkout@v3
