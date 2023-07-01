@@ -40,7 +40,7 @@ jobs:
           yarn
           yarn compile
           yarn ship
-          mv changelists*.vsix ${{ runner.temp }}/.ship/c4g-extension
+          mv c4g-extension*.vsix ${{ runner.temp }}/.ship/c4g-extension
           
       - name: Changing to gh-pages
         uses: actions/checkout@v3
