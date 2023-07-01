@@ -32,7 +32,15 @@ jobs:
           yarn
           yarn compile
           yarn ship
-          mv changelists*.vsix ${{ runner.temp }}/.ship/
+          mv changelists*.vsix ${{ runner.temp }}/.ship/changelists
+
+      - name: Building the c4g extension
+        run: |
+          cd c4g-extension
+          yarn
+          yarn compile
+          yarn ship
+          mv changelists*.vsix ${{ runner.temp }}/.ship/c4g-extension
           
       - name: Changing to gh-pages
         uses: actions/checkout@v3
