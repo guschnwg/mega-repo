@@ -5,6 +5,7 @@
 	"version": "0.0.10",
 	"publisher": "GiovannaZanardini",
 	"license": "MIT",
+	"repository": "https://github.com/guschnwg/mega-repo.git",
 	"engines": {
 		"vscode": "^1.61.0"
 	},
