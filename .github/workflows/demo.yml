@@ -32,6 +32,7 @@ jobs:
           yarn
           yarn compile
           yarn ship
+          mkdir ${{ runner.temp }}/.ship/changelists
           mv changelists*.vsix ${{ runner.temp }}/.ship/changelists
 
       - name: Building the c4g extension
@@ -40,6 +41,7 @@ jobs:
           yarn
           yarn compile
           yarn ship
+          mkdir ${{ runner.temp }}/.ship/c4g-extension
           mv c4g-extension*.vsix ${{ runner.temp }}/.ship/c4g-extension
           
       - name: Changing to gh-pages
