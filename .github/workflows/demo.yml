@@ -50,7 +50,9 @@ jobs:
           ref: gh-pages
           
       - name: Cleaning up the root
-        run: git rm -rf . || true
+        run: |
+          git rm -rf financing-calculator || true
+          git rm -rf tcc || true
       
       - name: Setting up the root
         run: mv ${{ runner.temp }}/.ship/* ./
