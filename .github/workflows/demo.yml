@@ -58,8 +58,8 @@ jobs:
         run: |
           mv ${{ runner.temp }}/.ship/financing-calculator ./financing-calculator
           mv ${{ runner.temp }}/.ship/tcc ./tcc
-          rsync --ignore-existing -a ${{ runner.temp }}/.ship/c4g-extension ./c4g-extension
-          rsync --ignore-existing -a ${{ runner.temp }}/.ship/changelists ./changelists
+          rsync --ignore-existing -a ${{ runner.temp }}/.ship/c4g-extension ./
+          rsync --ignore-existing -a ${{ runner.temp }}/.ship/changelists ./
       
       - name: Configuring git
         run: |
