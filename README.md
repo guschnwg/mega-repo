@@ -1,5 +1,9 @@
 # mega-repo
 
+All the deploys are in the gh-pages branch.
+
+The .github/workflows/demo.yml handles the ship by replacing the whole content of the react project's folders, but for the extensions it should just create a new version of the VSIX.
+
 ## c4g-extension
 
 Extension to be used in my job
