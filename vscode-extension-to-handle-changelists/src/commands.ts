@@ -4,31 +4,31 @@ import { getFilePath, installHook, isHookInstalled, uninstallHook } from './hook
 
 //
 
-export function installHookCommand(treeDataProvider: Provider) {
+export function installHookCommand(context: vscode.ExtensionContext, treeDataProvider: Provider) {
   return () => {
-    installHook();
+    installHook(context);
     treeDataProvider.refresh();
   };
 }
 
-export function checkHookCommand(treeDataProvider: Provider) {
+export function checkHookCommand(context: vscode.ExtensionContext, treeDataProvider: Provider) {
   return () => {
     treeDataProvider.refresh();
-    const msg = isHookInstalled() ? "Installed!" : "Not installed!";
+    const msg = isHookInstalled(context) ? "Installed!" : "Not installed!";
     vscode.window.showInformationMessage(msg);
   };
 }
 
-export function viewGitPreCommitFile(treeDataProvider: Provider) {
+export function viewGitPreCommitFile(context: vscode.ExtensionContext, treeDataProvider: Provider) {
   return () => {
     const path = getFilePath();
     vscode.commands.executeCommand('workbench.action.quickOpen', path);
   };
 }
 
-export function uninstallHookCommand(treeDataProvider: Provider) {
+export function uninstallHookCommand(context: vscode.ExtensionContext, treeDataProvider: Provider) {
   return () => {
-    uninstallHook();
+    uninstallHook(context);
     treeDataProvider.refresh();
   };
 }

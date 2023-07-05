@@ -2,7 +2,11 @@ import * as vscode from 'vscode';
 import { isHookInstalled, getChangelists } from './hooks';
 
 export class Provider implements vscode.TreeDataProvider<vscode.TreeItem> {
-  constructor() { }
+  context: vscode.ExtensionContext;
+
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+  }
 
   private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -31,7 +35,7 @@ export class Provider implements vscode.TreeDataProvider<vscode.TreeItem> {
     viewGitPreCommitFile.iconPath = new vscode.ThemeIcon('notebook-open-as-text');
     uninstallHook.iconPath = new vscode.ThemeIcon('debug-stop');
 
-    const actionHook = isHookInstalled() ? uninstallHook : installHook;
+    const actionHook = isHookInstalled(this.context) ? uninstallHook : installHook;
 
     return [actionHook, checkHook, viewGitPreCommitFile];
   }

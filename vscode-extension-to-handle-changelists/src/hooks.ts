@@ -2,11 +2,13 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as childProcess from 'child_process';
 
-const currentExt = vscode.extensions.all.find(ext => ext.packageJSON.name === 'changelists');
-const SCRIPT: string = fs.readFileSync(`${currentExt?.extensionPath}/src/script.sh`).toString().trim();
 //
 function getRepoRoot(workspaceFolder: string) {
   return childProcess.execSync(`cd ${workspaceFolder} && git rev-parse --show-toplevel`).toString().trim();
+}
+
+export function getScript(fromExtensionPath: string) {
+  return fs.readFileSync(`${fromExtensionPath}/src/script.sh`).toString().trim();
 }
 
 export function getFilePath() {
@@ -39,9 +41,9 @@ function savePreCommit(data: string) {
   }
 }
 
-function isScriptInFile() {
+function isScriptInFile(script: string) {
   const preCommit = getPreCommitHook();
-  return preCommit.includes(SCRIPT);
+  return preCommit.includes(script);
 }
 
 function isExecutable() {
@@ -52,18 +54,21 @@ function isExecutable() {
     return false
   }
 }
-export function isHookInstalled() {
-  return isScriptInFile() && isExecutable();
+export function isHookInstalled(context: vscode.ExtensionContext) {
+  const script = getScript(context.extensionPath);
+  return isScriptInFile(script) && isExecutable();
 }
-export function uninstallHook() {
+export function uninstallHook(context: vscode.ExtensionContext) {
   const preCommit = getPreCommitHook();
-  const newPreCommit = preCommit.replace(SCRIPT, '');
+  const script = getScript(context.extensionPath);
+  const newPreCommit = preCommit.replace(script, '');
   savePreCommit(newPreCommit.trim());
 }
-export function installHook() {
-  if (!isScriptInFile()) {
+export function installHook(context: vscode.ExtensionContext) {
+  const script = getScript(context.extensionPath);
+  if (!isScriptInFile(script)) {
     const preCommit = getPreCommitHook();
-    const newPreCommit = `${SCRIPT}\n\n${preCommit}`;
+    const newPreCommit = `${script}\n\n${preCommit}`;
     savePreCommit(newPreCommit.trim());
   }
   if (!isExecutable()) {
@@ -86,7 +91,7 @@ export function getChangelists() {
     return [];
   }
 
-  const path = `${workspaceFolder}/.gitchangelists`;
+  const path = `${workspaceFolder}/.gitchangelist`;
 
   const buffer = fs.readFileSync(path);
   const data = buffer.toString();
