@@ -70,10 +70,10 @@ defaults write com.apple.loginwindow LoginwindowLaunchesRelaunchApps -bool false
 
 
 echo "Show the ~/Library folder"
-chflags nohidden ~/Library
+sudo chflags nohidden ~/Library
 
 echo "Show the /Volumes folder"
-chflags nohidden /Volumes
+sudo chflags nohidden /Volumes
 
 echo "Show hidden files"
 defaults write com.apple.finder AppleShowAllFiles YES
@@ -82,8 +82,8 @@ echo "Disable Notification Center and remove the menu bar icon"
 launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist 2> /dev/null
 
 echo "Use scroll gesture with the Ctrl (^) modifier key to zoom"
-defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
-defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
+sudo defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
+sudo defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
 
 echo "Set a blazingly fast keyboard repeat rate"
 defaults write NSGlobalDomain KeyRepeat -int 1
