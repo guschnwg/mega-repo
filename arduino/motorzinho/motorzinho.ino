@@ -29,13 +29,13 @@ void move(Stream &serial) {
   if (left > 0) {
     leftMotor.motorGo(left);
   } else {
-    leftMotor.motorRev(left);
+    leftMotor.motorRev(left * -1);
   }
 
   if (right > 0) {
     rightMotor.motorGo(right);
   } else {
-    rightMotor.motorRev(right);
+    rightMotor.motorRev(right * -1);
   }
 
   delay(time);
