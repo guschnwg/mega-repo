@@ -93,7 +93,7 @@ echo "Save screenshots to the desktop"
 defaults write com.apple.screencapture location -string "${HOME}/Desktop"
 
 echo "Set Desktop as the default location for new Finder windows"
-echo "For other paths, use `PfLo` and `file:///full/path/here/`"
+echo "For other paths, use 'PfLo' and 'file:///full/path/here/'"
 defaults write com.apple.finder NewWindowTarget -string "PfDe"
 defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Desktop/"
 
