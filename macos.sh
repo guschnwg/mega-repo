@@ -86,8 +86,9 @@ sudo defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool t
 sudo defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
 
 echo "Set a blazingly fast keyboard repeat rate"
-defaults write NSGlobalDomain KeyRepeat -int 1
+defaults write NSGlobalDomain KeyRepeat -int 2
 defaults write NSGlobalDomain InitialKeyRepeat -int 10
+defaults write -g ApplePressAndHoldEnabled -bool false
 
 echo "Save screenshots to the desktop"
 defaults write com.apple.screencapture location -string "${HOME}/Desktop"
