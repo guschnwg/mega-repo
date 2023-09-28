@@ -13,6 +13,9 @@ const int pinButton = 5;
 int xZeroValue = 0;
 int yZeroValue = 0;
 
+int lastSent = 0;
+int messageWait = 200;
+
 Adafruit_PCD8544 display = Adafruit_PCD8544(/* CLK */19, /* DIN */ 21, /* DC */ 18, /* CE */ 22, /* RST */ 23);
 
 BluetoothSerial SerialBT;
@@ -25,14 +28,76 @@ int normalizeMyPotentiometer(int value, int zeroValue) {
   return map(value, 0, zeroValue, -255, 0);
 }
 
+void connectBluetooth(int tries) {
+  int triesLeft = tries;
+
+  if(SerialBT.connect("ESP32")) {
+    digitalWrite(2, HIGH);
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Connected!");
+    display.display();
+  } else {
+    while(!SerialBT.connected(2000) && tries > 0) {
+      display.clearDisplay();
+      display.setCursor(0, 0);
+      display.print("Failed to connect! Retrying...");
+      display.display();
+      tries--;
+    }
+  }
+}
+
+bool nearZero(int value) {
+  return value >= -5 && value <= 5;
+}
 bool positive(int value) {
-  return value >= 5;
+  return value > 5;
 }
 bool negative(int value) {
-  return value <= -5;
+  return value < -5;
 }
-bool nearZero(int value) {
-  return value > -5 && value < 5;
+
+int calculateR(int y, int x) {
+  if (nearZero(x)) {
+    return y;
+  }
+  if (nearZero(y)) {
+    return x * -1;
+  }
+
+  if (positive(x) && positive(y)) {
+    return map(x, 0, 255, 255, -255);
+  } else if (positive(x) && negative(y)) {
+    return map(x, 0, 255, -255, 255);
+  } else if (negative(x) && negative(y)) {
+    return -255; // Consider 255 now, and the other motor controls
+  } else if (negative(x) && positive(y)) {
+    return 255; // Consider 255 now, and the other motor controls
+  }
+  
+  return 0;
+}
+
+int calculateL(int y, int x) {
+  if (nearZero(x)) {
+    return y;
+  }
+  if (nearZero(y)) {
+    return x;
+  }
+
+  if (positive(x) && positive(y)) {
+    return 255; // Consider 255 now, and the other motor controls
+  } else if (positive(x) && negative(y)) {
+    return -255; // Consider 255 now, and the other motor controls
+  } else if (negative(x) && negative(y)) {
+    return map(x * -1, 0, 255, -255, 255);
+  } else if (negative(x) && positive(y)) {
+    return map(x * -1, 0, 255, 255, -255);
+  }
+
+  return 0;
 }
 
 void setup() {
@@ -58,20 +123,7 @@ void setup() {
   display.print("Setting up bluetooth");
   display.display();
 
-  if(SerialBT.connect("ESP32")) {
-    digitalWrite(2, HIGH);
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("Connected!");
-    display.display();
-  } else {
-    while(!SerialBT.connected(10000)) {
-      display.clearDisplay();
-      display.setCursor(0, 0);
-      display.print("Failed to connect! Retrying...");
-      display.display();
-    }
-  }
+  connectBluetooth(5);
 
   // Setting up zero values
   // Ideally they will start at the middle, so we mark it as the middle point
@@ -123,88 +175,66 @@ void setup() {
 void loop() {
   // Reading potentiometer values
 
-  int xValue = analogRead(pinPotX);
-  int yValue = analogRead(pinPotY);
+  int xValue = analogRead(pinPotX); // 4096 to 0 for some reason
+  int yValue = analogRead(pinPotY); // 0 to 4096
   bool clicked = digitalRead(pinButton);
 
   // Mapped values to the little fella
 
   // We want to map from 0<->4095 to -255 to 255
   int xNormalizedValue = normalizeMyPotentiometer(xValue, xZeroValue);
+  // My X is inverted for some reason, see L126
+  xNormalizedValue = map(xNormalizedValue, -255, 255, 255, -255);
   int yNormalizedValue = normalizeMyPotentiometer(yValue, yZeroValue);
 
-  String right = "0";
-  String left = "0";
-
-  // X+ and Y+ RIGHT FRONT
-  if (positive(xNormalizedValue) && positive(yNormalizedValue)) {
-    left = "255";
-    right = "200";
+  // Normalize again to MIN MAX
+  int rCalculated = calculateR(yNormalizedValue, xNormalizedValue);
+  if (positive(rCalculated)) {
+    rCalculated = map(rCalculated, 0, 255, 150, 200);
+  } else if (negative(rCalculated)) {
+    rCalculated = map(rCalculated, -255, 0, -200, -150);
+  } else {
+    rCalculated = 0;
   }
-  // X+ and Y0 FRONT
-  else if (positive(xNormalizedValue) && nearZero(yNormalizedValue)) {
-    left = "255";
-    right = "255";
-  }
-  // X+ and Y- LEFT FRONT
-  else if (positive(xNormalizedValue) && negative(yNormalizedValue)) {
-    left = "200";
-    right = "255";
-  }
-
-  // X- and Y+ RIGHT BACK
-  else if (negative(xNormalizedValue) && positive(yNormalizedValue)) {
-    left = "-255";
-    right = "-200";
-  }
-  // X- and Y0 BACK
-  else if (negative(xNormalizedValue) && nearZero(yNormalizedValue)) {
-    left = "-255";
-    right = "-255";
-  }
-  // X- and Y- LEFT BACK
-  else if (negative(xNormalizedValue) && negative(yNormalizedValue)) {
-    left = "-200";
-    right = "-255";
+  int lCalculated = calculateL(yNormalizedValue, xNormalizedValue);
+  if (positive(lCalculated)) {
+    lCalculated = map(lCalculated, 0, 255, 150, 200);
+  } else if (negative(lCalculated)) {
+    lCalculated = map(lCalculated, -255, 0, -200, -150);
+  } else {
+    lCalculated = 0;
   }
 
-  // X0 and Y+ RIGHT
-  else if (nearZero(xNormalizedValue) && positive(yNormalizedValue)) {
-    left = "255";
-    right = "-255";
+  // These are very much simplifications, for now it should be enough
+  String right = String(rCalculated);
+  String left = String(lCalculated);
+
+  String toSend = String(left + ":" + right + ":" + String(messageWait));
+
+  if (millis() - lastSent > messageWait) {
+    // Update screen
+    display.clearDisplay();
+
+    display.setCursor(0, 0);
+    display.print("X: ");
+    display.print(xValue);
+    display.print(" ("); display.print(xZeroValue); display.print(")"); 
+    display.setCursor(0, 10);
+    display.print("Y: ");
+    display.print(yValue);
+    display.print(" ("); display.print(yZeroValue); display.print(")"); 
+    display.setCursor(0, 20);
+    display.print("Button: ");
+    display.print(clicked);
+    display.setCursor(0, 30);
+    display.print(toSend);
+    display.setCursor(0, 40);
+    display.print("Sending...");
+    SerialBT.println(toSend);
+
+    display.display();
+
+    // Send bluetooth
+    lastSent = millis();
   }
-  // X0 and Y0 STOP
-  else if (nearZero(xNormalizedValue) && nearZero(yNormalizedValue)) {
-    // Nothing actually
-  }
-  // X0 and Y- LEFT
-  else if (nearZero(xNormalizedValue) && negative(yNormalizedValue)) {
-    left = "-255";
-    right = "255";
-  }
-
-  String toSend = String(left + ":" + right + ":" + 200);
-
-  // Display
-
-  display.clearDisplay();
-
-  display.setCursor(0, 0);
-  display.print("X: ");
-  display.print(xValue);
-  display.setCursor(0, 10);
-  display.print("Y: ");
-  display.print(yValue);
-  display.setCursor(0, 20);
-  display.print("Button: ");
-  display.print(clicked);
-  display.setCursor(0, 30);
-  display.print(toSend);
-
-  display.display();
-
-  // Send bluetooth
-
-  SerialBT.println(toSend);
-  delay(200);
 }
