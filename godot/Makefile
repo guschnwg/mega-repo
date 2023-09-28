@@ -86,6 +86,8 @@ full-vita: prepare build validate run output teardown
 
 vita: validate run output
 
+# Don't actually use this, send using USB which will work
+# For some reason there is a difference between the file sent using FTP and USB
 send-to-vita: FOLDER?=MyFirstGame
 send-to-vita:
 	echo "put $(FOLDER).vpk /uma0:/$(FOLDER).vpk"
