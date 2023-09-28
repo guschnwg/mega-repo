@@ -18,10 +18,12 @@ pull-macos:
 	chmod +x Godot.app/Contents/MacOS/Godot
 
 # Install the template to build to the vita
+# Remove that __MACOSX
 install-template-macos: FOLDER?=$(HOME)/Library/Application\ Support/Godot/templates/3.6.beta
 install-template-macos:
 	wget https://github.com/guschnwg/mega-repo/releases/download/godot-3.6.beta/vita_template_3.6.beta.tpz
 	unzip vita_template_3.6.beta.tpz
+	zip -d your-vita_release.zip "__MACOSX*"
 	mkdir -p $(FOLDER)
 	mv version.txt $(FOLDER)
 	mv vita_release.zip $(FOLDER)
@@ -74,9 +76,19 @@ teardown:
 	rm server-editor.zip
 	rm vita_template_3.6.beta.tpz
 
+# PSVita requires the image to be 8bit indexed
+convert-images: FOLDER?=MyFirstGame
+convert-images:
+	pngquant $(FOLDER)/**.png --ext .png --force
+
 full-vita: prepare build validate run output teardown
 
 vita: validate run output
+
+send-to-vita: FOLDER?=MyFirstGame
+send-to-vita:
+	echo "put $(FOLDER).vpk /uma0:/$(FOLDER).vpk"
+	ftp --no-login 192.168.0.52 1337
 
 # To debug the image we built
 debug: FOLDER?=MyFirstGame
