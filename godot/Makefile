@@ -21,13 +21,14 @@ pull-macos:
 # Remove that __MACOSX
 install-template-macos: FOLDER?=$(HOME)/Library/Application\ Support/Godot/templates/3.6.beta
 install-template-macos:
+	rm -f vita_template_3.6.beta.tpz
 	wget https://github.com/guschnwg/mega-repo/releases/download/godot-3.6.beta/vita_template_3.6.beta.tpz
 	unzip vita_template_3.6.beta.tpz
-	zip -d your-vita_release.zip "__MACOSX*"
+	zip -d vita_release.zip "__MACOSX*"
 	mkdir -p $(FOLDER)
 	mv version.txt $(FOLDER)
 	mv vita_release.zip $(FOLDER)
-	rm vita_template_3.6.beta.tpz
+	rm -f vita_template_3.6.beta.tpz
 
 
 # Download the binaries
