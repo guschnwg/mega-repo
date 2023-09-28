@@ -1,0 +1,3 @@
+[submodule "godot/godot-vita"]
+	path = godot/godot-vita
+	url = git@github.com:guschnwg/godot-vita.git
