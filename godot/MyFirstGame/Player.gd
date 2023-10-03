@@ -1,4 +1,4 @@
-extends Area2D
+extends KinematicBody2D
 
 var screen_size # Size of the game window.
 export var speed = 100
@@ -38,10 +38,13 @@ func _process(delta):
 		$Sprite.rotation *= -1
 		$Sprite.offset.y *= -1
 		$ShakeTimer.start()
- 
-	position += velocity * delta
-	position.x = clamp(position.x, 0, screen_size.x)
-	position.y = clamp(position.y, 0, screen_size.y)
+
+	# Collides, and don't get stuck on walls if we are sliding
+	move_and_slide(velocity)
+
+	# Just make sure to go back to the other side if we leave the screen
+	position.x = fposmod(position.x, screen_size.x)
+	position.y = fposmod(position.y, screen_size.y)
 
 
 func _on_ShakeTimer_timeout():
