@@ -1,7 +1,7 @@
 extends KinematicBody2D
 
-var speed = 10
-onready var player = get_parent().get_node("Player")
+export var speed = 10
+export(PackedScene) var player
 
 func _ready():
 	$Timer.start()

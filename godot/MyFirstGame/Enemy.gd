@@ -1,38 +1,25 @@
 extends Area2D
 
-
-var screen_size # Size of the game window.
 var speed = 100
 
 export(PackedScene) var soldier_scene
+export var shoot = "enemy_shoot"
+onready var player_one = get_node("/root/Main/Player1")
+onready var player_two = get_node("/root/Main/Player2")
 
-func _ready():
-	screen_size = get_viewport_rect().size
+var count = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	var velocity = Vector2.ZERO # The player's movement vector.
-	if Input.is_action_pressed("enemy_right"):
-		velocity.x += 1
-	if Input.is_action_pressed("enemy_left"):
-		velocity.x -= 1
-	if Input.is_action_pressed("enemy_down"):
-		velocity.y += 1
-	if Input.is_action_pressed("enemy_up"):
-		velocity.y -= 1
+	get_parent().offset += 250 * delta
+	if Input.is_action_just_pressed(shoot):
+		create_soldier(player_one if count % 2 == 0 else player_two)
 
-	if velocity.length() > 0:
-		velocity = velocity.normalized() * speed
-
-	position += velocity * delta
-	position.x = clamp(position.x, 0, screen_size.x)
-	position.y = clamp(position.y, 0, screen_size.y)
-	
-	if Input.is_action_just_pressed("enemy_shoot"):
-		create_soldier()
-
-func create_soldier():
+func create_soldier(follow):
 	var soldier = soldier_scene.instance()
-	soldier.position = position
+	soldier.position = global_position
+	soldier.player = follow
 
-	get_parent().add_child(soldier)
+	get_tree().get_root().add_child(soldier)
+	
+	count += 1

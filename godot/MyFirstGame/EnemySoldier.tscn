@@ -30,7 +30,7 @@ position = Vector2( 0, 14 )
 rotation = -3.14159
 scale = Vector2( 2, 2 )
 frames = SubResource( 2 )
-frame = 1
+frame = 5
 speed_scale = 5.0
 
 [node name="Sprite" type="Sprite" parent="."]

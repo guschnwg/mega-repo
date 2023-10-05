@@ -1,8 +1,12 @@
 extends KinematicBody2D
 
-var screen_size # Size of the game window.
 export var speed = 100
+export var move_right = "move_right"
+export var move_left = "move_left"
+export var move_up = "move_up"
+export var move_down = "move_down"
 
+var screen_size # Size of the game window.
 var shake = false
 
 func _ready():
@@ -11,33 +15,40 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	var velocity = Vector2.ZERO # The player's movement vector.
-	if Input.is_action_pressed("move_right"):
+	if Input.is_action_pressed(move_right):
 		velocity.x += 1
-	if Input.is_action_pressed("move_left"):
+	if Input.is_action_pressed(move_left):
 		velocity.x -= 1
-	if Input.is_action_pressed("move_down"):
+	if Input.is_action_pressed(move_down):
 		velocity.y += 1
-	if Input.is_action_pressed("move_up"):
+	if Input.is_action_pressed(move_up):
 		velocity.y -= 1
 
 	if velocity.length() > 0:
-		velocity = velocity.normalized() * speed
-		if $Sprite.rotation == 0:
-			$Sprite.rotation = 0.1
 		$Sprite.offset.y = 0
+
+		velocity = velocity.normalized() * speed
 
 		if velocity.x != 0:
 			$Sprite.flip_h = velocity.x < 0
+
+		var flip_multiplier = -1 if $Sprite.flip_h else 1
+		if velocity.y < 0:
+			$Sprite.rotation = (-0.2 if velocity.x == 0 else -0.1) * flip_multiplier
+		elif velocity.y > 0:
+			$Sprite.rotation = (0.2 if velocity.x == 0 else 0.1) * flip_multiplier
+		else:
+			$Sprite.rotation = 0.1 if velocity.x > 0 else -0.1
 	else:
 		$Sprite.rotation = 0
 		if $Sprite.offset.y == 0:
 			$Sprite.offset.y = 0.6
 
-	if shake:
-		shake = false
-		$Sprite.rotation *= -1
-		$Sprite.offset.y *= -1
-		$ShakeTimer.start()
+		if shake:
+			shake = false
+			$Sprite.rotation *= -1
+			$Sprite.offset.y *= -1
+			$ShakeTimer.start()
 
 	# Collides, and don't get stuck on walls if we are sliding
 	move_and_slide(velocity)
