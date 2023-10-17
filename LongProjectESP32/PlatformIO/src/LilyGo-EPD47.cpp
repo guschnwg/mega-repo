@@ -34,7 +34,7 @@
 #include <WiFiClient.h>
 
 const char *ssid = "ROSINHA";
-const char *password = "91965839";
+const char *password = "********";
 
 WiFiServer server(80);
 
