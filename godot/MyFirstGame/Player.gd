@@ -5,6 +5,13 @@ export var move_right = "move_right"
 export var move_left = "move_left"
 export var move_up = "move_up"
 export var move_down = "move_down"
+export var shoot = "player_shoot"
+export var aim_right = "aim_right"
+export var aim_left = "aim_left"
+export var aim_up = "aim_up"
+export var aim_down = "aim_down"
+
+var bullet = preload("res://Bullet.tscn")
 
 var screen_size # Size of the game window.
 var shake = false
@@ -56,6 +63,17 @@ func _process(delta):
 	# Just make sure to go back to the other side if we leave the screen
 	position.x = fposmod(position.x, screen_size.x)
 	position.y = fposmod(position.y, screen_size.y)
+
+	var rect_position = Vector2.ZERO
+	rect_position.x = Input.get_action_strength(aim_right) - Input.get_action_strength(aim_left)
+	rect_position.y = Input.get_action_strength(aim_down) - Input.get_action_strength(aim_up)
+	$Aim.rect_global_position = global_position + rect_position.normalized() * 25
+	
+	if Input.is_action_just_pressed(shoot, true):
+		var bullet_instance = bullet.instance()
+		bullet_instance.global_position = $Aim.rect_global_position
+		bullet_instance.apply_impulse(Vector2.ZERO, Vector2(1000, 0).rotated(rect_position.angle()))
+		get_tree().get_root().add_child(bullet_instance)
 
 
 func _on_ShakeTimer_timeout():

@@ -19,11 +19,25 @@ margin_right = 480.0
 margin_bottom = 540.0
 color = Color( 0.87451, 0, 1, 1 )
 
+[node name="Points" type="Label" parent="P1Side"]
+margin_left = 413.0
+margin_top = 12.0
+margin_right = 426.0
+margin_bottom = 26.0
+rect_scale = Vector2( 4, 4 )
+
 [node name="P2Side" type="ColorRect" parent="."]
 margin_left = 481.0
 margin_right = 961.0
 margin_bottom = 540.0
 color = Color( 0.392157, 0, 0.823529, 1 )
+
+[node name="Points" type="Label" parent="P2Side"]
+margin_left = 22.0
+margin_top = 13.0
+margin_right = 35.0
+margin_bottom = 27.0
+rect_scale = Vector2( 4, 4 )
 
 [node name="Player1" parent="." instance=ExtResource( 2 )]
 position = Vector2( 112, 390 )
@@ -34,6 +48,11 @@ move_right = "enemy_right"
 move_left = "enemy_left"
 move_up = "enemy_up"
 move_down = "enemy_down"
+shoot = "enemy_shoot"
+aim_right = "enemy_aim_right"
+aim_left = "enemy_aim_left"
+aim_up = "enemy_aim_up"
+aim_down = "enemy_aim_down"
 
 [node name="Walls" type="Node2D" parent="."]
 

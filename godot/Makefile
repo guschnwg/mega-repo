@@ -86,13 +86,9 @@ full-vita: prepare build validate run output teardown
 
 vita: validate run output
 
-# Don't actually use this, send using USB which will work
-# For some reason there is a difference between the file sent using FTP and USB
 send-to-vita: FOLDER?=MyFirstGame
 send-to-vita:
-	@echo "binary"
-	@echo "put $(FOLDER).vpk /uma0:/$(FOLDER).vpk"
-	ftp --no-login 192.168.0.38 1337
+	curl -T $(FOLDER).vpk ftp://192.168.0.43:1337/uma0:/
 
 # To debug the image we built
 debug: FOLDER?=MyFirstGame

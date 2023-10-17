@@ -25,4 +25,8 @@ wait_time = 0.25
 one_shot = true
 autostart = true
 
+[node name="Aim" type="ColorRect" parent="."]
+margin_right = 5.0
+margin_bottom = 5.0
+
 [connection signal="timeout" from="ShakeTimer" to="." method="_on_ShakeTimer_timeout"]
