@@ -26,7 +26,9 @@ one_shot = true
 autostart = true
 
 [node name="Aim" type="ColorRect" parent="."]
-margin_right = 5.0
-margin_bottom = 5.0
+margin_left = -3.0
+margin_top = -3.0
+margin_right = 3.0
+margin_bottom = 3.0
 
 [connection signal="timeout" from="ShakeTimer" to="." method="_on_ShakeTimer_timeout"]

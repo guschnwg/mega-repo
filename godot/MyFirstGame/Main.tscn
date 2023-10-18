@@ -43,7 +43,7 @@ rect_scale = Vector2( 4, 4 )
 position = Vector2( 112, 390 )
 
 [node name="Player2" parent="." instance=ExtResource( 2 )]
-position = Vector2( 751, 188 )
+position = Vector2( 751, 164 )
 move_right = "enemy_right"
 move_left = "enemy_left"
 move_up = "enemy_up"
@@ -57,27 +57,68 @@ aim_down = "enemy_aim_down"
 [node name="Walls" type="Node2D" parent="."]
 
 [node name="Wall" parent="Walls" instance=ExtResource( 5 )]
-position = Vector2( 231, 214 )
+position = Vector2( 24, 220 )
+scale = Vector2( 3, 3 )
 
 [node name="Wall2" parent="Walls" instance=ExtResource( 5 )]
-position = Vector2( 116, 216 )
-scale = Vector2( 1, 1.00249 )
+position = Vector2( 72, 220 )
+scale = Vector2( 3, 3 )
 
 [node name="Wall3" parent="Walls" instance=ExtResource( 5 )]
-position = Vector2( 27, 301 )
-scale = Vector2( 1, 1.00249 )
+position = Vector2( 120, 220 )
+scale = Vector2( 3, 3 )
 
 [node name="Wall4" parent="Walls" instance=ExtResource( 5 )]
-position = Vector2( 38, 235 )
-scale = Vector2( 1, 1.00249 )
+position = Vector2( 168, 220 )
+scale = Vector2( 3, 3 )
 
 [node name="Wall5" parent="Walls" instance=ExtResource( 5 )]
-position = Vector2( 116, 289 )
-scale = Vector2( 1, 1.00249 )
+position = Vector2( 216, 220 )
+scale = Vector2( 3, 3 )
 
 [node name="Wall6" parent="Walls" instance=ExtResource( 5 )]
-position = Vector2( 81, 255 )
-scale = Vector2( 1, 1.00249 )
+position = Vector2( 264, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall7" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 312, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall8" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 360, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall9" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 408, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall10" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 456, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall11" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 504, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall12" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 552, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall13" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 600, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall14" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 648, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall15" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 696, 220 )
+scale = Vector2( 3, 3 )
+
+[node name="Wall16" parent="Walls" instance=ExtResource( 5 )]
+position = Vector2( 744, 220 )
+scale = Vector2( 3, 3 )
 
 [node name="Path2D" type="Path2D" parent="."]
 position = Vector2( 152, 107 )

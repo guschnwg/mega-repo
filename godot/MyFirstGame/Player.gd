@@ -15,6 +15,8 @@ var bullet = preload("res://Bullet.tscn")
 
 var screen_size # Size of the game window.
 var shake = false
+var can_fire = true
+export var fire_rate = 0.5
 
 func _ready():
 	screen_size = get_viewport_rect().size
@@ -69,11 +71,20 @@ func _process(delta):
 	rect_position.y = Input.get_action_strength(aim_down) - Input.get_action_strength(aim_up)
 	$Aim.rect_global_position = global_position + rect_position.normalized() * 25
 	
-	if Input.is_action_just_pressed(shoot, true):
-		var bullet_instance = bullet.instance()
-		bullet_instance.global_position = $Aim.rect_global_position
-		bullet_instance.apply_impulse(Vector2.ZERO, Vector2(1000, 0).rotated(rect_position.angle()))
-		get_tree().get_root().add_child(bullet_instance)
+#	if Input.is_action_just_pressed(shoot, true):
+	if can_fire and rect_position != Vector2.ZERO:
+		shoot(rect_position.angle())
+		can_fire = false
+		yield(get_tree().create_timer(fire_rate), "timeout")
+		can_fire = true
+
+
+func shoot(direction):
+	var bullet_instance = bullet.instance()
+	bullet_instance.global_position = $Aim.rect_global_position
+	bullet_instance.apply_impulse(Vector2.ZERO, Vector2(1000, 0).rotated(direction))
+	bullet_instance.add_collision_exception_with(self)
+	get_tree().get_root().add_child(bullet_instance)
 
 
 func _on_ShakeTimer_timeout():
