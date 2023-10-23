@@ -66,30 +66,23 @@ void draw_grid() {
 }
 
 void print_scale() {
-  epd_poweron();
+  uint8_t width = 12;
+  uint8_t columns = EPD_WIDTH / width;
+  uint8_t height = 12;
+  uint8_t lines = EPD_HEIGHT / height;
 
-  uint8_t width = EPD_WIDTH / 10;
-  uint8_t lines = EPD_WIDTH / width;
-  uint8_t height = EPD_HEIGHT / 10;
-  uint8_t columns = EPD_HEIGHT / height;
+  uint8_t scale_step = 255 / (columns + lines);
 
-  for (uint8_t j = 0; j < columns; j++) {
-    for (uint8_t i = 0; i < lines; i++) {
-      Rect_t area = {
-        .x = width * i,
-        .y = height * j,
-        .width = width,
-        .height = height + 1
-      };
+  uint8_t* framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
+  while (!framebuffer) {}
+  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
-      Serial.printf("x: %d, y: %d, w: %d, h: %d\n", area.x, area.y, area.width, area.height);
-
-      for (uint8_t k = 0; k < ((i + j) % 16); k++) {
-        epd_push_pixels(area, 10, 0);
-      }
+  for (uint8_t i = 0; i < lines; i++) {
+    for (uint8_t j = 0; j < columns; j++) {
+      epd_fill_rect(width * j, height * i, width, height + 1, (i + j) * scale_step, framebuffer);
     }
   }
-  epd_poweroff();
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
 }
 
 Rect_t coordinatesArea = { .x = 230, .y = 120, .width = 200, .height = 50 };
@@ -112,14 +105,12 @@ void print_location(int x, int y, bool only_coordinates) {
 }
 
 void print_message(const char* message) {
-  epd_poweron();
   if (server_cursor_y > EPD_HEIGHT) {
     server_cursor_y = initial_server_cursor_y;
     Rect_t serverReceivedArea = { .x = 10, .y = initial_server_cursor_y - 33, .width = EPD_WIDTH - 20, .height = EPD_HEIGHT - initial_server_cursor_y + 33 - 10 };
     epd_clear_area(serverReceivedArea);
   }
   cursor_x = 20; write_string((GFXfont *)&FiraSans, message, &cursor_x, &server_cursor_y, NULL);
-  epd_poweroff();
 }
 
 // Callback for BLE
@@ -135,7 +126,6 @@ class MyServerCallbacks: public BLEServerCallbacks {
 
 class MyCharacteristicCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-
       String message = "BLE: ";
       String value = pCharacteristic->getValue().c_str();
       message += value;
@@ -147,6 +137,7 @@ void setup() {
   Serial.begin(115200);
 
   epd_init();
+  epd_poweron();
 
   pinMode(TOUCH_INT, INPUT_PULLUP);
   Wire.begin(TOUCH_SDA, TOUCH_SCL);
@@ -160,7 +151,6 @@ void setup() {
   }
   memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
-  epd_poweron();
   epd_clear();
   write_string((GFXfont *)&FiraSans, "Screen loaded.", &cursor_x, &cursor_y, NULL);
 
@@ -188,8 +178,6 @@ void setup() {
 
   // draw_grid();
 
-  epd_poweroff();
-
   BLEDevice::init("Giovanna e-Paper");
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -209,7 +197,7 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
-  // print_scale();
+  print_scale();
 }
 
 
@@ -222,9 +210,7 @@ void read_and_print_touch() {
   touch.getPoint(x, y, 0);
   y = EPD_HEIGHT - y;
 
-  epd_poweron();
   print_location(x, y, true);
-  epd_poweroff();
 }
 
 
