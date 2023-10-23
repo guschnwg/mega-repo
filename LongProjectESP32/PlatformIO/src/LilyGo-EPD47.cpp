@@ -33,8 +33,15 @@
 #include <ESPmDNS.h>
 #include <WiFiClient.h>
 
-const char *ssid = "ROSINHA";
-const char *password = "********";
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+
+const char *ssid = "Cazinha";
+const char *password = "W1ll2020!!";
+
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
 WiFiServer server(80);
 
@@ -58,6 +65,33 @@ void draw_grid() {
   }
 }
 
+void print_scale() {
+  epd_poweron();
+
+  uint8_t width = EPD_WIDTH / 10;
+  uint8_t lines = EPD_WIDTH / width;
+  uint8_t height = EPD_HEIGHT / 10;
+  uint8_t columns = EPD_HEIGHT / height;
+
+  for (uint8_t j = 0; j < columns; j++) {
+    for (uint8_t i = 0; i < lines; i++) {
+      Rect_t area = {
+        .x = width * i,
+        .y = height * j,
+        .width = width,
+        .height = height + 1
+      };
+
+      Serial.printf("x: %d, y: %d, w: %d, h: %d\n", area.x, area.y, area.width, area.height);
+
+      for (uint8_t k = 0; k < ((i + j) % 16); k++) {
+        epd_push_pixels(area, 10, 0);
+      }
+    }
+  }
+  epd_poweroff();
+}
+
 Rect_t coordinatesArea = { .x = 230, .y = 120, .width = 200, .height = 50 };
 void print_location(int x, int y, bool only_coordinates) {
   if (only_coordinates) {
@@ -76,6 +110,38 @@ void print_location(int x, int y, bool only_coordinates) {
 
   cursor_x = x; cursor_y = y; write_string((GFXfont *)&FiraSans, ".", &cursor_x, &cursor_y, NULL);
 }
+
+void print_message(const char* message) {
+  epd_poweron();
+  if (server_cursor_y > EPD_HEIGHT) {
+    server_cursor_y = initial_server_cursor_y;
+    Rect_t serverReceivedArea = { .x = 10, .y = initial_server_cursor_y - 33, .width = EPD_WIDTH - 20, .height = EPD_HEIGHT - initial_server_cursor_y + 33 - 10 };
+    epd_clear_area(serverReceivedArea);
+  }
+  cursor_x = 20; write_string((GFXfont *)&FiraSans, message, &cursor_x, &server_cursor_y, NULL);
+  epd_poweroff();
+}
+
+// Callback for BLE
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      // Do something when a client connects.
+    }
+
+    void onDisconnect(BLEServer* pServer) {
+      // Do something when a client disconnects.
+    }
+};
+
+class MyCharacteristicCallbacks: public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *pCharacteristic) {
+
+      String message = "BLE: ";
+      String value = pCharacteristic->getValue().c_str();
+      message += value;
+      print_message(message.c_str());
+    }
+};
 
 void setup() {
   Serial.begin(115200);
@@ -123,6 +189,27 @@ void setup() {
   // draw_grid();
 
   epd_poweroff();
+
+  BLEDevice::init("Giovanna e-Paper");
+  BLEServer *pServer = BLEDevice::createServer();
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID,
+    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE
+  );
+
+  pCharacteristic->setValue("Hello World says Neil");
+  pCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+  pService->start();
+  // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
+
+  // print_scale();
 }
 
 
@@ -165,14 +252,8 @@ void read_and_print_server() {
   }
   req = req.substring(addr_start + 1, addr_end);
 
-  epd_poweron();
-  if (server_cursor_y > EPD_HEIGHT) {
-    server_cursor_y = initial_server_cursor_y;
-    Rect_t serverReceivedArea = { .x = 10, .y = initial_server_cursor_y - 33, .width = EPD_WIDTH - 20, .height = EPD_HEIGHT - initial_server_cursor_y + 33 - 10 };
-    epd_clear_area(serverReceivedArea);
-  }
-  cursor_x = 20; write_string((GFXfont *)&FiraSans, req.c_str(), &cursor_x, &server_cursor_y, NULL);
-  epd_poweroff();
+  String message = "Server: " + req;
+  print_message(message.c_str());
 
   client.print(":)");
 
