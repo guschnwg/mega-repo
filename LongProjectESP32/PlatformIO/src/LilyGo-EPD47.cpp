@@ -28,6 +28,7 @@
 #include "firasans.h"
 #include <Wire.h>
 #include <touch.h>
+#include "pcf8563.h"
 
 #include <WiFi.h>
 #include <ESPmDNS.h>
@@ -53,6 +54,10 @@ int cursor_y = 60;
 
 int initial_server_cursor_y = 210;
 int server_cursor_y = initial_server_cursor_y;
+
+int vref = 1100;
+
+PCF8563_Class rtc;
 
 
 void draw_grid() {
@@ -88,7 +93,7 @@ void print_scale() {
 Rect_t coordinatesArea = { .x = 230, .y = 120, .width = 200, .height = 50 };
 void print_location(int x, int y, bool only_coordinates) {
   if (only_coordinates) {
-    epd_clear_area_cycles(coordinatesArea, 1, 50);
+    epd_clear_area_cycles(coordinatesArea, 1, 15);
   }
 
   char str[200];
@@ -133,6 +138,57 @@ class MyCharacteristicCallbacks: public BLECharacteristicCallbacks {
     }
 };
 
+struct Button {
+  int32_t start_x;
+  int32_t start_y;
+  int32_t end_x;
+  int32_t end_y;
+
+  char* to;
+} typedef Button;
+
+Button buttons[10] = {};
+
+void empty_buttons() {
+  memset(buttons, 0, sizeof(buttons));
+}
+
+void display__menu() {
+  empty_buttons();
+
+  epd_clear_area_cycles(epd_full_screen(), 1, 50);
+
+  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+
+  int32_t cursor_x, cursor_y = 0;
+
+  epd_draw_rect(10, 10, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (10 + 110) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Menu", &cursor_x, &cursor_y, framebuffer);
+  buttons[0] = { .start_x = 10, .start_y = 10, .end_x = EPD_WIDTH - 20, .end_y = 110, .to = "menu" };
+
+  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Bluetooth", &cursor_x, &cursor_y, framebuffer);
+  buttons[1] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "bluetooth" };
+
+  epd_draw_rect(10, 230, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (230 + 330) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Wi-Fi", &cursor_x, &cursor_y, framebuffer);
+  buttons[2] = { .start_x = 10, .start_y = 230, .end_x = EPD_WIDTH - 20, .end_y = 330, .to = "wifi" };
+
+  epd_draw_rect(10, 340, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (340 + 440) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Touch", &cursor_x, &cursor_y, framebuffer);
+  buttons[3] = { .start_x = 10, .start_y = 340, .end_x = EPD_WIDTH - 20, .end_y = 440, .to = "touch" };
+
+  uint16_t v = analogRead(BATT_PIN);
+  float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
+  String voltage = "➸ Voltage: " + String(battery_voltage) + "V";
+  voltage = voltage + String(" (") + rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD_H_M_S) + String(")");
+  Serial.println(voltage);
+
+  cursor_x = 20; cursor_y = 480; write_string((GFXfont *)&FiraSans, voltage.c_str(), &cursor_x, &cursor_y, framebuffer);
+
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -174,6 +230,9 @@ void setup() {
     cursor_x = 120; cursor_y = 110; write_string((GFXfont *)&FiraSans, WiFi.localIP().toString().c_str(), &cursor_x, &cursor_y, NULL);
   }
 
+  rtc.begin();
+  // rtc.setDateTime(2022, 6, 30, 0, 0, 0);
+
   print_location(0, 0, false);
 
   // draw_grid();
@@ -197,20 +256,8 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
-  print_scale();
-}
-
-
-void read_and_print_touch() {
-  if (!digitalRead(TOUCH_INT) || !touch.scanPoint()) {
-    return;
-  }
-
-  uint16_t x, y;
-  touch.getPoint(x, y, 0);
-  y = EPD_HEIGHT - y;
-
-  print_location(x, y, true);
+  // print_scale();
+  display__menu();
 }
 
 
@@ -247,9 +294,128 @@ void read_and_print_server() {
 }
 
 
-void loop() {
-  read_and_print_touch();
+void display__wifi() {
+  empty_buttons();
+
+  epd_clear_area_cycles(epd_full_screen(), 1, 50);
+  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+
+  int32_t cursor_x = 10;
+  int32_t cursor_y = 60;
+  write_string((GFXfont *)&FiraSans, "WI-FI", &cursor_x, &cursor_y, framebuffer);
+
+  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Back", &cursor_x, &cursor_y, framebuffer);
+  buttons[0] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "menu" };
+
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+}
+
+
+void display__bluetooth() {
+  empty_buttons();
+
+  epd_clear_area_cycles(epd_full_screen(), 1, 50);
+  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+
+  int32_t cursor_x = 10;
+  int32_t cursor_y = 60;
+  write_string((GFXfont *)&FiraSans, "Bluetooth", &cursor_x, &cursor_y, framebuffer);
+
+  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Back", &cursor_x, &cursor_y, framebuffer);
+  buttons[0] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "menu" };
+
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+}
+
+
+void display__touch() {
+  empty_buttons();
+
+  epd_clear_area_cycles(epd_full_screen(), 1, 50);
+  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+
+  int32_t cursor_x = 10;
+  int32_t cursor_y = 60;
+  write_string((GFXfont *)&FiraSans, "Touch", &cursor_x, &cursor_y, framebuffer);
+
+  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
+  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Back", &cursor_x, &cursor_y, framebuffer);
+  buttons[0] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "menu" };
+
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+}
+
+
+char* current_screen = "menu";
+
+
+void display(char* to) {
+  if (strcmp(to, "menu") == 0) {
+    current_screen = "menu";
+    display__menu();
+  } else if (strcmp(to, "bluetooth") == 0) {
+    current_screen = "bluetooth";
+    display__bluetooth();
+  } else if (strcmp(to, "wifi") == 0) {
+    current_screen = "wifi";
+    display__wifi();
+  } else if (strcmp(to, "touch") == 0) {
+    current_screen = "touch";
+    display__touch();
+  }
+}
+
+
+void navigate(uint16_t x, uint16_t y) {
+  if (x == 0 || y == 0) {
+    return;
+  }
+
+  for (int i = 0; i < 10; i++) {
+    Button button = buttons[i];
+    if (button.start_x <= x && x <= button.end_x && button.start_y <= y && y <= button.end_y) {
+      display(button.to);
+      return;
+    }
+  }
+}
+
+
+void loop__touch(uint16_t x, uint16_t y) {
+  if (x == 0 || y == 0) {
+    return;
+  }
+
+  print_location(x, y, true);
+}
+
+void loop__server() {
   read_and_print_server();
+}
+
+
+void loop() {
+  uint16_t x, y;
+  // Read touch and find which button was pressed
+  if (digitalRead(TOUCH_INT) && touch.scanPoint()) {
+    touch.getPoint(x, y, 0);
+    y = EPD_HEIGHT - y;
+  } else {
+    x = 0;
+    y = 0;
+  }
+
+  if (strcmp(current_screen, "touch") == 0) {
+    loop__touch(x, y);
+  } else if (strcmp(current_screen, "bluetooth") == 0) {
+    loop__server();
+  } else if (strcmp(current_screen, "wifi") == 0) {
+    loop__server();
+  }
+
+  navigate(x, y);
 
   delay(10);
 }
