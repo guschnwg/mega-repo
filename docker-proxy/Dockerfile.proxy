@@ -1,0 +1,8 @@
+FROM python:3.11.6-alpine
+
+RUN apk add --no-cache bsd-compat-headers rust cargo openssl ca-certificates
+RUN pip install mitmproxy==10.1.6
+
+COPY . .
+
+CMD mitmdump -s /code/proxy.py --mode regular@8081

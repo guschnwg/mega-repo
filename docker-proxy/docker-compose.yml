@@ -1,0 +1,27 @@
+version: '3'
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    volumes:
+      - ./:/code:consistent
+      - ./.mitmproxy:/root/.mitmproxy:consistent
+    image: proxy
+    ports:
+      - "8081:8081"
+    container_name: proxy
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    volumes:
+      - ./:/code:consistent
+      - ./.mitmproxy:/root/.mitmproxy:consistent
+    image: server
+    environment:
+      - HTTP_PROXY=http://proxy:8081
+      - HTTPS_PROXY=http://proxy:8081
+      - CURL_CA_BUNDLE=/root/.mitmproxy/mitmproxy-ca-cert.pem
+    container_name: server

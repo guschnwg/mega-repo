@@ -10,3 +10,5 @@ tcc/.next
 godot/server-editor.zip
 godot/vita_template_3.6.beta.tpz
 godot/Godot.app
+.mitmproxy
+__pycache__
