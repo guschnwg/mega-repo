@@ -29,6 +29,7 @@
 #include <Wire.h>
 #include <touch.h>
 #include "pcf8563.h"
+#include "time.h"
 
 #include <WiFi.h>
 #include <ESPmDNS.h>
@@ -47,6 +48,7 @@ const char *password = "W1ll2020!!";
 WiFiServer server(80);
 
 TouchClass touch;
+
 uint8_t *framebuffer = NULL;
 
 int cursor_x = 20;
@@ -59,55 +61,6 @@ int vref = 1100;
 
 PCF8563_Class rtc;
 
-
-void draw_grid() {
-  for (int i = 0; i < EPD_WIDTH; i += 10) {
-    for (int j = 0; j < EPD_HEIGHT; j += 10) {
-      int cursor_w = i;
-      int cursor_h = j;
-      write_string((GFXfont *)&FiraSans, ".", &cursor_w, &cursor_h, NULL);
-    }
-  }
-}
-
-void print_scale() {
-  uint8_t width = 12;
-  uint8_t columns = EPD_WIDTH / width;
-  uint8_t height = 12;
-  uint8_t lines = EPD_HEIGHT / height;
-
-  uint8_t scale_step = 255 / (columns + lines);
-
-  uint8_t* framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-  while (!framebuffer) {}
-  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
-
-  for (uint8_t i = 0; i < lines; i++) {
-    for (uint8_t j = 0; j < columns; j++) {
-      epd_fill_rect(width * j, height * i, width, height + 1, (i + j) * scale_step, framebuffer);
-    }
-  }
-  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
-}
-
-Rect_t coordinatesArea = { .x = 230, .y = 120, .width = 200, .height = 50 };
-void print_location(int x, int y, bool only_coordinates) {
-  if (only_coordinates) {
-    epd_clear_area_cycles(coordinatesArea, 1, 15);
-  }
-
-  char str[200];
-  if (only_coordinates) {
-    sprintf(str, " %dx%d", x, y);
-    cursor_x = coordinatesArea.x; cursor_y = 160; write_string((GFXfont *)&FiraSans, str, &cursor_x, &cursor_y, NULL);
-  } else {
-    sprintf(str, "Last touch: %dx%d", x, y);
-    cursor_x = 20; cursor_y = 160; write_string((GFXfont *)&FiraSans, str, &cursor_x, &cursor_y, NULL);
-  }
-  coordinatesArea.width = cursor_x - coordinatesArea.x + 10;
-
-  cursor_x = x; cursor_y = y; write_string((GFXfont *)&FiraSans, ".", &cursor_x, &cursor_y, NULL);
-}
 
 void print_message(const char* message) {
   if (server_cursor_y > EPD_HEIGHT) {
@@ -148,45 +101,50 @@ struct Button {
 } typedef Button;
 
 Button buttons[10] = {};
+uint8_t buttons_count = 0;
+
 
 void empty_buttons() {
+  buttons_count = 0;
   memset(buttons, 0, sizeof(buttons));
+}
+
+void button(char* label, char* to, int32_t x, int32_t y, int32_t w, int32_t h) {
+  epd_draw_rect(x, y, w, h, 0, framebuffer);
+  cursor_x = x + 10;
+  cursor_y = (y + y + h) / 2 + FiraSans.ascender / 2;
+  write_string(&FiraSans, label, &cursor_x, &cursor_y, framebuffer);
+  buttons[buttons_count] = { .start_x = x, .start_y = y, .end_x = x + w, .end_y = y + h, .to = to };
+  buttons_count++;
+}
+
+void clear__content() {
+  epd_clear_area_cycles(epd_full_screen(), 1, 50);
+  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+}
+
+void display__content() {
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
 }
 
 void display__menu() {
   empty_buttons();
 
-  epd_clear_area_cycles(epd_full_screen(), 1, 50);
+  clear__content();
 
-  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
-
-  int32_t cursor_x, cursor_y = 0;
-
-  epd_draw_rect(10, 10, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (10 + 110) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Menu", &cursor_x, &cursor_y, framebuffer);
-  buttons[0] = { .start_x = 10, .start_y = 10, .end_x = EPD_WIDTH - 20, .end_y = 110, .to = "menu" };
-
-  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Bluetooth", &cursor_x, &cursor_y, framebuffer);
-  buttons[1] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "bluetooth" };
-
-  epd_draw_rect(10, 230, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (230 + 330) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Wi-Fi", &cursor_x, &cursor_y, framebuffer);
-  buttons[2] = { .start_x = 10, .start_y = 230, .end_x = EPD_WIDTH - 20, .end_y = 330, .to = "wifi" };
-
-  epd_draw_rect(10, 340, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (340 + 440) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Touch", &cursor_x, &cursor_y, framebuffer);
-  buttons[3] = { .start_x = 10, .start_y = 340, .end_x = EPD_WIDTH - 20, .end_y = 440, .to = "touch" };
+  button("Menu", "menu", 10, 10, 300, 60);
+  button("Bluetooth", "bluetooth", 10, 80, 300, 60);
+  button("Wi-Fi", "wifi", 10, 150, 300, 60);
+  button("Touch", "touch", 10, 220, 300, 60);
 
   uint16_t v = analogRead(BATT_PIN);
   float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
   String voltage = "➸ Voltage: " + String(battery_voltage) + "V";
   voltage = voltage + String(" (") + rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD_H_M_S) + String(")");
   Serial.println(voltage);
+  cursor_x = 20; cursor_y = 480; write_string(&FiraSans, voltage.c_str(), &cursor_x, &cursor_y, framebuffer);
 
-  cursor_x = 20; cursor_y = 480; write_string((GFXfont *)&FiraSans, voltage.c_str(), &cursor_x, &cursor_y, framebuffer);
-
-  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+  display__content();
 }
 
 void setup() {
@@ -197,26 +155,21 @@ void setup() {
 
   pinMode(TOUCH_INT, INPUT_PULLUP);
   Wire.begin(TOUCH_SDA, TOUCH_SCL);
-  if (!touch.begin()) {
-    while (1) {}
-  }
+  touch.begin();
 
   framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-  if (!framebuffer) {
-    while (1) {}
-  }
   memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
   epd_clear();
-  write_string((GFXfont *)&FiraSans, "Screen loaded.", &cursor_x, &cursor_y, NULL);
+  write_string(&FiraSans, "Screen loaded.", &cursor_x, &cursor_y, NULL);
 
-  cursor_x = 20; cursor_y = 110; write_string((GFXfont *)&FiraSans, "WIFI: ", &cursor_x, &cursor_y, NULL);
+  cursor_x = 20; cursor_y = 110; write_string(&FiraSans, "WIFI: ", &cursor_x, &cursor_y, NULL);
   Rect_t wifiLoadArea = { .x = cursor_x - 5, .y = 70, .width = EPD_WIDTH - 120, .height =  50 };
 
   WiFi.begin(ssid, password);
   int tries = 10;
   while (WiFi.status() != WL_CONNECTED && tries > 0) {
-    cursor_y = 110; write_string((GFXfont *)&FiraSans, ".", &cursor_x, &cursor_y, NULL);
+    cursor_y = 110; write_string(&FiraSans, ".", &cursor_x, &cursor_y, NULL);
     delay(500);
     tries -= 1;
     Serial.println(tries);
@@ -225,17 +178,12 @@ void setup() {
 
   epd_clear_area_cycles(wifiLoadArea, 1, 50);
   if (WiFi.status() != WL_CONNECTED) {
-    cursor_x = 120; cursor_y = 110; write_string((GFXfont *)&FiraSans, "Gave up :(", &cursor_x, &cursor_y, NULL);
+    cursor_x = 120; cursor_y = 110; write_string(&FiraSans, "Gave up :(", &cursor_x, &cursor_y, NULL);
   } else {
-    cursor_x = 120; cursor_y = 110; write_string((GFXfont *)&FiraSans, WiFi.localIP().toString().c_str(), &cursor_x, &cursor_y, NULL);
+    cursor_x = 120; cursor_y = 110; write_string(&FiraSans, WiFi.localIP().toString().c_str(), &cursor_x, &cursor_y, NULL);
   }
 
   rtc.begin();
-  // rtc.setDateTime(2022, 6, 30, 0, 0, 0);
-
-  print_location(0, 0, false);
-
-  // draw_grid();
 
   BLEDevice::init("Giovanna e-Paper");
   BLEServer *pServer = BLEDevice::createServer();
@@ -256,7 +204,6 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
-  // print_scale();
   display__menu();
 }
 
@@ -293,65 +240,81 @@ void read_and_print_server() {
   client.stop();
 }
 
+//
+
+unsigned long last_refresh_millis = -1;
+void display__wifi__refresh_time(uint8_t *framebuffer) {
+  // Refresh every 2 seconds
+  if (millis() - last_refresh_millis < 2000) {
+    return;
+  }
+
+  if (framebuffer == NULL) {
+    Rect_t area = { .x = 0, .y = 110 - FiraSans.ascender, .width = EPD_WIDTH, .height = FiraSans.ascender };
+    epd_clear_area_cycles(area, 1, 50);
+  }
+
+  RTC_Date date = rtc.getDateTime();
+  String date_string = String(date.year) + String("/") + String(date.month) + String("/") + String(date.day);
+  String time_string = String(date.hour) + String(":") + String(date.minute) + String(":") + String(date.second);
+  String to_print = "Date: " + date_string + " " + time_string;
+  cursor_x = 10; cursor_y = 110; write_string(&FiraSans, to_print.c_str(), &cursor_x, &cursor_y, framebuffer);
+
+  last_refresh_millis = millis();
+}
+
 
 void display__wifi() {
   empty_buttons();
 
-  epd_clear_area_cycles(epd_full_screen(), 1, 50);
-  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+  clear__content();
 
-  int32_t cursor_x = 10;
-  int32_t cursor_y = 60;
-  write_string((GFXfont *)&FiraSans, "WI-FI", &cursor_x, &cursor_y, framebuffer);
+  cursor_x = 10; cursor_y = 60; write_string(&FiraSans, "WI-FI", &cursor_x, &cursor_y, framebuffer);
 
-  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Back", &cursor_x, &cursor_y, framebuffer);
-  buttons[0] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "menu" };
+  display__wifi__refresh_time(framebuffer);
 
-  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+  button("Set time", "set_time", 10, 200, 300, 60);
+  button("Reset time", "reset_time", 10, 270, 300, 60);
+  button("Refresh", "refresh", 10, 340, 300, 60);
+  button("Back", "menu", 10, 410, 300, 60);
+
+  display__content();
 }
+
+//
 
 
 void display__bluetooth() {
   empty_buttons();
 
-  epd_clear_area_cycles(epd_full_screen(), 1, 50);
-  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+  clear__content();
 
-  int32_t cursor_x = 10;
-  int32_t cursor_y = 60;
-  write_string((GFXfont *)&FiraSans, "Bluetooth", &cursor_x, &cursor_y, framebuffer);
+  cursor_x = 10; cursor_y = 60; write_string(&FiraSans, "Bluetooth", &cursor_x, &cursor_y, framebuffer);
 
-  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Back", &cursor_x, &cursor_y, framebuffer);
-  buttons[0] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "menu" };
+  button("Back", "menu", 10, 120, 300, 60);
 
-  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+  display__content();
 }
 
 
 void display__touch() {
   empty_buttons();
+  clear__content();
 
-  epd_clear_area_cycles(epd_full_screen(), 1, 50);
-  memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+  cursor_x = 10; cursor_y = 60; write_string(&FiraSans, "Touch", &cursor_x, &cursor_y, framebuffer);
 
-  int32_t cursor_x = 10;
-  int32_t cursor_y = 60;
-  write_string((GFXfont *)&FiraSans, "Touch", &cursor_x, &cursor_y, framebuffer);
+  button("Back", "menu", 10, 120, 300, 60);
 
-  epd_draw_rect(10, 120, EPD_WIDTH - 20, 100, 0, framebuffer);
-  cursor_x = 20; cursor_y = (120 + 220) / 2 + FiraSans.ascender / 2; write_string((GFXfont *)&FiraSans, "Back", &cursor_x, &cursor_y, framebuffer);
-  buttons[0] = { .start_x = 10, .start_y = 120, .end_x = EPD_WIDTH - 20, .end_y = 220, .to = "menu" };
-
-  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+  display__content();
 }
 
 
 char* current_screen = "menu";
-
-
 void display(char* to) {
+  if (strcmp(to, "refresh") == 0) {
+    to = current_screen;
+  }
+
   if (strcmp(to, "menu") == 0) {
     current_screen = "menu";
     display__menu();
@@ -364,6 +327,16 @@ void display(char* to) {
   } else if (strcmp(to, "touch") == 0) {
     current_screen = "touch";
     display__touch();
+  } else if (strcmp(to, "set_time") == 0) {
+    current_screen = "wifi";
+    configTime(0, 0, "pool.ntp.org");
+    rtc.syncToRtc();
+    display__wifi();
+  } else if (strcmp(to, "reset_time") == 0) {
+    current_screen = "wifi";
+    rtc.setDateTime(2020, 1, 1, 0, 0, 0);
+    rtc.syncToSystem();
+    display__wifi();
   }
 }
 
@@ -383,19 +356,6 @@ void navigate(uint16_t x, uint16_t y) {
 }
 
 
-void loop__touch(uint16_t x, uint16_t y) {
-  if (x == 0 || y == 0) {
-    return;
-  }
-
-  print_location(x, y, true);
-}
-
-void loop__server() {
-  read_and_print_server();
-}
-
-
 void loop() {
   uint16_t x, y;
   // Read touch and find which button was pressed
@@ -408,11 +368,12 @@ void loop() {
   }
 
   if (strcmp(current_screen, "touch") == 0) {
-    loop__touch(x, y);
+    // loop__touch(x, y);
   } else if (strcmp(current_screen, "bluetooth") == 0) {
-    loop__server();
+    read_and_print_server();
   } else if (strcmp(current_screen, "wifi") == 0) {
-    loop__server();
+    read_and_print_server();
+    display__wifi__refresh_time(NULL);
   }
 
   navigate(x, y);

@@ -38,3 +38,13 @@ Puppeteer to get the currently available interviews times for US visa
 
 Extension to manage the files that should not be committed, but I want to keep them in my local environment.
 For example, some configs to some specific files that change some functionality that i need to have locally, but should not be committed.
+
+## Dontpad
+
+curl 'https://api.dontpad.com/giovanna' \
+  -H 'content-type: application/x-www-form-urlencoded;charset=UTF-8' \
+  --data-raw 'text=oiemvsodlmbvklsdmbsb&lastModified=1&force=true' \
+  --compressed
+
+
+curl https://api.dontpad.com/giovanna.body.json\?lastModified=1
