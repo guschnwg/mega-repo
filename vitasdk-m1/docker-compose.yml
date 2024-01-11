@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  vita-builder:
+    build: .
+    volumes:
+      - ./out:/out:consistent

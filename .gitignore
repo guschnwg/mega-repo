@@ -12,3 +12,4 @@ godot/vita_template_3.6.beta.tpz
 godot/Godot.app
 .mitmproxy
 __pycache__
+vitasdk-m1/out/

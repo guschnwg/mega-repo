@@ -1,3 +1,9 @@
 [submodule "godot/godot-vita"]
 	path = godot/godot-vita
 	url = git@github.com:guschnwg/godot-vita.git
+[submodule "vitasdk-m1/samples"]
+	path = vitasdk-m1/samples
+	url = https://github.com/vitasdk/samples.git
+[submodule "vitasdk-m1/vdpm"]
+	path = vitasdk-m1/vdpm
+	url = https://github.com/SonicMastr/vdpm.git
