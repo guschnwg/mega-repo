@@ -1,0 +1,6 @@
+/games/mygame/CMakeFiles/mygame.dir
+/games/mygame/CMakeFiles/mygame-velf.dir
+/games/mygame/CMakeFiles/mygame.self-self.dir
+/games/mygame/CMakeFiles/mygame.vpk-vpk.dir
+/games/mygame/CMakeFiles/edit_cache.dir
+/games/mygame/CMakeFiles/rebuild_cache.dir

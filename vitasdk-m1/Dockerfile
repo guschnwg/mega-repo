@@ -1,6 +1,6 @@
 FROM debian
 
-COPY . .
+COPY vdpm /vdpm
 
 RUN apt-get update
 RUN apt-get install -y make git-core cmake python-is-python3 curl wget sudo libbz2-dev bzip2 xz-utils
