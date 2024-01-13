@@ -23,7 +23,8 @@ build-game:
 			echo '--- Cleaning ---' && \
 			rm -rf CMakeCache.txt CMakeFiles && \
 			rm -rf $(PROJECT_PATH)/$(OUTPUT_FILE)* && \
-			rm $(PROJECT_PATH)/cmake_install.cmake \
+			rm $(PROJECT_PATH)/cmake_install.cmake && \
+			rm $(PROJECT_PATH)/Makefile \
 		"
 
 # Specifics for mygame
