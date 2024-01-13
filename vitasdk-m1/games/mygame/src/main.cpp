@@ -1,56 +1,76 @@
-#include <psp2/kernel/threadmgr.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_render.h>
+#include <psp2/ctrl.h>
+#include <psp2common/ctrl.h>
 #include <psp2/kernel/processmgr.h>
-#include <psp2/touch.h>
 #ifdef __vita__
 #include <psp2/power.h>
 #endif
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_render.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdint.h>
 
-#include "debugScreen.h"
-
+enum { VITA_SCREEN_WIDTH = 960, VITA_SCREEN_HEIGHT = 544 };
 
 SDL_Window* gWindow;
 SDL_Renderer* gRenderer;
+SceCtrlData ctrl;
 
-int main(int argc, char *argv[]) {
-	psvDebugScreenInit();
-	psvDebugScreenPrintf("Hello, world!\n");
+int main(int argc, char* argv[])
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("Error SDL_Init: %s\n\n", SDL_GetError());
+        return -1;
+    }
 
-	sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, SCE_TOUCH_SAMPLING_STATE_START);
-	sceTouchEnableTouchForce(SCE_TOUCH_PORT_FRONT);
+    if ((gWindow = SDL_CreateWindow("Giovanna", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, VITA_SCREEN_WIDTH, VITA_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)) == NULL) {
+        printf("Error SDL_CreateWindow: %s\n\n", SDL_GetError());
+        return -1;
+    }
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) return -1;
+    if ((gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == NULL){
+        printf("Error SDL_CreateRenderer: %s\n\n", SDL_GetError());
+        return -1;
+    }
 
-    if ((gWindow = SDL_CreateWindow("MeuHello", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)) == NULL) return -1;
-	psvDebugScreenPrintf("-- %d --\n", gWindow);
+    int rectX = 100;
+    int rectY = 100;
+    while (true) {
+        printf("Tick %d\n", SDL_GetTicks());
+        printf("handleInputs\n");
+        sceCtrlPeekBufferPositive(0, &ctrl, 1);
+        printf("Buttons %d\n", ctrl.buttons);
 
-	// THIS CRASHEEEES
-	if ((gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == NULL) {
-		psvDebugScreenPrintf("\n Error? %s\n\n", SDL_GetError());
-		return -1;
-	}
+        if (ctrl.buttons & SCE_CTRL_START) break;
+        if (ctrl.buttons & SCE_CTRL_RIGHT) rectX += 1;
+        if (ctrl.buttons & SCE_CTRL_DOWN) rectY += 1;
 
-	SceTouchData touch;
-	while (1) {
-		psvDebugScreenPrintf("\e[0;5H");
+        SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+        SDL_RenderClear(gRenderer);
 
-		sceTouchPeek(0, &touch, 1);
-		psvDebugScreenPrintf("\n\n%4i : %-4i", touch.report[0].x, touch.report[0].y);
+        SDL_Rect fillRect = { rectX, rectY, 100, 100 };
+        SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+        SDL_RenderFillRect(gRenderer, &fillRect);
 
-		if (
-			touch.report[0].x > 900
-			&& touch.report[0].x < 1100
-			&& touch.report[0].y > 500
-			&& touch.report[0].y < 600
-		) {
-			return 0;
-		}
-	}
+        SDL_RenderPresent(gRenderer);
 
-	sceKernelDelayThread(3*1000000); // Wait for 3 seconds
-	return 0;
+        SDL_Delay(1000 / 30);
+    }
+
+    printf("Bye, sleeping for 3 seconds...\n");
+    sceKernelDelayThread(3 * 1000 * 1000);
+    printf("Ready to go...\n");
+
+    SDL_DestroyRenderer(gRenderer);
+    printf("Renderer destroyed %s...\n", SDL_GetError());
+
+    SDL_DestroyWindow(gWindow);
+    printf("Window destroyed %s...\n", SDL_GetError());
+
+    IMG_Quit();
+    printf("IMG destroyed %s...\n", SDL_GetError());
+
+    SDL_Quit();
+    printf("SDL destroyed %s...\n", SDL_GetError());
+
+    return 0;
 }
