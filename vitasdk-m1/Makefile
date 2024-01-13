@@ -14,14 +14,16 @@ build-game:
 		bash -c "\
 			echo '--- cd to $(PROJECT_PATH) ---' && \
 			cd $(PROJECT_PATH)/ && \
-			echo '--- Cleaning ---' && \
-			rm -rf CMakeCache.txt CMakeFiles && \
 			echo '--- CMake it ---' && \
 			cmake . && \
 			echo '--- Make it ---' && \
 			make && \
 			echo '--- Output it ---' && \
-			cp $(OUTPUT_FILE).vpk /out\
+			cp $(OUTPUT_FILE).vpk /out && \
+			echo '--- Cleaning ---' && \
+			rm -rf CMakeCache.txt CMakeFiles && \
+			rm -rf $(PROJECT_PATH)/$(OUTPUT_FILE)* && \
+			rm $(PROJECT_PATH)/cmake_install.cmake \
 		"
 
 # Specifics for mygame
@@ -45,3 +47,6 @@ watch-my-game:
 
 kill-vita3k:
 	killall Vita3K
+
+send-to-vita:
+	curl -T ./out/mygame.vpk ftp://192.168.0.35:1337/ux0:/
