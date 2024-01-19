@@ -5,6 +5,7 @@
 #include <psp2/ctrl.h>
 #include <psp2common/ctrl.h>
 #include <psp2/kernel/processmgr.h>
+#include <stdbool.h>
 #ifdef __vita__
 #include <psp2/power.h>
 #endif
@@ -41,8 +42,12 @@ int main(int argc, char* argv[])
         printf("Buttons %d\n", ctrl.buttons);
 
         if (ctrl.buttons & SCE_CTRL_START) break;
+
         if (ctrl.buttons & SCE_CTRL_RIGHT) rectX += 1;
+        else if (ctrl.buttons & SCE_CTRL_LEFT) rectX -= 1;
+
         if (ctrl.buttons & SCE_CTRL_DOWN) rectY += 1;
+        else if (ctrl.buttons & SCE_CTRL_UP) rectY -= 1;
 
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
         SDL_RenderClear(gRenderer);
