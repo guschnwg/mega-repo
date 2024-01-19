@@ -2,6 +2,7 @@ version: '3'
 
 services:
   vita-builder:
+    image: vita-builder
     build: .
     volumes:
       - ./out:/out:consistent

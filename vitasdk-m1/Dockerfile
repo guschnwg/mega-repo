@@ -1,4 +1,4 @@
-FROM debian
+FROM bitnami/minideb
 
 COPY vdpm /vdpm
 
@@ -11,5 +11,7 @@ ENV PATH=$VITASDK/bin:$PATH
 WORKDIR /vdpm
 RUN ./bootstrap-vitasdk.sh
 RUN ./install-all.sh
+
+RUN rm -rf /vdpm
 
 WORKDIR /

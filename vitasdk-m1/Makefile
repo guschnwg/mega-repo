@@ -1,5 +1,11 @@
+.PHONY: build push
+
 build:
-	docker compose build
+	docker compose build --no-cache
+
+push:
+	docker tag docker.io/library/vita-builder:latest docker.io/giznrdni/vita-builder:latest
+	docker push docker.io/giznrdni/vita-builder:latest
 
 build-game: PROJECT?=hello_world
 build-game: PROJECT_PATH?=/samples/$(PROJECT)
