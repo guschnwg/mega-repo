@@ -1,20 +1,27 @@
+#include <stdbool.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
-#include <psp2/ctrl.h>
 #include <psp2common/ctrl.h>
-#include <psp2/kernel/processmgr.h>
-#include <stdbool.h>
-#ifdef __vita__
+#include <psp2/ctrl.h>
 #include <psp2/power.h>
-#endif
+#include <psp2/kernel/processmgr.h>
 
 enum { VITA_SCREEN_WIDTH = 960, VITA_SCREEN_HEIGHT = 544 };
 
+typedef struct Vector2 {
+    int x;
+    int y;
+} Vector2;\
+
+SceCtrlData ctrl;
+
 SDL_Window* gWindow;
 SDL_Renderer* gRenderer;
-SceCtrlData ctrl;
+SDL_Texture* texture;
+
 
 int main(int argc, char* argv[])
 {
@@ -35,6 +42,9 @@ int main(int argc, char* argv[])
 
     int rectX = 100;
     int rectY = 100;
+    Vector2 velocity = { 0, 0 };
+    texture = IMG_LoadTexture(gRenderer, "app0:/images/100.png");;
+
     while (true) {
         printf("Tick %d\n", SDL_GetTicks());
         printf("handleInputs\n");
@@ -43,18 +53,22 @@ int main(int argc, char* argv[])
 
         if (ctrl.buttons & SCE_CTRL_START) break;
 
-        if (ctrl.buttons & SCE_CTRL_RIGHT) rectX += 1;
-        else if (ctrl.buttons & SCE_CTRL_LEFT) rectX -= 1;
+        if (ctrl.buttons & SCE_CTRL_RIGHT) velocity.x = 1;
+        else if (ctrl.buttons & SCE_CTRL_LEFT) velocity.x = -1;
+        else velocity.x = 0;
 
-        if (ctrl.buttons & SCE_CTRL_DOWN) rectY += 1;
-        else if (ctrl.buttons & SCE_CTRL_UP) rectY -= 1;
+        if (ctrl.buttons & SCE_CTRL_DOWN) velocity.y = 1;
+        else if (ctrl.buttons & SCE_CTRL_UP) velocity.y = -1;
+        else velocity.y = 0;
+
+        rectX += velocity.x;
+        rectY += velocity.y;
 
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
         SDL_RenderClear(gRenderer);
 
         SDL_Rect fillRect = { rectX, rectY, 100, 100 };
-        SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(gRenderer, &fillRect);
+        SDL_RenderCopy(gRenderer, texture, NULL, &fillRect);
 
         SDL_RenderPresent(gRenderer);
 

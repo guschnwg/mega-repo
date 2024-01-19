@@ -57,3 +57,10 @@ kill-vita3k:
 
 send-to-vita:
 	curl -T ./out/mygame.vpk ftp://192.168.0.35:1337/ux0:/
+
+pngquant:
+	docker pull kolyadin/pngquant
+	docker run -it --rm \
+		-v $(PWD)/games/mygame/src/images/:/var/workdir/ \
+		kolyadin/pngquant \
+		find . -maxdepth 1 -type f -name "*.png" -exec pngquant --verbose -f --ext .png {} \;
