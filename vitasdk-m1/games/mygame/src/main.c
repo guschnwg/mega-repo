@@ -12,15 +12,115 @@
 enum { VITA_SCREEN_WIDTH = 960, VITA_SCREEN_HEIGHT = 544 };
 
 typedef struct Vector2 {
-    int x;
-    int y;
-} Vector2;\
+    float x, y;
+} Vector2;
+
+typedef struct Player {
+    Vector2 position;
+    Vector2 velocity;
+    int speed;
+    SDL_Texture* texture;
+    Vector2 aimPosition;
+    float shootCooldown;
+    float currentShootCooldown;
+} Player;
 
 SceCtrlData ctrl;
 
 SDL_Window* gWindow;
 SDL_Renderer* gRenderer;
-SDL_Texture* texture;
+
+Player playerOne;
+Player playerTwo;
+
+
+bool isZero(Vector2* vector) {
+    return vector->x == 0 && vector->y == 0;
+}
+
+void normalize(Vector2* vector) {
+    if (isZero(vector)) return;
+
+    float length = sqrt(vector->x * vector->x + vector->y * vector->y);
+    vector->x /= length;
+    vector->y /= length;
+}
+
+void add (Vector2* vector, Vector2 other) {
+    vector->x += other.x;
+    vector->y += other.y;
+}
+
+void scale(Vector2* vector, float scale) {
+    vector->x *= scale;
+    vector->y *= scale;
+}
+
+
+void input() {
+    printf("handleInputs\n");
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
+    sceCtrlPeekBufferPositive(0, &ctrl, 1);
+    printf("Buttons %d\n", ctrl.buttons);
+
+    printf("LX %d\n", ctrl.lx);
+    printf("LY %d\n", ctrl.ly);
+    printf("RX %d\n", ctrl.rx);
+    printf("RY %d\n", ctrl.ry);
+}
+
+void process(float deltaTime) {
+    if (ctrl.buttons & SCE_CTRL_RIGHT) playerOne.velocity.x = 1;
+    else if (ctrl.buttons & SCE_CTRL_LEFT) playerOne.velocity.x = -1;
+    else playerOne.velocity.x = 0;
+
+    if (ctrl.buttons & SCE_CTRL_DOWN) playerOne.velocity.y = 1;
+    else if (ctrl.buttons & SCE_CTRL_UP) playerOne.velocity.y = -1;
+    else playerOne.velocity.y = 0;
+
+    playerOne.position.x += playerOne.velocity.x * playerOne.speed * deltaTime;
+    playerOne.position.y += playerOne.velocity.y * playerOne.speed * deltaTime;
+
+    playerOne.aimPosition.x = ctrl.lx - 127;
+    playerOne.aimPosition.y = ctrl.ly - 127;
+
+    bool aiming = !isZero(&playerOne.aimPosition);
+
+    normalize(&playerOne.aimPosition);
+    scale(&playerOne.aimPosition, 50);
+    add(&playerOne.aimPosition, playerOne.position);
+
+    playerOne.currentShootCooldown -= deltaTime;
+    if (playerOne.currentShootCooldown < 0) playerOne.currentShootCooldown = 0;
+
+    if (playerOne.currentShootCooldown <= 0) {
+        if (aiming) {
+            // TODO: shoot
+
+            playerOne.currentShootCooldown = playerOne.shootCooldown;
+        }
+    }
+}
+
+
+void draw() {
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(gRenderer);
+
+    SDL_Rect playerRect = { playerOne.position.x - 50, playerOne.position.y - 50, 100, 100 };
+    SDL_RenderCopy(gRenderer, playerOne.texture, NULL, &playerRect);
+
+    SDL_Rect aimRect = { playerOne.aimPosition.x - 5, playerOne.aimPosition.y - 5, 10, 10 };
+    if (playerOne.currentShootCooldown <= 0) SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+    else                                     SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+    printf("playerOne.currentShootCooldown %f\n", playerOne.currentShootCooldown);
+    SDL_RenderFillRect(gRenderer, &aimRect);
+
+    SDL_SetRenderDrawColor(gRenderer, 255, 255, 0, 255);
+    SDL_RenderDrawPoint(gRenderer, playerOne.position.x, playerOne.position.y);
+
+    SDL_RenderPresent(gRenderer);
+}
 
 
 int main(int argc, char* argv[])
@@ -40,39 +140,31 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    int rectX = 100;
-    int rectY = 100;
-    Vector2 velocity = { 0, 0 };
-    texture = IMG_LoadTexture(gRenderer, "app0:/images/100.png");;
+    playerOne.texture = IMG_LoadTexture(gRenderer, "app0:/images/dogs.png");
+    playerOne.position.x = 100;
+    playerOne.position.y = 100;
+    playerOne.aimPosition.x = 100;
+    playerOne.aimPosition.y = 100;
+    playerOne.velocity.x = 0;
+    playerOne.velocity.y = 0;
+    playerOne.speed = 100;
+    playerOne.shootCooldown = 5.0;
+    playerOne.currentShootCooldown = playerOne.shootCooldown;
+
+    int lastTime = 0;
+    int deltaTime = 0;
 
     while (true) {
-        printf("Tick %d\n", SDL_GetTicks());
-        printf("handleInputs\n");
-        sceCtrlPeekBufferPositive(0, &ctrl, 1);
-        printf("Buttons %d\n", ctrl.buttons);
+        input();
 
         if (ctrl.buttons & SCE_CTRL_START) break;
 
-        if (ctrl.buttons & SCE_CTRL_RIGHT) velocity.x = 1;
-        else if (ctrl.buttons & SCE_CTRL_LEFT) velocity.x = -1;
-        else velocity.x = 0;
+        deltaTime = SDL_GetTicks() - lastTime;
+        printf("DELTA TIME %d\n", deltaTime);
+        process(deltaTime / 1000.0);
+        lastTime = SDL_GetTicks();
 
-        if (ctrl.buttons & SCE_CTRL_DOWN) velocity.y = 1;
-        else if (ctrl.buttons & SCE_CTRL_UP) velocity.y = -1;
-        else velocity.y = 0;
-
-        rectX += velocity.x;
-        rectY += velocity.y;
-
-        SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
-        SDL_RenderClear(gRenderer);
-
-        SDL_Rect fillRect = { rectX, rectY, 100, 100 };
-        SDL_RenderCopy(gRenderer, texture, NULL, &fillRect);
-
-        SDL_RenderPresent(gRenderer);
-
-        SDL_Delay(1000 / 30);
+        draw();
     }
 
     printf("Bye, sleeping for 3 seconds...\n");

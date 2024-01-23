@@ -64,3 +64,6 @@ pngquant:
 		-v $(PWD)/games/mygame/src/images/:/var/workdir/ \
 		kolyadin/pngquant \
 		find . -maxdepth 1 -type f -name "*.png" -exec pngquant --verbose -f --ext .png {} \;
+
+watch-logs:
+	code -r /Applications/Vita3K.app/Contents/Resources/vita3k.log
