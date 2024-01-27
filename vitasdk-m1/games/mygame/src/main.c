@@ -7,14 +7,13 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <psp2common/ctrl.h>
-#include <psp2/audioout.h>
 #include <psp2/ctrl.h>
 #include <psp2/power.h>
 #include <psp2/kernel/clib.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/io/fcntl.h>
 
-#include "sounds/quack.h"
+#include "sound.c"
 
 void debug(char* str, int code) {
     SceUID log = sceIoOpen("ux0:/data/mygame.log", SCE_O_RDWR | SCE_O_APPEND | SCE_O_CREAT, 0777);
@@ -67,9 +66,6 @@ SceCtrlData ctrl;
 
 SDL_Window* gWindow;
 SDL_Renderer* gRenderer;
-
-int audioPort;
-int16_t audioBuf[SCE_AUDIO_MAX_LEN] = {0};
 
 Player playerOne;
 Player playerTwo;
@@ -145,7 +141,7 @@ void shoot(Player* player, Vector2 direction, int ttl, int power) {
         player->bullets.tail = bullet;
     }
 
-    sceAudioOutOutput(audioPort, audioBuf);
+    quackPlay();
 }
 
 void process(float deltaTime) {
@@ -263,11 +259,8 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-	int vol = SCE_AUDIO_VOLUME_0DB;
-    audioPort = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM, quackLength, quackSampleRate, SCE_AUDIO_OUT_MODE_MONO);
-
-    int setVolume = sceAudioOutSetVolume(audioPort, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, (int[]){vol,vol});
-    for (int n = 0 ; n < quackLength ; ++n) audioBuf[n] = quackData[n] * 8;
+    int soundThreadUid = sceKernelCreateThread("sound thread", soundThread, 0x40, 0x10000, 0, 0, NULL);
+    sceKernelStartThread(soundThreadUid, 0, NULL);
 
     playerOne.texture = IMG_LoadTexture(gRenderer, "app0:/images/dogs.png");
     playerOne.position.x = 100;
@@ -311,8 +304,6 @@ int main(int argc, char* argv[])
 
     SDL_Quit();
     printf("SDL destroyed %s...\n", SDL_GetError());
-
-    sceAudioOutReleasePort(audioPort);
 
     return 0;
 }
