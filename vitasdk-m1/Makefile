@@ -56,7 +56,7 @@ kill-vita3k:
 	killall Vita3K
 
 send-to-vita:
-	curl -T ./out/mygame.vpk ftp://192.168.0.35:1337/ux0:/
+	curl -T ./out/mygame.vpk ftp://192.168.0.14:1337/ux0:/
 
 pngquant:
 	docker pull kolyadin/pngquant

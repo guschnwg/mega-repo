@@ -1,13 +1,33 @@
 #include <stdbool.h>
+#include <stdint.h>
+#include <math.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <psp2common/ctrl.h>
+#include <psp2/audioout.h>
 #include <psp2/ctrl.h>
 #include <psp2/power.h>
+#include <psp2/kernel/clib.h>
 #include <psp2/kernel/processmgr.h>
+#include <psp2/io/fcntl.h>
+
+#include "sounds/quack.h"
+
+void debug(char* str, int code) {
+    SceUID log = sceIoOpen("ux0:/data/mygame.log", SCE_O_RDWR | SCE_O_APPEND | SCE_O_CREAT, 0777);
+    char debugBuf[100];
+    snprintf(debugBuf, sizeof(debugBuf), "%s 0x%X\n", str, code);
+    sceIoWrite(log, debugBuf, sceClibStrnlen(debugBuf, ~0));
+    sceIoClose(log);
+
+    // Could be like this too
+    // FILE* logFile = fopen("ux0:/data/mygame.log", "a");
+    // fprintf(logFile, "HIHIHI %d\n", 123);
+    // fclose(logFile);
+}
 
 enum { VITA_SCREEN_WIDTH = 960, VITA_SCREEN_HEIGHT = 544 };
 
@@ -48,12 +68,22 @@ SceCtrlData ctrl;
 SDL_Window* gWindow;
 SDL_Renderer* gRenderer;
 
+int audioPort;
+int16_t audioBuf[SCE_AUDIO_MAX_LEN] = {0};
+
 Player playerOne;
 Player playerTwo;
 
 
 bool isZero(Vector2* vector) {
     return vector->x == 0 && vector->y == 0;
+}
+
+void handleSomeVariation(Vector2* vector, int minThreshold, int maxThreshold) {
+    if (vector->x > minThreshold && vector->x < maxThreshold && vector->y > minThreshold && vector->y < maxThreshold) {
+        vector->x = 0;
+        vector->y = 0;
+    }
 }
 
 void normalize(Vector2* vector) {
@@ -114,6 +144,8 @@ void shoot(Player* player, Vector2 direction, int ttl, int power) {
         player->bullets.tail->next = bullet;
         player->bullets.tail = bullet;
     }
+
+    sceAudioOutOutput(audioPort, audioBuf);
 }
 
 void process(float deltaTime) {
@@ -129,6 +161,7 @@ void process(float deltaTime) {
     playerOne.position.y += playerOne.velocity.y * playerOne.speed * deltaTime;
 
     Vector2 aimDirection = { ctrl.lx - 127, ctrl.ly - 127 };
+    handleSomeVariation(&aimDirection, -50, 50);
     normalize(&aimDirection);
 
     playerOne.aimPosition = aimDirection;
@@ -174,11 +207,11 @@ void draw() {
     SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
     SDL_RenderClear(gRenderer);
 
-    for (int i = 0; i < VITA_SCREEN_HEIGHT; i += 10) {
+    for (int i = 0; i < VITA_SCREEN_HEIGHT; i += 50) {
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
         SDL_RenderDrawLine(gRenderer, 0, i, VITA_SCREEN_WIDTH, i);
     }
-    for (int i = 0; i < VITA_SCREEN_WIDTH; i += 10) {
+    for (int i = 0; i < VITA_SCREEN_WIDTH; i += 50) {
         SDL_SetRenderDrawColor(gRenderer, 0, 255, 255, 255);
         SDL_RenderDrawLine(gRenderer, i, 0, i, VITA_SCREEN_HEIGHT);
     }
@@ -230,6 +263,12 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+	int vol = SCE_AUDIO_VOLUME_0DB;
+    audioPort = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM, quackLength, quackSampleRate, SCE_AUDIO_OUT_MODE_MONO);
+
+    int setVolume = sceAudioOutSetVolume(audioPort, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, (int[]){vol,vol});
+    for (int n = 0 ; n < quackLength ; ++n) audioBuf[n] = quackData[n] * 8;
+
     playerOne.texture = IMG_LoadTexture(gRenderer, "app0:/images/dogs.png");
     playerOne.position.x = 100;
     playerOne.position.y = 100;
@@ -272,6 +311,8 @@ int main(int argc, char* argv[])
 
     SDL_Quit();
     printf("SDL destroyed %s...\n", SDL_GetError());
+
+    sceAudioOutReleasePort(audioPort);
 
     return 0;
 }
