@@ -15,7 +15,7 @@ void quackInit() {
     int vol = SCE_AUDIO_VOLUME_0DB;
     audioPort = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM, quackLength, quackSampleRate, SCE_AUDIO_OUT_MODE_MONO);
 
-    int setVolume = sceAudioOutSetVolume(audioPort, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, (int[]){vol,vol});
+    sceAudioOutSetVolume(audioPort, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, (int[]){vol,vol});
     for (int n = 0 ; n < quackLength ; ++n) audioBuf[n] = quackData[n] * 8;
 }
 

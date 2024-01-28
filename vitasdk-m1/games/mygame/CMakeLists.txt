@@ -28,6 +28,10 @@ include_directories(
 
 add_executable(${PROJECT_NAME}
   src/main.c
+  src/sound.c
+  src/vector.c
+  src/player.c
+  src/debug.c
 )
 
 target_link_libraries(${PROJECT_NAME}
