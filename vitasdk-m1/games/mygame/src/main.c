@@ -8,6 +8,7 @@
 #include <SDL2/SDL_render.h>
 #include <psp2common/ctrl.h>
 #include <psp2/ctrl.h>
+#include <psp2/touch.h>
 #include <psp2/power.h>
 #include <psp2/kernel/clib.h>
 #include <psp2/kernel/processmgr.h>
@@ -18,8 +19,10 @@
 #include "vector.h"
 #include "utils.h"
 #include "player.h"
+#include "enemy.h"
 
-SceCtrlData ctrl;
+SceCtrlData ctrlData;
+SceTouchData touchData;
 
 SDL_Window* gWindow;
 SDL_Renderer* gRenderer;
@@ -28,12 +31,18 @@ SDL_Renderer* gRenderer;
 void input() {
     printf("handleInputs\n");
     sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
-    sceCtrlPeekBufferPositive(0, &ctrl, 1);
-    printf("Buttons %d\n", ctrl.buttons);
+    sceCtrlPeekBufferPositive(0, &ctrlData, 1);
+    printf("Buttons %d\n", ctrlData.buttons);
+
+    sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, 1);
+	sceTouchSetSamplingState(SCE_TOUCH_PORT_BACK, 1);
+
+    sceTouchPeek(SCE_TOUCH_PORT_FRONT, &touchData, 1);
 }
 
 void process(float deltaTime) {
-    processPlayers(deltaTime, &ctrl);
+    processPlayers(deltaTime, &ctrlData, &touchData);
+    processEnemies(deltaTime, &ctrlData, &touchData);
 }
 
 
@@ -56,6 +65,7 @@ void draw() {
     drawBackground();
 
     drawPlayers(gRenderer);
+    drawEnemies(gRenderer);
 
     SDL_RenderPresent(gRenderer);
 }
@@ -80,6 +90,7 @@ int main(int argc, char* argv[]) {
     sceKernelStartThread(soundThreadUid, 0, NULL);
 
     initPlayers(gRenderer);
+    initEnemies(gRenderer);
 
     int lastTime = 0;
     int deltaTime = 0;
@@ -87,7 +98,7 @@ int main(int argc, char* argv[]) {
     while (true) {
         input();
 
-        if (ctrl.buttons & SCE_CTRL_START) break;
+        if (ctrlData.buttons & SCE_CTRL_START) break;
 
         deltaTime = SDL_GetTicks() - lastTime;
         printf("DELTA TIME %d\n", deltaTime);

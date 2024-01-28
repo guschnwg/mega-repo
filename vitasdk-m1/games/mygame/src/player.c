@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <psp2common/ctrl.h>
 #include <psp2/ctrl.h>
+#include <psp2/touch.h>
 #include "SDL2/SDL_image.h"
 
 #include "vector.h"
@@ -40,13 +41,11 @@ void initPlayer(
 }
 
 Vector2 lAxis (SceCtrlData* ctrl) {
-    Vector2 axis = { ctrl->lx - 127, ctrl->ly - 127 };
-    return axis;
+    return (Vector2) { ctrl->lx - 127, ctrl->ly - 127 };
 }
 
 Vector2 rAxis (SceCtrlData* ctrl) {
-    Vector2 axis = { ctrl->rx - 127, ctrl->ry - 127 };
-    return axis;
+    return (Vector2) { ctrl->rx - 127, ctrl->ry - 127 };
 }
 
 void initPlayers(SDL_Renderer* gRenderer) {
@@ -117,7 +116,7 @@ void processPlayer(float deltaTime, SceCtrlData* ctrl, Player* player) {
     }
 }
 
-void processPlayers(float deltaTime, SceCtrlData* ctrl) {
+void processPlayers(float deltaTime, SceCtrlData* ctrl, SceTouchData* touch) {
     processPlayer(deltaTime, ctrl, &playerOne);
     processPlayer(deltaTime, ctrl, &playerTwo);
 }

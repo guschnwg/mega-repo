@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
   src/vector.c
   src/player.c
   src/debug.c
+  src/enemy.c
 )
 
 target_link_libraries(${PROJECT_NAME}

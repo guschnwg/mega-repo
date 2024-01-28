@@ -1,9 +1,8 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include "SDL2/SDL_render.h"
-#include <psp2common/ctrl.h>
 #include <psp2/ctrl.h>
+#include <psp2/touch.h>
 
 #include "utils.h"
 
@@ -44,8 +43,6 @@ typedef struct Player {
 } Player;
 
 void initPlayers(SDL_Renderer* gRenderer);
-void processPlayers(float deltaTime, SceCtrlData* ctrl);
+void processPlayers(float deltaTime, SceCtrlData* ctrl, SceTouchData* touch);
 void drawPlayers(SDL_Renderer* gRenderer);
 void shoot(Player* player, Vector2 direction, int ttl, int power);
-
-#endif
