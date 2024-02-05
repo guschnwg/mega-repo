@@ -50,7 +50,7 @@
             x: 0,
             y: 0,
             angle: -120,
-            distance: 100,
+            distance: 250,
             fov: 120,
             size: 10,
         };
@@ -99,18 +99,17 @@
         function getNaiveRays(from) {
             const rays = [];
             for (let i = from.angle; i <= from.angle + from.fov; i++) {
-                const ray = { x: from.x, y: from.y, hit: false };
+                const incrementX = Math.cos(i * Math.PI / 180.0);
+                const incrementY = Math.sin(i * Math.PI / 180.0);
+                const ray = { x: from.x + incrementX, y: from.y + incrementY, hit: false };
                 for (let j = 0; j <= from.distance; j++) {
-                    const x = Math.cos(i * Math.PI / 180.0) * j + from.x;
-                    const y = Math.sin(i * Math.PI / 180.0) * j + from.y;
+                    const xInWorld = Math.floor(ray.x / tileSize);
+                    const yInWorld = Math.floor(ray.y / tileSize);
 
-                    const xInWorld = Math.floor(x / tileSize);
-                    const yInWorld = Math.floor(y / tileSize);
+                    ray.x += incrementX;
+                    ray.y += incrementY;
 
-                    ray.x = x;
-                    ray.y = y;
-
-                    if (xInWorld >= 0 && xInWorld <= 30 && yInWorld >= 0 && yInWorld <= 16 && world[yInWorld][xInWorld] != 0) {
+                    if (Boolean(world?.[yInWorld]?.[xInWorld])) {
                         ray.hit = true;
                         break;
                     }
@@ -120,7 +119,7 @@
             return rays;
         }
         function getComplexRays(from) {
-            
+            return [];
         }
         let getRays = getNaiveRays;
 
@@ -209,7 +208,7 @@
                 ctx.fillStyle = 'gray';
                 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                const scale = 100 / player.distance;
+                const scale = 250 / player.distance;
 
                 const originX = player.x * scale - ctx.canvas.width / 2;
                 const originY = player.y * scale - ctx.canvas.height / 2;
