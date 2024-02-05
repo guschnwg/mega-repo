@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body>
-    <canvas height="544" width="960"></canvas>
+
+<body style="overflow: hidden;">
+    <div>
+        <canvas id="world" height="544" width="960"></canvas>
+    </div>
+
+    <div>
+        <canvas id="camera" height="544" width="960"></canvas>
+    </div>
+
+    <div>
+        <canvas id="mode-seven" height="544" width="960"></canvas>
+    </div>
+
+    <div>
+        <canvas id="orthographic" height="544" width="960"></canvas>
+    </div>
 
     <script>
-        const canvas = document.querySelector('canvas');
-        const ctx = canvas.getContext('2d');
-
         const tileSize = 32;
         const world = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -39,99 +52,183 @@
             angle: -120,
             distance: 100,
             fov: 120,
+            size: 10,
         };
+    </script>
 
-        function drawNaiveRayCast() {
-            for (let i = player.angle; i <= player.angle + player.fov; i++) {
-                for (let j = 0 ; j <= player.distance ; j++) {
-                    const x = Math.cos(i * Math. PI / 180.0) * j + player.x;
-                    const y = Math.sin(i * Math. PI / 180.0) * j + player.y;
+    <script>
+        function toOriginScaled(x, origin = 0, scale = 1) {
+            return x * scale - origin;
+        }
+
+        function drawWorld(ctx, originX = 0, originY = 0, scale = 1) {
+            const size = tileSize * scale;
+            for (let i = 0; i < world.length; i++) {
+                for (let j = 0; j < world[i].length; j++) {
+                    if (world[i][j] === 0) {
+                        ctx.fillStyle = 'white';
+                    } else if (world[i][j] == 1) {
+                        ctx.fillStyle = 'black';
+                    } else if (world[i][j] == 2) {
+                        ctx.fillStyle = 'red';
+                    } else if (world[i][j] == 3) {
+                        ctx.fillStyle = 'purple';
+                    }
+
+                    const rectX = toOriginScaled(j, originX, size);
+                    const rectY = toOriginScaled(i, originY, size);
+
+                    ctx.fillRect(rectX, rectY, size, size);
+                    ctx.strokeStyle = '#e6e6e6';
+                    ctx.lineWidth = .2;
+                    ctx.strokeRect(rectX, rectY, size, size);
+                }
+            }
+        }
+
+        function drawPlayer(ctx, originX = 0, originY = 0, scale = 1) {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(
+                toOriginScaled(player.x - player.size / 2, originX, scale),
+                toOriginScaled(player.y - player.size / 2, originY, scale),
+                player.size * scale,
+                player.size * scale
+            );
+        }
+
+        function getNaiveRays(from) {
+            const rays = [];
+            for (let i = from.angle; i <= from.angle + from.fov; i++) {
+                const ray = { x: from.x, y: from.y, hit: false };
+                for (let j = 0; j <= from.distance; j++) {
+                    const x = Math.cos(i * Math.PI / 180.0) * j + from.x;
+                    const y = Math.sin(i * Math.PI / 180.0) * j + from.y;
 
                     const xInWorld = Math.floor(x / tileSize);
                     const yInWorld = Math.floor(y / tileSize);
 
-                    if (xInWorld >= 0 && xInWorld <= 30 && yInWorld >= 0 && yInWorld <= 16) {
-                        if (world[yInWorld][xInWorld] == 1) {
-                            break;
-                        } else {
-                            ctx.fillStyle = 'blue';
-                            ctx.fillRect(x, y, 1, 1);
-                        }
+                    ray.x = x;
+                    ray.y = y;
+
+                    if (xInWorld >= 0 && xInWorld <= 30 && yInWorld >= 0 && yInWorld <= 16 && world[yInWorld][xInWorld] != 0) {
+                        ray.hit = true;
+                        break;
                     }
                 }
-
-                // ctx.beginPath();
-                // ctx.strokeStyle = 'blue';
-                // ctx.moveTo(player.x, player.y);
-                // ctx.lineTo(player.x + x, player.y + y);
-                // ctx.stroke();
+                rays.push(ray);
             }
+            return rays;
         }
-        let drawRayCast = drawNaiveRayCast;
+        function getComplexRays(from) {
+            
+        }
+        let getRays = getNaiveRays;
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < world.length; i++) {
-                for (let j = 0; j < world[i].length; j++) {
-                    if (world[i][j] === 1) {
-                        ctx.fillStyle = 'black';
-                    } else {
-                        ctx.fillStyle = 'white';
-                    }
-                    ctx.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                    ctx.strokeStyle = '#e6e6e6';
-                    ctx.lineWidth = .2;
-                    ctx.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize);
+        function drawRays(ctx, from, rays, originX = 0, originY = 0, scale = 1) {
+            for (let ray of rays) {
+                if (ray.hit) {
+                    ctx.strokeStyle = 'red';
+                } else {
+                    ctx.strokeStyle = 'blue';
                 }
+                ctx.beginPath();
+                ctx.moveTo(toOriginScaled(from.x, originX, scale), toOriginScaled(from.y, originY, scale))
+                ctx.lineTo(toOriginScaled(ray.x, originX, scale), toOriginScaled(ray.y, originY, scale));
+                ctx.stroke();
+            }
+        }
+    </script>
+
+    <script>
+        function WorldGame() {
+            const canvas = document.getElementById('world');
+            const ctx = canvas.getContext('2d')
+
+            function draw() {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                drawWorld(ctx);
+                drawPlayer(ctx);
+                drawRays(ctx, player, getRays(player));
             }
 
-            ctx.fillStyle = 'green';
-            ctx.fillRect(player.x - 5, player.y - 5, 10, 10);
-
-            drawRayCast();
-        }
-
-        function update() {
-            draw();
-            requestAnimationFrame(update);
-        }
-
-        canvas.addEventListener('mousemove', e => {
-            const rect = canvas.getBoundingClientRect();
-            player.x = e.clientX - rect.left;
-            player.y = e.clientY - rect.top;
-        });
-
-        window.addEventListener('keydown', e => {
-            if (['ArrowLeft', 'a'].includes(e.key)) {
-                player.angle -= 1;
-            } else if (['ArrowRight', 'd'].includes(e.key)) {
-                player.angle += 1;
-            } else if (['ArrowUp', 'w'].includes(e.key)) {
-                player.distance += 10;
-            } else if (['ArrowDown', 's'].includes(e.key)) {
-                player.distance -= 10;
-            } else if (['+'].includes(e.key)) {
-                player.fov += 5;
-            } else if (['-'].includes(e.key)) {
-                player.fov -= 5;
+            function update() {
+                draw();
+                requestAnimationFrame(update);
             }
-        });
 
-        canvas.addEventListener('click', e => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.clientX - rect.left;
+                player.y = e.clientY - rect.top;
+            });
 
-            const i = Math.floor(y / tileSize);
-            const j = Math.floor(x / tileSize);
-            console.log(i, j);
-            world[i][j] = world[i][j] === 1 ? 0 : 1;
-        });
+            window.addEventListener('keydown', e => {
+                if (['ArrowLeft', 'a'].includes(e.key)) {
+                    player.angle -= 1;
+                } else if (['ArrowRight', 'd'].includes(e.key)) {
+                    player.angle += 1;
+                } else if (['ArrowUp', 'w'].includes(e.key)) {
+                    player.distance += 10;
+                } else if (['ArrowDown', 's'].includes(e.key)) {
+                    player.distance -= 10;
+                } else if (['+'].includes(e.key)) {
+                    player.fov += 5;
+                } else if (['-'].includes(e.key)) {
+                    player.fov -= 5;
+                } else if (['1'].includes(e.key)) {
+                    getRays = getNaiveRays;
+                } else if (['2'].includes(e.key)) {
+                    getRays = getComplexRays;
+                }
+            });
 
-        update();
+            canvas.addEventListener('click', e => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
 
+                const i = Math.floor(y / tileSize);
+                const j = Math.floor(x / tileSize);
+                console.log(i, j);
+                world[i][j] = world[i][j] = (world[i][j] + 1) % 4;
+            });
+
+            update();
+        }
+
+        WorldGame();
+    </script>
+
+    <script>
+        function CameraGame() {
+            const canvas = document.getElementById('camera');
+            const ctx = canvas.getContext('2d');
+
+            function draw() {
+                ctx.fillStyle = 'gray';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                const scale = 100 / player.distance;
+
+                const originX = player.x * scale - ctx.canvas.width / 2;
+                const originY = player.y * scale - ctx.canvas.height / 2;
+
+                drawWorld(ctx, originX, originY, scale);
+                drawPlayer(ctx, originX, originY, scale);
+                drawRays(ctx, player, getRays(player), originX, originY, scale);
+            }
+
+            function update() {
+                draw();
+                requestAnimationFrame(update);
+            }
+
+            update();
+        }
+
+        CameraGame();
     </script>
 </body>
+
 </html>
