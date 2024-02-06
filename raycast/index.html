@@ -17,7 +17,7 @@
     </div>
 
     <div>
-        <canvas id="mode-seven" height="544" width="960"></canvas>
+        <canvas id="fake-3d" height="544" width="960"></canvas>
     </div>
 
     <div>
@@ -47,11 +47,11 @@
         ];
 
         const player = {
-            x: 0,
-            y: 0,
-            angle: -120,
-            distance: 250,
-            fov: 120,
+            x: 480 - 32,
+            y: 320,
+            angle: -55,
+            distance: tileSize * 5,
+            fov: 66,
             size: 10,
         };
     </script>
@@ -94,11 +94,21 @@
                 player.size * scale,
                 player.size * scale
             );
+
+            ctx.beginPath();
+            ctx.strokeStyle = 'limegreen';
+            ctx.lineWidth = 3;
+            ctx.moveTo(toOriginScaled(player.x, originX, scale), toOriginScaled(player.y, originY, scale));
+            ctx.lineTo(
+                toOriginScaled(player.x + Math.cos(player.angle * Math.PI / 180.0) * 15, originX, scale),
+                toOriginScaled(player.y + Math.sin(player.angle * Math.PI / 180.0) * 15, originY, scale)
+            );
+            ctx.stroke();
         }
 
         function getNaiveRays(from) {
             const rays = [];
-            for (let i = from.angle; i <= from.angle + from.fov; i++) {
+            for (let i = from.angle - from.fov / 2; i <= from.angle + from.fov / 2; i++) {
                 const incrementX = Math.cos(i * Math.PI / 180.0);
                 const incrementY = Math.sin(i * Math.PI / 180.0);
                 const ray = { x: from.x + incrementX, y: from.y + incrementY, hit: false };
@@ -111,6 +121,7 @@
 
                     if (Boolean(world?.[yInWorld]?.[xInWorld])) {
                         ray.hit = true;
+                        ray.distance = j;
                         break;
                     }
                 }
@@ -119,12 +130,17 @@
             return rays;
         }
         function getComplexRays(from) {
-            return [];
+            const rays = [];
+
+            // DDA?
+
+            return rays;
         }
         let getRays = getNaiveRays;
 
         function drawRays(ctx, from, rays, originX = 0, originY = 0, scale = 1) {
             for (let ray of rays) {
+                ctx.lineWidth = .2;
                 if (ray.hit) {
                     ctx.strokeStyle = 'red';
                 } else {
@@ -136,6 +152,15 @@
                 ctx.stroke();
             }
         }
+
+        function drawDebug(ctx, originX = 0, originY = 0, scale = 1) {
+            let worldX = Math.floor(player.x / tileSize) * tileSize;
+            let worldY = Math.floor(player.y / tileSize) * tileSize;
+
+            const cos = Math.cos(player.angle * Math.PI / 180.0);
+            const sin = Math.sin(player.angle * Math.PI / 180.0);
+        }
+
     </script>
 
     <script>
@@ -149,6 +174,7 @@
                 drawWorld(ctx);
                 drawPlayer(ctx);
                 drawRays(ctx, player, getRays(player));
+                drawDebug(ctx);
             }
 
             function update() {
@@ -156,7 +182,7 @@
                 requestAnimationFrame(update);
             }
 
-            canvas.addEventListener('mousemove', e => {
+            window.addEventListener('mousemove', e => {
                 const rect = canvas.getBoundingClientRect();
                 player.x = e.clientX - rect.left;
                 player.y = e.clientY - rect.top;
@@ -208,7 +234,7 @@
                 ctx.fillStyle = 'gray';
                 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                const scale = 250 / player.distance;
+                const scale = tileSize * 10 / player.distance;
 
                 const originX = player.x * scale - ctx.canvas.width / 2;
                 const originY = player.y * scale - ctx.canvas.height / 2;
@@ -216,6 +242,8 @@
                 drawWorld(ctx, originX, originY, scale);
                 drawPlayer(ctx, originX, originY, scale);
                 drawRays(ctx, player, getRays(player), originX, originY, scale);
+
+                drawDebug(ctx, originX, originY, scale);
             }
 
             function update() {
@@ -227,6 +255,31 @@
         }
 
         CameraGame();
+    </script>
+
+    <script>
+        function Fake3DGame() {
+            const canvas = document.getElementById('fake-3d');
+            const ctx = canvas.getContext('2d');
+
+            function draw() {
+                ctx.fillStyle = 'gray';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                const rays = getRays(player);
+
+                drawDebug(ctx);
+            }
+
+            function update() {
+                draw();
+                requestAnimationFrame(update);
+            }
+
+            update();
+        }
+
+        Fake3DGame();
     </script>
 </body>
 
