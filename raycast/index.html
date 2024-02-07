@@ -64,9 +64,9 @@
         ];
 
         const player = {
-            x: 240,
-            y: 25,
-            angle: -190,
+            x: 11 * tileSize,
+            y: 6 * tileSize,
+            angle: -90,
             distance: tileSize * 100,
             scale: tileSize / 10,
             fov: 90,
@@ -217,7 +217,7 @@
             for (let i = from.angle - from.fov / 2; i <= from.angle + from.fov / 2; i += step) {
                 const incrementX = Math.cos(i * Math.PI / 180.0);
                 const incrementY = Math.sin(i * Math.PI / 180.0);
-                const ray = { x: from.x + incrementX, y: from.y + incrementY, hit: false, inWorld: 0, distance: 0 };
+                const ray = { x: from.x + incrementX, y: from.y + incrementY, hit: false, inWorld: 0, distance: 0, angle: i };
                 for (let j = 0; j <= from.distance; j++) {
                     const xInWorld = Math.floor(ray.x / tileSize);
                     const yInWorld = Math.floor(ray.y / tileSize);
@@ -228,8 +228,8 @@
                     const inWorld = world?.[yInWorld]?.[xInWorld];
                     if (inWorld > 0) {
                         ray.hit = true;
-                        ray.realDistance = j;
-                        ray.distance = j / tileSize;
+                        ray.euclideanDistance = j / tileSize;
+                        ray.distance = (j / tileSize) * Math.cos((i - from.angle) * Math.PI / 180.0);
                         ray.inWorld = inWorld;
                         break;
                     }
@@ -396,10 +396,10 @@
 
                 ctx.fillStyle = 'aqua';
                 ctx.fillRect(0, ctx.canvas.height / 2, ctx.canvas.width, ctx.canvas.height / 2);
-
                 
-                // const step = player.fov / 5;
                 const step = player.fov / ctx.canvas.width;
+                // const step = player.fov / 4;
+                // console.log(getNaiveRays(player, step), getDDARays(player, step));
                 const rays = getRays(player, step);
                 const width = ctx.canvas.width / rays.length;
                 for (let i = 0 ; i < rays.length; i++) {
@@ -423,6 +423,7 @@
                     } else {
                         ctx.fillStyle = regularColorMap[ray.inWorld];
                     }
+                    ctx.fillRect(i * width, drawStart, width, drawEnd - drawStart);
                     ctx.fillRect(i * width, drawStart, width, drawEnd - drawStart);
                 }
             }
