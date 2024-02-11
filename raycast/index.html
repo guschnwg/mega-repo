@@ -144,6 +144,9 @@
             const dirX = Math.cos(angle * Math.PI / 180.0);
             const dirY = Math.sin(angle * Math.PI / 180.0);
 
+            // const dirX = mapX * cos - mapY * sin;
+            // const dirY = mapX * sin + mapY * cos;
+
             // We have a bit of fisheye that i don't know how to handle tbf
             const rayDirX = dirX; // Simplification? for now
             const rayDirY = dirY; // Simplification? for now
@@ -397,9 +400,9 @@
                 ctx.fillStyle = 'aqua';
                 ctx.fillRect(0, ctx.canvas.height / 2, ctx.canvas.width, ctx.canvas.height / 2);
                 
-                const step = player.fov / ctx.canvas.width;
-                // const step = player.fov / 4;
-                // console.log(getNaiveRays(player, step), getDDARays(player, step));
+                // const step = player.fov / ctx.canvas.width;
+                const step = player.fov / 4;
+                console.log(getNaiveRays(player, step), getDDARays(player, step));
                 const rays = getRays(player, step);
                 const width = ctx.canvas.width / rays.length;
                 for (let i = 0 ; i < rays.length; i++) {
