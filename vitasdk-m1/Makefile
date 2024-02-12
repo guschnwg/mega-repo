@@ -33,6 +33,20 @@ build-game:
 			rm $(PROJECT_PATH)/Makefile \
 		"
 
+install-game: GAME_ID?=ID
+install-game: OUTPUT_FILE?=OUTPUT
+install-game:
+	rm -rf /Users/giznrdni/Library/Application\ Support/Vita3K/Vita3K/ux0/app/$(GAME_ID)
+	unzip ./out/$(OUTPUT_FILE).vpk -d /Users/giznrdni/Library/Application\ Support/Vita3K/Vita3K/ux0/app/$(GAME_ID)
+
+run-game: GAME_ID?=ID
+run-game:
+	open /Applications/Vita3K.app --args -r $(GAME_ID)
+
+build-install-run:
+	killall Vita3K | true
+	make build-game install-game run-game
+
 # Specifics for mygame
 
 build-my-game:
@@ -67,3 +81,6 @@ pngquant:
 
 watch-logs:
 	code -r /Applications/Vita3K.app/Contents/Resources/vita3k.log
+
+
+# make PROJECT=fake-first-person PROJECT_PATH=/games/fake-first-person OUTPUT_FILE=fake-first-person GAME_ID=GIOV00002 build-install-run
