@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script
+        src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+        integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+        crossorigin="anonymous"
+    ></script>
+
+    <style>
+        body {
+            background-color: red;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            background-color: white;
+            display: inline-block;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .col {
+
+        }
+    </style>
+
+    <script>
+        const WIDTH = 640;
+        const HEIGHT = 480;
+        const SIZE = 5;
+        const ROWS = HEIGHT / SIZE;
+        const COLS = WIDTH / SIZE;
+
+        $(document).ready(() => {
+            // Draw the canvas
+            let $container = $("<div class='container'></div>");
+            for (let i = 0; i < ROWS; i++) {
+                let $row = $("<div class='row'></div>");
+                // $row.css({"height": SIZE + "px"});
+                for (let j = 0; j < COLS; j++) {
+                    let $col = $("<div class='col'></div>");
+                    $col.css({"width": SIZE + "px", "height": SIZE + "px"});
+                    $col.appendTo($row);
+                }
+                $row.appendTo($container);
+            }
+            $container.appendTo("body");
+
+            // Draw a rect
+            function drawRect(x, y, w, h, c) {
+                for (let i = y; i < y + h; i++) {
+                    for (let j = x; j < x + w; j++) {
+                        if (i < 0 || i >= ROWS || j < 0 || j >= COLS) {
+                            continue;
+                        }
+
+                        let $col = $container.find(".row").eq(i).find(".col").eq(j);
+                        $col.css({"background-color": c});
+                    }
+                }
+            }
+            drawRect(9, 12, 51, 25, "red");
+            drawRect(60, 39, 51, 105, "purple");
+
+            // Draw a circle
+            function drawCircle(x, y, r, c) {
+                for (let i = y - r; i < y + r; i++) {
+                    for (let j = x - r; j < x + r; j++) {
+                        if (Math.pow(i - y, 2) + Math.pow(j - x, 2) < Math.pow(r, 2)) {
+                            if (i < 0 || i >= ROWS || j < 0 || j >= COLS) {
+                                continue;
+                            }
+
+                            let $col = $container.find(".row").eq(i).find(".col").eq(j);
+                            $col.css({"background-color": c});
+                        }
+                    }
+                }
+            }
+            drawCircle(60, 90, 20, "green");
+            drawCircle(90, 20, 30, "yellow");
+
+            // Draw a triangle
+            function drawTriangle(x, y, b, h, c) {
+                for (let i = y; i < y + h; i++) {
+                    let step = (i - y) / h * b / 2;
+                    for (let j = x - step; j < x + step; j++) {
+                        if (i < 0 || i >= ROWS || j < 0 || j >= COLS) {
+                            continue;
+                        }
+
+                        let $col = $container.find(".row").eq(Math.round(i)).find(".col").eq(Math.round(j));
+                        $col.css({"background-color": c});
+                    }
+                }
+            }
+            drawTriangle(30, 50, 30, 20, "blue");
+            drawTriangle(120, 45, 30, 20, "blue");
+
+            let x = 73;
+            let y = 12;
+            let xDir = 0;
+            let yDir = 0;
+
+            setInterval(() => {
+                x += xDir;
+                y += yDir;
+
+                let $col = $container.find(".row").eq(y).find(".col").eq(x);
+                $col.css({"background-color": "black"});
+            }, 100);
+
+            $(document).on("keydown", (e) => {
+                if (e.key === "ArrowRight") {
+                    xDir = 1;
+                    yDir = 0;
+                } else if (e.key === "ArrowLeft") {
+                    xDir = -1;
+                    yDir = 0;
+                } else if (e.key === "ArrowDown") {
+                    yDir = 1;
+                    xDir = 0;
+                } else if (e.key === "ArrowUp") {
+                    yDir = -1;
+                    xDir = 0;
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
