@@ -35,7 +35,7 @@
     <script>
         const WIDTH = 640;
         const HEIGHT = 480;
-        const SIZE = 5;
+        const SIZE = 2;
         const ROWS = HEIGHT / SIZE;
         const COLS = WIDTH / SIZE;
 
@@ -131,6 +131,9 @@
                 } else if (e.key === "ArrowUp") {
                     yDir = -1;
                     xDir = 0;
+                } else if (e.key === " ") {
+                    xDir = 0;
+                    yDir = 0;
                 }
             });
         });
