@@ -161,5 +161,9 @@ echo "Disable the all too sensitive backswipe on Magic Mouse"
 defaults write com.google.Chrome AppleEnableMouseSwipeNavigateWithScrolls -bool false
 defaults write com.google.Chrome.canary AppleEnableMouseSwipeNavigateWithScrolls -bool false
 
+echo "Lock the file that keeps track of open windows to reopen on boot, to unlock use nouchg"
+truncate -s 0 ~/Library/Preferences/ByHost/com.apple.loginwindow.*
+chflags uchg ~/Library/Preferences/ByHost/com.apple.loginwindow*
+
 # Kill all
 for app in Finder Dock SystemUIServer "Google Chrome" Terminal; do killall "$app" >/dev/null 2>&1; done
