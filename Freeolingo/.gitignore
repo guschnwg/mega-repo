@@ -1,0 +1,13 @@
+Freeolingo/Data/Courses
+courses
+.DS_Store
+
+# Got from some StackOverflow answer
+
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
