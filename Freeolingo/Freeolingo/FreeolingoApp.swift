@@ -7,6 +7,31 @@
 
 import SwiftUI
 
+func getQuestionTypesMap(courses: Array<Course>) -> [String: Array<Challenge>] {
+    var questionTypesMap: [String: Array<Challenge>] = [:]
+
+    for course in courses {
+        for section in course.sections {
+            for unit in section.units {
+                for level in unit.levels {
+                    for session in level.sessions {
+                        for challenge in session.challenges {
+                            if var item = questionTypesMap[challenge.type] {
+                                item.append(challenge)
+                                questionTypesMap[challenge.type] = item
+                            } else {
+                                questionTypesMap[challenge.type] = [challenge]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return questionTypesMap
+}
+
 @main
 struct FreeolingoApp: App {
     @StateObject private var store = Store()
@@ -14,7 +39,11 @@ struct FreeolingoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView(courses: courses, sessionAttempts: $store.sessionAttempts) { course, section, unit, level, session in
+            ContentView(
+                courses: courses,
+                sessionAttempts: $store.sessionAttempts,
+                questionTypesMap: getQuestionTypesMap(courses: courses)
+            ) { course, section, unit, level, session in
                 let newAttempt = SessionAttempt(
                     id: store.sessionAttempts.count,
                     courseId: course.id,

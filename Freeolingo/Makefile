@@ -1,7 +1,7 @@
 FLAGS=--allow-net --allow-write
 OUTPUT_PATH=./courses
-FROM_LANGUAGE=en
-LEARNING_LANGUAGE=nl-NL
+FROM_LANGUAGE=pt
+LEARNING_LANGUAGE=fr
 TOKEN=$(shell op item get Giovanna --vault Private --format json | op item get - --fields label="duo token")
 
 echo:

@@ -44,6 +44,8 @@ const course = {
                   return {
                     id: challenge["id"],
                     type: challenge["type"],
+                    data: challenge,
+                    rawData: JSON.stringify(challenge),
                   };
                 }),
               });

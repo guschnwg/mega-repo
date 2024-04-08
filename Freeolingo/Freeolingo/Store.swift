@@ -41,9 +41,11 @@ class Store: ObservableObject {
         do {
             let fileURL = try Self.fileURL()
             let data = try? Data(contentsOf: fileURL)
-            self.sessionAttempts = try JSONDecoder().decode([SessionAttempt].self, from: data!)
-            self.sessionAttemptMap = sessionAttempts.reduce(into: self.sessionAttemptMap.self) {
-                $0[$1.sessionId] = $1
+            if (data != nil) {
+                self.sessionAttempts = try JSONDecoder().decode([SessionAttempt].self, from: data!)
+                self.sessionAttemptMap = sessionAttempts.reduce(into: self.sessionAttemptMap.self) {
+                    $0[$1.sessionId] = $1
+                }
             }
         } catch {
             fatalError(error.localizedDescription)
