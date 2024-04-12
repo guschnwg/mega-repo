@@ -45,7 +45,7 @@ struct TextWithTTS: View {
 
 struct RecognizeSpeechView: View {
     let language: String
-
+    
     @State private var recognizedText = "Speech Recognition"
     @State private var isRecording = false
     
@@ -406,45 +406,16 @@ struct ChallengeView: View {
     }
 }
 
-struct ContentView: View {
-    let courses: Array<Course>
-    @Binding var sessionAttempts: Array<SessionAttempt>
-    let questionTypesMap: [String: Array<Challenge>]
+struct SessionView: View {
+    let course: Course
+    let section: Section
+    let unit: Unit
+    let level: Level
+    let session: Session
     let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
-    @State var state: Int = 0
-    
     var body: some View {
-        NavigationView {
-            List(courses) { course in
-                let fromLanguageName = getLanguageName(identifier: course.fromLanguage)
-                let learningLanguageName = getLanguageName(identifier: course.learningLanguage)
-                
-                NavigationLink(destination: CourseView(course: course, viewSession: viewSession)) {
-                    Text(fromLanguageName + " -> " + learningLanguageName)
-                }
-            }
-        }
-        .navigationTitle("Courses")
-        
-        NavigationView {
-            List(questionTypesMap.keys.sorted(), id: \.self) { key in
-                if let value = questionTypesMap[key], let someChallenge = value.randomElement() {
-                    NavigationLink(destination: ChallengeView(fromLanguage: "pt", learningLanguage: "fr", challenge: someChallenge)) {
-                        Text("\(key): \(value.count)")
-                    }.onAppear {
-                        state += 1
-                    }
-                } else {
-                    Text("\(key): 0")
-                }
-                
-            }
-        }
-        
-        //        List(sessionAttempts) { item in
-        //            Text(item.sessionId)
-        //        }
+        Text(session.id + " - " + session.type)
     }
 }
 
@@ -466,6 +437,24 @@ struct LevelView: View {
                     }
             }
         }
+        //        NavigationView {
+        //            DisclosureGroup(level.name, isExpanded: $isExpanded) {
+        //                ForEach(level.sessions) { session in
+        //                    NavigationLink(destination: SessionView(
+        //                        course: course,
+        //                        section: section,
+        //                        unit: unit,
+        //                        level: level,
+        //                        session: session,
+        //                        viewSession: viewSession
+        //                    )) {
+        //                        Text(session.id + " - " + session.type)
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        .navigationTitle("Session")
+        
     }
 }
 
@@ -519,33 +508,19 @@ struct UnitView: View {
     }
 }
 
-struct UnitListView: View {
+struct SectionView: View {
     let course: Course
     let section: Section
-    let units: Array<Unit>
-    @State var selectedUnit: Unit?
     let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
     var body: some View {
-        ForEach(units) { unit in
-            UnitView(course: course, section: section, unit: unit, viewSession: viewSession)
-        }
-    }
-}
-
-struct SessionListItemView: View {
-    let course: Course
-    let section: Section
-    @State private var isExpanded = false
-    
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
-    
-    var body: some View {
-        let firstUnitName = section.units.isEmpty ? "?" : section.units.first!.name
-        let title = firstUnitName.isEmpty ? "?" : firstUnitName
-        
-        DisclosureGroup(title, isExpanded: $isExpanded) {
-            UnitListView(course: course, section: section, units: section.units, viewSession: viewSession)
+        ForEach(section.units) { unit in
+            UnitView(
+                course: course,
+                section: section,
+                unit: unit,
+                viewSession: viewSession
+            )
         }
     }
 }
@@ -557,14 +532,78 @@ struct CourseView: View {
     
     var body: some View {
         List(course.sections) { section in
-            SessionListItemView(course: course, section: section, viewSession: viewSession)
+            NavigationLink(destination: SectionView(course: course, section: section, viewSession: viewSession)) {
+                Text(section.name)
+                
+                let firstUnitName = section.units.isEmpty ? "?" : section.units.first!.name
+                let title = firstUnitName.isEmpty ? "?" : firstUnitName
+                
+                Text(title).font(.system(size: 10))
+            }
         }
-        .navigationTitle(course.id)
+        .navigationTitle("Sections")
     }
 }
 
-//#Preview {
-//    ContentView(courses: [], sessionAttempts: []) {
-//        print("called it")
-//    }
-//}
+struct CoursesListView : View {
+    let courses: Array<Course>
+    let viewSession: (Course, Section, Unit, Level, Session) -> Void
+    
+    var body: some View {
+        let color = Color.red
+
+        List {
+            ForEach(courses.indices, id: \.self) { index in
+                let course = courses[index]
+                
+                let brightness = Double(Double(index) * Double(1) / Double(courses.count + 3))
+                let rowColor = color.brightness(brightness)
+
+                let fromLanguageName = getLanguageName(identifier: course.fromLanguage)
+                let learningLanguageName = getLanguageName(identifier: course.learningLanguage)
+                
+                NavigationLink(destination: CourseView(course: course, viewSession: viewSession)) {
+                    Text(fromLanguageName + " -> " + learningLanguageName)
+                }.listRowBackground(rowColor)
+            }
+        }.navigationTitle("Courses")
+    }
+}
+
+struct ContentView: View {
+    let courses: Array<Course>
+    let viewSession: (Course, Section, Unit, Level, Session) -> Void
+    
+    @State var state: Int = 0
+    
+    var body: some View {
+        if courses.count == 0 {
+            Text("No courses")
+        } else {
+            NavigationStack {
+                CoursesListView(courses: courses, viewSession: viewSession)
+            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        }
+    }
+}
+
+
+#Preview {
+    let sessions = [Session(id: "1", type: "LESSON", challenges: [])]
+    let levels = [Level(id: "1", name: "My level", sessions: sessions)]
+    let units = [Unit(id: 1, name: "My unit", levels: levels)]
+    let sections = [Section(id: 1, name: "FIrst section", units: units)]
+    let courses = [
+        Course(id: "1", fromLanguage: "pt", learningLanguage: "en", sections:sections),
+        Course(id: "2", fromLanguage: "pt", learningLanguage: "es", sections:sections),
+        Course(id: "3", fromLanguage: "pt", learningLanguage: "es", sections:sections),
+        Course(id: "4", fromLanguage: "pt", learningLanguage: "es", sections:sections),
+        Course(id: "5", fromLanguage: "pt", learningLanguage: "es", sections:sections),
+        Course(id: "6", fromLanguage: "pt", learningLanguage: "es", sections:sections),
+        Course(id: "7", fromLanguage: "pt", learningLanguage: "es", sections:sections)
+    ]
+    
+    return ContentView(courses: courses) {_,_,_,_,_ in
+        print("called it")
+    }
+}

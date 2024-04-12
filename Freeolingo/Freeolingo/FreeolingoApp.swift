@@ -40,9 +40,9 @@ struct FreeolingoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(
-                courses: courses,
-                sessionAttempts: $store.sessionAttempts,
-                questionTypesMap: getQuestionTypesMap(courses: courses)
+                courses: courses
+//                sessionAttempts: $store.sessionAttempts,
+//                questionTypesMap: [:] //getQuestionTypesMap(courses: courses)
             ) { course, section, unit, level, session in
                 let newAttempt = SessionAttempt(
                     id: store.sessionAttempts.count,

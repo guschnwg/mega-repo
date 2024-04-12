@@ -18,20 +18,20 @@ func listCourses() -> Array<Course> {
         let contents = try fileManager.contentsOfDirectory(atPath: bundlePath + "/Data/Courses")
         let filtered = contents.filter { $0.hasSuffix(".json") }
         
-        var courses: Array<NSDictionary> = []
+        var courses: Array<Course> = []
         for file in filtered {
             let path = "/Data/Courses/" + file
             let filePath = Bundle.main.path(forResource: path, ofType: nil)
             do {
                 let data = try Data(contentsOf: URL(fileURLWithPath: filePath!))
-                let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
-                courses.append(jsonResult as! NSDictionary)
+                let course = try JSONDecoder().decode(Course.self, from: data)
+                courses.append(course)
+            } catch {
+                print("Some error")
             }
         }
-        
-        let jsonData = try JSONSerialization.data(withJSONObject: courses, options: [])
-        let data = try JSONDecoder().decode(Array<Course>.self, from: jsonData)
-        return data
+
+        return courses
     } catch {
         return []
     }
