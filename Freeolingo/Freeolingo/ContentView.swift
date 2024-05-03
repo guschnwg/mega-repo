@@ -8,401 +8,61 @@
 import SwiftUI
 import Foundation
 import AVFoundation
-import Speech
 
-func emojiForNumber(_ number: Int) -> String {
-    switch number {
-    case 0: return "0️⃣"
-    case 1: return "1️⃣"
-    case 2: return "2️⃣"
-    case 3: return "3️⃣"
-    case 4: return "4️⃣"
-    case 5: return "5️⃣"
-    case 6: return "6️⃣"
-    case 7: return "7️⃣"
-    case 8: return "8️⃣"
-    case 9: return "9️⃣"
-    case 10: return "🔟"
-    default: return "🔢"
-    }
+let colors = [
+    Color.red,
+    Color.blue,
+    Color.yellow,
+    Color.orange,
+    Color.pink,
+    Color.brown,
+    Color.cyan,
+    Color.mint,
+    Color.purple,
+    Color.green,
+]
+
+func getColor(index: Int, exclude: Color? = nil) -> Color {
+    let available = (exclude != nil) ? colors.filter { $0 != exclude } : colors
+    return available[index % available.count]
 }
 
-struct TextWithTTS: View {
-    let label: String
-    let speak: String
-    let language: String
-    
-    let synthesizer = AVSpeechSynthesizer()
-    
-    var body: some View {
-        Text(label).onTapGesture {
-            let speechUtterance = AVSpeechUtterance(string: speak)
-            speechUtterance.voice = AVSpeechSynthesisVoice(language: language)
-            synthesizer.speak(speechUtterance)
-        }
-    }
-}
+struct SessionChallengesView: View {
+    let course: Course
+    let section: Section
+    let unit: Unit
+    let level: Level
+    let session: Session
 
-struct RecognizeSpeechView: View {
-    let language: String
+    let finishSession: () -> Void
     
-    @State private var recognizedText = "Speech Recognition"
-    @State private var isRecording = false
-    
-    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "fr"))
-    private let audioEngine = AVAudioEngine()
-    @State private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-    @State private var recognitionTask: SFSpeechRecognitionTask?
-    
-    func requestSpeechAuthorization() {
-        SFSpeechRecognizer.requestAuthorization { authStatus in
-            // Handle authorization status
-            if authStatus == .authorized {
-                print("Speech recognition authorized")
-            } else {
-                print("Speech recognition not authorized")
-            }
-        }
-    }
-    
-    private func startRecording() {
-        if recognitionTask != nil {
-            recognitionTask?.cancel()
-            recognitionTask = nil
-        }
-        
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-        } catch {
-            print("audioSession properties weren't set because of an error.")
-        }
-        
-        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        
-        let inputNode = audioEngine.inputNode
-        
-        guard let recognitionRequest = recognitionRequest else {
-            fatalError("Unable to create a SFSpeechAudioBufferRecognitionRequest object")
-        }
-        
-        recognitionRequest.shouldReportPartialResults = true
-        
-        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
-            var isFinal = false
-            
-            if let result = result {
-                self.recognizedText = result.bestTranscription.formattedString
-                isFinal = result.isFinal
-            }
-            
-            if error != nil || isFinal {
-                self.audioEngine.stop()
-                inputNode.removeTap(onBus: 0)
-                
-                self.recognitionRequest = nil
-                self.recognitionTask = nil
-                
-                self.isRecording = false
-            }
-        }
-        
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, when) in
-            self.recognitionRequest?.append(buffer)
-        }
-        
-        audioEngine.prepare()
-        
-        do {
-            try audioEngine.start()
-            isRecording = true
-        } catch {
-            print("audioEngine couldn't start because of an error.")
-        }
-    }
-    
-    private func stopRecording() {
-        audioEngine.stop()
-        recognitionRequest?.endAudio()
-        isRecording = false
-    }
+    @State private var currentChallenge = 12
     
     var body: some View {
         VStack {
-            Text(recognizedText)
-                .padding()
-            
-            Button(action: {
-                if self.isRecording {
-                    stopRecording()
-                } else {
-                    startRecording()
-                }
-            }) {
-                Text(isRecording ? "Stop Recording" : "Start Recording")
-                    .padding()
-            }
-        }
-        .onAppear {
-            self.requestSpeechAuthorization()
-        }
-    }
-}
+            Text("Session \(level.sessions.firstIndex(of: session)! + 1)/\(level.sessions.count)")
+            Text("Challenge \(currentChallenge + 1)/\(session.challenges.count)")
 
-struct ChallengeView: View {
-    let fromLanguage: String
-    let learningLanguage: String
-    let challenge: Challenge
-    private var jsonResult: NSDictionary?
-    
-    init(fromLanguage: String, learningLanguage: String, challenge: Challenge) {
-        self.challenge = challenge
-        self.fromLanguage = fromLanguage
-        self.learningLanguage = learningLanguage
-        
-        if let data = challenge.rawData.data(using: .utf8) {
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
-                self.jsonResult = json as? NSDictionary
-            } catch {
-                print("JSON deserialization error: \(error)")
-                self.jsonResult = nil
-            }
+            ChallengeView(
+                languageSettings: LanguageSettings(
+                    fromLanguage: course.fromLanguage,
+                    learningLanguage: course.learningLanguage
+                ),
+                challenge: session.challenges[currentChallenge],
+                onComplete: {isCorrect in
+                    if !isCorrect {
+                        // Add the same challenge in the end so we can retry?
+                    }
+
+                    if session.challenges.indices.contains(currentChallenge + 1) {
+                        currentChallenge += 1
+                    } else {
+                        finishSession()
+                        currentChallenge = 0
+                    }
+                }
+            )
         }
-    }
-    
-    var body: some View {
-        VStack {
-            switch challenge.type {
-            case "assist":
-                let prompt = jsonResult!["prompt"] as! String
-                
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: fromLanguage)
-                
-                let choices = jsonResult!["choices"] as! [String]
-                let correctIndex = jsonResult!["correctIndex"] as! Int
-                let response = choices[correctIndex]
-                
-                List(choices, id: \.self) { choice in
-                    let choiceStr = choice == response ? "\(choice) ✅" : choice
-                    TextWithTTS(label: choiceStr, speak: choice, language: learningLanguage)
-                }
-            case "completeReverseTranslation":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: fromLanguage)
-                
-                var solutions: [String] = []
-                
-                let tokens = jsonResult!["displayTokens"] as! [NSDictionary]
-                let response = tokens.map { token in
-                    let text = token["text"] as! String
-                    if token["isBlank"] as! Bool {
-                        solutions.append(text)
-                        return text.map { _ in "_" }.joined()
-                    } else {
-                        return text
-                    }
-                }.joined()
-                
-                TextWithTTS(label: "Translated: \(response)", speak: response, language: learningLanguage)
-                
-                List(solutions, id: \.self) { token in
-                    TextWithTTS(label: token, speak: token, language: learningLanguage)
-                }
-            case "listen":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: learningLanguage)
-                
-                let solutionTranslation = jsonResult!["solutionTranslation"] as! String
-                TextWithTTS(label: "Solution: \(solutionTranslation)", speak: solutionTranslation, language: fromLanguage)
-            case "listenComplete":
-                var solutions: [String] = []
-                
-                let tokens = jsonResult!["displayTokens"] as! [NSDictionary]
-                let prompt = tokens.map { token in
-                    let text = token["text"] as! String
-                    if token["isBlank"] as! Bool {
-                        solutions.append(text)
-                        return text.map { _ in "_" }.joined()
-                    } else {
-                        return text
-                    }
-                }.joined()
-                
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: learningLanguage)
-                
-                let solutionTranslation = jsonResult!["solutionTranslation"] as! String
-                TextWithTTS(label: "Translation: \(solutionTranslation)", speak: solutionTranslation, language: fromLanguage)
-                
-                List(solutions, id: \.self) { token in
-                    TextWithTTS(label: token, speak: token, language: learningLanguage)
-                }
-            case "listenIsolation":
-                let rangeStart = jsonResult!["blankRangeStart"] as! Int
-                let rangeEnd = jsonResult!["blankRangeEnd"] as! Int
-                let range = rangeStart...rangeEnd
-                
-                let tokens = jsonResult!["tokens"] as! [NSDictionary]
-                let rawPrompt = tokens.map { $0["value"] as! String }.joined()
-                let prompt = tokens.enumerated().map {(index, item) in
-                    let word = item["value"] as! String
-                    return range.contains(index) ? word.map { _ in "_" }.joined() : word
-                }.joined()
-                
-                TextWithTTS(label: "Prompt: \(prompt)", speak: rawPrompt, language: learningLanguage)
-                
-                let solutionTranslation = jsonResult!["solutionTranslation"] as! String
-                TextWithTTS(label: "Solution: \(solutionTranslation)", speak: solutionTranslation, language: fromLanguage)
-                
-                let options = (jsonResult!["options"] as! [NSDictionary]).map { $0["text"] as! String }
-                let correctIndex = jsonResult!["correctIndex"] as! Int
-                let response = options[correctIndex]
-                
-                List(options, id: \.self) { option in
-                    TextWithTTS(label: option == response ? "\(option) ✅" : option, speak: option, language: learningLanguage)
-                }
-                
-            case "listenMatch":
-                let pairs = jsonResult!["pairs"] as! [NSDictionary]
-                
-                ForEach(pairs, id: \.self) {item in
-                    HStack {
-                        let learningWord = item["learningWord"] as! String
-                        TextWithTTS(label: learningWord, speak: learningWord, language: learningLanguage)
-                        
-                        Text(" - ")
-                        
-                        let translation = item["translation"] as! String
-                        TextWithTTS(label: translation, speak: translation, language: fromLanguage)
-                    }
-                }
-            case "listenSpeak":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: learningLanguage)
-                
-                let choices = jsonResult!["choices"] as! [String]
-                let correctIndices = jsonResult!["correctIndices"] as! [Int]
-                
-                List(choices, id: \.self) {choice in
-                    let index = choices.firstIndex(of: choice)
-                    let number = correctIndices.firstIndex(of: index!)
-                    let emoji = number != nil ? emojiForNumber(number!) : "❌"
-                    let choiceStr = "\(choice) \(emoji)"
-                    
-                    TextWithTTS(label: choiceStr, speak: choice, language: fromLanguage)
-                }
-            case "listenTap":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: learningLanguage)
-                
-                let solutionTranslation = jsonResult!["solutionTranslation"] as! String
-                TextWithTTS(label: "Solution: \(solutionTranslation)", speak: solutionTranslation, language: fromLanguage)
-                
-                let choices = (jsonResult!["choices"] as! [NSDictionary]).map {$0["text"] as! String}
-                let correctIndices = jsonResult!["correctIndices"] as! [Int]
-                
-                List(choices, id: \.self) {choice in
-                    let index = choices.firstIndex(of: choice)
-                    let number = correctIndices.firstIndex(of: index!)
-                    let emoji = number != nil ? emojiForNumber(number!) : "❌"
-                    let choiceStr = "\(choice) \(emoji)"
-                    
-                    TextWithTTS(label: choiceStr, speak: choice, language: learningLanguage)
-                }
-            case "match":
-                let pairs = jsonResult!["pairs"] as! [NSDictionary]
-                
-                ForEach(pairs, id: \.self) {item in
-                    HStack {
-                        let learningToken = item["learningToken"] as! String
-                        TextWithTTS(label: learningToken, speak: learningToken, language: learningLanguage)
-                        
-                        Text(" - ")
-                        
-                        let fromToken = item["fromToken"] as! String
-                        TextWithTTS(label: fromToken, speak: fromToken, language: fromLanguage)
-                    }
-                }
-            case "name":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: fromLanguage)
-                
-                let solutions = jsonResult!["correctSolutions"] as! [String]
-                List(solutions, id: \.self) { solution in
-                    TextWithTTS(label: solution, speak: solution, language: learningLanguage)
-                }
-            case "partialReverseTranslate":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: fromLanguage)
-                
-                var solution: String = ""
-                let tokens = jsonResult!["displayTokens"] as! [NSDictionary]
-                let toComplete = tokens.map { token in
-                    let text = token["text"] as! String
-                    if token["isBlank"] as! Bool {
-                        solution.append(text)
-                        return text.map { _ in "_" }.joined()
-                    } else {
-                        return text
-                    }
-                }.joined()
-                TextWithTTS(label: "Prompt: \(toComplete)", speak: toComplete, language: learningLanguage)
-                
-                TextWithTTS(label: "Solution: \(solution)", speak: solution, language: learningLanguage)
-            case "select":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: fromLanguage)
-                
-                let choices = jsonResult!["choices"] as! [NSDictionary]
-                let correctIndex = jsonResult!["correctIndex"] as! Int
-                let response = choices[correctIndex]
-                
-                List(choices, id: \.self) { choice in
-                    let choiceImg = choice["image"] as! String
-                    let choiceStr = choice["phrase"] as! String
-                    let choiceHint = choice["hint"] as! String
-                    
-                    VStack {
-                        AsyncImage(url: URL(string: choiceImg)!)
-                        
-                        TextWithTTS(label: choice == response ? "\(choiceStr) ✅" : choiceStr, speak: choiceStr, language: learningLanguage)
-                        
-                        TextWithTTS(label: choiceHint, speak: choiceHint, language: fromLanguage).italic()
-                    }
-                }
-            case "speak":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: learningLanguage)
-                
-                let solutionTranslation = jsonResult!["solutionTranslation"] as! String
-                TextWithTTS(label: "Solution: \(solutionTranslation)", speak: solutionTranslation, language: fromLanguage)
-                
-                RecognizeSpeechView(language: learningLanguage)
-            case "translate":
-                let prompt = jsonResult!["prompt"] as! String
-                TextWithTTS(label: "Prompt: \(prompt)", speak: prompt, language: learningLanguage)
-                
-                let solutions = jsonResult!["correctSolutions"] as! [String]
-                let solutionTranslation = solutions[0]
-                TextWithTTS(label: "Solution: \(solutionTranslation)", speak: solutionTranslation, language: fromLanguage)
-                
-                let choices = jsonResult!["choices"] as! [NSDictionary]
-                let correctIndices = jsonResult!["correctIndices"] as! [Int]
-                
-                List(choices, id: \.self) { choice in
-                    let index = choices.firstIndex(of: choice)
-                    let number = correctIndices.firstIndex(of: index!)
-                    let emoji = number != nil ? emojiForNumber(number!) : "❌"
-                    let choiceStr = choice["text"] as! String
-                    
-                    TextWithTTS(label: "\(choiceStr) \(emoji)", speak: choiceStr, language: fromLanguage)
-                }
-            default:
-                Text(challenge.rawData)
-            }
-        }.navigationTitle(challenge.type)
     }
 }
 
@@ -412,10 +72,24 @@ struct SessionView: View {
     let unit: Unit
     let level: Level
     let session: Session
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
+
+    let finishSession: () -> Void
+    
+    @State private var isPresented = false
     
     var body: some View {
-        Text(session.id + " - " + session.type)
+        Button("Start") {
+            isPresented = true
+        }.sheet(isPresented: $isPresented) {
+            SessionChallengesView(
+                course: course,
+                section: section,
+                unit: unit,
+                level: level,
+                session: session,
+                finishSession: finishSession
+            )
+        }
     }
 }
 
@@ -426,83 +100,44 @@ struct LevelView: View {
     let level: Level
     let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
-    @State private var isExpanded = false
+    @State private var isPresented = false
+    @State private var currentSession = 0
     
-    var body: some View {
-        DisclosureGroup(level.name, isExpanded: $isExpanded) {
-            ForEach(level.sessions) { session in
-                Text(session.id + " - " + session.type)
-                    .onTapGesture {
-                        viewSession(course, section, unit, level, session)
-                    }
-            }
-        }
-        //        NavigationView {
-        //            DisclosureGroup(level.name, isExpanded: $isExpanded) {
-        //                ForEach(level.sessions) { session in
-        //                    NavigationLink(destination: SessionView(
-        //                        course: course,
-        //                        section: section,
-        //                        unit: unit,
-        //                        level: level,
-        //                        session: session,
-        //                        viewSession: viewSession
-        //                    )) {
-        //                        Text(session.id + " - " + session.type)
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        .navigationTitle("Session")
-        
-    }
-}
-
-struct LevelListView: View {
-    let course: Course
-    let section: Section
-    let unit: Unit
-    let levels: Array<Level>
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
-    
-    var body: some View {
-        List(levels) { level in
-            LevelView(
-                course: course,
-                section: section,
-                unit: unit,
-                level: level,
-                viewSession: viewSession
-            )
+    func finishSession() -> Void {
+        if level.sessions.indices.contains(currentSession + 1) {
+            currentSession += 1
+        } else {
+            isPresented = false
         }
     }
-}
-
-struct UnitView: View {
-    let course: Course
-    let section: Section
-    let unit: Unit
-    @State var sheetOpened: Bool = false
-    
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
     var body: some View {
-        Text(unit.name).onTapGesture {
-            sheetOpened = true
-        }
-        .sheet(isPresented: $sheetOpened) {
-            LevelListView(
-                course: course,
-                section: section,
-                unit: unit,
-                levels: unit.levels,
-                viewSession: viewSession
-            )
+        Text(level.name)
+        .onTapGesture {
+            isPresented = true
+            viewSession(course, section, unit, level, level.sessions[currentSession])
+        }.popover(isPresented: $isPresented) {
+            Text("\(currentSession + 1)/\(level.sessions.count)")
             
-            Button {
-                sheetOpened = false
-            } label: {
-                Text("X")
+            if #available(iOS 16.4, *) {
+                SessionView(
+                    course: course,
+                    section: section,
+                    unit: unit,
+                    level: level,
+                    session: level.sessions[currentSession],
+                    finishSession: finishSession
+                ).presentationCompactAdaptation((.popover))
+                    .frame(width: 300, height: 200)
+            } else {
+                SessionView(
+                    course: course,
+                    section: section,
+                    unit: unit,
+                    level: level,
+                    session: level.sessions[currentSession],
+                    finishSession: finishSession
+                )
             }
         }
     }
@@ -514,14 +149,38 @@ struct SectionView: View {
     let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
     var body: some View {
-        ForEach(section.units) { unit in
-            UnitView(
-                course: course,
-                section: section,
-                unit: unit,
-                viewSession: viewSession
-            )
-        }
+        List {
+            ForEach(section.units.indices, id: \.self) { index in
+                let unit = section.units[index]
+                let color = getColor(index: index)
+
+                VStack(spacing: 0) {
+                    Text(unit.name).frame(height: 100).font(.system(size: 20))
+                    
+                    List {
+                        ForEach(unit.levels.indices, id: \.self) { levelIndex in
+                            let level = unit.levels[levelIndex]
+                            let levelColor = getColor(index: levelIndex, exclude: color)
+                            
+                            LevelView(
+                                course: course,
+                                section: section,
+                                unit: unit,
+                                level: level,
+                                viewSession: viewSession
+                            ).listRowSeparator(.hidden)
+                                .listRowBackground(levelColor)
+                        }
+                    }.listStyle(.plain)
+                        .environment(\.defaultMinListRowHeight, 60)
+
+                }.listRowBackground(color)
+                    .listRowSeparator(.hidden)
+                    .frame(height: CGFloat(100 + unit.levels.count * 60))
+            }
+        }.navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Units")
+            .listStyle(.plain)
     }
 }
 
@@ -531,17 +190,25 @@ struct CourseView: View {
     let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
     var body: some View {
-        List(course.sections) { section in
-            NavigationLink(destination: SectionView(course: course, section: section, viewSession: viewSession)) {
-                Text(section.name)
-                
-                let firstUnitName = section.units.isEmpty ? "?" : section.units.first!.name
-                let title = firstUnitName.isEmpty ? "?" : firstUnitName
-                
-                Text(title).font(.system(size: 10))
+        List {
+            ForEach(course.sections.indices, id: \.self) { index in
+                let section = course.sections[index]
+                NavigationLink(destination: SectionView(course: course, section: section, viewSession: viewSession)) {
+                    VStack(alignment: .leading) {
+                        Text(section.name).font(.system(size: 24))
+                        
+                        let firstUnitName = section.units.isEmpty ? "?" : section.units.first!.name
+                        let title = firstUnitName.isEmpty ? "?" : firstUnitName
+                        
+                        Text(title).font(.system(size: 14))
+                    }
+                }.listRowBackground(colors[index % colors.count])
+                    .listRowSeparator(.hidden)
             }
-        }
-        .navigationTitle("Sections")
+        }.navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Sections")
+            .environment(\.defaultMinListRowHeight, 100)
+            .listStyle(.plain)
     }
 }
 
@@ -551,22 +218,56 @@ struct CoursesListView : View {
     
     var body: some View {
         let color = Color.red
-
+        
         List {
             ForEach(courses.indices, id: \.self) { index in
                 let course = courses[index]
                 
                 let brightness = Double(Double(index) * Double(1) / Double(courses.count + 3))
                 let rowColor = color.brightness(brightness)
-
+                
                 let fromLanguageName = getLanguageName(identifier: course.fromLanguage)
                 let learningLanguageName = getLanguageName(identifier: course.learningLanguage)
                 
                 NavigationLink(destination: CourseView(course: course, viewSession: viewSession)) {
                     Text(fromLanguageName + " -> " + learningLanguageName)
+                        .font(.system(size: 24))
                 }.listRowBackground(rowColor)
+                    .listRowSeparator(.hidden)
             }
         }.navigationTitle("Courses")
+            .environment(\.defaultMinListRowHeight, 100)
+            .listStyle(.plain)
+    }
+}
+
+struct AllQuestionsView: View {
+    let courses: [Course]
+    @State var types: [String: Array<Challenge>] = [:]
+    
+    var body: some View {
+        if types.isEmpty {
+            Button("Load") {
+                types = getQuestionTypesMap(courses: courses)
+            }
+        } else {
+            List {
+                ForEach(types.keys.sorted(), id: \.self) { type in
+                    NavigationLink(
+                        destination: ChallengeView(
+                            languageSettings: LanguageSettings(
+                                fromLanguage: courses[0].fromLanguage,
+                                learningLanguage: courses[0].learningLanguage
+                            ),
+                            challenge: (types[type]?.randomElement())!,
+                            onComplete: {_ in }
+                        )
+                    ) {
+                        Text("\(type) - \(types[type]!.count)")
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -582,6 +283,10 @@ struct ContentView: View {
         } else {
             NavigationStack {
                 CoursesListView(courses: courses, viewSession: viewSession)
+                
+                NavigationLink(destination: AllQuestionsView(courses: courses)) {
+                    Text("AllQuestionsView")
+                }
             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
     }
@@ -589,21 +294,52 @@ struct ContentView: View {
 
 
 #Preview {
-    let sessions = [Session(id: "1", type: "LESSON", challenges: [])]
-    let levels = [Level(id: "1", name: "My level", sessions: sessions)]
-    let units = [Unit(id: 1, name: "My unit", levels: levels)]
-    let sections = [Section(id: 1, name: "FIrst section", units: units)]
+    let challenges: [Challenge] = []
+    
+    let sessions = [
+        Session(id: "1", type: "LESSON", challenges: challenges),
+        Session(id: "2", type: "LESSON", challenges: challenges),
+        Session(id: "3", type: "LESSON", challenges: challenges),
+        Session(id: "4", type: "LESSON", challenges: challenges),
+        Session(id: "5", type: "LESSON", challenges: challenges),
+    ]
+    let levels = [
+        Level(id: "1", name: "My level", sessions: sessions),
+        Level(id: "2", name: "My level", sessions: sessions),
+        Level(id: "3", name: "My level", sessions: sessions),
+        Level(id: "4", name: "My level", sessions: sessions),
+        Level(id: "5", name: "My level", sessions: sessions),
+        Level(id: "6", name: "My level", sessions: sessions),
+        Level(id: "7", name: "My level", sessions: sessions),
+    ]
+    let units = [
+        Unit(id: 1, name: "My unit", levels: levels),
+        Unit(id: 2, name: "My unit", levels: levels),
+        Unit(id: 3, name: "My unit", levels: levels),
+        Unit(id: 4, name: "My unit", levels: levels),
+        Unit(id: 5, name: "My unit", levels: levels),
+        Unit(id: 6, name: "My unit", levels: levels)
+    ]
+    let sections = [
+        Section(id: 1, name: "FIrst section", units: units),
+        Section(id: 2, name: "FIrst section", units: units),
+        Section(id: 3, name: "FIrst section", units: units),
+        Section(id: 4, name: "FIrst section", units: units),
+        Section(id: 5, name: "FIrst section", units: units),
+        Section(id: 6, name: "FIrst section", units: units),
+        Section(id: 7, name: "FIrst section", units: units),
+    ]
     let courses = [
         Course(id: "1", fromLanguage: "pt", learningLanguage: "en", sections:sections),
         Course(id: "2", fromLanguage: "pt", learningLanguage: "es", sections:sections),
         Course(id: "3", fromLanguage: "pt", learningLanguage: "es", sections:sections),
-        Course(id: "4", fromLanguage: "pt", learningLanguage: "es", sections:sections),
-        Course(id: "5", fromLanguage: "pt", learningLanguage: "es", sections:sections),
-        Course(id: "6", fromLanguage: "pt", learningLanguage: "es", sections:sections),
-        Course(id: "7", fromLanguage: "pt", learningLanguage: "es", sections:sections)
+        Course(id: "4", fromLanguage: "pt", learningLanguage: "es", sections:sections)
     ]
     
     return ContentView(courses: courses) {_,_,_,_,_ in
         print("called it")
     }
+//    return SectionView(course: courses[0], section: sections[0]) {_,_,_,_,_ in
+//        print("called it")
+//    }
 }

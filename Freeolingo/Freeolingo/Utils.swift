@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 func listCourses() -> Array<Course> {
     guard let bundlePath = Bundle.main.resourcePath else {
@@ -66,4 +67,18 @@ func listFoldersInBundle() -> Array<(String, Bool)> {
 
 func getLanguageName(identifier: String) -> String {
     return Locale.current.localizedString(forIdentifier: identifier) ?? identifier
+}
+
+extension View {
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
+    }
+}
+
+extension View {
+    func apply<V: View>(@ViewBuilder _ block: (Self) -> V) -> V { block(self) }
 }

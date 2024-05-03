@@ -7,6 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6B76CD732BD2F75000DCA0C0 /* ChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */; };
+		6B76CD752BD2F7D700DCA0C0 /* RecognizeSpeechView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD742BD2F7D700DCA0C0 /* RecognizeSpeechView.swift */; };
+		6B76CD772BD2F80A00DCA0C0 /* TextWithTTSView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD762BD2F80A00DCA0C0 /* TextWithTTSView.swift */; };
+		6B76CD792BD31A1300DCA0C0 /* AssistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD782BD31A1300DCA0C0 /* AssistView.swift */; };
+		6B76CD7B2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD7A2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift */; };
+		6B76CD7D2BD31C0C00DCA0C0 /* ListenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD7C2BD31C0C00DCA0C0 /* ListenView.swift */; };
+		6B76CD7F2BD31C6800DCA0C0 /* ListenCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD7E2BD31C6800DCA0C0 /* ListenCompleteView.swift */; };
+		6B76CD812BD31D5500DCA0C0 /* ListenIsolationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD802BD31D5500DCA0C0 /* ListenIsolationView.swift */; };
+		6B76CD832BD31ED100DCA0C0 /* ListenMatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD822BD31ED100DCA0C0 /* ListenMatchView.swift */; };
+		6B76CD852BD31F8400DCA0C0 /* ListenSpeakView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD842BD31F8400DCA0C0 /* ListenSpeakView.swift */; };
+		6B76CD872BD31FFF00DCA0C0 /* ListenTapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD862BD31FFF00DCA0C0 /* ListenTapView.swift */; };
+		6B76CD892BD3215400DCA0C0 /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD882BD3215400DCA0C0 /* MatchView.swift */; };
+		6B76CD8B2BD321B300DCA0C0 /* NameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD8A2BD321B300DCA0C0 /* NameView.swift */; };
+		6B76CD8D2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD8C2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift */; };
+		6B76CD8F2BD322DE00DCA0C0 /* SelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */; };
+		6B76CD912BD3243D00DCA0C0 /* SpeakView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */; };
+		6B76CD932BD324C100DCA0C0 /* TranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD922BD324C100DCA0C0 /* TranslateView.swift */; };
+		6B76CD982BD8521600DCA0C0 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6B76CD972BD8521600DCA0C0 /* WrappingHStack */; };
+		6B76CD9A2BD85DF700DCA0C0 /* TextListenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD992BD85DF700DCA0C0 /* TextListenView.swift */; };
+		6B76CD9D2BE4898A00DCA0C0 /* StringMetric in Frameworks */ = {isa = PBXBuildFile; productRef = 6B76CD9C2BE4898A00DCA0C0 /* StringMetric */; };
 		6BA222C32BB8D86A00E11D96 /* FreeolingoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA222C22BB8D86A00E11D96 /* FreeolingoApp.swift */; };
 		6BA222C52BB8D86A00E11D96 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA222C42BB8D86A00E11D96 /* ContentView.swift */; };
 		6BA222C72BB8D86B00E11D96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BA222C62BB8D86B00E11D96 /* Assets.xcassets */; };
@@ -18,6 +38,24 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeView.swift; sourceTree = "<group>"; };
+		6B76CD742BD2F7D700DCA0C0 /* RecognizeSpeechView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecognizeSpeechView.swift; sourceTree = "<group>"; };
+		6B76CD762BD2F80A00DCA0C0 /* TextWithTTSView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextWithTTSView.swift; sourceTree = "<group>"; };
+		6B76CD782BD31A1300DCA0C0 /* AssistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistView.swift; sourceTree = "<group>"; };
+		6B76CD7A2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompleteReverseTranslationView.swift; sourceTree = "<group>"; };
+		6B76CD7C2BD31C0C00DCA0C0 /* ListenView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListenView.swift; sourceTree = "<group>"; };
+		6B76CD7E2BD31C6800DCA0C0 /* ListenCompleteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListenCompleteView.swift; sourceTree = "<group>"; };
+		6B76CD802BD31D5500DCA0C0 /* ListenIsolationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListenIsolationView.swift; sourceTree = "<group>"; };
+		6B76CD822BD31ED100DCA0C0 /* ListenMatchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListenMatchView.swift; sourceTree = "<group>"; };
+		6B76CD842BD31F8400DCA0C0 /* ListenSpeakView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListenSpeakView.swift; sourceTree = "<group>"; };
+		6B76CD862BD31FFF00DCA0C0 /* ListenTapView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListenTapView.swift; sourceTree = "<group>"; };
+		6B76CD882BD3215400DCA0C0 /* MatchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
+		6B76CD8A2BD321B300DCA0C0 /* NameView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NameView.swift; sourceTree = "<group>"; };
+		6B76CD8C2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PartialReverseTranslateView.swift; sourceTree = "<group>"; };
+		6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectView.swift; sourceTree = "<group>"; };
+		6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeakView.swift; sourceTree = "<group>"; };
+		6B76CD922BD324C100DCA0C0 /* TranslateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslateView.swift; sourceTree = "<group>"; };
+		6B76CD992BD85DF700DCA0C0 /* TextListenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextListenView.swift; sourceTree = "<group>"; };
 		6BA222BF2BB8D86A00E11D96 /* Freeolingo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Freeolingo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BA222C22BB8D86A00E11D96 /* FreeolingoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeolingoApp.swift; sourceTree = "<group>"; };
 		6BA222C42BB8D86A00E11D96 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -34,12 +72,36 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B76CD982BD8521600DCA0C0 /* WrappingHStack in Frameworks */,
+				6B76CD9D2BE4898A00DCA0C0 /* StringMetric in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6B76CD712BD2F73100DCA0C0 /* Challenges */ = {
+			isa = PBXGroup;
+			children = (
+				6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */,
+				6B76CD782BD31A1300DCA0C0 /* AssistView.swift */,
+				6B76CD7A2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift */,
+				6B76CD7C2BD31C0C00DCA0C0 /* ListenView.swift */,
+				6B76CD882BD3215400DCA0C0 /* MatchView.swift */,
+				6B76CD8A2BD321B300DCA0C0 /* NameView.swift */,
+				6B76CD922BD324C100DCA0C0 /* TranslateView.swift */,
+				6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */,
+				6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */,
+				6B76CD8C2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift */,
+				6B76CD862BD31FFF00DCA0C0 /* ListenTapView.swift */,
+				6B76CD842BD31F8400DCA0C0 /* ListenSpeakView.swift */,
+				6B76CD822BD31ED100DCA0C0 /* ListenMatchView.swift */,
+				6B76CD802BD31D5500DCA0C0 /* ListenIsolationView.swift */,
+				6B76CD7E2BD31C6800DCA0C0 /* ListenCompleteView.swift */,
+			);
+			path = Challenges;
+			sourceTree = "<group>";
+		};
 		6BA222B62BB8D86A00E11D96 = {
 			isa = PBXGroup;
 			children = (
@@ -59,6 +121,7 @@
 		6BA222C12BB8D86A00E11D96 /* Freeolingo */ = {
 			isa = PBXGroup;
 			children = (
+				6B76CD712BD2F73100DCA0C0 /* Challenges */,
 				6BA222D02BB8DACF00E11D96 /* Data */,
 				6BA222C22BB8D86A00E11D96 /* FreeolingoApp.swift */,
 				6BA222C42BB8D86A00E11D96 /* ContentView.swift */,
@@ -67,6 +130,9 @@
 				EC5C64072BBAE46F00EB1E56 /* Models.swift */,
 				EC5C64092BBAE49300EB1E56 /* Utils.swift */,
 				EC5C640B2BBAE67600EB1E56 /* Store.swift */,
+				6B76CD742BD2F7D700DCA0C0 /* RecognizeSpeechView.swift */,
+				6B76CD762BD2F80A00DCA0C0 /* TextWithTTSView.swift */,
+				6B76CD992BD85DF700DCA0C0 /* TextListenView.swift */,
 			);
 			path = Freeolingo;
 			sourceTree = "<group>";
@@ -95,6 +161,10 @@
 			dependencies = (
 			);
 			name = Freeolingo;
+			packageProductDependencies = (
+				6B76CD972BD8521600DCA0C0 /* WrappingHStack */,
+				6B76CD9C2BE4898A00DCA0C0 /* StringMetric */,
+			);
 			productName = Freeolingo;
 			productReference = 6BA222BF2BB8D86A00E11D96 /* Freeolingo.app */;
 			productType = "com.apple.product-type.application";
@@ -123,6 +193,10 @@
 				Base,
 			);
 			mainGroup = 6BA222B62BB8D86A00E11D96;
+			packageReferences = (
+				6B76CD962BD8521600DCA0C0 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
+				6B76CD9B2BE4898A00DCA0C0 /* XCRemoteSwiftPackageReference "StringMetric.swift" */,
+			);
 			productRefGroup = 6BA222C02BB8D86A00E11D96 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -150,11 +224,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B76CD9A2BD85DF700DCA0C0 /* TextListenView.swift in Sources */,
 				EC5C640C2BBAE67600EB1E56 /* Store.swift in Sources */,
 				EC5C64082BBAE46F00EB1E56 /* Models.swift in Sources */,
+				6B76CD812BD31D5500DCA0C0 /* ListenIsolationView.swift in Sources */,
+				6B76CD7F2BD31C6800DCA0C0 /* ListenCompleteView.swift in Sources */,
+				6B76CD832BD31ED100DCA0C0 /* ListenMatchView.swift in Sources */,
+				6B76CD7B2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift in Sources */,
+				6B76CD8D2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift in Sources */,
+				6B76CD912BD3243D00DCA0C0 /* SpeakView.swift in Sources */,
+				6B76CD752BD2F7D700DCA0C0 /* RecognizeSpeechView.swift in Sources */,
+				6B76CD732BD2F75000DCA0C0 /* ChallengeView.swift in Sources */,
+				6B76CD792BD31A1300DCA0C0 /* AssistView.swift in Sources */,
+				6B76CD8F2BD322DE00DCA0C0 /* SelectView.swift in Sources */,
 				6BA222C52BB8D86A00E11D96 /* ContentView.swift in Sources */,
+				6B76CD892BD3215400DCA0C0 /* MatchView.swift in Sources */,
+				6B76CD8B2BD321B300DCA0C0 /* NameView.swift in Sources */,
+				6B76CD7D2BD31C0C00DCA0C0 /* ListenView.swift in Sources */,
 				6BA222C32BB8D86A00E11D96 /* FreeolingoApp.swift in Sources */,
 				EC5C640A2BBAE49300EB1E56 /* Utils.swift in Sources */,
+				6B76CD872BD31FFF00DCA0C0 /* ListenTapView.swift in Sources */,
+				6B76CD852BD31F8400DCA0C0 /* ListenSpeakView.swift in Sources */,
+				6B76CD772BD2F80A00DCA0C0 /* TextWithTTSView.swift in Sources */,
+				6B76CD932BD324C100DCA0C0 /* TranslateView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,7 +389,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -328,7 +420,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -364,6 +456,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6B76CD962BD8521600DCA0C0 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ksemianov/WrappingHStack";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+		6B76CD9B2BE4898A00DCA0C0 /* XCRemoteSwiftPackageReference "StringMetric.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/autozimu/StringMetric.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6B76CD972BD8521600DCA0C0 /* WrappingHStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6B76CD962BD8521600DCA0C0 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
+			productName = WrappingHStack;
+		};
+		6B76CD9C2BE4898A00DCA0C0 /* StringMetric */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6B76CD9B2BE4898A00DCA0C0 /* XCRemoteSwiftPackageReference "StringMetric.swift" */;
+			productName = StringMetric;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6BA222B72BB8D86A00E11D96 /* Project object */;
 }
