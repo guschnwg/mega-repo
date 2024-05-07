@@ -20,7 +20,7 @@ struct ListenTapView: View {
         VStack {
             TextListenView(
                 speak: listenTap.prompt,
-                language: languageSettings.fromLanguage
+                language: languageSettings.learningLanguage
             )
             .font(.system(size: 48))
             
@@ -72,7 +72,7 @@ struct ListenTapView: View {
             Button("Confirm") {
                 onComplete(
                     listenTap.correctIndices == choiceChosen,
-                    Text(listenTap.solutionTranslation)
+                    Text("\(listenTap.prompt) or \(listenTap.solutionTranslation)")
                 )
             }
             .frame(maxWidth: .infinity)

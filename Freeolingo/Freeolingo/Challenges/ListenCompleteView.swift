@@ -10,6 +10,7 @@ import SwiftUI
 struct ListenCompleteView: View {
     var listenComplete: Challenge.ListenComplete
     let languageSettings: LanguageSettings
+    let onComplete: (Bool, Text) -> Void
     
     var body: some View {
         var solutions: [String] = []
@@ -46,6 +47,7 @@ struct ListenCompleteView: View {
         ),
         languageSettings: LanguageSettings(
             fromLanguage: "pt_BR", learningLanguage: "fr_FR"
-        )
+        ),
+        onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
 }

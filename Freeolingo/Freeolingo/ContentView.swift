@@ -243,7 +243,12 @@ struct CoursesListView : View {
 
 struct AllQuestionsView: View {
     let courses: [Course]
-    @State var types: [String: Array<Challenge>] = [:]
+    @State private var types: [String: Array<Challenge>] = [:]
+    
+    init(courses: [Course]) {
+        self.courses = courses
+        types = getQuestionTypesMap(courses: courses)
+    }
     
     var body: some View {
         if types.isEmpty {

@@ -13,9 +13,10 @@ struct CompleteReverseTranslationView: View {
     var completeReverseTranslation: Challenge.CompleteReverseTranslation
     let languageSettings: LanguageSettings
     let onComplete: (Bool, Text) -> Void
-    
+
     @State private var current = ""
-    
+    @FocusState private var focused: Bool
+
     var body: some View {
         VStack(spacing: 60) {
             TextWithTTSView(
@@ -30,6 +31,7 @@ struct CompleteReverseTranslationView: View {
                             .background(.white)
                             .frame(width: CGFloat(token.text.count) * 50)
                             .padding(.all, 0)
+                            .focused($focused)
                     } else {
                         Text(token.text)
                         .padding(.all, 0)
@@ -41,6 +43,8 @@ struct CompleteReverseTranslationView: View {
                 let solutions: [String] = completeReverseTranslation.displayTokens
                     .filter { $0.isBlank }
                     .map { $0.text }
+                
+                focused = false
                 
                 if solutions[0].distance(between: current) > 0.9 {
                     onComplete(true, Text("OK"))
@@ -58,6 +62,7 @@ struct CompleteReverseTranslationView: View {
         }
         .onAppear {
             current = ""
+            focused = true
         }
     }
 }

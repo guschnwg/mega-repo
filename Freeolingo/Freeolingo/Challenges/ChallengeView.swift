@@ -47,17 +47,15 @@ struct ChallengeView: View {
     
     var body: some View {
         VStack {
-            Text(challenge.type)
-            
             switch challenge.data {
             case .assist(let assist):
                 AssistView(assist: assist, languageSettings: languageSettings, onComplete: _onComplete)
             case .completeReverseTranslation(let completeReverseTranslation):
                 CompleteReverseTranslationView(completeReverseTranslation: completeReverseTranslation, languageSettings: languageSettings, onComplete: _onComplete)
             case .listen(let listen):
-                ListenView(listen: listen, languageSettings: languageSettings)
+                ListenView(listen: listen, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenComplete(let listenComplete):
-                ListenCompleteView(listenComplete: listenComplete, languageSettings: languageSettings)
+                ListenCompleteView(listenComplete: listenComplete, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenIsolation(let listenIsolation):
                 ListenIsolationView(listenIsolation: listenIsolation, languageSettings: languageSettings)
             case .listenMatch(let listenMatch):
@@ -82,7 +80,6 @@ struct ChallengeView: View {
                 Text(challenge.rawData)
             }
         }
-        .navigationTitle(challenge.type)
         .alert(isPresented: $showAlert) {
             Alert(
                 title: answerCorrect ? Text("Correct") : Text("WRONG!"),
