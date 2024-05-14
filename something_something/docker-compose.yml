@@ -18,7 +18,7 @@ services:
     container_name: youtube-dl
     build:
       context: ./youtube-dl
-      dockerfile: ./Dockerfile.youtube-dl
+      dockerfile: ./Dockerfile
     ports:
       - "9998:8080"
     volumes:
@@ -26,6 +26,21 @@ services:
     stdin_open: true
     tty: true
     restart: always
+    networks:
+      - shared
+
+  stream:
+    container_name: stream
+    build:
+      context: ./stream
+      dockerfile: ./Dockerfile
+    ports:
+      - "9997:8080"
+    volumes:
+      - ./stream:/stream:rw
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
     networks:
       - shared
 

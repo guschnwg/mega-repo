@@ -28,8 +28,6 @@ def download_video(url):
 # Path: something_something/youtube-dl/main.py
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse
-from urllib.parse import parse_qs
 import json
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
