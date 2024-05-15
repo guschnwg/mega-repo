@@ -4,14 +4,12 @@ services:
   tunnel:
     container_name: tunnel
     image: cloudflare/cloudflared:latest
-    environment:
-      - TOKEN=YOUR_TOKEN
     command: [
       "tunnel",
       "--no-autoupdate",
       "run",
       "--token",
-      "$TOKEN",
+      "YOUR_TOKEN",
     ]
     networks:
       - shared
