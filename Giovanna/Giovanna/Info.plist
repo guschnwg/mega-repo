@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>STREAM_URL</key>
+	<string>$(STREAM_URL)</string>
+	<key>HEADER_ONE_KEY</key>
+	<string>$(HEADER_ONE_KEY)</string>
+	<key>HEADER_ONE_VAL</key>
+	<string>$(HEADER_ONE_VAL)</string>
+	<key>HEADER_TWO_KEY</key>
+	<string>$(HEADER_TWO_KEY)</string>
+	<key>HEADER_TWO_VAL</key>
+	<string>$(HEADER_TWO_VAL)</string>
+</dict>
+</plist>

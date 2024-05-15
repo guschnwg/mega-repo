@@ -1,0 +1,15 @@
+//
+//  Config.xcconfig
+//  Giovanna
+//
+//  Created by Giovanna Zanardini on 15/05/24.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+STREAM_URL = 
+HEADER_ONE_KEY = 
+HEADER_ONE_VAL = 
+HEADER_TWO_KEY = 
+HEADER_TWO_VAL = 
