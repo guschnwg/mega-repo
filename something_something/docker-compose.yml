@@ -4,7 +4,7 @@ services:
   tunnel:
     container_name: tunnel
     image: cloudflare/cloudflared:latest
-    env:
+    environment:
       - TOKEN=YOUR_TOKEN
     command: [
       "tunnel",
