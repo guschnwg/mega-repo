@@ -36,6 +36,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "9997:8080"
+    devices:
+      - /dev/video0:/dev/video0
     volumes:
       - ./stream:/stream:rw
     stdin_open: true
