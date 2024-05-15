@@ -5,7 +5,7 @@ cap = cv2.VideoCapture(0)
 
 stream = Stream("my_camera", size=(640, 480), quality=50, fps=30)
 
-server = MjpegServer("localhost", 8080)
+server = MjpegServer("0.0.0.0", 8080)
 server.add_stream(stream)
 server.start()
 
