@@ -6,41 +6,90 @@
 //
 
 import SwiftUI
+import WrappingHStack
 
 struct ListenIsolationView: View {
     var listenIsolation: Challenge.ListenIsolation
     let languageSettings: LanguageSettings
+    let onComplete: (Bool, Text) -> Void
+    
+    @State private var choiceChosen: Int = -1
+    @State private var shuffled: [Challenge.Option] = []
     
     var body: some View {
-        let rangeStart = listenIsolation.blankRangeStart
-        let rangeEnd = listenIsolation.blankRangeEnd
-        let range = rangeStart...rangeEnd
+        VStack {
+            let rangeStart = listenIsolation.blankRangeStart
+            let rangeEnd = listenIsolation.blankRangeEnd
+            let range = rangeStart...rangeEnd-1
 
-        let tokens = listenIsolation.tokens
-        let rawPrompt = tokens.map { $0.value }.joined()
-        let prompt = tokens.enumerated().map {(index, item) in
-            let word = item.value
-            return range.contains(index) ? word.map { _ in "_" }.joined() : word
-        }.joined()
-
-        TextWithTTSView(label: "Prompt: \(prompt)", speak: rawPrompt, language: languageSettings.learningLanguage)
-
-        let solutionTranslation = listenIsolation.solutionTranslation
-        TextWithTTSView(
-            label: "Solution: \(solutionTranslation)",
-            speak: solutionTranslation,
-            language: languageSettings.fromLanguage
-        )
-
-        let options = (listenIsolation.options).map { $0.text }
-        let response = options[listenIsolation.correctIndex]
-
-        List(options, id: \.self) { option in
-            TextWithTTSView(
-                label: option == response ? "\(option) ✅" : option,
-                speak: option,
-                language: languageSettings.learningLanguage
-            )
+            WrappingHStack(alignment: .center, horizontalSpacing: 0) {
+                ForEach(listenIsolation.tokens.indices, id:\.self) {index in
+                    let token = listenIsolation.tokens[index]
+                    if range.contains(index) {
+                        if choiceChosen == -1 {
+                            Text(token.value.map({ _ in "_" }).joined())
+                        } else {
+                            let option = listenIsolation.options[choiceChosen]
+                            TextWithTTSView(
+                                label: option.text,
+                                speak: option.text,
+                                language: languageSettings.fromLanguage,
+                                onTapGesture: { choiceChosen = -1 }
+                            )
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 15)
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
+                            .onTapGesture { choiceChosen = -1 }
+                        }
+                    } else {
+                        Text(token.value)
+                    }
+                }
+            }
+            
+            WrappingHStack(alignment: .center) {
+                let availableOptions = shuffled.filter({ option in
+                    let index = listenIsolation.options.firstIndex(of: option) ?? -1
+                    return index == -1 || choiceChosen != index
+                })
+                ForEach(availableOptions, id: \.self) { option in
+                    let index = listenIsolation.options.firstIndex(of: option)
+                    
+                    TextWithTTSView(
+                        label: option.text,
+                        speak: option.text,
+                        language: languageSettings.fromLanguage,
+                        onTapGesture: { choiceChosen = index! }
+                    )
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 15)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
+                    .onTapGesture { choiceChosen = index! }
+                }
+            }.padding(.all, 10)
+            
+            Button("Confirm") {
+                onComplete(
+                    listenIsolation.correctIndex == choiceChosen,
+                    Text(listenIsolation.solutionTranslation)
+                )
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.all, 20)
+            .disabled(choiceChosen == -1)
+        }
+        .padding(.vertical, 100)
+        .frame(maxWidth: .infinity, maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+        .background(.green)
+        .onChange(of: listenIsolation) {
+            choiceChosen = -1
+            shuffled = listenIsolation.options.shuffled()
+        }
+        .onAppear {
+            choiceChosen = -1
+            shuffled = listenIsolation.options.shuffled()
         }
     }
 }
@@ -69,6 +118,7 @@ struct ListenIsolationView: View {
         ),
         languageSettings: LanguageSettings(
             fromLanguage: "pt_BR", learningLanguage: "fr_FR"
-        )
+        ),
+        onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
 }

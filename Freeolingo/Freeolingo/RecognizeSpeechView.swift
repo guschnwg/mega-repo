@@ -10,10 +10,9 @@ import Foundation
 import Speech
 
 struct RecognizeSpeechView: View {
+    @Binding var result: SFSpeechRecognitionResult?
+    @Binding var isRecording: Bool
     let language: String
-    
-    @State private var recognizedText = "Speech Recognition"
-    @State private var isRecording = false
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "fr"))
     private let audioEngine = AVAudioEngine()
@@ -59,7 +58,7 @@ struct RecognizeSpeechView: View {
             var isFinal = false
             
             if let result = result {
-                self.recognizedText = result.bestTranscription.formattedString
+                self.result = result
                 isFinal = result.isFinal
             }
             
@@ -96,23 +95,16 @@ struct RecognizeSpeechView: View {
     }
     
     var body: some View {
-        VStack {
-            Text(recognizedText)
-                .padding()
-            
-            Button(action: {
-                if self.isRecording {
-                    stopRecording()
-                } else {
-                    startRecording()
-                }
-            }) {
-                Text(isRecording ? "Stop Recording" : "Start Recording")
-                    .padding()
-            }
-        }
+        VStack {}
         .onAppear {
             self.requestSpeechAuthorization()
+        }
+        .onChange(of: isRecording) {
+            if isRecording {
+                startRecording()
+            } else {
+                stopRecording()
+            }
         }
     }
 }

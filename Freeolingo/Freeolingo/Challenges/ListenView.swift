@@ -44,10 +44,10 @@ struct ListenView: View {
         .frame(maxHeight: .infinity)
         .background(.green)
         .onChange(of: listen) {
-            
+            current = ""
         }
         .onAppear {
-            
+            current = ""
         }
     }
 }
@@ -66,9 +66,13 @@ struct PurpleBorder: TextFieldStyle {
 
 #Preview {
     ListenView(
-        listen: Challenge.Listen(prompt: "Hi, somethign something somthign", solutionTranslation: "Oi, tudo bem"),
+        listen: Challenge.Listen(
+            prompt: "Hi, somethign something somthign",
+            solutionTranslation: "Oi, tudo bem"
+        ),
         languageSettings: LanguageSettings(
-            fromLanguage: "pt_BR", learningLanguage: "fr_FR"
+            fromLanguage: "pt_BR",
+            learningLanguage: "fr_FR"
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )

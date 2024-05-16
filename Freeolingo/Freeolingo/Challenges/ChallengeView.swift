@@ -57,23 +57,23 @@ struct ChallengeView: View {
             case .listenComplete(let listenComplete):
                 ListenCompleteView(listenComplete: listenComplete, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenIsolation(let listenIsolation):
-                ListenIsolationView(listenIsolation: listenIsolation, languageSettings: languageSettings)
+                ListenIsolationView(listenIsolation: listenIsolation, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenMatch(let listenMatch):
                 ListenMatchView(listenMatch: listenMatch, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenSpeak(let listenSpeak):
-                ListenSpeakView(listenSpeak: listenSpeak, languageSettings: languageSettings)
+                ListenSpeakView(listenSpeak: listenSpeak, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenTap(let listenTap):
                 ListenTapView(listenTap: listenTap, languageSettings: languageSettings, onComplete: _onComplete)
             case .match(let match):
                 MatchView(match: match, languageSettings: languageSettings, onComplete: _onComplete)
             case .name(let name):
-                NameView(name: name, languageSettings: languageSettings)
+                NameView(name: name, languageSettings: languageSettings, onComplete: _onComplete)
             case .partialReverseTranslate(let partialReverseTranslate):
-                PartialReverseTranslateView(partialReverseTranslate: partialReverseTranslate, languageSettings: languageSettings)
+                PartialReverseTranslateView(partialReverseTranslate: partialReverseTranslate, languageSettings: languageSettings, onComplete: _onComplete)
             case .select(let select):
                 SelectView(select: select, languageSettings: languageSettings, onComplete: _onComplete)
             case .speak(let speak):
-                SpeakView(speak: speak, languageSettings: languageSettings)
+                SpeakView(speak: speak, languageSettings: languageSettings, onComplete: _onComplete)
             case .translate(let translate):
                 TranslateView(translate: translate, languageSettings: languageSettings, onComplete: _onComplete)
             default:

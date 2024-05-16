@@ -17,7 +17,7 @@ struct Challenge: Decodable, Identifiable {
         let value: String
     }
 
-    struct Option: Decodable, Equatable {
+    struct Option: Decodable, Hashable, Equatable {
         let text: String
     }
 

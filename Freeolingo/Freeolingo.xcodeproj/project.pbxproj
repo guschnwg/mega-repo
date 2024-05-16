@@ -83,21 +83,21 @@
 		6B76CD712BD2F73100DCA0C0 /* Challenges */ = {
 			isa = PBXGroup;
 			children = (
-				6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */,
 				6B76CD782BD31A1300DCA0C0 /* AssistView.swift */,
+				6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */,
 				6B76CD7A2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift */,
+				6B76CD7E2BD31C6800DCA0C0 /* ListenCompleteView.swift */,
+				6B76CD802BD31D5500DCA0C0 /* ListenIsolationView.swift */,
+				6B76CD822BD31ED100DCA0C0 /* ListenMatchView.swift */,
+				6B76CD842BD31F8400DCA0C0 /* ListenSpeakView.swift */,
+				6B76CD862BD31FFF00DCA0C0 /* ListenTapView.swift */,
 				6B76CD7C2BD31C0C00DCA0C0 /* ListenView.swift */,
 				6B76CD882BD3215400DCA0C0 /* MatchView.swift */,
 				6B76CD8A2BD321B300DCA0C0 /* NameView.swift */,
-				6B76CD922BD324C100DCA0C0 /* TranslateView.swift */,
-				6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */,
-				6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */,
 				6B76CD8C2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift */,
-				6B76CD862BD31FFF00DCA0C0 /* ListenTapView.swift */,
-				6B76CD842BD31F8400DCA0C0 /* ListenSpeakView.swift */,
-				6B76CD822BD31ED100DCA0C0 /* ListenMatchView.swift */,
-				6B76CD802BD31D5500DCA0C0 /* ListenIsolationView.swift */,
-				6B76CD7E2BD31C6800DCA0C0 /* ListenCompleteView.swift */,
+				6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */,
+				6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */,
+				6B76CD922BD324C100DCA0C0 /* TranslateView.swift */,
 			);
 			path = Challenges;
 			sourceTree = "<group>";

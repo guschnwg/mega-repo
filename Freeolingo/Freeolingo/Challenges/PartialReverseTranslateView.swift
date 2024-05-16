@@ -6,31 +6,88 @@
 //
 
 import SwiftUI
+import WrappingHStack
 
 struct PartialReverseTranslateView: View {
     var partialReverseTranslate: Challenge.PartialReverseTranslate
     let languageSettings: LanguageSettings
+    let onComplete: (Bool, Text) -> Void
+    
+    @State private var current = ""
+    @FocusState private var focused: Bool
+    
+    @State private var tokens: [Challenge.DisplayToken] = []
+    
+    func initTokens(displayTokens: [Challenge.DisplayToken]) -> [Challenge.DisplayToken] {
+        var tokens: [Challenge.DisplayToken] = []
+        
+        for token in displayTokens {
+            let last = tokens.last
+            if tokens.isEmpty || last?.isBlank != token.isBlank {
+                tokens.append(Challenge.DisplayToken(text: token.text, isBlank: token.isBlank))
+            } else {
+                if last!.isBlank == token.isBlank {
+                    let newLast = Challenge.DisplayToken(
+                        text: last!.text + token.text,
+                        isBlank: last!.isBlank
+                    )
+                    tokens[tokens.lastIndex(of: last!)!] = newLast
+                }
+            }
+        }
+        return tokens
+    }
     
     var body: some View {
-        TextWithTTSView(
-            label: "Prompt: \(partialReverseTranslate.prompt)",
-            speak: partialReverseTranslate.prompt,
-            language: languageSettings.fromLanguage
-        )
-
-        var solution: String = ""
-        let toComplete = partialReverseTranslate.displayTokens.map { token in
-            let text = token.text
-            if token.isBlank {
-                solution.append(text)
-                return text.map { _ in "_" }.joined()
-            } else {
-                return text
+        VStack {
+            TextWithTTSView(
+                speak: partialReverseTranslate.prompt,
+                language: languageSettings.fromLanguage
+            ).font(.system(size: 36))
+            
+            WrappingHStack(horizontalSpacing: 0) {
+                ForEach(tokens, id: \.text) { token in
+                    if token.isBlank {
+                        TextField("...", text: $current)
+                            .background(.white)
+                            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+                            .frame(width: CGFloat(token.text.count) * 15)
+                            .padding(.all, 0)
+                            .focused($focused)
+                    } else {
+                        Text(token.text)
+                            .padding(.all, 0)
+                    }
+                }
             }
-        }.joined()
-        TextWithTTSView(label: "Prompt: \(toComplete)", speak: toComplete, language: languageSettings.learningLanguage)
+            
+            Button("Confirm") {
+                focused = false
 
-        TextWithTTSView(label: "Solution: \(solution)", speak: solution, language: languageSettings.learningLanguage)
+                let solution = tokens.first(where: { $0.isBlank })
+                let score = solution!.text.distance(between: current)
+                let fullSolution = partialReverseTranslate.displayTokens.map { $0.text }.joined()
+                if score > 0.85 {
+                    onComplete(true, Text("OK: \(fullSolution) \(score)"))
+                } else {
+                    onComplete(false, Text("NOT OK: \(fullSolution) \(score)"))
+                }
+            }.disabled(current.isEmpty)
+        }
+        .padding(.vertical, 100)
+        .padding(.horizontal, 30)
+        .frame(maxWidth: .infinity)
+        .frame(maxHeight: .infinity)
+        .background(.green)
+        .onChange(of: partialReverseTranslate) {
+            current = ""
+            tokens = initTokens(displayTokens: partialReverseTranslate.displayTokens)
+        }
+        .onAppear {
+            current = ""
+            focused = true
+            tokens = initTokens(displayTokens: partialReverseTranslate.displayTokens)
+        }
     }
 }
 
@@ -52,6 +109,7 @@ struct PartialReverseTranslateView: View {
         ),
         languageSettings: LanguageSettings(
             fromLanguage: "pt_BR", learningLanguage: "fr_FR"
-        )
+        ),
+        onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
 }
