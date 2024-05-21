@@ -1,5 +1,5 @@
-run: TUNNEL_TOKEN=?
 run:
+	TUNNEL_TOKEN=? \
 	docker compose up --build
 
 ngrok: TOKEN?=$(shell op item get NGrok --vault Private --format json | op item get - --fields label="authtoken")
