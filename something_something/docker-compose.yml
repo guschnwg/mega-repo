@@ -61,5 +61,18 @@ services:
     networks:
       - shared
 
+  freeolingo:
+    container_name: freeolingo
+    build:
+      context: ../Freeolingo/Server
+      dockerfile: ./Dockerfile
+    ports:
+      - "9996:8080"
+    stdin_open: true
+    tty: true
+    restart: always
+    networks:
+      - shared
+
 networks:
   shared:
