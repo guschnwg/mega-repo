@@ -48,6 +48,6 @@ struct SessionView: View {
         section: COURSES[0].sections[0],
         unit: COURSES[0].sections[0].units[0],
         level: COURSES[0].sections[0].units[0].levels[0],
-        session: COURSES[0].sections[0].units[0].levels[0].sessions[0]
+        session: SESSIONS[0]
     ) {}
 }
