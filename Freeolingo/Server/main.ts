@@ -145,6 +145,9 @@ const port = 8080;
 
 const handler = async (request: Request): Promise<Response> => {
   const route = new URL(request.url).pathname;
+
+  console.log("Request received:", route);
+
   if (route === "/") {
     return new Response("Hello, world!", { status: 200 });
   }
