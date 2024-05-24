@@ -69,6 +69,16 @@ function getHeaders(token: string) {
   };
 }
 
+async function getCourseList(token: string) {
+  let res = await fetch("https://www.duolingo.com/api/1/courses/list", {
+      "headers": getHeaders(token),
+      "method": "GET",
+  });
+
+  let data = await res.json();
+  return data;
+}
+
 async function getSpecificCourse(token: string, fromLanguage = 'pt', learningLanguage = 'es') {
   let fields = 'courses,currentCourse,fromLanguage,learningLanguage';
   let res = await fetch("https://www.duolingo.com/2017-06-30/users/134244220?fields=" + fields, {
@@ -135,7 +145,7 @@ async function getSession(token: string, fromLanguage = 'pt', learningLanguage =
   }
 
   if (retry) {
-      return getSession(token, fromLanguage, learningLanguage, level, levelSessionIndex, false);
+      return getSession(token, fromLanguage, learningLanguage, level, levelSessionIndex, challengeTypes, false);
   }
 
   return { id: "FAILED." + levelSessionIndex, data: postData };
@@ -154,6 +164,12 @@ const handler = async (request: Request): Promise<Response> => {
 
   if (route === "/ping") {
     return new Response("Pong!", { status: 200 });
+  }
+
+  if (route.startsWith("/getCourseList")) {
+    const [, , token] = route.split("/");
+    const list = await getCourseList(token);
+    return new Response(JSON.stringify(list, null, 2), { status: 200 });
   }
 
   if (route.startsWith("/getSpecificCourse")) {
