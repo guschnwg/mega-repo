@@ -77,7 +77,7 @@ struct ListenSpeakView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.all, 20)
-            .disabled(choiceChosen.count == 0)
+            .disabled(choiceChosen.isEmpty)
         }
         .padding(.vertical, 100)
         .background(.green)
