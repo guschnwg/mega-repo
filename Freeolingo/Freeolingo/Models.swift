@@ -150,6 +150,31 @@ struct Challenge: Decodable, Identifiable {
     enum CodingKeys : CodingKey {
         case id, type, rawData, data
     }
+
+    init(type: String) {
+        self.id = "INVALID"
+        self.type = type
+        self.rawData = ""
+        self.data = nil
+    }
+    
+    init(json: String) throws {
+        // TODO: Eventually get rid of this raw data thing, I want to fetch from the API instead of that converted JSON representation that I was using
+        let decoded = try JSONSerialization.jsonObject(with: json.data(using: .utf8)!, options: []) as? [String: Any]
+        let translated = [
+            "id": decoded!["id"],
+            "type": decoded!["type"],
+            "rawData": json,
+            "data": decoded
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: translated, options: [])
+        let challenge = try JSONDecoder().decode(Challenge.self, from: jsonData)
+        
+        id = challenge.id
+        type = challenge.type
+        rawData = challenge.rawData
+        data = challenge.data
+    }
     
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -191,7 +216,7 @@ struct Challenge: Decodable, Identifiable {
                 data = nil
             }
         } catch {
-            print("Error")
+            print("Error \(error)")
             data = nil
         }
     }
@@ -222,10 +247,23 @@ struct Unit: Decodable, Identifiable {
     let levels: Array<Level>
 }
 
+enum SectionType: String, Decodable {
+    case dailyRefresh = "daily_refresh"
+    case learning = "learning"
+    case personalizedPractice = "personalized_practice"
+}
+
 struct Section: Decodable, Identifiable {
     let id: Int
     let name: String
+    let type: SectionType
     let units: Array<Unit>
+    
+    struct ExampleSentence: Decodable {
+        let exampleSentence: String
+    }
+    
+    let exampleSentence: ExampleSentence?
 }
 
 struct Course: Decodable, Identifiable {

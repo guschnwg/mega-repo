@@ -32,6 +32,15 @@
 		6BA222C72BB8D86B00E11D96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BA222C62BB8D86B00E11D96 /* Assets.xcassets */; };
 		6BA222CA2BB8D86B00E11D96 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BA222C92BB8D86B00E11D96 /* Preview Assets.xcassets */; };
 		6BA222D12BB8DACF00E11D96 /* Data in Resources */ = {isa = PBXBuildFile; fileRef = 6BA222D02BB8DACF00E11D96 /* Data */; };
+		6BA596EB2C00A542007AEEF9 /* TestingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596EA2C00A542007AEEF9 /* TestingView.swift */; };
+		6BA596ED2C00AD23007AEEF9 /* SessionChallengesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596EC2C00AD23007AEEF9 /* SessionChallengesView.swift */; };
+		6BA596EF2C00AEAA007AEEF9 /* ModelSamples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596EE2C00AEAA007AEEF9 /* ModelSamples.swift */; };
+		6BA596F12C00B9A9007AEEF9 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F02C00B9A9007AEEF9 /* SessionView.swift */; };
+		6BA596F32C00BA01007AEEF9 /* LevelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F22C00BA01007AEEF9 /* LevelView.swift */; };
+		6BA596F52C00BA6B007AEEF9 /* SectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F42C00BA6B007AEEF9 /* SectionView.swift */; };
+		6BA596F72C00BAA2007AEEF9 /* CourseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F62C00BAA2007AEEF9 /* CourseView.swift */; };
+		6BA596F92C00BADA007AEEF9 /* CoursesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F82C00BADA007AEEF9 /* CoursesListView.swift */; };
+		6BA596FB2C00BB02007AEEF9 /* AllChallengesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */; };
 		EC5C64082BBAE46F00EB1E56 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C64072BBAE46F00EB1E56 /* Models.swift */; };
 		EC5C640A2BBAE49300EB1E56 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C64092BBAE49300EB1E56 /* Utils.swift */; };
 		EC5C640C2BBAE67600EB1E56 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C640B2BBAE67600EB1E56 /* Store.swift */; };
@@ -62,6 +71,15 @@
 		6BA222C62BB8D86B00E11D96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6BA222C92BB8D86B00E11D96 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		6BA222D02BB8DACF00E11D96 /* Data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Data; sourceTree = "<group>"; };
+		6BA596EA2C00A542007AEEF9 /* TestingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingView.swift; sourceTree = "<group>"; };
+		6BA596EC2C00AD23007AEEF9 /* SessionChallengesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionChallengesView.swift; sourceTree = "<group>"; };
+		6BA596EE2C00AEAA007AEEF9 /* ModelSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSamples.swift; sourceTree = "<group>"; };
+		6BA596F02C00B9A9007AEEF9 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
+		6BA596F22C00BA01007AEEF9 /* LevelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelView.swift; sourceTree = "<group>"; };
+		6BA596F42C00BA6B007AEEF9 /* SectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionView.swift; sourceTree = "<group>"; };
+		6BA596F62C00BAA2007AEEF9 /* CourseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseView.swift; sourceTree = "<group>"; };
+		6BA596F82C00BADA007AEEF9 /* CoursesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesListView.swift; sourceTree = "<group>"; };
+		6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllChallengesView.swift; sourceTree = "<group>"; };
 		EC5C64072BBAE46F00EB1E56 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		EC5C64092BBAE49300EB1E56 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		EC5C640B2BBAE67600EB1E56 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
@@ -128,11 +146,20 @@
 				6BA222C62BB8D86B00E11D96 /* Assets.xcassets */,
 				6BA222C82BB8D86B00E11D96 /* Preview Content */,
 				EC5C64072BBAE46F00EB1E56 /* Models.swift */,
+				6BA596EE2C00AEAA007AEEF9 /* ModelSamples.swift */,
 				EC5C64092BBAE49300EB1E56 /* Utils.swift */,
 				EC5C640B2BBAE67600EB1E56 /* Store.swift */,
 				6B76CD742BD2F7D700DCA0C0 /* RecognizeSpeechView.swift */,
 				6B76CD762BD2F80A00DCA0C0 /* TextWithTTSView.swift */,
 				6B76CD992BD85DF700DCA0C0 /* TextListenView.swift */,
+				6BA596EA2C00A542007AEEF9 /* TestingView.swift */,
+				6BA596EC2C00AD23007AEEF9 /* SessionChallengesView.swift */,
+				6BA596F02C00B9A9007AEEF9 /* SessionView.swift */,
+				6BA596F22C00BA01007AEEF9 /* LevelView.swift */,
+				6BA596F42C00BA6B007AEEF9 /* SectionView.swift */,
+				6BA596F62C00BAA2007AEEF9 /* CourseView.swift */,
+				6BA596F82C00BADA007AEEF9 /* CoursesListView.swift */,
+				6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */,
 			);
 			path = Freeolingo;
 			sourceTree = "<group>";
@@ -224,23 +251,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6BA596F52C00BA6B007AEEF9 /* SectionView.swift in Sources */,
+				6BA596ED2C00AD23007AEEF9 /* SessionChallengesView.swift in Sources */,
 				6B76CD9A2BD85DF700DCA0C0 /* TextListenView.swift in Sources */,
 				EC5C640C2BBAE67600EB1E56 /* Store.swift in Sources */,
 				EC5C64082BBAE46F00EB1E56 /* Models.swift in Sources */,
+				6BA596F92C00BADA007AEEF9 /* CoursesListView.swift in Sources */,
 				6B76CD812BD31D5500DCA0C0 /* ListenIsolationView.swift in Sources */,
 				6B76CD7F2BD31C6800DCA0C0 /* ListenCompleteView.swift in Sources */,
 				6B76CD832BD31ED100DCA0C0 /* ListenMatchView.swift in Sources */,
+				6BA596F12C00B9A9007AEEF9 /* SessionView.swift in Sources */,
+				6BA596EB2C00A542007AEEF9 /* TestingView.swift in Sources */,
 				6B76CD7B2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift in Sources */,
 				6B76CD8D2BD3220C00DCA0C0 /* PartialReverseTranslateView.swift in Sources */,
 				6B76CD912BD3243D00DCA0C0 /* SpeakView.swift in Sources */,
+				6BA596EF2C00AEAA007AEEF9 /* ModelSamples.swift in Sources */,
 				6B76CD752BD2F7D700DCA0C0 /* RecognizeSpeechView.swift in Sources */,
+				6BA596FB2C00BB02007AEEF9 /* AllChallengesView.swift in Sources */,
 				6B76CD732BD2F75000DCA0C0 /* ChallengeView.swift in Sources */,
 				6B76CD792BD31A1300DCA0C0 /* AssistView.swift in Sources */,
+				6BA596F72C00BAA2007AEEF9 /* CourseView.swift in Sources */,
 				6B76CD8F2BD322DE00DCA0C0 /* SelectView.swift in Sources */,
 				6BA222C52BB8D86A00E11D96 /* ContentView.swift in Sources */,
 				6B76CD892BD3215400DCA0C0 /* MatchView.swift in Sources */,
 				6B76CD8B2BD321B300DCA0C0 /* NameView.swift in Sources */,
 				6B76CD7D2BD31C0C00DCA0C0 /* ListenView.swift in Sources */,
+				6BA596F32C00BA01007AEEF9 /* LevelView.swift in Sources */,
 				6BA222C32BB8D86A00E11D96 /* FreeolingoApp.swift in Sources */,
 				EC5C640A2BBAE49300EB1E56 /* Utils.swift in Sources */,
 				6B76CD872BD31FFF00DCA0C0 /* ListenTapView.swift in Sources */,
@@ -387,8 +423,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -418,8 +453,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

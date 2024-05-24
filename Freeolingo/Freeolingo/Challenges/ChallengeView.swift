@@ -33,6 +33,7 @@ struct LanguageSettings {
 struct ChallengeView: View {
     let languageSettings: LanguageSettings
     let challenge: Challenge
+    let onAnswered: (Bool) -> Void
     let onComplete: (Bool) -> Void
 
     @State private var showAlert = false
@@ -40,9 +41,10 @@ struct ChallengeView: View {
     @State private var answerCorrect: Bool = false
 
     func _onComplete(isCorrect: Bool, message: Text) {
-            showAlert = true
-            answerCorrect = isCorrect
-            alertText = message
+        showAlert = true
+        answerCorrect = isCorrect
+        alertText = message
+        onAnswered(isCorrect)
     }
     
     var body: some View {
