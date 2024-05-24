@@ -236,15 +236,24 @@ struct Session: Decodable, Identifiable, Equatable {
 struct Level: Decodable, Identifiable {
     let id: String
     let name: String
+    let totalSessions: Int
     
-    let sessions: Array<Session>
+//    var sessions: Array<Session> = []
+    
+    private enum CodingKeys : String, CodingKey {
+        case id, name = "debugName", totalSessions
+    }
 }
 
 struct Unit: Decodable, Identifiable {
     let id: Int
-    let name: String
+    let name: String?
     
     let levels: Array<Level>
+    
+    private enum CodingKeys : String, CodingKey {
+        case id = "unitIndex", name = "teachingObjective", levels
+    }
 }
 
 enum SectionType: String, Decodable {
@@ -253,17 +262,20 @@ enum SectionType: String, Decodable {
     case personalizedPractice = "personalized_practice"
 }
 
-struct Section: Decodable, Identifiable {
-    let id: Int
-    let name: String
+struct Section: Decodable {
+    let name: String?
     let type: SectionType
     let units: Array<Unit>
     
     struct ExampleSentence: Decodable {
         let exampleSentence: String
     }
-    
+
     let exampleSentence: ExampleSentence?
+    
+    private enum CodingKeys : String, CodingKey {
+        case name = "debugName", type, units, exampleSentence
+    }
 }
 
 struct Course: Decodable, Identifiable {
@@ -272,5 +284,36 @@ struct Course: Decodable, Identifiable {
     let learningLanguage: String
     
     let sections: Array<Section>
+    
+    private enum CodingKeys : String, CodingKey {
+        case id, fromLanguage, learningLanguage, sections = "pathSectioned"
+    }
 }
 
+struct AvailableCourse: Decodable {
+//    {
+//        "num_learners": 332,
+//        "from_language_name": "Russian",
+//        "num_learners_string": "332",
+//        "learning_language": "sv",
+//        "learning_language_name": "Swedish",
+//        "from_language_id": "ru",
+//        "progress": 0,
+//        "phase": 1,
+//        "learning_language_id": "sv",
+//        "from_language": "ru"
+//    }
+    let fromLanguage: String
+    let fromLanguageName: String
+    let learningLanguage: String
+    let learningLanguageName: String
+    let numLearners: Int
+    
+    private enum CodingKeys : String, CodingKey {
+        case fromLanguage = "from_language_id"
+        case fromLanguageName = "from_language_name"
+        case learningLanguage = "learning_language"
+        case learningLanguageName = "learning_language_name"
+        case numLearners = "num_learners"
+    }
+}

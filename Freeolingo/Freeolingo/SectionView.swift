@@ -12,7 +12,6 @@ import SwiftUI
 let colors = [
     Color.red,
     Color.blue,
-    Color.yellow,
     Color.orange,
     Color.pink,
     Color.brown,
@@ -30,7 +29,6 @@ func getColor(index: Int, exclude: Color? = nil) -> Color {
 struct SectionView: View {
     let course: Course
     let section: Section
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
     var body: some View {
         ScrollView {
@@ -40,7 +38,7 @@ struct SectionView: View {
                 let height = 100 + (unit.levels.count-1) * (100 - 15) + 40
                 
                 VStack {
-                    Text(unit.name)
+                    Text(unit.name ?? "???")
                         .frame(maxWidth: .infinity)
                         .frame(height: 100).font(.system(size: 20))
                         .background(color)
@@ -57,8 +55,7 @@ struct SectionView: View {
                                 section: section,
                                 unit: unit,
                                 level: level,
-                                color: levelColor,
-                                viewSession: viewSession
+                                color: levelColor
                             )
                             .frame(width: 100, height: 100)
                             .background(levelColor)
@@ -82,5 +79,5 @@ struct SectionView: View {
     SectionView(
         course: COURSES[0],
         section: COURSES[0].sections[0]
-    ) {_,_,_,_,_ in}
+    )
 }

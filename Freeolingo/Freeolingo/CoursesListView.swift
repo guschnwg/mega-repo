@@ -9,36 +9,47 @@ import Foundation
 import SwiftUI
 
 struct CoursesListView : View {
-    let courses: Array<Course>
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
+    let availableCourses: [AvailableCourse]
+
+    @EnvironmentObject var store: Store
     
     var body: some View {
-        let baseColor = Color.red
-        
-        VStack(spacing: 0) {
-            ForEach(courses.indices, id: \.self) { index in
-                let course = courses[index]
-                
-                let brightness = Double(Double(index) * Double(1) / Double(courses.count + 3))
-                let rowColor = baseColor.brightness(brightness)
-                
-                let fromLanguageName = getLanguageName(identifier: course.fromLanguage)
-                let learningLanguageName = getLanguageName(identifier: course.learningLanguage)
-                
-                NavigationLink(destination: CourseView(course: course, viewSession: viewSession)) {
-                    Text(fromLanguageName + " -> " + learningLanguageName)
-                        .font(.system(size: 24))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                        .padding(.all, 10)
+        let baseColor = Color.teal.darker(by: 0.2)
+        let increment = CGFloat(1) / CGFloat(availableCourses.count + 5)
+
+        ScrollView {
+            VStack (spacing: 0) {
+                ForEach(availableCourses.indices, id: \.self) { index in
+                    let course = availableCourses[index]
+                    
+                    let rowColor = baseColor.lighter(by: increment * CGFloat(index))
+                    
+                    let fromLanguageName = course.fromLanguageName
+                    let learningLanguageName = course.learningLanguageName
+                    let languageSettings = LanguageSettings(
+                        fromLanguage: course.fromLanguage,
+                        learningLanguage: course.learningLanguage
+                    )
+                    
+                    NavigationLink(destination: CourseView(languageSettings: languageSettings)) {
+                        Text(fromLanguageName + " -> " + learningLanguageName)
+                            .font(.system(size: 24))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                            .padding(.all, 10)
+                    }
+                    .frame(height: 100)
+                    .frame(maxWidth: .infinity)
+                    .background(rowColor)
+                    .foregroundColor(.white)
                 }
-                .frame(height: 100)
-                .frame(maxWidth: .infinity)
-                .background(rowColor)
             }
         }.navigationTitle("Courses")
+            .background(baseColor)
     }
 }
 
 #Preview {
-    CoursesListView(courses: COURSES) {_,_,_,_,_ in}
+    NavigationStack {
+        CoursesListView(availableCourses: AVAILABLE_COURSES)
+    }
 }

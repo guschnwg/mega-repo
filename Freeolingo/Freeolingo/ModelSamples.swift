@@ -253,13 +253,13 @@ let SESSIONS = [
 ]
 
 let LEVELS = [
-    Level(id: "1", name: "My level", sessions: SESSIONS),
-    Level(id: "2", name: "My level", sessions: SESSIONS),
-    Level(id: "3", name: "My level", sessions: SESSIONS),
-    Level(id: "4", name: "My level", sessions: SESSIONS),
-    Level(id: "5", name: "My level", sessions: SESSIONS),
-    Level(id: "6", name: "My level", sessions: SESSIONS),
-    Level(id: "7", name: "My level", sessions: SESSIONS),
+    Level(id: "1", name: "My level", totalSessions: 5),
+    Level(id: "2", name: "My level", totalSessions: 5),
+    Level(id: "3", name: "My level", totalSessions: 5),
+    Level(id: "4", name: "My level", totalSessions: 5),
+    Level(id: "5", name: "My level", totalSessions: 5),
+    Level(id: "6", name: "My level", totalSessions: 5),
+    Level(id: "7", name: "My level", totalSessions: 5),
 ]
 
 let UNITS = [
@@ -274,18 +274,31 @@ let UNITS = [
 let EXAMPLE_SENTENCE = Section.ExampleSentence(exampleSentence: "Example Sentence")
 
 let SECTIONS = [
-    Section(id: 1, name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(id: 2, name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(id: 3, name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(id: 4, name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(id: 5, name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(id: 6, name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(id: 7, name: "FIrst section", type: SectionType.dailyRefresh, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(name: "FIrst section", type: SectionType.dailyRefresh, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
 ]
 
 let COURSES = [
     Course(id: "1", fromLanguage: "pt", learningLanguage: "en", sections: SECTIONS),
-    Course(id: "2", fromLanguage: "pt", learningLanguage: "es", sections: SECTIONS),
-    Course(id: "3", fromLanguage: "pt", learningLanguage: "es", sections: SECTIONS),
-    Course(id: "4", fromLanguage: "pt", learningLanguage: "es", sections: SECTIONS)
+    Course(id: "2", fromLanguage: "pt", learningLanguage: "fr", sections: SECTIONS)
+]
+
+let AVAILABLE_COURSES = [
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
 ]

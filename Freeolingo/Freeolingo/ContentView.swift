@@ -10,23 +10,24 @@ import Foundation
 import AVFoundation
 
 struct ContentView: View {
-    let courses: Array<Course>
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
-    
+    @EnvironmentObject var store: Store
+
     @State var state: Int = 0
     
     var body: some View {
-        if courses.count == 0 {
+        if store.availableCourses.isEmpty {
             Text("No courses")
         } else {
             NavigationStack {
                 VStack {
-                    CoursesListView(courses: courses, viewSession: viewSession)
-                    
-                    Spacer()
-                    
-                    NavigationLink(destination: AllChallengesView()) {
-                        Text("AllChallengesView")
+                    CoursesListView(availableCourses: store.availableCourses)
+
+                    if UserDefaults.standard.bool(forKey: "debug_mode") {
+                        Spacer()
+
+                        NavigationLink(destination: AllChallengesView()) {
+                            Text("AllChallengesView")
+                        }
                     }
                 }
             }
@@ -36,7 +37,5 @@ struct ContentView: View {
 
 
 #Preview {
-    return ContentView(courses: COURSES) {_,_,_,_,_ in
-        print("called it")
-    }
+    return ContentView()
 }

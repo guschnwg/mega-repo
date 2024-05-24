@@ -8,22 +8,20 @@
 import Foundation
 import SwiftUI
 
-struct CourseView: View {
+struct InnerCourseView: View {
     let course: Course
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
     
     @State private var selectedSection: Section? = nil
-    
+
     var body: some View {
-        ScrollView {
+        VStack {
             ForEach(course.sections.indices, id: \.self) { index in
                 let section = course.sections[index]
-
+                
                 NavigationLink(
                     destination: SectionView(
                         course: course,
-                        section: section,
-                        viewSession: viewSession
+                        section: section
                     )
                 ) {
                     VStack (alignment: .leading) {
@@ -51,11 +49,12 @@ struct CourseView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(height: 250)
+                .frame(height: 150)
                 .frame(maxWidth: .infinity)
                 .padding(.all, 10)
                 .background(colors[index % colors.count])
                 .clipShape(.rect(cornerRadius: 10.0))
+                .foregroundColor(.white)
             }
         }.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Sections")
@@ -63,6 +62,34 @@ struct CourseView: View {
     }
 }
 
+struct CourseView: View {
+    let languageSettings: LanguageSettings
+    
+    @EnvironmentObject var store: Store
+    
+    @State private var selectedSection: Section? = nil
+    
+    var body: some View {
+        let expectedCourse: Course? = store.courses.first(where: {
+            languageSettings.fromLanguage == $0.fromLanguage
+            && languageSettings.learningLanguage == $0.learningLanguage
+        })
+        
+        ScrollView {
+            if let course = expectedCourse {
+                InnerCourseView(course: course)
+            } else {
+                Text("No course for this")
+            }
+        }
+        .onAppear {
+            store.getCourse(languageSettings: languageSettings)
+        }
+    }
+}
+
 #Preview {
-    CourseView(course: COURSES[0]) {_,_,_,_,_ in}
+    NavigationStack {
+        InnerCourseView(course: COURSES[0])
+    }
 }

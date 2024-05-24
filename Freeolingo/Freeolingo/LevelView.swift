@@ -15,13 +15,13 @@ struct LevelView: View {
     let level: Level
     let color: Color
     
-    let viewSession: (Course, Section, Unit, Level, Session) -> Void
+    @EnvironmentObject var store: Store
     
     @State private var isPresented = false
     @State private var currentSession = 0
     
     func finishSession() -> Void {
-        if level.sessions.indices.contains(currentSession + 1) {
+        if currentSession + 1 < level.totalSessions {
             currentSession += 1
         } else {
             isPresented = false
@@ -31,12 +31,12 @@ struct LevelView: View {
     var body: some View {
         Button(action: {
             isPresented = true
-            viewSession(
-                course,
-                section,
-                unit,
-                level,
-                level.sessions[currentSession]
+            store.viewSession(
+                course: course,
+                section: section,
+                unit: unit,
+                level: level,
+                session: SESSIONS[currentSession]
             )
         }, label: {
             Text(level.name).frame(width: 100, height: 100)
@@ -46,7 +46,7 @@ struct LevelView: View {
                 Text(level.name)
                 
                 Text(
-                    "Lesson \(currentSession + 1) from \(level.sessions.count)"
+                    "Lesson \(currentSession + 1) from \(level.totalSessions)"
                 )
                 
                 HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
@@ -55,7 +55,7 @@ struct LevelView: View {
                         section: section,
                         unit: unit,
                         level: level,
-                        session: level.sessions[currentSession],
+                        session: SESSIONS[currentSession],
                         finishSession: finishSession
                     )
                 }
@@ -74,6 +74,5 @@ struct LevelView: View {
         unit: COURSES[0].sections[0].units[0],
         level: COURSES[0].sections[0].units[0].levels[0],
         color: .red
-    ) {_,_,_,_,_ in }
-        .background(.red)
+    ).background(.red)
 }
