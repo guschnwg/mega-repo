@@ -16,13 +16,13 @@
 			<key>Type</key>
 			<string>PSTextFieldSpecifier</string>
 			<key>Title</key>
-			<string>Name</string>
+			<string>Duolingo Token</string>
 			<key>Key</key>
-			<string>name_preference</string>
+			<string>duolingo_token</string>
 			<key>DefaultValue</key>
 			<string></string>
 			<key>IsSecure</key>
-			<false/>
+			<true/>
 			<key>KeyboardType</key>
 			<string>Alphabet</string>
 			<key>AutocapitalizationType</key>
@@ -34,9 +34,9 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Enabled</string>
+			<string>Debug Mode</string>
 			<key>Key</key>
-			<string>enabled_preference</string>
+			<string>debug</string>
 			<key>DefaultValue</key>
 			<true/>
 		</dict>
