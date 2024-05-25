@@ -60,6 +60,14 @@ const CHALLENGE_TYPES = [
   "writeComprehension"
 ];
 
+async function hash(message: string) {
+  const data = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
+}
+
 function getHeaders(token: string) {
   return {
     "accept": "application/json; charset=UTF-8",
@@ -69,17 +77,37 @@ function getHeaders(token: string) {
   };
 }
 
+
 async function getCourseList(token: string) {
+  try {
+    const data = await Deno.readTextFile('./cache/courseList.json');
+    return JSON.parse(data);
+  } catch {
+    console.log("Cache miss")
+  }
+
   let res = await fetch("https://www.duolingo.com/api/1/courses/list", {
       "headers": getHeaders(token),
       "method": "GET",
   });
 
   let data = await res.json();
+
+  // Persist to a file
+  Deno.writeTextFile('./cache/courseList.json', JSON.stringify(data, null, 2), { create: true });
+
   return data;
 }
 
 async function getSpecificCourse(token: string, fromLanguage = 'pt', learningLanguage = 'es') {
+  const hashed = await hash(`${fromLanguage}.${learningLanguage}`);
+  try {
+    const data = await Deno.readTextFile(`./cache/getSpecificCourse.${hashed}.json`);
+    return JSON.parse(data);
+  } catch {
+    console.log("Cache miss")
+  }
+
   let fields = 'courses,currentCourse,fromLanguage,learningLanguage';
   let res = await fetch("https://www.duolingo.com/2017-06-30/users/134244220?fields=" + fields, {
       "headers": getHeaders(token),
@@ -95,10 +123,21 @@ async function getSpecificCourse(token: string, fromLanguage = 'pt', learningLan
 
   let data = await res.json();
   let course = data.currentCourse;
+
+  Deno.writeTextFile(`./cache/getSpecificCourse.${hashed}.json`, JSON.stringify(course, null, 2), { create: true });
+
   return course;
 }
 
 async function getSession(token: string, fromLanguage = 'pt', learningLanguage = 'es', level: any = {}, levelSessionIndex = 0, challengeTypes: string[] = [], retry = true) {
+  const hashed = await hash(`${fromLanguage}.${learningLanguage}.${level.id}.${levelSessionIndex}.${challengeTypes.join(',')}`);
+  try {
+    const data = await Deno.readTextFile(`./cache/getSession.${hashed}.json`);
+    return JSON.parse(data);
+  } catch {
+    console.log("Cache miss")
+  }
+
   let postData: any = {
       "challengeTypes": challengeTypes || CHALLENGE_TYPES,
       "fromLanguage": fromLanguage,
@@ -141,6 +180,10 @@ async function getSession(token: string, fromLanguage = 'pt', learningLanguage =
   });
   if (res.ok) {
       let data = await res.json();
+
+      // Persist to a file
+      Deno.writeTextFile(`./cache/getSession.${hashed}.json`, JSON.stringify(data, null, 2), { create: true });
+
       return data;
   }
 
@@ -173,19 +216,19 @@ const handler = async (request: Request): Promise<Response> => {
   }
 
   if (route.startsWith("/getSpecificCourse")) {
-    const [, , token, fromLanguage, toLanguage] = route.split("/");
-    const course = await getSpecificCourse(token, fromLanguage, toLanguage);
+    const [, , token, fromLanguage, learningLanguage] = route.split("/");
+    const course = await getSpecificCourse(token, fromLanguage, learningLanguage);
     return new Response(JSON.stringify(course, null, 2), { status: 200 });
   }
 
   if (route.startsWith("/getSession")) {
-    const [, , token, fromLanguage, toLanguage, section, unit, level, levelSessionInfo, challengeTypes] = route.split("/");
-    const course = await getSpecificCourse(token, fromLanguage, toLanguage);
+    const [, , token, fromLanguage, learningLanguage, section, unit, level, levelSessionInfo, challengeTypes] = route.split("/");
+    const course = await getSpecificCourse(token, fromLanguage, learningLanguage);
     const actualLevel = course.pathSectioned[parseInt(section, 10)].units[parseInt(unit, 10)].levels[parseInt(level, 10)];
     const session = await getSession(
       token,
       fromLanguage,
-      toLanguage,
+      learningLanguage,
       actualLevel,
       parseInt(levelSessionInfo, 10),
       challengeTypes ? challengeTypes.split(',') : [],

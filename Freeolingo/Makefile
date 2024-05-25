@@ -20,4 +20,4 @@ run-server:
 	cd Server && docker build -t app . && docker run -it -p 8080:8080 app
 
 pod-run-server:
-	cd Server && podman build --tag freeolingo -f ./Dockerfile . && podman run -p 8080:8080 freeolingo
+	cd Server && podman build --tag freeolingo -f ./Dockerfile . && podman run -p 8080:8080 -v ./out:/app/cache:Z freeolingo

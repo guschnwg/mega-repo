@@ -11,3 +11,5 @@ courses
 *.xcuserstate
 project.xcworkspace/
 xcuserdata/
+
+Server/out
