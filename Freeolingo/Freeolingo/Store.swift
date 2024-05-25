@@ -31,6 +31,9 @@ class Store: ObservableObject {
     @Published var availableCourses: [AvailableCourse] = []
     @Published var courses: [Course] = []
     
+    let baseURL = UserDefaults.standard.value(forKey: "base_url") ?? "http://localhost:8080"
+    let token = UserDefaults.standard.value(forKey: "duolingo_token") ?? "TOKEN"
+    
     private static func fileURL() throws -> URL {
         try FileManager.default.url(for: .documentDirectory,
                                     in: .userDomainMask,
@@ -52,21 +55,16 @@ class Store: ObservableObject {
         } catch {
             fatalError(error.localizedDescription)
         }
-        
     }
     
     func getAvailableCourses(fromLanguages: [String]) {
-        // TODO: Keep this persistent
+        // TODO: Keep this persistent in the app, not just the server
 
         if !self.availableCourses.isEmpty {
             return
         }
-
-        let baseURL = "http://localhost:8080"
-        let token = UserDefaults.standard.value(forKey: "duolingo_token")!
-        let path = "getCourseList/\(token)/"
         
-        let url = URL(string: "\(baseURL)/\(path)")!
+        let url = URL(string: "\(baseURL)/getCourseList/\(token)")!
         let task = URLSession.shared.dataTask(with: url) { data, _, _ in
             do {
                 let courses = try JSONDecoder().decode([AvailableCourse].self, from: data!)
@@ -81,16 +79,13 @@ class Store: ObservableObject {
     }
     
     func getCourse(languageSettings: LanguageSettings) {
-        // TODO: Keep this persistent
+        // TODO: Keep this persistent in the app, not just the server
 
         if self.courses.contains(where: { $0.fromLanguage == languageSettings.fromLanguage && $0.learningLanguage == languageSettings.learningLanguage }) {
             return
         }
-        
-        let baseURL = "http://localhost:8080"
-        let token = UserDefaults.standard.value(forKey: "duolingo_token")!
+
         let path = "getSpecificCourse/\(token)/\(languageSettings.fromLanguage)/\(languageSettings.learningLanguage)"
-        
         let url = URL(string: "\(baseURL)/\(path)")!
         let task = URLSession.shared.dataTask(with: url) { data, _, _ in
             do {
