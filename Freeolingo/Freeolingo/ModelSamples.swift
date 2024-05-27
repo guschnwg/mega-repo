@@ -253,13 +253,13 @@ let SESSIONS = [
 ]
 
 let LEVELS = [
-    Level(id: "1", name: "My level", totalSessions: 5),
-    Level(id: "2", name: "My level", totalSessions: 5),
-    Level(id: "3", name: "My level", totalSessions: 5),
-    Level(id: "4", name: "My level", totalSessions: 5),
-    Level(id: "5", name: "My level", totalSessions: 5),
-    Level(id: "6", name: "My level", totalSessions: 5),
-    Level(id: "7", name: "My level", totalSessions: 5),
+    Level(id: "1", name: "My level", type: LevelType.skill, totalSessions: 5),
+    Level(id: "2", name: "My level", type: LevelType.skill, totalSessions: 5),
+    Level(id: "3", name: "My level", type: LevelType.skill, totalSessions: 5),
+    Level(id: "4", name: "My level", type: LevelType.chest, totalSessions: 5),
+    Level(id: "5", name: "My level", type: LevelType.skill, totalSessions: 5),
+    Level(id: "6", name: "My level", type: LevelType.skill, totalSessions: 5),
+    Level(id: "7", name: "My level", type: LevelType.unitReview, totalSessions: 5),
 ]
 
 let UNITS = [

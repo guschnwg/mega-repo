@@ -30,6 +30,7 @@ class Store: ObservableObject {
     @Published var sessionAttemptMap: [String: SessionAttempt] = [:]
     @Published var availableCourses: [AvailableCourse] = []
     @Published var courses: [Course] = []
+    @Published var sessionsMap: [String: Session] = [:]
     
     let baseURL = UserDefaults.standard.value(forKey: "base_url") ?? "http://localhost:8080"
     let token = UserDefaults.standard.value(forKey: "duolingo_token") ?? "TOKEN"
@@ -100,8 +101,64 @@ class Store: ObservableObject {
         task.resume()
     }
     
-    func viewSession(course: Course, section: Section, unit: Unit, level: Level, session: Session) {
-        print("View session \(session)")
+    func keyFor(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) -> String {
+        let fromLanguage = course.fromLanguage
+        let learningLanguage = course.learningLanguage
+        let sectionIndex = course.sections.firstIndex(where: { $0.name == section.name }) ?? 0
+        let unitIndex = section.units.firstIndex(where: { $0.id == unit.id }) ?? 0
+        let levelIndex = unit.levels.firstIndex(where: { $0.id == level.id }) ?? 0
+        let path = "getSession/\(token)/\(fromLanguage)/\(learningLanguage)/\(sectionIndex)/\(unitIndex)/\(levelIndex)/\(sessionIndex)"
+        return path
+    }
+    
+    func getSession(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
+        // TODO: Keep this persistent in the app, not just the server
+        let path = keyFor(course: course, section: section, unit: unit, level: level, sessionIndex: sessionIndex)
+
+        if self.sessionsMap.keys.contains(path) {
+            return
+        }
+        
+        if level.type == LevelType.chest {
+            return
+        }
+        if level.type == LevelType.story {
+            return
+        }
+
+        let url = URL(string: "\(baseURL)/\(path)")!
+        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
+            do {
+                // TODO: Let's not convert and actually learn how to do this generic stuff in Swift
+                // Decode to dictionary
+                // Create an id, type, data: rest object and then pass to the decoder
+                var json = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any]
+                let challenges = json!["challenges"] as! [[String: Any]]
+                json!["challenges"] = challenges.map { challenge in
+                    var convertedChallenge: [String: Any] = [:]
+                    convertedChallenge["id"] = challenge["id"]
+                    convertedChallenge["type"] = challenge["type"]
+                    convertedChallenge["data"] = challenge
+                    return convertedChallenge
+                }
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: json as Any, options: [])
+                    let session = try JSONDecoder().decode(Session.self, from: jsonData)
+                    DispatchQueue.main.async {
+                        self.sessionsMap[path] = session
+                    }
+                } catch {
+                    print(error)
+                }
+            } catch {
+                print(error)
+            }
+        }
+        task.resume()
+    }
+    
+    func viewSession(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
+        getSession(course: course, section: section, unit: unit, level: level, sessionIndex: sessionIndex)
     }
     
     func save() {

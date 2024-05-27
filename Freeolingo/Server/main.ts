@@ -215,14 +215,14 @@ const handler = async (request: Request): Promise<Response> => {
     return new Response(JSON.stringify(list, null, 2), { status: 200 });
   }
 
-  if (route.startsWith("/getSpecificCourse")) {
+  if (route.startsWith("/getSpecificCourse/")) {
     const [, , token, fromLanguage, learningLanguage] = route.split("/");
     const course = await getSpecificCourse(token, fromLanguage, learningLanguage);
     return new Response(JSON.stringify(course, null, 2), { status: 200 });
   }
 
-  if (route.startsWith("/getSession")) {
-    const [, , token, fromLanguage, learningLanguage, section, unit, level, levelSessionInfo, challengeTypes] = route.split("/");
+  if (route.startsWith("/getSession/")) {
+    const [, , token, fromLanguage, learningLanguage, section, unit, level, levelSessionIndex, challengeTypes] = route.split("/");
     const course = await getSpecificCourse(token, fromLanguage, learningLanguage);
     const actualLevel = course.pathSectioned[parseInt(section, 10)].units[parseInt(unit, 10)].levels[parseInt(level, 10)];
     const session = await getSession(
@@ -230,7 +230,7 @@ const handler = async (request: Request): Promise<Response> => {
       fromLanguage,
       learningLanguage,
       actualLevel,
-      parseInt(levelSessionInfo, 10),
+      parseInt(levelSessionIndex, 10),
       challengeTypes ? challengeTypes.split(',') : [],
     );
     return new Response(JSON.stringify(session, null, 2), { status: 200 });

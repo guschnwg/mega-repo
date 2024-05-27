@@ -36,10 +36,12 @@ struct LevelView: View {
                 section: section,
                 unit: unit,
                 level: level,
-                session: SESSIONS[currentSession]
+                sessionIndex: currentSession
             )
         }, label: {
-            Text(level.name).frame(width: 100, height: 100)
+            Text(level.name)
+                .frame(width: 100, height: 100)
+                .foregroundColor(.white)
         })
         .popover(isPresented: $isPresented) {
             VStack(alignment: .leading, spacing: 30) {
@@ -49,20 +51,40 @@ struct LevelView: View {
                     "Lesson \(currentSession + 1) from \(level.totalSessions)"
                 )
                 
-                HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
-                    SessionView(
-                        course: course,
-                        section: section,
-                        unit: unit,
-                        level: level,
-                        session: SESSIONS[currentSession],
-                        finishSession: finishSession
-                    )
+                let key = store.keyFor(
+                    course: course,
+                    section: section,
+                    unit: unit,
+                    level: level,
+                    sessionIndex: currentSession
+                )
+                
+                if store.sessionsMap.keys.contains(key) {
+                    HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
+                        SessionView(
+                            course: course,
+                            section: section,
+                            unit: unit,
+                            level: level,
+                            session: store.sessionsMap[key]!,
+                            finishSession: finishSession
+                        )
+                    }
+                } else {
+                    Text("Loading...")
                 }
             }
             .padding(.all, 20)
             .presentationCompactAdaptation((.popover))
-            
+        }
+        .onChange(of: currentSession) {
+            store.viewSession(
+                course: course,
+                section: section,
+                unit: unit,
+                level: level,
+                sessionIndex: currentSession
+            )
         }
     }
 }

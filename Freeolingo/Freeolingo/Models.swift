@@ -123,6 +123,10 @@ struct Challenge: Decodable, Identifiable {
         let correctIndices: [Int]
     }
     
+    struct GapFill: Decodable, Equatable {
+        
+    }
+    
     let id: String
     let type: String
     
@@ -140,12 +144,11 @@ struct Challenge: Decodable, Identifiable {
             partialReverseTranslate(PartialReverseTranslate),
             select(Select),
             speak(Speak),
-            translate(Translate)
+            translate(Translate),
+            gapFill(GapFill)
     }
     
     let data: DataTypes?
-    
-    let rawData: String
     
     enum CodingKeys : CodingKey {
         case id, type, rawData, data
@@ -154,7 +157,6 @@ struct Challenge: Decodable, Identifiable {
     init(type: String) {
         self.id = "INVALID"
         self.type = type
-        self.rawData = ""
         self.data = nil
     }
     
@@ -164,7 +166,6 @@ struct Challenge: Decodable, Identifiable {
         let translated = [
             "id": decoded!["id"],
             "type": decoded!["type"],
-            "rawData": json,
             "data": decoded
         ]
         let jsonData = try JSONSerialization.data(withJSONObject: translated, options: [])
@@ -172,7 +173,6 @@ struct Challenge: Decodable, Identifiable {
         
         id = challenge.id
         type = challenge.type
-        rawData = challenge.rawData
         data = challenge.data
     }
     
@@ -180,7 +180,6 @@ struct Challenge: Decodable, Identifiable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         id = try values.decode(String.self, forKey: .id)
         type = try values.decode(String.self, forKey: .type)
-        rawData = try values.decode(String.self, forKey: .rawData)
 
         do {
             switch type {
@@ -212,6 +211,8 @@ struct Challenge: Decodable, Identifiable {
                 data = try .speak(values.decode(Speak.self, forKey: .data))
             case "translate":
                 data = try .translate(values.decode(Translate.self, forKey: .data))
+            case "gapFill":
+                data = try .gapFill(values.decode(GapFill.self, forKey: .data))
             default:
                 data = nil
             }
@@ -233,15 +234,25 @@ struct Session: Decodable, Identifiable, Equatable {
     let challenges: Array<Challenge>
 }
 
+enum LevelType: String, Decodable {
+    case chest = "chest"
+    case skill = "skill"
+    case unitReview = "unit_review"
+    case practice = "practice"
+    case story = "story"
+}
+
+
 struct Level: Decodable, Identifiable {
     let id: String
     let name: String
+    let type: LevelType
     let totalSessions: Int
     
 //    var sessions: Array<Session> = []
     
     private enum CodingKeys : String, CodingKey {
-        case id, name = "debugName", totalSessions
+        case id, name = "debugName", type, totalSessions
     }
 }
 

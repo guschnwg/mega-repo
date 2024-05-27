@@ -78,8 +78,10 @@ struct ChallengeView: View {
                 SpeakView(speak: speak, languageSettings: languageSettings, onComplete: _onComplete)
             case .translate(let translate):
                 TranslateView(translate: translate, languageSettings: languageSettings, onComplete: _onComplete)
+            case .gapFill(let gapFill):
+                Text("GAP FILL")
             default:
-                Text(challenge.rawData)
+                Text(challenge.type)
             }
         }
         .alert(isPresented: $showAlert) {
