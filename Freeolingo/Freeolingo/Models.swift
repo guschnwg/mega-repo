@@ -161,14 +161,7 @@ struct Challenge: Decodable, Identifiable {
     }
     
     init(json: String) throws {
-        // TODO: Eventually get rid of this raw data thing, I want to fetch from the API instead of that converted JSON representation that I was using
-        let decoded = try JSONSerialization.jsonObject(with: json.data(using: .utf8)!, options: []) as? [String: Any]
-        let translated = [
-            "id": decoded!["id"],
-            "type": decoded!["type"],
-            "data": decoded
-        ]
-        let jsonData = try JSONSerialization.data(withJSONObject: translated, options: [])
+        let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
         let challenge = try JSONDecoder().decode(Challenge.self, from: jsonData)
         
         id = challenge.id
@@ -182,37 +175,38 @@ struct Challenge: Decodable, Identifiable {
         type = try values.decode(String.self, forKey: .type)
 
         do {
+            let specific = try decoder.singleValueContainer()
             switch type {
             case "assist":
-                data = try .assist(values.decode(Assist.self, forKey: .data))
+                data = try .assist(specific.decode(Assist.self))
             case "completeReverseTranslation":
-                data = try .completeReverseTranslation(values.decode(CompleteReverseTranslation.self, forKey: .data))
+                data = try .completeReverseTranslation(specific.decode(CompleteReverseTranslation.self))
             case "listen":
-                data = try .listen(values.decode(Listen.self, forKey: .data))
+                data = try .listen(specific.decode(Listen.self))
             case "listenComplete":
-                data = try .listenComplete(values.decode(ListenComplete.self, forKey: .data))
+                data = try .listenComplete(specific.decode(ListenComplete.self))
             case "listenIsolation":
-                data = try .listenIsolation(values.decode(ListenIsolation.self, forKey: .data))
+                data = try .listenIsolation(specific.decode(ListenIsolation.self))
             case "listenMatch":
-                data = try .listenMatch(values.decode(ListenMatch.self, forKey: .data))
+                data = try .listenMatch(specific.decode(ListenMatch.self))
             case "listenSpeak":
-                data = try .listenSpeak(values.decode(ListenSpeak.self, forKey: .data))
+                data = try .listenSpeak(specific.decode(ListenSpeak.self))
             case "listenTap":
-                data = try .listenTap(values.decode(ListenTap.self, forKey: .data))
+                data = try .listenTap(specific.decode(ListenTap.self))
             case "match":
-                data = try .match(values.decode(Match.self, forKey: .data))
+                data = try .match(specific.decode(Match.self))
             case "name":
-                data = try .name(values.decode(Name.self, forKey: .data))
+                data = try .name(specific.decode(Name.self))
             case "partialReverseTranslate":
-                data = try .partialReverseTranslate(values.decode(PartialReverseTranslate.self, forKey: .data))
+                data = try .partialReverseTranslate(specific.decode(PartialReverseTranslate.self))
             case "select":
-                data = try .select(values.decode(Select.self, forKey: .data))
+                data = try .select(specific.decode(Select.self))
             case "speak":
-                data = try .speak(values.decode(Speak.self, forKey: .data))
+                data = try .speak(specific.decode(Speak.self))
             case "translate":
-                data = try .translate(values.decode(Translate.self, forKey: .data))
+                data = try .translate(specific.decode(Translate.self))
             case "gapFill":
-                data = try .gapFill(values.decode(GapFill.self, forKey: .data))
+                data = try .gapFill(specific.decode(GapFill.self))
             default:
                 data = nil
             }
