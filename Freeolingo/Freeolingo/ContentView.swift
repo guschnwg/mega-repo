@@ -37,5 +37,5 @@ struct ContentView: View {
 
 
 #Preview {
-    return ContentView()
+    return ContentView().environmentObject(previewStore())
 }
