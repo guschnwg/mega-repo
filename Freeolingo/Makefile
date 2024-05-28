@@ -17,7 +17,7 @@ convert:
 	deno run --allow-read --allow-write ./Scripts/convert.js $(INPUT_FILE) $(OUTPUT_FILE)
 
 run-server:
-	cd Server && docker build -t app . && docker run -it -p 8080:8080 app
+	cd Server && docker build -t app . && docker run -it -p 8080:8080 -v ./out:/app/cache:rw app
 
 pod-run-server:
 	cd Server && podman build --tag freeolingo -f ./Dockerfile . && podman run -p 8080:8080 -v ./out:/app/cache:Z freeolingo
