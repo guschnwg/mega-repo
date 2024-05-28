@@ -8,7 +8,7 @@ from aiohttp import web
 import os
 
 HOST = os.getenv("HOST", "")
-PORT = int(os.getenv("PORT", ""))
+PORT = int(os.getenv("PORT", "80") or "80")
 STREAM_USER = os.getenv("STREAM_USER", "")
 STREAM_PASSWORD = os.getenv("STREAM_PASSWORD", "")
 ONVIF_USER = os.getenv("ONVIF_USER", "")
