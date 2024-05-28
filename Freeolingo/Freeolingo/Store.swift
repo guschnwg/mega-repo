@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct SingleAttempt: Codable {
     let started: Date
@@ -171,3 +172,20 @@ class Store: ObservableObject {
         }
     }
 }
+
+func previewStore() -> Store {
+    let previewStore = Store()
+    previewStore.courses = COURSES
+    previewStore.availableCourses = AVAILABLE_COURSES
+    return previewStore
+}
+
+struct Palette {
+    let Primary: Color
+    let Background: Color
+}
+
+let PALETTE = Palette(
+    Primary: Color.teal.darker(by: 0.2),
+    Background: Color.gray.lighter(by: 0.95)
+)
