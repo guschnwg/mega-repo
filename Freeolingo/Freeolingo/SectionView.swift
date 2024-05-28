@@ -35,7 +35,7 @@ struct SectionView: View {
             ForEach(section.units.indices, id: \.self) { index in
                 let unit = section.units[index]
                 let color = getColor(index: index)
-                let height = 100 + (unit.levels.count-1) * (100 - 15) + 40
+                let increment = CGFloat(1) / CGFloat(unit.levels.count + 5)
                 
                 VStack {
                     Text(unit.name ?? "???")
@@ -45,10 +45,11 @@ struct SectionView: View {
 
                     Spacer(minLength: 20)
                     
+                    // Can't be more arbitrary than this...
                     VStack (alignment: .center, spacing: 0) {
                         ForEach(unit.levels.indices, id: \.self) { levelIndex in
                             let level = unit.levels[levelIndex]
-                            let levelColor = getColor(index: levelIndex, exclude: color)
+                            let levelColor = color.lighter(by: increment * CGFloat(levelIndex))
                             
                             LevelView(
                                 course: course,
@@ -57,27 +58,33 @@ struct SectionView: View {
                                 level: level,
                                 color: levelColor
                             )
-                            .frame(width: 100, height: 100)
+                            .frame(width: 120, height: 120)
                             .background(levelColor)
                             .clipShape(Circle())
-                            .offset(x: levelIndex % 2 == 0 ? 50.0 : -50.0, y: CGFloat(-20 * levelIndex))
+                            .offset(
+                                x: levelIndex % 2 == 0 ? 80.0 : -80.0,
+                                y: CGFloat(-36 * levelIndex)
+                            )
                         }
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, CGFloat(-36 * (unit.levels.count - 1)))
                     
                     Spacer(minLength: 20)
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: CGFloat(height))
-                .padding(.top, 105)
             }
         }.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Units")
+            .background(PALETTE.Background)
     }
 }
 
 #Preview {
-    SectionView(
-        course: COURSES[0],
-        section: COURSES[0].sections[0]
-    )
+    NavigationStack {
+        SectionView(
+            course: COURSES[0],
+            section: COURSES[0].sections[0]
+        )
+    }.environmentObject(previewStore())
 }
