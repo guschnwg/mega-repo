@@ -14,7 +14,7 @@ struct CoursesListView : View {
     @EnvironmentObject var store: Store
     
     var body: some View {
-        let baseColor = Color.teal.darker(by: 0.2)
+        let baseColor = PALETTE.Primary
         let increment = CGFloat(1) / CGFloat(availableCourses.count + 5)
 
         ScrollView {
@@ -50,6 +50,6 @@ struct CoursesListView : View {
 
 #Preview {
     NavigationStack {
-        CoursesListView(availableCourses: AVAILABLE_COURSES)
+        CoursesListView(availableCourses: AVAILABLE_COURSES).environmentObject(previewStore())
     }
 }
