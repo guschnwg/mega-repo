@@ -1,5 +1,4 @@
 import asyncio
-import time
 import cv2
 from mjpeg_streamer import MjpegServer, Stream
 from onvif import ONVIFCamera
