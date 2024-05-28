@@ -14,7 +14,7 @@ struct InnerCourseView: View {
     @State private var selectedSection: Section? = nil
 
     var body: some View {
-        VStack {
+        ScrollView {
             ForEach(course.sections.indices, id: \.self) { index in
                 let section = course.sections[index]
                 
@@ -58,7 +58,7 @@ struct InnerCourseView: View {
             }
         }.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Sections")
-            .padding(.all, 10)
+            .padding(.horizontal, 10)
     }
 }
 
@@ -75,7 +75,7 @@ struct CourseView: View {
             && languageSettings.learningLanguage == $0.learningLanguage
         })
         
-        ScrollView {
+        VStack {
             if let course = expectedCourse {
                 InnerCourseView(course: course)
             } else {
@@ -84,12 +84,12 @@ struct CourseView: View {
         }
         .onAppear {
             store.getCourse(languageSettings: languageSettings)
-        }
+        }.background(PALETTE.Background)
     }
 }
 
 #Preview {
     NavigationStack {
-        InnerCourseView(course: COURSES[0])
+        InnerCourseView(course: COURSES[0]).environmentObject(previewStore())
     }
 }
