@@ -236,14 +236,11 @@ enum LevelType: String, Decodable {
     case story = "story"
 }
 
-
 struct Level: Decodable, Identifiable {
     let id: String
     let name: String
     let type: LevelType
     let totalSessions: Int
-    
-//    var sessions: Array<Session> = []
     
     private enum CodingKeys : String, CodingKey {
         case id, name = "debugName", type, totalSessions

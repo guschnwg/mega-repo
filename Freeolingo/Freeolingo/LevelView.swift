@@ -45,33 +45,40 @@ struct LevelView: View {
         })
         .popover(isPresented: $isPresented) {
             VStack(alignment: .leading, spacing: 30) {
-                Text(level.name)
-                
-                Text(
-                    "Lesson \(currentSession + 1) from \(level.totalSessions)"
-                )
-                
-                let key = store.keyFor(
-                    course: course,
-                    section: section,
-                    unit: unit,
-                    level: level,
-                    sessionIndex: currentSession
-                )
-                
-                if store.sessionsMap.keys.contains(key) {
-                    HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
-                        SessionView(
-                            course: course,
-                            section: section,
-                            unit: unit,
-                            level: level,
-                            session: store.sessionsMap[key]!,
-                            finishSession: finishSession
-                        )
+                if level.type == LevelType.chest {
+                    Text("Just keep going")
+                    Button("Continue") {
+                        finishSession()
                     }
                 } else {
-                    Text("Loading...")
+                    Text(level.name)
+                    
+                    Text(
+                        "Lesson \(currentSession + 1) from \(level.totalSessions)"
+                    )
+                    
+                    let key = store.keyFor(
+                        course: course,
+                        section: section,
+                        unit: unit,
+                        level: level,
+                        sessionIndex: currentSession
+                    )
+                    
+                    if store.sessionsMap.keys.contains(key) {
+                        HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
+                            SessionView(
+                                course: course,
+                                section: section,
+                                unit: unit,
+                                level: level,
+                                session: store.sessionsMap[key]!,
+                                finishSession: finishSession
+                            )
+                        }
+                    } else {
+                        Text("Loading...")
+                    }
                 }
             }
             .padding(.all, 20)

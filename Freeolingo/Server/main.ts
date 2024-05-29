@@ -194,6 +194,35 @@ async function getSession(token: string, fromLanguage = 'pt', learningLanguage =
   return { id: "FAILED." + levelSessionIndex, data: postData };
 }
 
+async function getStory(token: string, storyId: string) {
+  const hashed = await hash(storyId);
+  try {
+    const data = await Deno.readTextFile(`./cache/getStory.${hashed}.json`);
+    return JSON.parse(data);
+  } catch {
+    console.log("Cache miss")
+  }
+
+  let qs = "?crowns=29&debugShowAllChallenges=false&illustrationFormat=svg&isDesktop=true&isLegendaryMode=false";
+  qs += "&masterVersion=false&mode=READ";
+  qs += "&supportedElements=ARRANGE,CHALLENGE_PROMPT,DUO_POPUP,FREEFORM_WRITING,FREEFORM_WRITING_EXAMPLE_RESPONSE,FREEFORM_WRITING_PROMPT,HEADER,HINT_ONBOARDING,LINE,MATCH,MULTIPLE_CHOICE,POINT_TO_PHRASE,SECTION_HEADER,SELECT_PHRASE,SENDER_RECEIVER,SUBHEADING,TYPE_TEXT";
+  qs += "&type=story&_=1711454331093";
+
+  let res = await fetch("https://stories.duolingo.com/api2/stories/" + storyId + qs, {
+      "headers": getHeaders(token),
+      "method": "GET",
+  });
+
+  if (res.ok) {
+    let data = await res.json();
+
+    // Persist to a file
+    Deno.writeTextFile(`./cache/getStory.${hashed}.json`, JSON.stringify(data, null, 2), { create: true });
+
+    return data;
+}
+}
+
 const port = 8080;
 
 const handler = async (request: Request): Promise<Response> => {
@@ -234,6 +263,12 @@ const handler = async (request: Request): Promise<Response> => {
       challengeTypes ? challengeTypes.split(',') : [],
     );
     return new Response(JSON.stringify(session, null, 2), { status: 200 });
+  }
+
+  if (route.startsWith('/getStory/')) {
+    const [, , token, storyId] = route.split("/");
+    const story = await getStory(token, storyId);
+    return new Response(JSON.stringify(story, null, 2), { status: 200 });
   }
 
   const body = `Your user-agent is:\n\n${

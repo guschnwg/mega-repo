@@ -48,8 +48,8 @@ class Store: ObservableObject {
         do {
             let fileURL = try Self.fileURL()
             let data = try? Data(contentsOf: fileURL)
-            if (data != nil) {
-                self.sessionAttempts = try JSONDecoder().decode([SessionAttempt].self, from: data!)
+            if let data = data {
+                self.sessionAttempts = try JSONDecoder().decode([SessionAttempt].self, from: data)
                 self.sessionAttemptMap = sessionAttempts.reduce(into: self.sessionAttemptMap.self) {
                     $0[$1.sessionId] = $1
                 }
@@ -57,6 +57,22 @@ class Store: ObservableObject {
         } catch {
             fatalError(error.localizedDescription)
         }
+    }
+    
+    func apiFetch<T: Decodable>(url: URL, onComplete: @escaping (T) -> Void) {
+        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
+            do {
+                if let data = data {
+                    let decoded = try JSONDecoder().decode(T.self, from: data)
+                    DispatchQueue.main.async {
+                        onComplete(decoded)
+                    }
+                }
+            } catch {
+                print(error)
+            }
+        }
+        task.resume()
     }
     
     func getAvailableCourses(fromLanguages: [String]) {
@@ -67,17 +83,9 @@ class Store: ObservableObject {
         }
         
         let url = URL(string: "\(baseURL)/getCourseList/\(token)")!
-        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-            do {
-                let courses = try JSONDecoder().decode([AvailableCourse].self, from: data!)
-                DispatchQueue.main.async {
-                    self.availableCourses = courses.filter { fromLanguages.contains($0.fromLanguage) }
-                }
-            } catch {
-                print(error)
-            }
+        apiFetch(url: url) { (courses: [AvailableCourse]) in
+            self.availableCourses = courses.filter { fromLanguages.contains($0.fromLanguage) }
         }
-        task.resume()
     }
     
     func getCourse(languageSettings: LanguageSettings) {
@@ -89,17 +97,9 @@ class Store: ObservableObject {
 
         let path = "getSpecificCourse/\(token)/\(languageSettings.fromLanguage)/\(languageSettings.learningLanguage)"
         let url = URL(string: "\(baseURL)/\(path)")!
-        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-            do {
-                let course = try JSONDecoder().decode(Course.self, from: data!)
-                DispatchQueue.main.async {
-                    self.courses.append(course)
-                }
-            } catch {
-                print(error)
-            }
+        apiFetch(url: url) { (course: Course) in
+            self.courses.append(course)
         }
-        task.resume()
     }
     
     func keyFor(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) -> String {
@@ -110,6 +110,10 @@ class Store: ObservableObject {
         let levelIndex = unit.levels.firstIndex(where: { $0.id == level.id }) ?? 0
         let path = "getSession/\(token)/\(fromLanguage)/\(learningLanguage)/\(sectionIndex)/\(unitIndex)/\(levelIndex)/\(sessionIndex)"
         return path
+    }
+    
+    func getStory(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
+        
     }
     
     func getSession(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
@@ -124,38 +128,14 @@ class Store: ObservableObject {
             return
         }
         if level.type == LevelType.story {
+            getStory(course: course, section: section, unit: unit, level: level, sessionIndex: sessionIndex)
             return
         }
 
         let url = URL(string: "\(baseURL)/\(path)")!
-        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
-            do {
-                // TODO: Let's not convert and actually learn how to do this generic stuff in Swift
-                // Decode to dictionary
-                // Create an id, type, data: rest object and then pass to the decoder
-                var json = try JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any]
-                let challenges = json!["challenges"] as! [[String: Any]]
-                json!["challenges"] = challenges.map { challenge in
-                    var convertedChallenge: [String: Any] = [:]
-                    convertedChallenge["id"] = challenge["id"]
-                    convertedChallenge["type"] = challenge["type"]
-                    convertedChallenge["data"] = challenge
-                    return convertedChallenge
-                }
-                do {
-                    let jsonData = try JSONSerialization.data(withJSONObject: json as Any, options: [])
-                    let session = try JSONDecoder().decode(Session.self, from: jsonData)
-                    DispatchQueue.main.async {
-                        self.sessionsMap[path] = session
-                    }
-                } catch {
-                    print(error)
-                }
-            } catch {
-                print(error)
-            }
+        apiFetch(url: url) { (session: Session) in
+            self.sessionsMap[path] = session
         }
-        task.resume()
     }
     
     func viewSession(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
