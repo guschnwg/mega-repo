@@ -13,8 +13,8 @@ STREAM_USER = os.getenv("STREAM_USER", "")
 STREAM_PASSWORD = os.getenv("STREAM_PASSWORD", "")
 ONVIF_USER = os.getenv("ONVIF_USER", "")
 ONVIF_PASSWORD = os.getenv("ONVIF_PASSWORD", "")
-WSDL = os.getenv("WSDL", "")
-RTSP_PATH = os.getenv("RTSP_PATH", "")
+WSDL = os.getenv("WSDL", "/usr/local/lib/python3.11/site-packages/wsdl/")
+RTSP_PATH = os.getenv("RTSP_PATH", "/cam/realmonitor?channel=1&subtype=0")
 
 mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL)
 ptz_service = mycam.create_ptz_service()
@@ -27,7 +27,9 @@ cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RT
 stream = Stream("my_camera", size=(1366, 768), quality=50, fps=60)
 server.add_stream(stream)
 
-class Handler:
+is_live = False
+
+class TurnHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
         x = request.rel_url.query.get("x", 0)
         y = request.rel_url.query.get("y", 0)
@@ -49,11 +51,36 @@ class Handler:
 
         return response
 
-server._app.router.add_route("GET", "/turn", Handler())
+class OnHandler:
+    async def __call__(self, request: web.Request) -> web.StreamResponse:
+        global is_live
+        is_live = True
+
+        headers = {"Content-Type": "application/json"}
+        response = web.StreamResponse(status=200, reason="OK", headers=headers)
+        await response.prepare(request)
+        await response.write(b"{}")
+
+class OffHandler:
+    async def __call__(self, request: web.Request) -> web.StreamResponse:
+        global is_live
+        is_live = False
+
+        headers = {"Content-Type": "application/json"}
+        response = web.StreamResponse(status=200, reason="OK", headers=headers)
+        await response.prepare(request)
+        await response.write(b"{}")
+
+server._app.router.add_route("GET", "/turn", TurnHandler())
+server._app.router.add_route("GET", "/on", OnHandler())
+server._app.router.add_route("GET", "/off", OffHandler())
 server.start()
 
 def update_stream():
     while True:
+        if not is_live:
+            continue
+
         ret, frame = cap.read()
         if not ret:
             continue
