@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <canvas height=250 width=250></canvas>
+    <canvas height=500 width=500></canvas>
 
     <div id="destination"></div>
     <div id="mouse"></div>
@@ -21,16 +21,21 @@
         const mouseEl = document.getElementById('mouse');
 
         const world = [
-            [0, 1, 0, 0, 0],
-            [0, 0, 1, 1, 0],
-            [0, 0, 0, 1, 0],
-            [0, 0, 0, 1, 0],
-            [0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
         ];
 
         const player = {
-            x: 1.2,
-            y: 3.7,
+            x: 1.5,
+            y: 3,
         }
 
         const mouse = {
@@ -38,10 +43,21 @@
             y: 0,
         }
 
+        const destination = {
+            x: 4,
+            y: 1,
+        }
+
         canvas.addEventListener('mousemove', e => {
             const rect = e.target.getBoundingClientRect();
             mouse.x = (e.clientX - rect.left) / 50; //x position within the element.
             mouse.y = (e.clientY - rect.top) / 50;  //y position within the element.
+        })
+
+        canvas.addEventListener('mousedown', e => {
+            const rect = e.target.getBoundingClientRect();
+            destination.x = Math.floor((e.clientX - rect.left) / 50); //x position within the element.
+            destination.y = Math.floor((e.clientY - rect.top) / 50);  //y position within the element.
         })
 
         window.addEventListener('keydown', e => {
@@ -55,11 +71,6 @@
                 player.x += 0.1;
             }
         })
-
-        const destination = {
-            x: 4,
-            y: 1,
-        }
 
         function draw() {
             // World
@@ -97,17 +108,26 @@
             ctx.stroke();
 
             info('Destination', destinationEl, player, destination);
-            info('Mouse', mouseEl, player, mouse);
+            // info('Mouse', mouseEl, player, mouse);
 
             setTimeout(draw, 1000 / 60);
         }
 
         function getAngle(first, second) {
-            return Math.atan2(second.y - first.y, second.x - first.x);
+            const angle = Math.atan2(second.y - first.y, second.x - first.x);
+            return angle < 0 ? angle + 2 * Math.PI : angle;
         }
 
         function toDeg(inRad) {
             return inRad * (180 / Math.PI);
+        }
+
+        function isInWorld(x, y) {
+            return y >= 0 && y < world.length && x >= 0 && x < world[y].length;
+        }
+
+        function isWall(x, y) {
+            return world[y][x] != 0;
         }
 
         function info(title, el, from, to) {
@@ -119,33 +139,38 @@
             const angleTan = Math.tan(angleRad)
             const oneUnitInX = 1 / angleCos;
             const oneUnitInY = 1 / angleSin;
-            const xDirection = to.x - from.x > 0 ? 'right' : 'left';
-            const yDirection = to.y - from.y > 0 ? 'down' : 'up';
+            const xDirection = to.x - from.x > 0 ? 1 : -1;
+            const yDirection = to.y - from.y > 0 ? 1 : -1;
 
-            // const firstUnitInX = (1 - (from.x - Math.floor(from.x))) / angleCos;
-            // const firstUnitInY = (1 - (from.y - Math.floor(from.y))) / angleSin;
-            const firstUnitInX = oneUnitInX;
-            const firstUnitInY = oneUnitInY;
-            
+            let firstUnitInX = oneUnitInX;
+            if (Math.floor(from.x) != from.x) {
+                if (xDirection > 0) {
+                    firstUnitInX = (Math.ceil(from.x) - from.x) / angleCos;
+                } else {
+                    firstUnitInX = (Math.floor(from.x) - from.x) / angleCos;
+                }
+            }
+            let firstUnitInY = oneUnitInY;
+            if (Math.floor(from.y) != from.y) {
+                if (yDirection > 0) {
+                    firstUnitInY = (Math.ceil(from.y) - from.y) / angleSin;
+                } else {
+                    firstUnitInY = (Math.floor(from.y) - from.y) / angleSin;
+                }
+            }
+
             let remainerInX = Math.abs(firstUnitInX);
             let remainerInY = Math.abs(firstUnitInY);
-            
+
             let currentX = from.x;
             let currentY = from.y;
-            
-            const increments = [];
-            for (let i = 0 ; i < 2 ; i++) {
-                // Debug add dot to where we are
-                ctx.beginPath()
-                ctx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
-                ctx.fillStyle = 'green';
-                ctx.fill();
-                // End debug
 
+            const increments = [];
+            for (let i = 0; i < 20; i++) {
                 if (remainerInX < remainerInY) {
                     increments.push(remainerInX);
                     remainerInY -= remainerInX;
-                    
+
                     currentX += remainerInX * angleCos;
                     currentY += remainerInX * angleSin;
 
@@ -153,12 +178,19 @@
                 } else {
                     increments.push(remainerInY);
                     remainerInX -= remainerInY;
-                    
+
                     currentY += remainerInY * angleSin;
                     currentX += remainerInY * angleCos;
 
                     remainerInY = Math.abs(oneUnitInY);
                 }
+
+                // Debug add dot to where we are
+                ctx.beginPath()
+                ctx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
+                ctx.fillStyle = 'green';
+                ctx.fill();
+                // End debug
             }
 
             el.innerHTML = `
