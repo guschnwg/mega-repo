@@ -108,7 +108,7 @@
             ctx.stroke();
 
             info('Destination', destinationEl, player, destination);
-            // info('Mouse', mouseEl, player, mouse);
+            info('Mouse', mouseEl, player, mouse);
 
             setTimeout(draw, 1000 / 60);
         }
@@ -167,25 +167,57 @@
 
             const increments = [];
             for (let i = 0; i < 20; i++) {
+                let increment = 0;
+                let incrementX = 0;
+                let incrementY = 0;
+
                 if (remainerInX < remainerInY) {
-                    increments.push(remainerInX);
                     remainerInY -= remainerInX;
 
-                    currentX += remainerInX * angleCos;
-                    currentY += remainerInX * angleSin;
+                    incrementX = remainerInX * angleCos;
+                    incrementY = remainerInX * angleSin;
 
+                    increment = remainerInX;
                     remainerInX = Math.abs(oneUnitInX);
-                } else {
-                    increments.push(remainerInY);
+                } else if (remainerInX > remainerInY) {
                     remainerInX -= remainerInY;
 
-                    currentY += remainerInY * angleSin;
-                    currentX += remainerInY * angleCos;
+                    incrementX = remainerInY * angleCos;
+                    incrementY = remainerInY * angleSin;
 
+                    increment = remainerInY;
+                    remainerInY = Math.abs(oneUnitInY);
+                } else {
+                    incrementX = remainerInX * angleCos;
+                    incrementY = remainerInX * angleSin;
+
+                    increment = remainerInX;
+                    remainerInX = Math.abs(oneUnitInX);
                     remainerInY = Math.abs(oneUnitInY);
                 }
 
-                // Debug add dot to where we are
+                // The checker
+                let positionX = currentX + ((currentX + incrementX) - currentX) / 2;
+                let positionY = currentY + ((currentY + incrementY) - currentY) / 2;
+                ctx.beginPath()
+                ctx.arc(positionX * 50, positionY * 50, 2, 0, 2 * Math.PI, false);
+                ctx.fillStyle = 'yellow';
+                ctx.fill();
+
+                if (!isInWorld(Math.floor(positionX), Math.floor(positionY)) || isWall(Math.floor(positionX), Math.floor(positionY))) {
+                    ctx.beginPath()
+                    ctx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
+                    ctx.fillStyle = 'red';
+                    ctx.fill();
+
+                    break;
+                }
+
+                increments.push(increment);
+                currentX += incrementX;
+                currentY += incrementY;
+
+                // Debug add dot to the collisions
                 ctx.beginPath()
                 ctx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
                 ctx.fillStyle = 'green';
