@@ -40,6 +40,16 @@
             [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
         ];
 
+        const textures = [
+            [],
+            [
+                'red', 'red', 'red', 'red', 
+                'red', 'blue', 'blue', 'red', 
+                'red', 'blue', 'blue', 'red', 
+                'red', 'red', 'red', 'red', 
+            ]
+        ]
+
         const player = {
             x: 1.5,
             y: 3,
@@ -310,7 +320,7 @@
         function pov(from, to) {
             const angleRad = getAngle(from, to)
 
-            let fov = 50;
+            let fov = 66;
             let step = .5
             let xStep = 800 / fov * step;
             let xPosition = 0;
@@ -330,7 +340,14 @@
                 const perpendicularDistance = distance * Math.cos(radians);
                 const height = 600 / (perpendicularDistance);
 
-                cameraCtx.fillStyle = lastSideHit == 0 ? 'white' : lastSideHit == 1 ? 'gray' : 'red';
+                const lightness = convertValue({
+                    min: 0,
+                    max: 300,
+                }, {
+                    min: 0,
+                    max: 30,
+                }, height);
+                cameraCtx.fillStyle = lastSideHit == 0 ? `hsl(94, 100%, ${lightness}%)` : `hsl(360, 100%, ${lightness}%)`;
                 cameraCtx.fillRect(
                     xPosition,
                     300 - height / 2,
