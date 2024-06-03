@@ -130,17 +130,15 @@
             return world[y][x] != 0;
         }
 
-        function info(title, el, from, to) {
-            const distance = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
-            const angleRad = getAngle(from, to)
-            const angleDeg = toDeg(angleRad)
-            const angleCos = Math.cos(angleRad)
-            const angleSin = Math.sin(angleRad)
-            const angleTan = Math.tan(angleRad)
+        function ray(from, angle) {
+            const angleCos = Math.cos(angle)
+            const angleSin = Math.sin(angle)
+
             const oneUnitInX = 1 / angleCos;
             const oneUnitInY = 1 / angleSin;
-            const xDirection = to.x - from.x > 0 ? 1 : -1;
-            const yDirection = to.y - from.y > 0 ? 1 : -1;
+
+            const xDirection = angleCos > 0 ? 1 : -1;
+            const yDirection = angleSin > 0 ? 1 : -1;
 
             let firstUnitInX = oneUnitInX;
             if (Math.floor(from.x) != from.x) {
@@ -224,6 +222,31 @@
                 ctx.fill();
                 // End debug
             }
+
+            const distance = increments.reduce((acc, i) => acc + i, 0);
+
+            return {
+                distance,
+                oneUnitInX,
+                oneUnitInY,
+                xDirection,
+                yDirection,
+                increments
+            }
+        }
+
+        function info(title, el, from, to) {
+            const angleRad = getAngle(from, to)
+            const angleDeg = toDeg(angleRad)
+
+            const {
+                distance,
+                oneUnitInX,
+                oneUnitInY,
+                xDirection,
+                yDirection,
+                increments
+            } = ray(from, angleRad);
 
             el.innerHTML = `
                 <h4>${title}: </h4>
