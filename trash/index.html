@@ -8,14 +8,21 @@
 </head>
 
 <body>
-    <canvas height=500 width=500></canvas>
+    <div style="display: inline; overflow: scroll; white-space: nowrap;">
+        <canvas id="world" height=500 width=500></canvas>
+
+        <canvas id="camera" height=600 width=800></canvas>
+    </div>
 
     <div id="destination"></div>
     <div id="mouse"></div>
 
     <script>
-        const canvas = document.getElementsByTagName('canvas')[0];
-        const ctx = canvas.getContext("2d");
+        const worldCanvas = document.getElementById('world');
+        const worldCtx = worldCanvas.getContext("2d");
+
+        const cameraCanvas = document.getElementById('camera');
+        const cameraCtx = cameraCanvas.getContext("2d");
 
         const destinationEl = document.getElementById('destination');
         const mouseEl = document.getElementById('mouse');
@@ -48,13 +55,13 @@
             y: 1,
         }
 
-        canvas.addEventListener('mousemove', e => {
+        worldCanvas.addEventListener('mousemove', e => {
             const rect = e.target.getBoundingClientRect();
             mouse.x = (e.clientX - rect.left) / 50; //x position within the element.
             mouse.y = (e.clientY - rect.top) / 50;  //y position within the element.
         })
 
-        canvas.addEventListener('mousedown', e => {
+        worldCanvas.addEventListener('mousedown', e => {
             const rect = e.target.getBoundingClientRect();
             destination.x = Math.floor((e.clientX - rect.left) / 50); //x position within the element.
             destination.y = Math.floor((e.clientY - rect.top) / 50);  //y position within the element.
@@ -77,38 +84,47 @@
             world.forEach((row, rIndex) => {
                 row.forEach((column, cIndex) => {
                     if (column == 0) {
-                        ctx.fillStyle = 'black';
+                        worldCtx.fillStyle = 'black';
                     } else {
-                        ctx.fillStyle = 'red';
+                        worldCtx.fillStyle = 'red';
                     }
-                    ctx.fillRect(50 * cIndex, 50 * rIndex, 50, 50);
-                    ctx.strokeStyle = 'lightgray';
-                    ctx.strokeRect(50 * cIndex, 50 * rIndex, 50, 50);
+                    worldCtx.fillRect(50 * cIndex, 50 * rIndex, 50, 50);
+                    worldCtx.strokeStyle = 'lightgray';
+                    worldCtx.strokeRect(50 * cIndex, 50 * rIndex, 50, 50);
                 });
             });
 
             // Player
-            ctx.beginPath()
-            ctx.arc(player.x * 50, player.y * 50, 5, 0, 2 * Math.PI, false);
-            ctx.fillStyle = 'blue';
-            ctx.fill();
+            worldCtx.beginPath()
+            worldCtx.arc(player.x * 50, player.y * 50, 5, 0, 2 * Math.PI, false);
+            worldCtx.fillStyle = 'blue';
+            worldCtx.fill();
 
             // Line
-            ctx.beginPath();
-            ctx.strokeStyle = 'purple';
-            ctx.moveTo(player.x * 50, player.y * 50);
-            ctx.lineTo(mouse.x * 50, mouse.y * 50);
-            ctx.stroke();
+            worldCtx.beginPath();
+            worldCtx.strokeStyle = 'purple';
+            worldCtx.moveTo(player.x * 50, player.y * 50);
+            worldCtx.lineTo(mouse.x * 50, mouse.y * 50);
+            worldCtx.stroke();
 
             // Destination
-            ctx.beginPath();
-            ctx.strokeStyle = 'yellow';
-            ctx.moveTo(player.x * 50, player.y * 50);
-            ctx.lineTo(destination.x * 50, destination.y * 50);
-            ctx.stroke();
+            worldCtx.beginPath();
+            worldCtx.strokeStyle = 'yellow';
+            worldCtx.moveTo(player.x * 50, player.y * 50);
+            worldCtx.lineTo(destination.x * 50, destination.y * 50);
+            worldCtx.stroke();
 
             info('Destination', destinationEl, player, destination);
             info('Mouse', mouseEl, player, mouse);
+
+            // Camera
+            cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+            cameraCtx.fillStyle = 'darkblue';
+            cameraCtx.fillRect(0, 0, cameraCanvas.width, cameraCanvas.height / 2);
+            cameraCtx.fillStyle = 'peru';
+            cameraCtx.fillRect(0, cameraCanvas.height / 2, cameraCanvas.width, cameraCanvas.height / 2);
+
+            pov(player, mouse);
 
             setTimeout(draw, 1000 / 60);
         }
@@ -163,11 +179,14 @@
             let currentX = from.x;
             let currentY = from.y;
 
+            let lastSideHit = 0;
+
             const increments = [];
             for (let i = 0; i < 20; i++) {
                 let increment = 0;
                 let incrementX = 0;
                 let incrementY = 0;
+                let currentSideHit = 0;
 
                 if (remainerInX < remainerInY) {
                     remainerInY -= remainerInX;
@@ -177,6 +196,7 @@
 
                     increment = remainerInX;
                     remainerInX = Math.abs(oneUnitInX);
+                    currentSideHit = 0;
                 } else if (remainerInX > remainerInY) {
                     remainerInX -= remainerInY;
 
@@ -185,6 +205,7 @@
 
                     increment = remainerInY;
                     remainerInY = Math.abs(oneUnitInY);
+                    currentSideHit = 1;
                 } else {
                     incrementX = remainerInX * angleCos;
                     incrementY = remainerInX * angleSin;
@@ -192,21 +213,22 @@
                     increment = remainerInX;
                     remainerInX = Math.abs(oneUnitInX);
                     remainerInY = Math.abs(oneUnitInY);
+                    currentSideHit = 2;
                 }
 
                 // The checker
                 let positionX = currentX + ((currentX + incrementX) - currentX) / 2;
                 let positionY = currentY + ((currentY + incrementY) - currentY) / 2;
-                ctx.beginPath()
-                ctx.arc(positionX * 50, positionY * 50, 2, 0, 2 * Math.PI, false);
-                ctx.fillStyle = 'yellow';
-                ctx.fill();
+                worldCtx.beginPath()
+                worldCtx.arc(positionX * 50, positionY * 50, 2, 0, 2 * Math.PI, false);
+                worldCtx.fillStyle = 'yellow';
+                worldCtx.fill();
 
                 if (!isInWorld(Math.floor(positionX), Math.floor(positionY)) || isWall(Math.floor(positionX), Math.floor(positionY))) {
-                    ctx.beginPath()
-                    ctx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = 'red';
-                    ctx.fill();
+                    worldCtx.beginPath()
+                    worldCtx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
+                    worldCtx.fillStyle = 'red';
+                    worldCtx.fill();
 
                     break;
                 }
@@ -214,12 +236,13 @@
                 increments.push(increment);
                 currentX += incrementX;
                 currentY += incrementY;
+                lastSideHit = currentSideHit;
 
                 // Debug add dot to the collisions
-                ctx.beginPath()
-                ctx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
-                ctx.fillStyle = 'green';
-                ctx.fill();
+                worldCtx.beginPath()
+                worldCtx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
+                worldCtx.fillStyle = 'green';
+                worldCtx.fill();
                 // End debug
             }
 
@@ -231,7 +254,8 @@
                 oneUnitInY,
                 xDirection,
                 yDirection,
-                increments
+                increments,
+                lastSideHit,
             }
         }
 
@@ -245,7 +269,8 @@
                 oneUnitInY,
                 xDirection,
                 yDirection,
-                increments
+                increments,
+                lastSideHit
             } = ray(from, angleRad);
 
             el.innerHTML = `
@@ -265,7 +290,55 @@
                 Increments: ${increments.map(i => i.toFixed(2)).join(', ')}
                 <br />
                 Len: ${increments.reduce((acc, i) => acc + i, 0).toFixed(2)}
+                <br />
+                Last side hit: ${lastSideHit}
             `;
+        }
+
+        function invertScale(input, min, max) {
+            return max + min - input;
+        }
+
+        function convertValue(fromScale, toScale, value) {
+            const converted = toScale.min - ((fromScale.min - value) / fromScale.max) * toScale.max;
+            if (toScale.min > toScale.max) {
+                return invertScale(converted, toScale.max, toScale.min);
+            }
+            return converted;
+        }
+
+        function pov(from, to) {
+            const angleRad = getAngle(from, to)
+
+            let fov = 50;
+            let step = .5
+            let xStep = 800 / fov * step;
+            let xPosition = 0;
+            for (let degree = (fov / 2); degree >= -1 * (fov / 2); degree -= step) {
+                let radians = degree * Math.PI / 180;
+
+                const {
+                    distance,
+                    oneUnitInX,
+                    oneUnitInY,
+                    xDirection,
+                    yDirection,
+                    increments,
+                    lastSideHit
+                } = ray(from, angleRad - radians);
+
+                const perpendicularDistance = distance * Math.cos(radians);
+                const height = 600 / (perpendicularDistance);
+
+                cameraCtx.fillStyle = lastSideHit == 0 ? 'white' : lastSideHit == 1 ? 'gray' : 'red';
+                cameraCtx.fillRect(
+                    xPosition,
+                    300 - height / 2,
+                    xStep,
+                    height,
+                );
+                xPosition += xStep;
+            }
         }
 
         draw();
