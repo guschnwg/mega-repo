@@ -40,6 +40,8 @@
             [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
         ];
 
+        const colors = ['black', 'red'];
+
         const textures = [
             [],
             [
@@ -65,39 +67,34 @@
             y: 1,
         }
 
+        let mouseDown = false;
+
         worldCanvas.addEventListener('mousemove', e => {
             const rect = e.target.getBoundingClientRect();
             mouse.x = (e.clientX - rect.left) / 50; //x position within the element.
             mouse.y = (e.clientY - rect.top) / 50;  //y position within the element.
+
+            if (mouseDown) {
+                destination.x = Math.floor((e.clientX - rect.left) / 50); //x position within the element.
+                destination.y = Math.floor((e.clientY - rect.top) / 50);  //y position within the element.
+            }
         })
 
-        worldCanvas.addEventListener('mousedown', e => {
-            const rect = e.target.getBoundingClientRect();
-            destination.x = Math.floor((e.clientX - rect.left) / 50); //x position within the element.
-            destination.y = Math.floor((e.clientY - rect.top) / 50);  //y position within the element.
-        })
+        worldCanvas.addEventListener('mousedown', e => mouseDown = true);
+        worldCanvas.addEventListener('mouseup', e => mouseDown = false);
 
         window.addEventListener('keydown', e => {
-            if (e.key === 'w') {
-                player.y -= 0.1;
-            } else if (e.key === 's') {
-                player.y += 0.1;
-            } else if (e.key === 'a') {
-                player.x -= 0.1;
-            } else if (e.key === 'd') {
-                player.x += 0.1;
-            }
+            if (e.key === 'w') player.y -= 0.1;
+            if (e.key === 's') player.y += 0.1;
+            if (e.key === 'a') player.x -= 0.1;
+            if (e.key === 'd') player.x += 0.1;
         })
 
         function draw() {
             // World
             world.forEach((row, rIndex) => {
                 row.forEach((column, cIndex) => {
-                    if (column == 0) {
-                        worldCtx.fillStyle = 'black';
-                    } else {
-                        worldCtx.fillStyle = 'red';
-                    }
+                    worldCtx.fillStyle = colors[column]
                     worldCtx.fillRect(50 * cIndex, 50 * rIndex, 50, 50);
                     worldCtx.strokeStyle = 'lightgray';
                     worldCtx.strokeRect(50 * cIndex, 50 * rIndex, 50, 50);
@@ -129,10 +126,17 @@
 
             // Camera
             cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
-            cameraCtx.fillStyle = 'darkblue';
-            cameraCtx.fillRect(0, 0, cameraCanvas.width, cameraCanvas.height / 2);
-            cameraCtx.fillStyle = 'peru';
-            cameraCtx.fillRect(0, cameraCanvas.height / 2, cameraCanvas.width, cameraCanvas.height / 2);
+            for (let i = 0; i < 300; i+=1) {
+                const light = convertValue({ min: 0, max: 300 }, { min: 50, max: 0 }, i)
+                cameraCtx.fillStyle = `hsl(240, 100%, ${Math.floor(light)}%)`;
+                cameraCtx.fillRect(0, i, 800, 1);
+            }
+
+            for (let i = 300; i < 600; i+=1) {
+                const light = convertValue({ min: 300, max: 600 }, { min: 20, max: 60 }, i)
+                cameraCtx.fillStyle = `hsl(30, 59%, ${Math.floor(light)}%)`;
+                cameraCtx.fillRect(0, i, 800, 1);
+            }
 
             pov(player, mouse);
 
@@ -160,97 +164,85 @@
             const angleCos = Math.cos(angle)
             const angleSin = Math.sin(angle)
 
-            const oneUnitInX = 1 / angleCos;
-            const oneUnitInY = 1 / angleSin;
+            const oneUnit = { x: 1 / angleCos, y: 1 / angleSin }
+            const direction = { x: angleCos > 0 ? 1 : -1, y: angleSin > 0 ? 1 : -1 }
 
-            const xDirection = angleCos > 0 ? 1 : -1;
-            const yDirection = angleSin > 0 ? 1 : -1;
+            let firstUnit = { x: oneUnit.x, y: oneUnit.y };
 
-            let firstUnitInX = oneUnitInX;
             if (Math.floor(from.x) != from.x) {
-                if (xDirection > 0) {
-                    firstUnitInX = (Math.ceil(from.x) - from.x) / angleCos;
+                if (direction.x > 0) {
+                    firstUnit.x = (Math.ceil(from.x) - from.x) / angleCos;
                 } else {
-                    firstUnitInX = (Math.floor(from.x) - from.x) / angleCos;
+                    firstUnit.x = (Math.floor(from.x) - from.x) / angleCos;
                 }
             }
-            let firstUnitInY = oneUnitInY;
             if (Math.floor(from.y) != from.y) {
-                if (yDirection > 0) {
-                    firstUnitInY = (Math.ceil(from.y) - from.y) / angleSin;
+                if (direction.y > 0) {
+                    firstUnit.y = (Math.ceil(from.y) - from.y) / angleSin;
                 } else {
-                    firstUnitInY = (Math.floor(from.y) - from.y) / angleSin;
+                    firstUnit.y = (Math.floor(from.y) - from.y) / angleSin;
                 }
             }
 
-            let remainerInX = Math.abs(firstUnitInX);
-            let remainerInY = Math.abs(firstUnitInY);
-
-            let currentX = from.x;
-            let currentY = from.y;
+            let remainer = { x: Math.abs(firstUnit.x), y: Math.abs(firstUnit.y) };
+            let current = { x: from.x, y: from.y };
 
             let lastSideHit = 0;
 
             const increments = [];
             for (let i = 0; i < 20; i++) {
-                let increment = 0;
-                let incrementX = 0;
-                let incrementY = 0;
-                let currentSideHit = 0;
+                let stepDistance = 0; // the step actual distance, the hipotenuse
+                let stepIncrement = { x: 0, y: 0 }; // the step increment, the x and y to add to the current position
+                let currentSideHit = 0; // the side of the wall that was hit
 
-                if (remainerInX < remainerInY) {
-                    remainerInY -= remainerInX;
+                if (remainer.x < remainer.y) {
+                    remainer.y -= remainer.x;
 
-                    incrementX = remainerInX * angleCos;
-                    incrementY = remainerInX * angleSin;
+                    stepIncrement.x = remainer.x * angleCos;
+                    stepIncrement.y = remainer.x * angleSin;
 
-                    increment = remainerInX;
-                    remainerInX = Math.abs(oneUnitInX);
-                    currentSideHit = 0;
-                } else if (remainerInX > remainerInY) {
-                    remainerInX -= remainerInY;
-
-                    incrementX = remainerInY * angleCos;
-                    incrementY = remainerInY * angleSin;
-
-                    increment = remainerInY;
-                    remainerInY = Math.abs(oneUnitInY);
-                    currentSideHit = 1;
+                    stepDistance = remainer.x;
+                    remainer.x = Math.abs(oneUnit.x);
+                    currentSideHit = 'x';
                 } else {
-                    incrementX = remainerInX * angleCos;
-                    incrementY = remainerInX * angleSin;
+                    remainer.x -= remainer.y;
 
-                    increment = remainerInX;
-                    remainerInX = Math.abs(oneUnitInX);
-                    remainerInY = Math.abs(oneUnitInY);
-                    currentSideHit = 2;
+                    stepIncrement.x = remainer.y * angleCos;
+                    stepIncrement.y = remainer.y * angleSin;
+
+                    stepDistance = remainer.y;
+                    remainer.y = Math.abs(oneUnit.y);
+                    currentSideHit = 'y';
                 }
 
-                // The checker
-                let positionX = currentX + ((currentX + incrementX) - currentX) / 2;
-                let positionY = currentY + ((currentY + incrementY) - currentY) / 2;
+                // We check to see which square the center of the step is in
+                let check = {
+                    x: current.x + ((current.x + stepIncrement.x) - current.x) / 2,
+                    y: current.y + ((current.y + stepIncrement.y) - current.y) / 2,
+                }
                 worldCtx.beginPath()
-                worldCtx.arc(positionX * 50, positionY * 50, 2, 0, 2 * Math.PI, false);
+                worldCtx.arc(check.x * 50, check.y * 50, 2, 0, 2 * Math.PI, false);
                 worldCtx.fillStyle = 'yellow';
                 worldCtx.fill();
 
-                if (!isInWorld(Math.floor(positionX), Math.floor(positionY)) || isWall(Math.floor(positionX), Math.floor(positionY))) {
+                if (!isInWorld(Math.floor(check.x), Math.floor(check.y)) || isWall(Math.floor(check.x), Math.floor(check.y))) {
                     worldCtx.beginPath()
-                    worldCtx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
+                    worldCtx.arc(current.x * 50, current.y * 50, 4, 0, 2 * Math.PI, false);
                     worldCtx.fillStyle = 'red';
                     worldCtx.fill();
 
                     break;
                 }
 
-                increments.push(increment);
-                currentX += incrementX;
-                currentY += incrementY;
+                // If we did not hit anything we can add the step to the increments and move on
+                increments.push(stepDistance);
+                current.x += stepIncrement.x;
+                current.y += stepIncrement.y;
                 lastSideHit = currentSideHit;
 
                 // Debug add dot to the collisions
                 worldCtx.beginPath()
-                worldCtx.arc(currentX * 50, currentY * 50, 4, 0, 2 * Math.PI, false);
+                worldCtx.arc(current.x * 50, current.y * 50, 4, 0, 2 * Math.PI, false);
                 worldCtx.fillStyle = 'green';
                 worldCtx.fill();
                 // End debug
@@ -260,10 +252,8 @@
 
             return {
                 distance,
-                oneUnitInX,
-                oneUnitInY,
-                xDirection,
-                yDirection,
+                oneUnit,
+                direction,
                 increments,
                 lastSideHit,
             }
@@ -275,10 +265,8 @@
 
             const {
                 distance,
-                oneUnitInX,
-                oneUnitInY,
-                xDirection,
-                yDirection,
+                oneUnit,
+                direction,
                 increments,
                 lastSideHit
             } = ray(from, angleRad);
@@ -289,13 +277,13 @@
                 <br />
                 Angle: ${angleDeg}
                 <br />
-                One unit in X: ${oneUnitInX}
+                One unit in X: ${oneUnit.x}
                 <br />
-                One unit in Y: ${oneUnitInY}
+                One unit in Y: ${oneUnit.y}
                 <br />
-                Direction in X: ${xDirection}
+                Direction in X: ${direction.x}
                 <br />
-                Direction in Y: ${yDirection}
+                Direction in Y: ${direction.y}
                 <br />
                 Increments: ${increments.map(i => i.toFixed(2)).join(', ')}
                 <br />
@@ -305,15 +293,8 @@
             `;
         }
 
-        function invertScale(input, min, max) {
-            return max + min - input;
-        }
-
         function convertValue(fromScale, toScale, value) {
-            const converted = toScale.min - ((fromScale.min - value) / fromScale.max) * toScale.max;
-            if (toScale.min > toScale.max) {
-                return invertScale(converted, toScale.max, toScale.min);
-            }
+            const converted = ((value - fromScale.min) * (toScale.max - toScale.min)) / (fromScale.max - fromScale.min) + toScale.min;
             return converted;
         }
 
@@ -321,39 +302,22 @@
             const angleRad = getAngle(from, to)
 
             let fov = 66;
-            let step = .5
+            let step = .1
             let xStep = 800 / fov * step;
             let xPosition = 0;
+            // IDK why the order is reversed
             for (let degree = (fov / 2); degree >= -1 * (fov / 2); degree -= step) {
                 let radians = degree * Math.PI / 180;
 
-                const {
-                    distance,
-                    oneUnitInX,
-                    oneUnitInY,
-                    xDirection,
-                    yDirection,
-                    increments,
-                    lastSideHit
-                } = ray(from, angleRad - radians);
+                const { distance, lastSideHit } = ray(from, angleRad - radians);
 
                 const perpendicularDistance = distance * Math.cos(radians);
-                const height = 600 / (perpendicularDistance);
+                const height = 600 / perpendicularDistance;
 
-                const lightness = convertValue({
-                    min: 0,
-                    max: 300,
-                }, {
-                    min: 0,
-                    max: 30,
-                }, height);
-                cameraCtx.fillStyle = lastSideHit == 0 ? `hsl(94, 100%, ${lightness}%)` : `hsl(360, 100%, ${lightness}%)`;
-                cameraCtx.fillRect(
-                    xPosition,
-                    300 - height / 2,
-                    xStep,
-                    height,
-                );
+                let lightness = height > 600 ? 50 : convertValue({ min: 0, max: 600 }, { min: 0, max: 50 }, height);
+                cameraCtx.fillStyle = lastSideHit == 'x' ? `hsl(94, 100%, ${lightness}%)` : `hsl(360, 100%, ${lightness}%)`;
+                // Overlaps a little bit but fixes some weird tiny gaps
+                cameraCtx.fillRect(Math.floor(xPosition), 300 - height / 2, Math.ceil(xStep), height);
                 xPosition += xStep;
             }
         }
