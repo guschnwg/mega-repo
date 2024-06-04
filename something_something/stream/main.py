@@ -61,6 +61,8 @@ class OnHandler:
         await response.prepare(request)
         await response.write(b"{}")
 
+        return response
+
 class OffHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
         global is_live
@@ -70,6 +72,8 @@ class OffHandler:
         response = web.StreamResponse(status=200, reason="OK", headers=headers)
         await response.prepare(request)
         await response.write(b"{}")
+
+        return response
 
 server._app.router.add_route("GET", "/turn", TurnHandler())
 server._app.router.add_route("GET", "/on", OnHandler())
