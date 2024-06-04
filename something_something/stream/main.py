@@ -75,9 +75,31 @@ class OffHandler:
 
         return response
 
+
+class ResetHandler:
+    async def __call__(self, request: web.Request) -> web.StreamResponse:
+        global is_live, cap
+        is_live = False
+
+        await asyncio.sleep(5)
+
+        cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
+
+        await asyncio.sleep(5)
+
+        headers = {"Content-Type": "application/json"}
+        response = web.StreamResponse(status=200, reason="OK", headers=headers)
+        await response.prepare(request)
+        await response.write(b"{}")
+
+        is_live = True
+
+        return response
+
 server._app.router.add_route("GET", "/turn", TurnHandler())
 server._app.router.add_route("GET", "/on", OnHandler())
 server._app.router.add_route("GET", "/off", OffHandler())
+server._app.router.add_route("GET", "/reset", ResetHandler())
 server.start()
 
 def update_stream():
