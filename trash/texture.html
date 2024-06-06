@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <input type="range" id="size" min="1" max="64" value="16" />
+    </div>
+
+    <div>
+        <div id="color"></div>
+
+        <input type="range" min="0" max="360" value="180" id="hue">
+        <input type="range" min="0" max="100" value="100" id="saturation">
+        <input type="range" min="0" max="100" value="50" id="lightness">
+
+        <button id="fill">Fill</button>
+    </div>
+
+    <div id="texture-colors"></div>
+
+    <div id="holder"></div>
+
+    <code id="code"></code>
+
+    <script>
+        let holder = document.getElementById('holder');
+        let code = document.getElementById('code');
+        let hue = document.getElementById('hue');
+        let saturation = document.getElementById('saturation');
+        let lightness = document.getElementById('lightness');
+        let textureColors = document.getElementById('texture-colors');
+        let fill = document.getElementById('fill');
+        let size = document.getElementById('size');
+
+        let dimensions = { width: parseInt(size.value), height: parseInt(size.value) };
+        let texture = [];
+
+        let mousePressed = false;
+
+        function init() {
+            texture = [];
+            holder.innerHTML = "";
+
+            for (let i = 0; i < dimensions.height; i++) {
+                let row = [];
+                for (let j = 0; j < dimensions.width; j++) {
+                    // In HSL
+                    row.push([
+                        360 * j / (dimensions.height - 1),
+                        100 * i / (dimensions.width - 1),
+                        50
+                    ]);
+                }
+                texture.push(row);
+            }
+
+            for (let i = 0; i < dimensions.height; i++) {
+                let row = document.createElement('div');
+                row.style.display = 'flex';
+                for (let j = 0; j < dimensions.width; j++) {
+                    const [h, s, l] = texture[i][j];
+                    let div = document.createElement('div');
+                    div.style.width = '16px';
+                    div.style.height = '16px';
+                    div.style.backgroundColor = `hsl(${h}, ${s}%, ${l}%)`;
+                    div.addEventListener('mouseover', () => {
+                        if (!mousePressed) return;
+
+                        texture[i][j] = [
+                            hue.value,
+                            saturation.value,
+                            lightness.value
+                        ];
+                        draw();
+                    });
+                    div.addEventListener('mousedown', e => {
+                        if (e.ctrlKey) {
+                            const [h, s, l] = texture[i][j];
+                            hue.value = h;
+                            saturation.value = s;
+                            lightness.value = l;
+                            draw();
+                        }
+                    });
+                    row.appendChild(div);
+                }
+                holder.appendChild(row);
+            }
+        }
+
+        function draw() {
+            color.style.width = '100px';
+            color.style.height = '100px';
+            color.style.backgroundColor = `hsl(${hue.value}, ${saturation.value}%, ${lightness.value}%)`;
+
+            for (let i = 0; i < dimensions.height; i++) {
+                let row = holder.children.item(i);
+                for (let j = 0; j < dimensions.width; j++) {
+                    const col = row.children.item(j);
+                    const [h, s, l] = texture[i][j];
+                    col.style.backgroundColor = `hsl(${h}, ${s}%, ${l}%)`;
+                }
+            }
+
+            code.innerHTML = `
+                [
+                    ${texture.map(row => `
+                        [
+                            ${row.map(pixel => `[${pixel.join(', ')}]`).join(',\n            ')}
+                        ]
+                    `).join(',\n    ')}
+                ]
+            `;
+        
+            textureColors.innerHTML = "";
+            let uniqueColors = [...new Set(texture.flat().map(t => t.join(',')))].map(c => c.split(','));
+            for (let color of uniqueColors) {
+                let div = document.createElement('div');
+                div.style.width = '16px';
+                div.style.height = '16px';
+                div.style.display = 'inline-block';
+                div.style.backgroundColor = `hsl(${color[0]}, ${color[1]}%, ${color[2]}%)`;
+                div.addEventListener('click', e => {
+                    hue.value = color[0];
+                    saturation.value = color[1];
+                    lightness.value = color[2];
+                    draw();
+                });
+                textureColors.appendChild(div);
+            }
+        }
+
+        hue.addEventListener('input', draw);
+        saturation.addEventListener('input', draw);
+        lightness.addEventListener('input', draw);
+
+        size.addEventListener('input', () => {
+            dimensions = { width: parseInt(size.value), height: parseInt(size.value) };
+            init();
+            draw();
+        });
+
+        holder.addEventListener('mousedown', () => mousePressed = true);
+        holder.addEventListener('mouseup', () => mousePressed = false);
+
+        fill.addEventListener('click', () => {
+            for (let i = 0; i < dimensions.height; i++) {
+                for (let j = 0; j < dimensions.width; j++) {
+                    texture[i][j] = [
+                        hue.value,
+                        saturation.value,
+                        lightness.value
+                    ];
+                }
+            }
+            draw();
+        });
+
+        init();
+        draw();
+    </script>
+</body>
+</html>
