@@ -77,6 +77,8 @@
             ],
         };
 
+        let textureScale = 1;
+
         const player = {
             x: 1.5,
             y: 3,
@@ -128,7 +130,11 @@
                 player.x -= 0.1 * Math.sin(mouse.angle)
                 player.y += 0.1 * Math.cos(mouse.angle)
             }
+
             if (e.key === 't') textured = true;
+
+            if (e.key === '>') textureScale += 0.1;
+            if (e.key === '<') textureScale = Math.max(textureScale - 0.1, 0.1);
         })
 
         window.addEventListener('keyup', e => {
@@ -375,9 +381,13 @@
                 if (textured) {
                     let yStep = .5;
                     let texture = textures[hit];
-                    let inSquare = current[lastSideHit === 'x' ? 'y' : 'x'];
-                    inSquare = inSquare - Math.floor(inSquare);
-                    let textureX = texture[Math.floor(inSquare * texture.length)];
+                    let inSquare = current[lastSideHit === 'x' ? 'y' : 'x'] % 1;
+                    let textureXIndex = convertValue(
+                        { min: 0, max: textureScale },
+                        { min: 0, max: texture.length },
+                        inSquare,
+                    ) % texture.length
+                    let textureX = texture[Math.floor(textureXIndex)];
 
                     let baseY = (maxHeight / 2 - height / 2);
                     
@@ -388,7 +398,7 @@
                         // let textureIndex = Math.floor(y / yStep) % textureX.length;
                         let textureIndex = Math.floor(
                             convertValue(
-                                { min: 0, max: height },
+                                { min: 0, max: Math.floor(height * textureScale) },
                                 { min: 0, max: textureX.length },
                                 y
                             )
