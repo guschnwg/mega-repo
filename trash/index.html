@@ -29,10 +29,10 @@
 
         const world = [
             [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 2, 2, 0, 0, 1, 0, 0, 0],
             [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 2, 0, 0, 0],
+            [0, 0, 0, 2, 0, 0, 1, 0, 0, 0],
             [0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
             [0, 0, 1, 1, 0, 0, 1, 0, 0, 0],
             [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
@@ -40,17 +40,42 @@
             [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
         ];
 
-        const colors = ['black', 'red'];
+        const colors = ['black', 'red', 'green'];
 
-        const textures = [
-            [],
-            [
-                'red', 'red', 'red', 'red', 
-                'red', 'blue', 'blue', 'red', 
-                'red', 'blue', 'blue', 'red', 
-                'red', 'red', 'red', 'red', 
-            ]
-        ]
+        const textures = {
+            0: [],
+            1: [
+                ['black', 'black', 'black' , 'black' , 'black' , 'black' , 'black'],
+                ['black', 'red', 'red' , 'red' , 'red' , 'red' , 'red' , 'black'],
+                ['black', 'red', 'red', 'blue', 'blue', 'red', 'blue', 'black'], 
+                ['black', 'red', 'blue', 'red', 'red', 'blue', 'blue', 'black'], 
+                ['black', 'red', 'blue', 'red', 'red', 'blue', 'blue', 'black'], 
+                ['black', 'red', 'red', 'blue', 'blue', 'red', 'blue', 'black'], 
+                ['black', 'red', 'red' , 'red' , 'red' , 'red' , 'red' , 'black'], 
+                ['black', 'black', 'black' , 'black' , 'black' , 'black' , 'black'], 
+            ],
+            2: [
+                ['green', 'green', 'green' , 'green' , 'green' , 'green' , 'green'],
+                ['green', 'purple', 'purple' , 'purple' , 'purple' , 'purple' , 'purple' , 'green'],
+                ['green', 'purple', 'purple', 'blue', 'blue', 'purple', 'blue', 'green'], 
+                ['green', 'purple', 'blue', 'purple', 'purple', 'blue', 'blue', 'green'], 
+                ['green', 'purple', 'blue', 'purple', 'purple', 'blue', 'blue', 'green'], 
+                ['green', 'purple', 'purple', 'blue', 'blue', 'purple', 'blue', 'green'], 
+                ['green', 'purple', 'purple' , 'purple' , 'purple' , 'purple' , 'purple' , 'green'], 
+                ['green', 'green', 'green' , 'green' , 'green' , 'green' , 'green'], 
+            ],
+            'out of bounds': [
+                ['gold', 'gold', 'gold' , 'gold' , 'gold' , 'gold' , 'gold'],
+                ['gold', 'black', 'gold' , 'black' , 'gold' , 'black' , 'gold' , 'black'],
+                ['gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold'], 
+                ['gold', 'gold', 'gold' , 'gold' , 'gold' , 'gold' , 'gold'],
+                ['gold', 'black', 'gold' , 'black' , 'gold' , 'black' , 'gold' , 'black'],
+                ['gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold'], 
+                ['gold', 'gold', 'gold' , 'gold' , 'gold' , 'gold' , 'gold'],
+                ['gold', 'black', 'gold' , 'black' , 'gold' , 'black' , 'gold' , 'black'],
+                ['gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold'], 
+            ],
+        };
 
         const player = {
             x: 1.5,
@@ -58,8 +83,9 @@
         }
 
         const mouse = {
-            x: 0,
-            y: 0,
+            x: 2,
+            y: 3,
+            angle: 0,
         }
 
         const destination = {
@@ -68,11 +94,13 @@
         }
 
         let mouseDown = false;
+        let textured = false;
 
         worldCanvas.addEventListener('mousemove', e => {
             const rect = e.target.getBoundingClientRect();
             mouse.x = (e.clientX - rect.left) / 50; //x position within the element.
             mouse.y = (e.clientY - rect.top) / 50;  //y position within the element.
+            mouse.angle = getAngle(player, mouse); 
 
             if (mouseDown) {
                 destination.x = Math.floor((e.clientX - rect.left) / 50); //x position within the element.
@@ -84,10 +112,27 @@
         worldCanvas.addEventListener('mouseup', e => mouseDown = false);
 
         window.addEventListener('keydown', e => {
-            if (e.key === 'w') player.y -= 0.1;
-            if (e.key === 's') player.y += 0.1;
-            if (e.key === 'a') player.x -= 0.1;
-            if (e.key === 'd') player.x += 0.1;
+            if (e.key === 'w') {
+                player.y += 0.1 * Math.sin(mouse.angle)
+                player.x += 0.1 * Math.cos(mouse.angle)
+            };
+            if (e.key === 's') {
+                player.y -= 0.1 * Math.sin(mouse.angle)
+                player.x -= 0.1 * Math.cos(mouse.angle)
+            }
+            if (e.key === 'a') {
+                player.x += 0.1 * Math.sin(mouse.angle)
+                player.y -= 0.1 * Math.cos(mouse.angle)
+            }
+            if (e.key === 'd') {
+                player.x -= 0.1 * Math.sin(mouse.angle)
+                player.y += 0.1 * Math.cos(mouse.angle)
+            }
+            if (e.key === 't') textured = true;
+        })
+
+        window.addEventListener('keyup', e => {
+            if (e.key === 't') textured = false;
         })
 
         function draw() {
@@ -156,8 +201,8 @@
             return y >= 0 && y < world.length && x >= 0 && x < world[y].length;
         }
 
-        function isWall(x, y) {
-            return world[y][x] != 0;
+        function inWorld(x, y) {
+            return world[y][x];
         }
 
         function ray(from, angle) {
@@ -188,6 +233,7 @@
             let current = { x: from.x, y: from.y };
 
             let lastSideHit = 0;
+            let hit = null;
 
             const increments = [];
             for (let i = 0; i < 20; i++) {
@@ -225,12 +271,21 @@
                 worldCtx.fillStyle = 'yellow';
                 worldCtx.fill();
 
-                if (!isInWorld(Math.floor(check.x), Math.floor(check.y)) || isWall(Math.floor(check.x), Math.floor(check.y))) {
+                if (!isInWorld(Math.floor(check.x), Math.floor(check.y))) {
                     worldCtx.beginPath()
                     worldCtx.arc(current.x * 50, current.y * 50, 4, 0, 2 * Math.PI, false);
                     worldCtx.fillStyle = 'red';
                     worldCtx.fill();
-
+                    hit = 'out of bounds'
+                    break;
+                }
+                let squareInWorld = inWorld(Math.floor(check.x), Math.floor(check.y));
+                if (squareInWorld !== 0) {
+                    worldCtx.beginPath()
+                    worldCtx.arc(current.x * 50, current.y * 50, 4, 0, 2 * Math.PI, false);
+                    worldCtx.fillStyle = 'purple';
+                    worldCtx.fill();
+                    hit = squareInWorld;
                     break;
                 }
 
@@ -256,6 +311,8 @@
                 direction,
                 increments,
                 lastSideHit,
+                current,
+                hit,
             }
         }
 
@@ -302,22 +359,61 @@
             const angleRad = getAngle(from, to)
 
             let fov = 66;
-            let step = .1
+            let step = .5
             let xStep = 800 / fov * step;
             let xPosition = 0;
+            let maxHeight = 600;
             // IDK why the order is reversed
             for (let degree = (fov / 2); degree >= -1 * (fov / 2); degree -= step) {
                 let radians = degree * Math.PI / 180;
 
-                const { distance, lastSideHit } = ray(from, angleRad - radians);
+                const { distance, lastSideHit, current, hit } = ray(from, angleRad - radians);
 
                 const perpendicularDistance = distance * Math.cos(radians);
-                const height = 600 / perpendicularDistance;
+                const height = maxHeight / perpendicularDistance;
 
-                let lightness = height > 600 ? 50 : convertValue({ min: 0, max: 600 }, { min: 0, max: 50 }, height);
-                cameraCtx.fillStyle = lastSideHit == 'x' ? `hsl(94, 100%, ${lightness}%)` : `hsl(360, 100%, ${lightness}%)`;
-                // Overlaps a little bit but fixes some weird tiny gaps
-                cameraCtx.fillRect(Math.floor(xPosition), 300 - height / 2, Math.ceil(xStep), height);
+                if (textured) {
+                    let yStep = .5;
+                    let texture = textures[hit];
+                    let inSquare = current[lastSideHit === 'x' ? 'y' : 'x'];
+                    inSquare = inSquare - Math.floor(inSquare);
+                    let textureX = texture[Math.floor(inSquare * texture.length)];
+
+                    let baseY = (maxHeight / 2 - height / 2);
+                    
+                    for (let y = 0; y < height; y += yStep) {
+                        let yPos = Math.floor(y + baseY);
+                        let xPos = Math.floor(xPosition) ;
+
+                        // let textureIndex = Math.floor(y / yStep) % textureX.length;
+                        let textureIndex = Math.floor(
+                            convertValue(
+                                { min: 0, max: height },
+                                { min: 0, max: textureX.length },
+                                y
+                            )
+                        ) % textureX.length;
+                        
+                        cameraCtx.fillStyle = textureX[textureIndex];
+                        
+                        cameraCtx.fillRect(
+                            xPos,
+                            yPos,
+                            Math.ceil(xStep),
+                            Math.ceil(yStep)
+                        );
+                    }
+                } else {
+                    let lightness = height > 600 ? 50 : convertValue({ min: 0, max: 600 }, { min: 0, max: 50 }, height);
+                    cameraCtx.fillStyle = lastSideHit == 'x' ? `hsl(94, 100%, ${lightness}%)` : `hsl(360, 100%, ${lightness}%)`;
+                    // Overlaps a little bit but fixes some weird tiny gaps
+                    cameraCtx.fillRect(
+                        Math.floor(xPosition),
+                        maxHeight / 2 - height / 2, Math.ceil(xStep),
+                        height
+                    );
+                }
+
                 xPosition += xStep;
             }
         }
