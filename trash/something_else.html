@@ -4,41 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <style>
+        canvas {
+            border: 1px solid red;
+        }
+    </style>
 </head>
 <body>
     <canvas id="camera"></canvas>
 
-    <div>
-        <h2>Control camera</h2>
-        <button onclick="camera.x += 0.1">Right</button>
-        <button onclick="camera.x -= 0.1">Left</button>
-        <button onclick="camera.y -= 0.1">Down</button>
-        <button onclick="camera.y += 0.1">Up</button>
-        <button onclick="camera.z += 0.1">Zoom In</button>
-        <button onclick="camera.z -= 0.1">Zoom Out</button>
-    </div>
-
-    <div>
-        <h2>Control cube</h2>
-        <button onclick="cube.x += 0.1">Right</button>
-        <button onclick="cube.x -= 0.1">Left</button>
-        <button onclick="cube.y -= 0.1">Down</button>
-        <button onclick="cube.y += 0.1">Up</button>
-        <button onclick="cube.z += 0.1">Forward</button>
-        <button onclick="cube.z -= 0.1">Backward</button>
-
-        <button onclick="cube.width += 1">Wider</button>
-        <button onclick="cube.width -= 1">Narrower</button>
-        <button onclick="cube.height += 1">Taller</button>
-        <button onclick="cube.height -= 1">Shorter</button>
-        <button onclick="cube.depth += 1">Deeper</button>
-        <button onclick="cube.depth -= 1">Shallower</button>
-
-        <button onclick="cube.padding += 1">Zoom In</button>
-        <button onclick="cube.padding -= 1">Zoom Out</button>
-
-        <button onclick="cube.radius += 1">Bigger</button>
-        <button onclick="cube.radius -= 1">Smaller</button>
+    <div style="display: flex; gap: 50px;">
+        <div>
+            <h2>Control camera</h2>
+            <div>
+                X
+                <input type="range" min="-10" max="10" value="0" step="1" oninput="camera.x = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>0</output>
+            </div>
+            <div>
+                Y
+                <input type="range" min="-10" max="10" value="0" step="1" oninput="camera.y = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>0</output>
+            </div>
+            <div>
+                Z
+                <input type="range" min="-10" max="4" value="-4" step="1" oninput="camera.z = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>-4</output>
+            </div>
+        </div>
+    
+        <div>
+            <h2>Control cube</h2>
+    
+            <div>
+                X
+                <input type="range" min="-10" max="10" value="-3.5" step="0.1" oninput="cube.x = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>-3.5</output>
+            </div>
+            <div>
+                Y
+                <input type="range" min="-10" max="10" value="-3.5" step="0.1" oninput="cube.y = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>-3.5</output>
+            </div>
+            <div>
+                Z
+                <input type="range" min="-10" max="10" value="2" step="0.1" oninput="cube.z = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>2</output>
+            </div>
+    
+            <div>
+                Width
+                <input type="range" min="1" max="10" value="6" step="1" oninput="cube.width = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>6</output>
+            </div>
+            <div>
+                Height
+                <input type="range" min="1" max="10" value="6" step="1" oninput="cube.height = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>6</output>
+            </div>
+            <div>
+                Depth
+                <input type="range" min="1" max="10" value="6" step="1" oninput="cube.depth = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>6</output>
+            </div>
+    
+            <div>
+                Padding
+                <input type="range" min="0" max="100" value="40" step="1" oninput="cube.padding = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>40</output>
+            </div>
+    
+            <div>
+                Radius
+                <input type="range" min="1" max="10" value="5" step="1" oninput="cube.radius = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output>5</output>
+            </div>
+        </div>
     </div>
 
     <script>
