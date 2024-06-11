@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="camera"></canvas>
+
+    <div>
+        <h2>Control camera</h2>
+        <button onclick="camera.x += 0.1">Right</button>
+        <button onclick="camera.x -= 0.1">Left</button>
+        <button onclick="camera.y -= 0.1">Down</button>
+        <button onclick="camera.y += 0.1">Up</button>
+        <button onclick="camera.z += 0.1">Zoom In</button>
+        <button onclick="camera.z -= 0.1">Zoom Out</button>
+    </div>
+
+    <div>
+        <h2>Control cube</h2>
+        <button onclick="cube.x += 0.1">Right</button>
+        <button onclick="cube.x -= 0.1">Left</button>
+        <button onclick="cube.y -= 0.1">Down</button>
+        <button onclick="cube.y += 0.1">Up</button>
+        <button onclick="cube.z += 0.1">Forward</button>
+        <button onclick="cube.z -= 0.1">Backward</button>
+
+        <button onclick="cube.width += 1">Wider</button>
+        <button onclick="cube.width -= 1">Narrower</button>
+        <button onclick="cube.height += 1">Taller</button>
+        <button onclick="cube.height -= 1">Shorter</button>
+        <button onclick="cube.depth += 1">Deeper</button>
+        <button onclick="cube.depth -= 1">Shallower</button>
+
+        <button onclick="cube.padding += 1">Zoom In</button>
+        <button onclick="cube.padding -= 1">Zoom Out</button>
+
+        <button onclick="cube.radius += 1">Bigger</button>
+        <button onclick="cube.radius -= 1">Smaller</button>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('camera');
+        let context = canvas.getContext('2d');
+
+        canvas.width = 500;
+        canvas.height = 500;
+
+        const camera = {
+            x: 0,
+            y: 0,
+            z: -4,
+
+            // Rotation - TODO
+            pitch: 0,
+            yaw: 0,
+            roll: 0
+        };
+
+        const cube = {
+            x: -3.5,
+            y: -3.5,
+            z: 2,
+            width: 6,
+            height: 6,
+            depth: 6,
+            padding: 40,
+            radius: 5,
+
+            // Rotation - TODO
+            pitch: 0,
+            yaw: 0,
+            roll: 0
+        }
+
+        function convertScale(value, min, max, newMin, newMax) {
+            return (value - min) / (max - min) * (newMax - newMin) + newMin;
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // TODO: Fix the positioning of the cube when moving the cube or camera
+
+            function getPosition(x, y, z) {
+                return {
+                    x: ((z * camera.x - x * camera.z) / (z - camera.z)) * cube.padding,
+                    y: ((z * camera.y - y * camera.z) / (z - camera.z)) * cube.padding
+                }
+            }
+
+            for (let ix = cube.x; ix < cube.x + cube.width; ix++) {
+                for (let iy = cube.y; iy < cube.y + cube.height; iy++) {
+                    for (let iz = cube.z; iz < cube.z + cube.depth; iz++) {
+                        let { x, y } = getPosition(ix, iy, iz);
+
+                        context.beginPath();
+
+                        // let r = Math.floor(convertScale(ix, cube.x, cube.x + cube.width - 1, 0, 150));
+                        // let g = Math.floor(convertScale(iy, cube.y, cube.y + cube.height - 1, 0, 150));
+                        // let b = Math.floor(convertScale(iz, cube.z, cube.z + cube.depth - 1, 0, 150));
+                        // context.fillStyle = `rgb(${r}, ${g}, ${b})`;
+
+                        let h = convertScale(ix, cube.x, cube.x + cube.width - 1, 0, 360);
+                        let s = 100;
+                        let l = convertScale(iz, cube.z, cube.z + cube.depth - 1, 50, 25);
+                        context.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+
+                        let radius = convertScale(iz, cube.z, cube.z + cube.depth - 1, cube.radius, cube.radius / 2);
+                        
+                        context.ellipse(
+                            x + canvas.width / 2,
+                            y + canvas.height / 2,
+                            radius,
+                            radius,
+                            0, 0, Math.PI * 2
+                        );
+                        context.fill();
+                    }
+                }
+            }
+
+            const frontFace = [
+                { x: cube.x, y: cube.y, z: cube.z },
+                { x: cube.x + cube.width - 1, y: cube.y, z: cube.z },
+                { x: cube.x + cube.width - 1, y: cube.y + cube.height - 1, z: cube.z },
+                { x: cube.x, y: cube.y + cube.height - 1, z: cube.z },
+            ];
+            const backFace = [
+                { x: cube.x, y: cube.y, z: cube.z + cube.depth - 1 },
+                { x: cube.x + cube.width - 1, y: cube.y, z: cube.z + cube.depth - 1 },
+                { x: cube.x + cube.width - 1, y: cube.y + cube.height - 1, z: cube.z + cube.depth - 1 },
+                { x: cube.x, y: cube.y + cube.height - 1, z: cube.z + cube.depth - 1 },
+            ];
+
+            // Draw front face
+            context.beginPath();
+            context.strokeStyle = 'green';
+            for (let vertex of frontFace) {
+                let { x, y } = getPosition(vertex.x, vertex.y, vertex.z);
+                context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+            }
+            context.closePath();
+            context.stroke();
+
+            // Draw back face
+            context.beginPath();
+            context.strokeStyle = 'red';
+            for (let vertex of backFace) {
+                let { x, y } = getPosition(vertex.x, vertex.y, vertex.z);
+                context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+            }
+            context.closePath();
+            context.stroke();
+
+            // Draw lines between front and back face
+            context.beginPath();
+            context.strokeStyle = 'blue';
+            for (let i = 0; i < frontFace.length; i++) {
+                let { x, y } = getPosition(frontFace[i].x, frontFace[i].y, frontFace[i].z);
+                context.moveTo(x + canvas.width / 2, y + canvas.height / 2);
+                let { x: x2, y: y2 } = getPosition(backFace[i].x, backFace[i].y, backFace[i].z);
+                context.lineTo(x2 + canvas.width / 2, y2 + canvas.height / 2);
+            }
+            context.stroke();
+
+            setTimeout(draw, 1000 / 60);
+        }
+
+        draw();
+
+    </script>
+</body>
+</html>
