@@ -19,18 +19,18 @@
             <h2>Control camera</h2>
             <div>
                 X
-                <input type="range" min="-10" max="10" value="0" step="1" oninput="camera.x = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>0</output>
+                <input id="camera-x-input" type="range" step="1" oninput="camera.x = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
             <div>
                 Y
-                <input type="range" min="-10" max="10" value="0" step="1" oninput="camera.y = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>0</output>
+                <input id="camera-y-input" type="range" step="1" oninput="camera.y = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
             <div>
                 Z
-                <input type="range" min="-10" max="4" value="-4" step="1" oninput="camera.z = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>-4</output>
+                <input id="camera-z-input" type="range" step="1" oninput="camera.z = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
         </div>
     
@@ -39,46 +39,53 @@
     
             <div>
                 X
-                <input type="range" min="-10" max="10" value="-3.5" step="0.1" oninput="cube.x = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>-3.5</output>
+                <input id="cube-x-input" type="range" step="1" oninput="cube.x = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
             <div>
                 Y
-                <input type="range" min="-10" max="10" value="-3.5" step="0.1" oninput="cube.y = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>-3.5</output>
+                <input id="cube-y-input" type="range" step="1" oninput="cube.y = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
             <div>
                 Z
-                <input type="range" min="-10" max="10" value="2" step="0.1" oninput="cube.z = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>2</output>
+                <input id="cube-z-input" type="range" step="1" oninput="cube.z = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
     
             <div>
                 Width
-                <input type="range" min="1" max="10" value="6" step="1" oninput="cube.width = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>6</output>
+                <input id="cube-width-input" type="range" step="1" oninput="cube.width = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
             <div>
                 Height
-                <input type="range" min="1" max="10" value="6" step="1" oninput="cube.height = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>6</output>
+                <input id="cube-height-input" type="range" step="1" oninput="cube.height = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
             <div>
                 Depth
-                <input type="range" min="1" max="10" value="6" step="1" oninput="cube.depth = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>6</output>
+                <input id="cube-depth-input" type="range" step="1" oninput="cube.depth = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
     
             <div>
                 Padding
-                <input type="range" min="0" max="100" value="40" step="1" oninput="cube.padding = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>40</output>
+                <input id="cube-padding-input"type="range" step="1" oninput="cube.padding = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
             </div>
     
             <div>
                 Radius
-                <input type="range" min="1" max="10" value="5" step="1" oninput="cube.radius = parseFloat(this.value); this.nextElementSibling.value = this.value" />
-                <output>5</output>
+                <input id="cube-radius-input" type="range" step="1" oninput="cube.radius = parseFloat(this.value); this.nextElementSibling.value = this.value" />
+                <output></output>
+            </div>
+        </div>
+
+        <div>
+            <h2>???</h2>
+            <div>
+                <button onclick="bounce(cube)">Bounce cube</button>
             </div>
         </div>
     </div>
@@ -93,7 +100,12 @@
         const camera = {
             x: 0,
             y: 0,
-            z: -4,
+            z: -14,
+
+            // Velocity - TODO
+            vx: 0,
+            vy: 0,
+            vz: 0,
 
             // Rotation - TODO
             pitch: 0,
@@ -102,14 +114,19 @@
         };
 
         const cube = {
-            x: -3.5,
-            y: -3.5,
-            z: 2,
-            width: 6,
-            height: 6,
-            depth: 6,
-            padding: 40,
-            radius: 5,
+            x: 3,
+            y: 3,
+            z: 6,
+            width: 5,
+            height: 5,
+            depth: 5,
+            padding: 60,
+            radius: 8,
+
+            // Velocity
+            vx: 0,
+            vy: 0,
+            vz: 0,
 
             // Rotation - TODO
             pitch: 0,
@@ -117,52 +134,77 @@
             roll: 0
         }
 
+        function bounce(what) {
+            if (what.vx || what.vy || what.vz) {
+                what.vx = 0;
+                what.vy = 0;
+                what.vz = 0;
+                return;
+            }
+
+            what.vx = Math.random() / 3;
+            what.vy = Math.random() / 3;
+            what.vz = Math.random() / 3;
+        }
+
+        function setInputValue(el, value, min, max) {
+            el.value = value;
+            el.min = min;
+            el.max = max;
+            el.nextElementSibling.value = value;
+        }
+
+        function init() {
+            setInputValue(document.getElementById('camera-x-input'), camera.x, -canvas.width / 8, canvas.width / 8);
+            setInputValue(document.getElementById('camera-y-input'), camera.y, -canvas.height / 8, canvas.height / 8);
+            setInputValue(document.getElementById('camera-z-input'), camera.z, -100, 100);
+
+            setInputValue(document.getElementById('cube-x-input'), cube.x, -canvas.width / 8, canvas.width / 8);
+            setInputValue(document.getElementById('cube-y-input'), cube.y, -canvas.height / 8, canvas.height / 8);
+            setInputValue(document.getElementById('cube-z-input'), cube.z, -100, 100);
+            setInputValue(document.getElementById('cube-width-input'), cube.width, 1, 10);
+            setInputValue(document.getElementById('cube-height-input'), cube.height, 1, 10);
+            setInputValue(document.getElementById('cube-depth-input'), cube.depth, 1, 10);
+            setInputValue(document.getElementById('cube-padding-input'), cube.padding, 1, 100);
+            setInputValue(document.getElementById('cube-radius-input'), cube.radius, 1, 10);
+        }
+
+        function update() {
+            cube.x = cube.x + cube.vx;
+            cube.y = cube.y + cube.vy;
+            cube.z = cube.z + cube.vz;
+
+            if (cube.x < 0 || cube.x > 10) {
+                cube.vx *= -1;
+            }
+            if (cube.y < 0 || cube.y > 10) {
+                cube.vy *= -1;
+            }
+            if (cube.z < 0 || cube.z > 10) {
+                cube.vz *= -1;
+            }
+
+            init();
+
+            setTimeout(draw);
+        }
+
         function convertScale(value, min, max, newMin, newMax) {
             return (value - min) / (max - min) * (newMax - newMin) + newMin;
         }
 
+        function getPosition(x, y, z) {
+            return {
+                x: ((z * camera.x - x * camera.z) / (z - camera.z)) * cube.padding,
+                y: ((z * camera.y - y * camera.z) / (z - camera.z)) * cube.padding
+            }
+        }
+
         function draw() {
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = 'white';
+            context.fillRect(0, 0, canvas.width, canvas.height);
 
-            // TODO: Fix the positioning of the cube when moving the cube or camera
 
-            function getPosition(x, y, z) {
-                return {
-                    x: ((z * camera.x - x * camera.z) / (z - camera.z)) * cube.padding,
-                    y: ((z * camera.y - y * camera.z) / (z - camera.z)) * cube.padding
-                }
-            }
-
-            for (let ix = cube.x; ix < cube.x + cube.width; ix++) {
-                for (let iy = cube.y; iy < cube.y + cube.height; iy++) {
-                    for (let iz = cube.z + cube.depth; iz >= cube.z ; iz--) { // Start from the back!
-                        let { x, y } = getPosition(ix, iy, iz);
-
-                        context.beginPath();
-
-                        // let r = Math.floor(convertScale(ix, cube.x, cube.x + cube.width - 1, 0, 150));
-                        // let g = Math.floor(convertScale(iy, cube.y, cube.y + cube.height - 1, 0, 150));
-                        // let b = Math.floor(convertScale(iz, cube.z, cube.z + cube.depth - 1, 0, 150));
-                        // context.fillStyle = `rgb(${r}, ${g}, ${b})`;
-
-                        let h = convertScale(ix, cube.x, cube.x + cube.width - 1, 0, 360);
-                        let s = 100;
-                        let l = convertScale(iz, cube.z, cube.z + cube.depth - 1, 50, 25);
-                        context.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
-
-                        let radius = convertScale(iz, cube.z, cube.z + cube.depth - 1, cube.radius, cube.radius / 2);
-                        
-                        context.ellipse(
-                            x + canvas.width / 2,
-                            y + canvas.height / 2,
-                            radius,
-                            radius,
-                            0, 0, Math.PI * 2
-                        );
-                        context.fill();
-                    }
-                }
-            }
 
             const frontFace = [
                 { x: cube.x, y: cube.y, z: cube.z },
@@ -182,7 +224,7 @@
             context.strokeStyle = 'green';
             for (let vertex of frontFace) {
                 let { x, y } = getPosition(vertex.x, vertex.y, vertex.z);
-                context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+                context.lineTo(x, y);
             }
             context.closePath();
             context.stroke();
@@ -192,7 +234,7 @@
             context.strokeStyle = 'red';
             for (let vertex of backFace) {
                 let { x, y } = getPosition(vertex.x, vertex.y, vertex.z);
-                context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+                context.lineTo(x, y);
             }
             context.closePath();
             context.stroke();
@@ -202,16 +244,44 @@
             context.strokeStyle = 'blue';
             for (let i = 0; i < frontFace.length; i++) {
                 let { x, y } = getPosition(frontFace[i].x, frontFace[i].y, frontFace[i].z);
-                context.moveTo(x + canvas.width / 2, y + canvas.height / 2);
+                context.moveTo(x, y);
                 let { x: x2, y: y2 } = getPosition(backFace[i].x, backFace[i].y, backFace[i].z);
-                context.lineTo(x2 + canvas.width / 2, y2 + canvas.height / 2);
+                context.lineTo(x2, y2);
             }
             context.stroke();
 
-            setTimeout(draw, 1000 / 60);
+            // Draw balls inside cube
+            for (let iz = cube.depth - 1; iz >= 0 ; iz--) { // Start from the back!
+                for (let ix = 0; ix < cube.width; ix++) {
+                    for (let iy = 0; iy < cube.height; iy++) {
+                        let { x, y } = getPosition(ix + cube.x, iy + cube.y, iz + cube.z);
+
+                        context.beginPath();
+
+                        let h = convertScale(ix, 0, cube.width - 1, 0, 360);
+                        let s = 100;
+                        let l = convertScale(iz, 0, cube.depth - 1, 50, 25);
+                        context.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+
+                        let radius = convertScale(iz, 0, cube.depth - 1, cube.radius, cube.radius / 2);
+                        
+                        context.ellipse(
+                            x,
+                            y,
+                            radius,
+                            radius,
+                            0, 0, Math.PI * 2
+                        );
+                        context.fill();
+                    }
+                }
+            }
+
+            setTimeout(update, 30);
         }
 
-        draw();
+        init();
+        update();
 
     </script>
 </body>
