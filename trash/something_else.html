@@ -135,7 +135,7 @@
 
             for (let ix = cube.x; ix < cube.x + cube.width; ix++) {
                 for (let iy = cube.y; iy < cube.y + cube.height; iy++) {
-                    for (let iz = cube.z; iz < cube.z + cube.depth; iz++) {
+                    for (let iz = cube.z + cube.depth; iz >= cube.z ; iz--) { // Start from the back!
                         let { x, y } = getPosition(ix, iy, iz);
 
                         context.beginPath();
