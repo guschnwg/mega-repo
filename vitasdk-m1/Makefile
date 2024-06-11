@@ -53,12 +53,13 @@ build-my-game:
 	PROJECT=mygame PROJECT_PATH=/games/mygame OUTPUT_FILE=mygame make build-game
 
 install-my-game:
-	rm -rf /Users/giznrdni/Library/Application\ Support/Vita3K/Vita3K/ux0/app/GIOV00001
-	unzip ./out/mygame.vpk -d /Users/giznrdni/Library/Application\ Support/Vita3K/Vita3K/ux0/app/GIOV00001
+	rm -rf /Users/${USER}/Library/Application\ Support/Vita3K/Vita3K/fs/ux0/app/GIOV00001
+	unzip ./out/mygame.vpk -d /Users/${USER}/Library/Application\ Support/Vita3K/Vita3K/fs/ux0/app/GIOV00001
 
 run-my-game:
 	open /Applications/Vita3K.app --args -r GIOV00001
 
+# This one!
 build-install-run-my-game:
 	killall Vita3K | true
 	make build-my-game install-my-game run-my-game
