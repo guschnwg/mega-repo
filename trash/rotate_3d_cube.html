@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        canvas {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <canvas height="500" width="500"></canvas>
+
+    <script>
+        const canvas = document.querySelector('canvas');
+        const context = canvas.getContext('2d');
+        context.translate(canvas.width / 2, canvas.height / 2);
+
+        const cube = {
+            x: 0,
+            y: 0,
+            z: 5,
+
+            size: 5,
+            angle: 0, // TODO
+        };
+
+        const screen = {
+            z: 0
+        };
+
+        const eye = {
+            x: 0,
+            y: 0,
+            z: -5
+        };
+
+        function convertScale(value, min, max, newMin, newMax) {
+            return (value - min) / (max - min) * (newMax - newMin) + newMin;
+        }
+
+        function update() {
+            // Kinda cool
+            // cube.x = Math.sin(Date.now() / 1000) * 2;
+            // cube.y = Math.cos(Date.now() / 1000) * 2;
+        }
+
+        function draw() {
+            context.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+
+            const start = Math.floor(cube.size / 2) * -1;
+            const end = Math.floor(cube.size / 2);
+
+            // Start from the back
+            for (let cz = end; cz >= start; cz--) {
+                // Behind screen
+                if (cube.z + cz < screen.z) continue;
+
+                for (let cy = start ; cy <= end ; cy++) {
+                    for (let cx = start ; cx <= end ; cx++) {
+                        const x = (cx - cube.x) * (screen.z - eye.z) / (cube.z + cz - eye.z);
+                        const y = (cy - cube.y) * (screen.z - eye.z) / (cube.z + cz - eye.z);
+
+                        context.beginPath();
+                        context.fillStyle = `hsl(0, 100%, ${convertScale(cz, -2, 2, 20, 50)}%)`;
+                        context.ellipse(
+                            x * canvas.width / cube.size,
+                            y * canvas.height / cube.size,
+                            5, 5, 0, 0, Math.PI * 2
+                        );
+                        context.fill();
+                    }
+                }
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            setTimeout(loop, 1000 / 60);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
