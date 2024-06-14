@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas height="600" width="600"></canvas>
+
+        <div>
+            Square
+            <input type="range" id="square.x" min="-300" max="300" value="0" oninput="square.x = parseInt(this.value)">
+            <input type="range" id="square.y" min="-300" max="300" value="0" oninput="square.y = parseInt(this.value)">
+        </div>
+
+        <div>
+            Pivot
+            <input type="range" id="pivot.x" min="-300" max="300" value="0" oninput="pivot.x = parseInt(this.value)">
+            <input type="range" id="pivot.y" min="-300" max="300" value="0" oninput="pivot.y = parseInt(this.value)">
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.querySelector('canvas');
+        const context = canvas.getContext('2d');
+
+        const square = {
+            x: 0,
+            y: 0,
+            size: 50,
+            angle: 0,
+            scale: 1,
+        };
+
+        const pivot = {
+            x: 0,
+            y: 0,
+        }
+
+        function coordinates(x, y, angle, pX = 0, pY = 0) {
+            return {
+                x: (x - pX) * Math.cos(angle * Math.PI / 180) - (y - pY) * Math.sin(angle * Math.PI / 180) + pX,
+                y: (x - pX) * Math.sin(angle * Math.PI / 180) + (y - pY) * Math.cos(angle * Math.PI / 180) + pY,
+            } 
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw axis
+            context.strokeStyle = 'black';
+            context.lineWidth = 1;
+            context.beginPath();
+            context.moveTo(canvas.width / 2, 0);
+            context.lineTo(canvas.width / 2, canvas.height);
+            context.moveTo(0, canvas.height / 2);
+            context.lineTo(canvas.width, canvas.height / 2);
+            context.stroke();
+
+            // Draw grid
+            context.strokeStyle = 'lightgray';
+            context.lineWidth = .25;
+            context.beginPath();
+            for (let i = 0; i < canvas.width; i += 50) {
+                context.moveTo(i, 0);
+                context.lineTo(i, canvas.height);
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                context.moveTo(0, i);
+                context.lineTo(canvas.width, i);
+            }
+            context.stroke();
+
+            // Original position for square
+            context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            context.fillRect(square.x + - square.size / 2 + canvas.width / 2, square.y + - square.size / 2 + canvas.height / 2, square.size, square.size);
+
+            // Square with dots
+            for (let i = 0; i < square.size; i++) {
+                for (let j = 0; j < square.size; j++) {
+                    const _x = square.x + (i - square.size / 2) * square.scale;
+                    const _y = square.y + (j - square.size / 2) * square.scale;
+
+                    let { x, y } = coordinates(_x, _y, square.angle, pivot.x, pivot.y);
+
+                    context.fillStyle = 'blue';
+                    context.fillRect(
+                        x + canvas.width / 2,
+                        y + canvas.height / 2,
+                        1 * square.scale,
+                        1 * square.scale
+                    );
+                }
+            }
+
+            // Square with lines
+            context.strokeStyle = 'red';
+            context.lineWidth = 1;
+            context.beginPath();
+            let _x = square.x - square.size / 2;
+            let _y = square.y - square.size / 2;
+
+            let { x, y } = coordinates(_x, _y, square.angle, pivot.x, pivot.y);
+            context.moveTo(x + canvas.width / 2, y + canvas.height / 2);
+            ({ x, y } = coordinates(_x + square.size, _y, square.angle, pivot.x, pivot.y));
+            context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+            ({ x, y } = coordinates(_x + square.size, _y + square.size, square.angle, pivot.x, pivot.y));
+            context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+            ({ x, y } = coordinates(_x, _y + square.size, square.angle, pivot.x, pivot.y));
+            context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+            ({ x, y } = coordinates(_x, _y, square.angle, pivot.x, pivot.y));
+            context.lineTo(x + canvas.width / 2, y + canvas.height / 2);
+            context.stroke();
+
+            // Draw pivot
+            context.fillStyle = 'purple';
+            context.fillRect(pivot.x - 2 + canvas.width / 2, pivot.y - 2 + canvas.height / 2, 4, 4);
+        }
+
+        function update() {
+            square.angle = (square.angle + 1) % 360;
+            // square.scale = Math.sin(square.angle * Math.PI / 180) * 50 + 50; // DOPE
+            // square.scale = (square.scale + 0.01) % 2;
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
