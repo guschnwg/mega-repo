@@ -225,9 +225,10 @@
 
             // TODO: Figure out this one...
             let theta = cube.yaw * Math.PI / 180;
+            let oldX = x; // SCREAMING FUCKKKK
             x = (x - cube.midPoint.x) * Math.cos(theta) - (cube.midPoint.z - z) * Math.sin(theta) + cube.midPoint.x;
             y = y;
-            z = (x - cube.midPoint.x) * Math.sin(theta) + (cube.midPoint.z - z) * Math.cos(theta) + cube.midPoint.z;
+            z = (oldX - cube.midPoint.x) * Math.sin(theta) + (cube.midPoint.z - z) * Math.cos(theta) + cube.midPoint.z;
 
             return {
                 x: ((z * camera.x - x * camera.z) / (z - camera.z)) * cube.padding,

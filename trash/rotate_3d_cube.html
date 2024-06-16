@@ -6,13 +6,19 @@
     <title>Document</title>
 
     <style>
-        canvas {
-            border: 1px solid red;
+        body {
+            background: #0f0f0f;
+            height: 100vh;
+            margin: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
 <body>
-    <canvas height="500" width="500"></canvas>
+    <canvas height="700" width="700"></canvas>
 
     <script>
         const canvas = document.querySelector('canvas');
@@ -20,12 +26,22 @@
         context.translate(canvas.width / 2, canvas.height / 2);
 
         const cube = {
-            x: 0,
+            x: 1,
             y: 0,
             z: 5,
 
             size: 5,
-            angle: 0, // TODO
+            padding: 100,
+
+            pitch: 0,
+            yaw: 0,
+            roll: 0,
+
+            h: 0,
+
+            vx: 0.05,
+            vy: 0.05,
+            vz: 0.05
         };
 
         const screen = {
@@ -46,6 +62,41 @@
             // Kinda cool
             // cube.x = Math.sin(Date.now() / 1000) * 2;
             // cube.y = Math.cos(Date.now() / 1000) * 2;
+
+            cube.pitch += 0.01;
+            cube.yaw += 0.01;
+            cube.roll += 0.01;
+
+            cube.h = cube.h + 1 % 360;
+
+            cube.x += cube.vx;
+            if (cube.x > 4 || cube.x < -4) cube.vx *= -1 * (Math.random() + 0.5);
+            cube.y += cube.vy;
+            if (cube.y > 4 || cube.y < -4) cube.vy *= -1 * (Math.random() + 0.5);
+        }
+
+        function pitch (ix, iy, iz, angle) {
+            return {
+                cx: ix,
+                cy: iy * Math.cos(angle) - iz * Math.sin(angle),
+                cz: iy * Math.sin(angle) + iz * Math.cos(angle)
+            }
+        }
+
+        function yaw (ix, iy, iz, angle) {
+            return {
+                cx: ix * Math.cos(angle) - iz * Math.sin(angle),
+                cy: iy,
+                cz: ix * Math.sin(angle) + iz * Math.cos(angle)
+            }
+        }
+
+        function roll (ix, iy, iz, angle) {
+            return {
+                cx: ix * Math.cos(angle) - iy * Math.sin(angle),
+                cy: ix * Math.sin(angle) + iy * Math.cos(angle),
+                cz: iz
+            }
         }
 
         function draw() {
@@ -55,20 +106,28 @@
             const end = Math.floor(cube.size / 2);
 
             // Start from the back
-            for (let cz = end; cz >= start; cz--) {
+            for (let iz = end; iz >= start; iz--) {
                 // Behind screen
-                if (cube.z + cz < screen.z) continue;
+                if (cube.z + iz < screen.z) continue;
 
-                for (let cy = start ; cy <= end ; cy++) {
-                    for (let cx = start ; cx <= end ; cx++) {
+                for (let iy = start ; iy <= end ; iy++) {
+                    for (let ix = start ; ix <= end ; ix++) {
+                        let cx = ix;
+                        let cy = iy;
+                        let cz = iz;
+
+                        ({ cx, cy, cz } = pitch(cx, cy, cz, cube.pitch));
+                        ({ cx, cy, cz } = roll(cx, cy, cz, cube.roll));
+                        ({ cx, cy, cz } = yaw(cx, cy, cz, cube.yaw));
+
                         const x = (cx - cube.x) * (screen.z - eye.z) / (cube.z + cz - eye.z);
                         const y = (cy - cube.y) * (screen.z - eye.z) / (cube.z + cz - eye.z);
 
                         context.beginPath();
-                        context.fillStyle = `hsl(0, 100%, ${convertScale(cz, -2, 2, 20, 50)}%)`;
+                        context.fillStyle = `hsl(${cube.h}, 100%, ${convertScale(cz, -2, 2, 40, 20)}%)`;
                         context.ellipse(
-                            x * canvas.width / cube.size,
-                            y * canvas.height / cube.size,
+                            x * cube.padding,
+                            y * cube.padding,
                             5, 5, 0, 0, Math.PI * 2
                         );
                         context.fill();
