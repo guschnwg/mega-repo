@@ -1,6 +1,12 @@
 run:
+	STREAM_HOST=? \
+	STREAM_PORT=? \
+	STREAM_STREAM_USER=? \
+	STREAM_STREAM_PASSWORD=? \
+	STREAM_ONVIF_USER=? \
+	STREAM_ONVIF_PASSWORD=? \
 	TUNNEL_TOKEN=? \
-	docker compose up --build
+	docker compose up --build -d
 
 ngrok: TOKEN?=$(shell op item get NGrok --vault Private --format json | op item get - --fields label="authtoken")
 ngrok: DOMAIN?=$(shell op item get NGrok --vault Private --format json | op item get - --fields label="domain")
