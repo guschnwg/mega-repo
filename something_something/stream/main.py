@@ -78,11 +78,15 @@ class OffHandler:
 
 class ResetHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
-        global is_live, cap
+        global is_live, cap, mycam, ptz_service, media_service, media_profile
         is_live = False
 
         await asyncio.sleep(5)
 
+        mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL)
+        ptz_service = mycam.create_ptz_service()
+        media_service = mycam.create_media_service()
+        media_profile = media_service.GetProfiles()[0]
         cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
 
         await asyncio.sleep(5)
