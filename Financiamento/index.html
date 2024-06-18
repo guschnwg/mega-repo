@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hello</title>
+
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        .amortization {
+            padding: 10px;
+            border: 1px solid black;
+        }
+
+        .header-values {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+        }
+    </style>
+
+    <script>
+        const formatMoney = (val) =>
+            val.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                style: 'currency',
+                currency: 'BRL',
+            });
+    </script>
+
+    <script type="module">
+        import { h, render } from 'https://esm.sh/preact';
+        import { useState } from 'https://esm.sh/preact/hooks';
+        
+        function Table({
+            months,
+            value,
+            downPayment,
+            interest,
+            monthlyInterest,
+            amortizations,
+        }) {
+            let debitBalance = value - downPayment;
+
+            const children = [
+                h('tr', null, [
+                    h('td', null, '0'),
+                    h('td', null, '0'),
+                    h('td', null, '0'),
+                    h('td', null, '0'),
+                    h('td', null, formatMoney(debitBalance)),
+                ]),
+            ];
+
+            const monthlyAmortization = debitBalance / months;
+            let accumulatedAmortizations = 0;
+            let accumulatedPayments = 0;
+            let accumulatedInterests = 0;
+            let accumulatedExtraAmortizations = 0;
+
+            let month = 1;
+            while (debitBalance > 0) {
+                const extraAmortizations = amortizations
+                .filter((a) => month % a.every === 0)
+                .filter(a => a.from <= month && a.to >= month)
+                .map((a) => a.value * (a.multiplier ** (month - a.from)));
+
+                const installmentInterest = (debitBalance * monthlyInterest) / 100;
+                const installmentAmortizations = [monthlyAmortization].concat(
+                extraAmortizations
+                );
+
+                const installmentPayment = monthlyAmortization + installmentInterest;
+                const installmentAmortization = installmentAmortizations.reduce(
+                (a, b) => a + b,
+                0
+                );
+
+                const extraPaymentInInstallment = extraAmortizations.reduce(
+                (a, b) => a + b,
+                0
+                );
+
+                children.push(
+                    h('tr', null, [
+                        h('td', null, month),
+                        h('td', null, formatMoney(installmentPayment), extraPaymentInInstallment ? ` (+ ${formatMoney(extraPaymentInInstallment)})` : ''),
+                        h('td', null, installmentAmortizations.map(formatMoney).join(' + ')),
+                        h('td', null, formatMoney(installmentInterest)),
+                        h('td', null, formatMoney(debitBalance - installmentAmortization)),
+                    ]),
+                );
+
+                //
+                accumulatedAmortizations += installmentAmortization;
+                accumulatedPayments += installmentPayment;
+                accumulatedInterests += installmentInterest;
+                accumulatedExtraAmortizations += extraAmortizations.reduce(
+                (a, b) => a + b,
+                0
+                );
+
+                debitBalance -= installmentAmortization;
+
+                month += 1;
+            }
+
+            children.push(
+                h(
+                    'tr', null,
+                    h('td', null, 'Total'),
+                    h('td', null, formatMoney(accumulatedPayments), accumulatedExtraAmortizations ? ` (+ ${formatMoney(accumulatedExtraAmortizations)})` : ''),
+                    h('td', null, formatMoney(accumulatedAmortizations), '(', formatMoney(accumulatedExtraAmortizations), ')'),
+                    h('td', null, formatMoney(accumulatedInterests)),
+                    h('td', null),
+                ),
+                h(
+                    'tr', null,
+                    h('td', null, 'Total pago'),
+                    h('td', null, formatMoney(accumulatedPayments + accumulatedExtraAmortizations)),
+                    h('td', null),
+                    h('td', null),
+                    h('td', null),
+                ),
+            );
+
+            return h(
+                'table',
+                null,
+                h('thead', null, [
+                h('tr', null, [
+                    h('th', null, 'Mês'),
+                    h('th', null, 'Parcela'),
+                    h('th', null, 'Amortização'),
+                    h('th', null, 'Juros'),
+                    h('th', null, 'Saldo Devedor'),
+                ]),
+                ]),
+                h('tbody', null, children)
+            );
+        }
+
+        function App() {
+            const [months, setMonths] = useState(120);
+            const [value, setValue] = useState(450_000);
+            const [downPayment, setDownPayment] = useState(124_000);
+            const [interest, setInterest] = useState(11.47);
+
+            const [amortizations, setAmortizations] = useState([
+                { id: Math.random(), every: 12, value: 2500, from: 0, to: months, multiplier: 1 },
+            ]);
+
+            const monthlyInterest = (Math.pow(1 + interest / 100, 1 / 12) - 1) * 100;
+
+            function updateAmortization(amortization, what, value) {
+                setAmortizations((_prev) => {
+                    const prev = [..._prev];
+                    const theOne = prev.find((p) => p.id === amortization.id);
+                    theOne[what] = value;
+                    return prev;
+                })
+            }
+
+            return h(
+                'div', null,
+                h(
+                    'div', { class: 'header-values' },
+                    h(
+                        'div', null,
+                        [
+                            'Período ',
+                            h(
+                                'div', null,
+                                h('input', { value: months, onChange: (event) => setMonths(event.target.value) })
+                            ),
+                            'Meses'
+                        ]
+                    ),
+                    h(
+                        'div', null,
+                        [
+                            'Valor Total ',
+                            h(
+                                'div', null,
+                                h('input', { value: value, onChange: (event) => setValue(event.target.value) })
+                            ),
+                            h('div', { style: { color: 'green' } }, `${formatMoney(value)}`)
+                        ]
+                    ),
+                    h(
+                        'div', null,
+                        [
+                            'Entrada ',
+                            h(
+                                'div', null,
+                                h('input', { value: downPayment, onChange: (event) => setDownPayment(event.target.value) })
+                            ),
+                            h('div', { style: { color: 'red' } }, `${formatMoney(downPayment)}`)
+                        ]
+                    ),
+                    h(
+                        'div', null,
+                        [
+                            'Juros anual ',
+                            h(
+                                'div', null,
+                                h('input', { value: interest, onChange: (event) => setInterest(event.target.value) })
+                            ),
+                            h('div', null, `Juros mensal: ${monthlyInterest.toString().slice(0, 4)}%`)
+                        ]
+                    ),
+                ),
+                h('div', { class: 'amortization' },
+                    h('div', null, `Valor financiado: ${formatMoney(value - downPayment)}`),
+                    h('div', null, `Valor mensal sem juros: ${formatMoney((value - downPayment) / months)}`),
+                ),
+                h(
+                    'div', null,
+                    'Amortizações ',
+                    h(
+                        'div', null,
+                        amortizations.map(a => h(
+                            'div', { class: 'amortization' },
+                            [
+                                h('input', { value: a.every, onChange: event => updateAmortization(a, 'every', parseInt(event.target.value)) }),
+                                ' Meses ',
+                                h('input', { value: a.value, onChange: event => updateAmortization(a, 'value', parseFloat(event.target.value)) }),
+                                ' Reais ',
+                                ' - ',
+                                'De ',
+                                h('input', { value: a.from, onChange: event => updateAmortization(a, 'from', parseInt(event.target.value)) }),
+                                ' - ',
+                                'Até ',
+                                h('input', { value: a.to, onChange: event => updateAmortization(a, 'to', parseInt(event.target.value)) }),
+                                ' -- ',
+                                'xx ',
+                                h('input', { value: a.multiplier, onChange: event => updateAmortization(a, 'multiplier', parseFloat(event.target.value)) }),
+                                ' -- ',
+                                h('button', { onClick: () => setAmortizations((prev) => prev.filter((p) => p.id !== a.id)) }, 'X')
+                            ]
+                        ))
+                    ),
+                    h('button', { onClick: () => setAmortizations((prev) => [...prev, { id: Math.random(), every: 1, value: 0, from: 0, to: months, multiplier: 1 }]) }, 'Adicionar amortização')
+                ),
+
+                h(Table, { months, value, downPayment, interest, monthlyInterest, amortizations })
+            );
+        }
+
+
+        // Create your app
+        const app = h(App, null, null);
+
+        render(app, document.getElementById('root'));
+    </script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+
+</html>
