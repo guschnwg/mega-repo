@@ -46,6 +46,13 @@ services:
 
   stream:
     container_name: stream
+    environment:
+      - HOST=$HOST
+      - PORT=$PORT
+      - STREAM_USER=$STREAM_USER
+      - STREAM_PASSWORD=$STREAM_PASSWORD
+      - ONVIF_USER=$ONVIF_USER
+      - ONVIF_PASSWORD=$ONVIF_PASSWORD
     build:
       context: ./stream
       dockerfile: ./Dockerfile
