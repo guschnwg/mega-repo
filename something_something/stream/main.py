@@ -16,11 +16,6 @@ ONVIF_PASSWORD = os.getenv("ONVIF_PASSWORD", "")
 WSDL = os.getenv("WSDL", "/usr/local/lib/python3.11/site-packages/wsdl/")
 RTSP_PATH = os.getenv("RTSP_PATH", "/cam/realmonitor?channel=1&subtype=0")
 
-mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL)
-ptz_service = mycam.create_ptz_service()
-media_service = mycam.create_media_service()
-media_profile = media_service.GetProfiles()[0]
-
 server = MjpegServer("0.0.0.0", 8080)
 
 cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
@@ -36,6 +31,10 @@ class TurnHandler:
         timeout = request.rel_url.query.get("timeout", 0)
         wait = request.rel_url.query.get("wait", 0)
 
+        mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL)
+        ptz_service = mycam.create_ptz_service()
+        media_service = mycam.create_media_service()
+        media_profile = media_service.GetProfiles()[0]
         ptz_service.ContinuousMove({
             'ProfileToken': media_profile.token,
             'Velocity': {'PanTilt': {'x': float(x), 'y': float(y)}},
@@ -78,15 +77,11 @@ class OffHandler:
 
 class ResetHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
-        global is_live, cap, mycam, ptz_service, media_service, media_profile
+        global is_live, cap
         is_live = False
 
         await asyncio.sleep(5)
 
-        mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL)
-        ptz_service = mycam.create_ptz_service()
-        media_service = mycam.create_media_service()
-        media_profile = media_service.GetProfiles()[0]
         cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
 
         await asyncio.sleep(5)
