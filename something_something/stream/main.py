@@ -31,7 +31,7 @@ class TurnHandler:
         timeout = request.rel_url.query.get("timeout", 0)
         wait = request.rel_url.query.get("wait", 0)
 
-        mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL)
+        mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
         ptz_service = mycam.create_ptz_service()
         media_service = mycam.create_media_service()
         media_profile = media_service.GetProfiles()[0]
