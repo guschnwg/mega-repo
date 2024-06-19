@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+        }
+
+        #container {
+            background: #222121;
+            display: flex;
+            flex-direction: column;
+
+            zoom: 0.5;
+        }
+        .row {
+            display: inline-flex;
+        }
+        .cell {
+            --color: black;
+
+            width: 5px;
+            height: 5px;
+            border-radius: 5px;
+            margin: 1.5px;
+
+            background-color: var(--color);
+            box-shadow: var(--color) 0px 0px 5px 1.2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        const container = document.getElementById('container');
+
+        const ROWS = 32;
+        const COLS = 200;
+
+        const CIRCLE = [
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        ];
+
+        const CIRCLE_CHARACTERS = {
+            1: [
+                [0, 0, 1, 1, 0, 0],
+                [0, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0]
+            ],
+            2: [
+                [0, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0],
+                [0, 1, 1, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1],
+            ],
+            3: [
+                [0, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 1, 1, 1, ],
+                [0, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+                [0, 1, 1, 1, 1, 0],
+            ],
+        };
+
+        const CHARACTERS = {
+            ' ': [
+                [0],
+            ],
+            1: [
+                [0, 0, 0, 1, 1, 1],
+                [0, 0, 1, 1, 1, 1],
+                [0, 1, 1, 0, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1]
+            ],
+            2: [
+                [0, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0, 0],
+                [1, 1, 1, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1]
+            ],
+            3: [
+                [0, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+                [1, 1, 1, 1, 1, 1],
+                [0, 1, 1, 1, 1, 0]
+            ],
+            4: [
+                [0, 0, 0, 0, 0, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 1, 1, 1],
+                [0, 0, 1, 1, 1, 1],
+                [0, 1, 1, 0, 1, 1],
+                [1, 1, 0, 0, 1, 1],
+                [1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1]
+            ],
+            '.': [
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [0, 0],
+                [1, 1],
+                [1, 1]
+            ],
+            'S': [
+                [0, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 1, 1, 0, 0, 0],
+                [0, 1, 1, 1, 1, 1, 0],
+                [0, 0, 0, 0, 1, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1],
+                [0, 1, 1, 1, 1, 0, 0]
+            ],
+            't': [
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 1],
+                [0, 1, 1, 1]
+            ],
+            'A': [
+                [0, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1],
+                [1, 1, 0, 1, 1],
+                [1, 1, 0, 1, 1],
+                [1, 1, 1, 1, 1],
+                [1, 1, 0, 1, 1],
+                [1, 1, 0, 1, 1],
+            ],
+            'a': [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 1],
+                [0, 0, 1, 1, 1],
+                [0, 1, 0, 0, 1],
+                [0, 1, 1, 1, 1],
+            ]
+        }
+
+        function init() {
+            // The sign
+            for (let r = 0 ; r < ROWS ; r++) {
+                const row = document.createElement('div');
+                row.classList.add('row');
+                container.appendChild(row);
+    
+                for (let c = 0 ; c < COLS ; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    row.appendChild(cell);
+                }
+            }
+        }
+
+        function circle(x, y, color, char) {
+            const rows = container.children;
+            for (let r = 0; r < CIRCLE.length; r++) {
+                for (let c = 0; c < CIRCLE[r].length; c++) {
+                    if (CIRCLE[r][c] === 1) {
+                        let col = rows[y + r].children[x + c];
+                        col.style.setProperty('--color', color);
+                    }
+                }
+            }
+
+            text(x + 4, y + 3, char, 'white', CIRCLE_CHARACTERS);
+        }
+
+        function text(x, y, text, color, from = CHARACTERS) {
+            const rows = container.children;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const charRow = from[char];
+                for (let r = 0; r < charRow.length; r++) {
+                    for (let c = 0; c < charRow[r].length; c++) {
+                        if (charRow[r][c] === 1) {
+                            let col = rows[y + r].children[x + c];
+                            col.style.setProperty('--color', color);
+                        }
+                    }
+                }
+                x += charRow[0].length + 1;
+            }
+        }
+
+        function update() {
+            text(1, 2, '1.', 'white');
+            circle(13, 1, 'red', '1');
+            text(30, 2, '242 St', 'white');
+
+            text(1, 19, '3.', 'white');
+            circle(13, 18, 'blue', '3');
+            text(30, 19, Object.keys(CHARACTERS).join(''), 'white');
+
+            // requestAnimationFrame(update);
+        }
+
+        init();
+        update();
+    </script>
+</body>
+</html>
