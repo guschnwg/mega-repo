@@ -16,6 +16,8 @@ debug-fetch:
 convert:
 	deno run --allow-read --allow-write ./Scripts/convert.js $(INPUT_FILE) $(OUTPUT_FILE)
 
+# mkdir -p out
+# chmod 643 out
 run-server:
 	cd Server && docker build -t app . && docker run -it -p 8080:8080 -v ./out:/app/cache:rw app
 
