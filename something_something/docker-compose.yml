@@ -73,6 +73,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "9996:8080"
+    volumes:
+      - ./out:/app/cache:rw
     stdin_open: true
     tty: true
     restart: always
