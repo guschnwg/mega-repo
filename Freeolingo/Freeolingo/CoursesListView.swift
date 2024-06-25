@@ -15,7 +15,7 @@ struct CoursesListView : View {
     
     var body: some View {
         let baseColor = PALETTE.Primary
-        let increment = CGFloat(1) / CGFloat(availableCourses.count + 5)
+        let increment = CGFloat(1) / CGFloat(availableCourses.count + 20)
 
         ScrollView {
             VStack (spacing: 0) {

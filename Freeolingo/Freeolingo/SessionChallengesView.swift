@@ -9,15 +9,20 @@ import Foundation
 import SwiftUI
 
 struct Style: ProgressViewStyle {
+    let color: Color
+
     func makeBody(configuration: Configuration) -> some View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 10)
                 .frame(width: 250, height: 28)
-                .foregroundColor(.gray.opacity(0.2))
-            
+                .foregroundColor(.white.opacity(0.6))
+
             RoundedRectangle(cornerRadius: 10)
-                .frame(width: CGFloat(configuration.fractionCompleted ?? 0) * 250, height: 28)
-                .foregroundColor(.green)
+                .frame(
+                    width: configuration.fractionCompleted! * 250,
+                    height: 28
+                )
+                .foregroundColor(color)
         }
     }
 }
@@ -28,6 +33,7 @@ struct SessionChallengesView: View {
     let unit: Unit
     let level: Level
     let session: Session
+    let color: Color
     
     let finishSession: () -> Void
     
@@ -36,10 +42,14 @@ struct SessionChallengesView: View {
     
     var body: some View {
         VStack {
-            ProgressView(value: ((CGFloat(currentChallenge + increment + 1)) / CGFloat(session.challenges.count + 1)))
-                .animation(.easeInOut(duration: 0.1), value: increment)
-                .progressViewStyle(Style())
-                .padding()
+            HStack {
+                // +1 to have a minimum value set in the ProgressBar
+                let progress = CGFloat(currentChallenge + increment + 1) / CGFloat(session.challenges.count + 1)
+
+                ProgressView(value: progress)
+                    .animation(.easeInOut(duration: 0.1), value: increment)
+                    .progressViewStyle(Style(color: color))
+            }
             
             ChallengeView(
                 languageSettings: LanguageSettings(
@@ -67,15 +77,23 @@ struct SessionChallengesView: View {
                 }
             )
         }
+        .padding()
+        .background(color.lighter(by: 0.5))
     }
 }
 
 #Preview {
-    return SessionChallengesView(
-        course: COURSES[0],
-        section: COURSES[0].sections[0],
-        unit: COURSES[0].sections[0].units[0],
-        level: COURSES[0].sections[0].units[0].levels[0],
-        session: SESSIONS[0]
-    ) {}
+    @State var something = true
+    return Button("HI") {}
+        .sheet(isPresented: $something) {
+            SessionChallengesView(
+                course: COURSES[0],
+                section: COURSES[0].sections[0],
+                unit: COURSES[0].sections[0].units[0],
+                level: COURSES[0].sections[0].units[0].levels[0],
+                session: SESSIONS[0],
+                color: .red
+            ) {}
+        }
+    
 }

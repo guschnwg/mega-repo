@@ -18,14 +18,18 @@ struct ListenView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 60) {
             TextWithTTSView(
-                label: "Prompt: \(listen.prompt)", speak: listen.prompt, language: languageSettings.learningLanguage
+                speak: listen.prompt,
+                language: languageSettings.learningLanguage
             )
+                .font(.largeTitle)
+                .multilineTextAlignment(.center)
 
             TextField("...", text: $current)
+                .padding(.all, 20)
                 .background(.white)
-                .padding(.horizontal, 50)
-                .textFieldStyle(PurpleBorder())
+                .clipShape(RoundedRectangle(cornerRadius: 25.0))
                 .focused($focused)
+                .font(.largeTitle)
             
             Button("Confirm") {
                 focused = false
@@ -40,27 +44,15 @@ struct ListenView: View {
             }.disabled(current.isEmpty)
         }
         .padding(.vertical, 100)
+        .padding(.horizontal, 50)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
-        .background(.green)
         .onChange(of: listen) {
             current = ""
         }
         .onAppear {
             current = ""
         }
-    }
-}
-
-struct PurpleBorder: TextFieldStyle {
-    func _body(configuration: TextField<Self._Label>) -> some View {
-        configuration
-            .padding()
-            .background(.green)
-            .overlay(
-                RoundedRectangle(cornerRadius: 30)
-                    .stroke(.purple, lineWidth:2)
-            )
     }
 }
 
@@ -75,5 +67,5 @@ struct PurpleBorder: TextFieldStyle {
             learningLanguage: "fr_FR"
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
-    )
+    ).background(.red.lighter(by: 0.5))
 }

@@ -18,15 +18,15 @@ struct NameView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 60) {
             TextWithTTSView(
-                label: "Prompt: \(name.prompt)",
+                label: name.prompt,
                 speak: name.prompt,
                 language: languageSettings.fromLanguage
             )
 
             TextField("...", text: $current)
+                .clipShape(RoundedRectangle(cornerRadius: 25.0))
+                .padding(.vertical, 20)
                 .background(.white)
-                .padding(.horizontal, 50)
-                .textFieldStyle(PurpleBorder())
                 .focused($focused)
             
             Button("Confirm") {

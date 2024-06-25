@@ -17,6 +17,9 @@ struct WebView: UIViewRepresentable {
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
         let request = URLRequest(url: url)
+        uiView.isOpaque = false
+        uiView.backgroundColor = UIColor.clear
+        uiView.scrollView.backgroundColor = UIColor.clear
         uiView.load(request)
     }
 }
@@ -29,14 +32,12 @@ struct SelectView: View {
     @State private var choiceChosen: Int = -1
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             TextWithTTSView(
                 label: select.prompt,
                 speak: select.prompt,
                 language: languageSettings.fromLanguage
             ).font(.system(size: 36))
-
-            Spacer()
 
             VStack {
                 ForEach(select.choices.indices, id: \.self) { index in
@@ -56,8 +57,8 @@ struct SelectView: View {
                     }
                     .padding(.all, 20)
                     .frame(maxWidth: .infinity)
-                    .background(.red)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
+                    .background(.white.opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 25.0))
                     .onTapGesture {
                         self.choiceChosen = index
                     }
@@ -75,9 +76,7 @@ struct SelectView: View {
             .padding(.all, 20)
             .disabled(choiceChosen == -1)
         }
-        .padding(.vertical, 100)
-        .padding(.horizontal, 10)
-        .background(.green)
+        .padding(.all, 10)
         .onChange(of: select) { choiceChosen = -1 }
     }
 }
@@ -107,4 +106,5 @@ struct SelectView: View {
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .background(.red)
 }

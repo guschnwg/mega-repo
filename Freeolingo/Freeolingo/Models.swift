@@ -161,8 +161,7 @@ struct Challenge: Decodable, Identifiable {
     }
     
     init(json: String) throws {
-        let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-        let challenge = try JSONDecoder().decode(Challenge.self, from: jsonData)
+        let challenge = try JSONDecoder().decode(Challenge.self, from: json.data(using: .utf8)!)
         
         id = challenge.id
         type = challenge.type

@@ -13,8 +13,7 @@ struct TextListenView: View {
     let speak: String
     let language: String
     var onTapGesture: (() -> Void)? = nil
-    
-    let synthesizer = AVSpeechSynthesizer()
+
     let speechUtterance: AVSpeechUtterance
     
     init(speak: String, language: String) {
@@ -32,6 +31,7 @@ struct TextListenView: View {
     
     var body: some View {
         Button(action: {
+            let synthesizer = AVSpeechSynthesizer()
             synthesizer.speak(speechUtterance)
             onTapGesture?()
         }, label: {

@@ -29,6 +29,7 @@ struct CompleteReverseTranslationView: View {
                     if token.isBlank {
                         TextField("...", text: $current)
                             .background(.white)
+                            .font(.largeTitle)
                             .frame(width: CGFloat(token.text.count) * 50)
                             .padding(.all, 0)
                             .focused($focused)
@@ -56,7 +57,6 @@ struct CompleteReverseTranslationView: View {
         .padding(.vertical, 100)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
-        .background(.green)
         .onChange(of: completeReverseTranslation) {
             current = ""
         }

@@ -14,6 +14,7 @@ struct SessionView: View {
     let unit: Unit
     let level: Level
     let session: Session
+    let color: Color
     
     let finishSession: () -> Void
     
@@ -23,9 +24,10 @@ struct SessionView: View {
         Button("Start") {
             isPresented = true
         }
-        .padding(.all, 10)
-        .background(.green)
-        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
+        .padding()
+        .background(color)
+        .foregroundColor(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
         .sheet(isPresented: $isPresented) {
             SessionChallengesView(
                 course: course,
@@ -33,11 +35,11 @@ struct SessionView: View {
                 unit: unit,
                 level: level,
                 session: session,
-                finishSession: {
-                    isPresented = false
-                    finishSession()
-                }
-            )
+                color: color
+            ) {
+                isPresented = false
+                finishSession()
+            }
         }
     }
 }
@@ -48,6 +50,7 @@ struct SessionView: View {
         section: COURSES[0].sections[0],
         unit: COURSES[0].sections[0].units[0],
         level: COURSES[0].sections[0].units[0].levels[0],
-        session: SESSIONS[0]
+        session: SESSIONS[0],
+        color: .red
     ) {}
 }

@@ -8,59 +8,29 @@
 import Foundation
 import SwiftUI
 
-struct SingleAttempt: Codable {
-    let started: Date
-    let finished: Date?
-    let passed: Bool
-}
-
-struct SessionAttempt : Codable, Identifiable {
-    let id: Int
-    let courseId: String
-    let sectionId: Int
-    let unitId: Int
-    let levelId: String
-    let sessionId: String
-    let viewed: Bool
-    let passed: Bool
-    let attemps: Array<SingleAttempt>
-}
-
 class Store: ObservableObject {
-    @Published var sessionAttempts: [SessionAttempt] = []
-    @Published var sessionAttemptMap: [String: SessionAttempt] = [:]
     @Published var availableCourses: [AvailableCourse] = []
     @Published var courses: [Course] = []
     @Published var sessionsMap: [String: Session] = [:]
     
-    let baseURL = UserDefaults.standard.value(forKey: "base_url") ?? "http://localhost:8080"
-    let token = UserDefaults.standard.value(forKey: "duolingo_token") ?? "TOKEN"
-    
-    private static func fileURL() throws -> URL {
-        try FileManager.default.url(for: .documentDirectory,
-                                    in: .userDomainMask,
-                                    appropriateFor: nil,
-                                    create: false)
-        .appendingPathComponent("my.data")
-    }
-    
-    func load() {
-        do {
-            let fileURL = try Self.fileURL()
-            let data = try? Data(contentsOf: fileURL)
-            if let data = data {
-                self.sessionAttempts = try JSONDecoder().decode([SessionAttempt].self, from: data)
-                self.sessionAttemptMap = sessionAttempts.reduce(into: self.sessionAttemptMap.self) {
-                    $0[$1.sessionId] = $1
-                }
-            }
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
+    let baseURL = UserDefaults.standard.string(forKey: "base_url") ?? "http://localhost:8080"
+    let token = UserDefaults.standard.string(forKey: "duolingo_token") ?? "TOKEN"
+    let headers = [
+        UserDefaults.standard.string(forKey: "header_one") ?? "Key-One: Value",
+        UserDefaults.standard.string(forKey: "header_two") ?? "Key-Two: Value"
+    ]
     
     func apiFetch<T: Decodable>(url: URL, onComplete: @escaping (T) -> Void) {
-        let task = URLSession.shared.dataTask(with: url) { data, _, _ in
+        var request = URLRequest(url: url)
+        for header in headers {
+            let components = header.components(separatedBy: ":")
+            if components.count == 2 {
+                let key = components[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                let value = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
+        let task = URLSession.shared.dataTask(with: request) {data, response, error in
             do {
                 if let data = data {
                     let decoded = try JSONDecoder().decode(T.self, from: data)
@@ -141,22 +111,13 @@ class Store: ObservableObject {
     func viewSession(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
         getSession(course: course, section: section, unit: unit, level: level, sessionIndex: sessionIndex)
     }
-    
-    func save() {
-        do {
-            let data = try JSONEncoder().encode(self.sessionAttempts)
-            let outfile = try Self.fileURL()
-            try data.write(to: outfile)
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
 }
 
 func previewStore() -> Store {
     let previewStore = Store()
     previewStore.courses = COURSES
     previewStore.availableCourses = AVAILABLE_COURSES
+    previewStore.sessionsMap["getSession/TOKEN/pt/en/0/0/0/0"] = SESSIONS[0]
     return previewStore
 }
 

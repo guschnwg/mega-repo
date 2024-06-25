@@ -45,10 +45,9 @@ struct TextWithTTSView: View {
         self.onTapGesture = onTapGesture
         self.icon = icon
     }
-    
-    let synthesizer = AVSpeechSynthesizer()
-    
+
     func onTap() {
+        let synthesizer = AVSpeechSynthesizer()
         let speechUtterance = AVSpeechUtterance(string: speak)
         speechUtterance.voice = AVSpeechSynthesisVoice(language: language)
         synthesizer.speak(speechUtterance)

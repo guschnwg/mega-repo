@@ -24,9 +24,7 @@
 		6B76CD8F2BD322DE00DCA0C0 /* SelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */; };
 		6B76CD912BD3243D00DCA0C0 /* SpeakView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */; };
 		6B76CD932BD324C100DCA0C0 /* TranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD922BD324C100DCA0C0 /* TranslateView.swift */; };
-		6B76CD982BD8521600DCA0C0 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6B76CD972BD8521600DCA0C0 /* WrappingHStack */; };
 		6B76CD9A2BD85DF700DCA0C0 /* TextListenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B76CD992BD85DF700DCA0C0 /* TextListenView.swift */; };
-		6B76CD9D2BE4898A00DCA0C0 /* StringMetric in Frameworks */ = {isa = PBXBuildFile; productRef = 6B76CD9C2BE4898A00DCA0C0 /* StringMetric */; };
 		6BA222C32BB8D86A00E11D96 /* FreeolingoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA222C22BB8D86A00E11D96 /* FreeolingoApp.swift */; };
 		6BA222C52BB8D86A00E11D96 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA222C42BB8D86A00E11D96 /* ContentView.swift */; };
 		6BA222C72BB8D86B00E11D96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BA222C62BB8D86B00E11D96 /* Assets.xcassets */; };
@@ -42,6 +40,8 @@
 		6BA596F92C00BADA007AEEF9 /* CoursesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F82C00BADA007AEEF9 /* CoursesListView.swift */; };
 		6BA596FB2C00BB02007AEEF9 /* AllChallengesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */; };
 		6BA596FD2C00EC92007AEEF9 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 6BA596FC2C00EC92007AEEF9 /* Settings.bundle */; };
+		6BF2BEDE2C2B1E17000ABE81 /* StringMetric in Frameworks */ = {isa = PBXBuildFile; productRef = 6BF2BEDD2C2B1E17000ABE81 /* StringMetric */; };
+		6BF2BEE02C2B1E1D000ABE81 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6BF2BEDF2C2B1E1D000ABE81 /* WrappingHStack */; };
 		EC5C64082BBAE46F00EB1E56 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C64072BBAE46F00EB1E56 /* Models.swift */; };
 		EC5C640A2BBAE49300EB1E56 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C64092BBAE49300EB1E56 /* Utils.swift */; };
 		EC5C640C2BBAE67600EB1E56 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C640B2BBAE67600EB1E56 /* Store.swift */; };
@@ -92,8 +92,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6B76CD982BD8521600DCA0C0 /* WrappingHStack in Frameworks */,
-				6B76CD9D2BE4898A00DCA0C0 /* StringMetric in Frameworks */,
+				6BF2BEE02C2B1E1D000ABE81 /* WrappingHStack in Frameworks */,
+				6BF2BEDE2C2B1E17000ABE81 /* StringMetric in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -192,8 +192,8 @@
 			);
 			name = Freeolingo;
 			packageProductDependencies = (
-				6B76CD972BD8521600DCA0C0 /* WrappingHStack */,
-				6B76CD9C2BE4898A00DCA0C0 /* StringMetric */,
+				6BF2BEDD2C2B1E17000ABE81 /* StringMetric */,
+				6BF2BEDF2C2B1E1D000ABE81 /* WrappingHStack */,
 			);
 			productName = Freeolingo;
 			productReference = 6BA222BF2BB8D86A00E11D96 /* Freeolingo.app */;
@@ -226,6 +226,7 @@
 			packageReferences = (
 				6B76CD962BD8521600DCA0C0 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				6B76CD9B2BE4898A00DCA0C0 /* XCRemoteSwiftPackageReference "StringMetric.swift" */,
+				6BF2BED82C2A75D6000ABE81 /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = 6BA222C02BB8D86A00E11D96 /* Products */;
 			projectDirPath = "";
@@ -512,18 +513,26 @@
 				minimumVersion = 0.3.2;
 			};
 		};
+		6BF2BED82C2A75D6000ABE81 /* XCRemoteSwiftPackageReference "SVGKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6B76CD972BD8521600DCA0C0 /* WrappingHStack */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6B76CD962BD8521600DCA0C0 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
-			productName = WrappingHStack;
-		};
-		6B76CD9C2BE4898A00DCA0C0 /* StringMetric */ = {
+		6BF2BEDD2C2B1E17000ABE81 /* StringMetric */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6B76CD9B2BE4898A00DCA0C0 /* XCRemoteSwiftPackageReference "StringMetric.swift" */;
 			productName = StringMetric;
+		};
+		6BF2BEDF2C2B1E1D000ABE81 /* WrappingHStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6B76CD962BD8521600DCA0C0 /* XCRemoteSwiftPackageReference "WrappingHStack" */;
+			productName = WrappingHStack;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

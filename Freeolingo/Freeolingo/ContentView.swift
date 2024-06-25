@@ -17,6 +17,10 @@ struct ContentView: View {
     var body: some View {
         if store.availableCourses.isEmpty {
             Text("No courses")
+            
+            Button("Refresh") {
+                store.getAvailableCourses(fromLanguages: ["pt"])
+            }
         } else {
             NavigationStack {
                 VStack {

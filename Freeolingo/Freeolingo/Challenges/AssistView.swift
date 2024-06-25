@@ -37,7 +37,7 @@ struct AssistView: View {
                     )
                     .padding(.all, 20)
                     .frame(maxWidth: .infinity)
-                    .background(.red)
+                    .background(.white.opacity(0.3))
                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
                     .onTapGesture {
                         self.choiceChosen = index
@@ -59,7 +59,6 @@ struct AssistView: View {
             .disabled(choiceChosen == -1)
         }
         .padding(.all, 100)
-        .background(.green)
         .onChange(of: assist) { choiceChosen = -1 }
     }
 }

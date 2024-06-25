@@ -82,7 +82,6 @@ struct ListenIsolationView: View {
         }
         .padding(.vertical, 100)
         .frame(maxWidth: .infinity, maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
-        .background(.green)
         .onChange(of: listenIsolation) {
             choiceChosen = -1
             shuffled = listenIsolation.options.shuffled()
