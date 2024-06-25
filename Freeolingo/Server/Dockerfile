@@ -5,8 +5,6 @@ EXPOSE 8080
 WORKDIR /app
 
 RUN chown -R deno /app
-RUN mkdir /app/cache
-RUN chown -R deno /app/cache
 
 USER deno
 
