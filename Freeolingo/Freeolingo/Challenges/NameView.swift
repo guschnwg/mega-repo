@@ -17,17 +17,21 @@ struct NameView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 60) {
-            TextWithTTSView(
-                label: name.prompt,
+            ButtonWithTTSView(
                 speak: name.prompt,
                 language: languageSettings.fromLanguage
-            )
+            ) {
+                Label("", systemImage: "speaker.wave.2")
+                    .font(.system(size: 48))
+            }
+            .frame(width: CGFloat(80))
 
             TextField("...", text: $current)
-                .clipShape(RoundedRectangle(cornerRadius: 25.0))
-                .padding(.vertical, 20)
+                .padding(.all, 20)
                 .background(.white)
                 .focused($focused)
+                .clipShape(RoundedRectangle(cornerRadius: 25.0))
+                .font(.system(size: 24))
             
             Button("Confirm") {
                 focused = false
@@ -52,9 +56,9 @@ struct NameView: View {
             }.disabled(current.isEmpty)
         }
         .padding(.vertical, 100)
+        .padding(.horizontal, 10)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
-        .background(.green)
         .onChange(of: name) {
             current = ""
         }
@@ -75,4 +79,6 @@ struct NameView: View {
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }

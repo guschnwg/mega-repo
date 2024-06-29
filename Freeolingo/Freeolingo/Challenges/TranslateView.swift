@@ -31,44 +31,44 @@ struct TranslateView: View {
                 ForEach(choiceChosen.indices, id: \.self) { index in
                     let choiceIndex = choiceChosen[index]
                     let choice = translate.choices[choiceIndex]
-                    
-                    TextWithTTSView(
-                        label: choice.text,
+
+                    ButtonWithTTSView(
                         speak: choice.text,
                         language: languageSettings.fromLanguage,
-                        onTapGesture: { choiceChosen.remove(at: index) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen.remove(at: index) }
+                        isActive: true,
+                        onTapGesture: { choiceChosen.removeAll(where: { $0 == choiceIndex }) }
+                    ) {
+                        Text(choice.text)
+                    }
+                    .frame(width: CGFloat(choice.text.count * 12 + 55))
                 }
             }.padding(.all, 10)
             
             Spacer()
             
             WrappingHStack(alignment: .center) {
-                let availableChoices = shuffled.filter({ choice in
-                    let index = translate.choices.firstIndex(of: choice) ?? -1
-                    return index == -1 || !choiceChosen.contains(index)
-                })
-                ForEach(availableChoices, id: \.self) { choice in
+                ForEach(shuffled, id: \.self) { choice in
                     let index = translate.choices.firstIndex(of: choice)
+                    let alreadyMatched = choiceChosen.contains(where: { $0 == index })
                     
-                    TextWithTTSView(
-                        label: choice.text,
+                    ButtonWithTTSView(
                         speak: choice.text,
                         language: languageSettings.fromLanguage,
-                        onTapGesture: { choiceChosen.append(index!) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen.append(index!) }
+                        isActive: false,
+                        background: alreadyMatched ? .white.opacity(0.5) : .white,
+                        onTapGesture: {
+                            if alreadyMatched { return }
+                            choiceChosen.append(index!)
+                        }
+                    ) {
+                        Text(choice.text)
+                            .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                    }
+                    .frame(width: CGFloat(choice.text.count * 12 + 55))
                 }
             }.padding(.all, 10)
+            
+            Spacer()
             
             Button("Confirm") {
                 onComplete(
@@ -81,7 +81,6 @@ struct TranslateView: View {
             .disabled(choiceChosen.isEmpty)
         }
         .padding(.vertical, 100)
-        .background(.green)
         .onChange(of: translate) {
             choiceChosen = []
             shuffled = translate.choices.shuffled()
@@ -114,4 +113,6 @@ struct TranslateView: View {
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .environmentObject(Speaker())
+    .background(.blue.lighter(by: 0.3))
 }

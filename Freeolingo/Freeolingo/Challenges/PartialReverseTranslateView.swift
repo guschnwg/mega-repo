@@ -39,7 +39,7 @@ struct PartialReverseTranslateView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 60) {
             TextWithTTSView(
                 speak: partialReverseTranslate.prompt,
                 language: languageSettings.fromLanguage
@@ -49,14 +49,17 @@ struct PartialReverseTranslateView: View {
                 ForEach(tokens, id: \.text) { token in
                     if token.isBlank {
                         TextField("...", text: $current)
+                            .padding(.all, 10)
                             .background(.white)
                             .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
                             .frame(width: CGFloat(token.text.count) * 15)
-                            .padding(.all, 0)
                             .focused($focused)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .font(.system(size: 22))
                     } else {
                         Text(token.text)
                             .padding(.all, 0)
+                            .font(.system(size: 22))
                     }
                 }
             }
@@ -78,7 +81,6 @@ struct PartialReverseTranslateView: View {
         .padding(.horizontal, 30)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
-        .background(.green)
         .onChange(of: partialReverseTranslate) {
             current = ""
             tokens = initTokens(displayTokens: partialReverseTranslate.displayTokens)
@@ -112,4 +114,6 @@ struct PartialReverseTranslateView: View {
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter())
 }

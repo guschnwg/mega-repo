@@ -23,6 +23,10 @@ struct ListenIsolationView: View {
             let range = rangeStart...rangeEnd-1
 
             WrappingHStack(alignment: .center, horizontalSpacing: 0) {
+                let fullSentence = listenIsolation.tokens
+                    .map {token in token.value }
+                    .joined()
+
                 ForEach(listenIsolation.tokens.indices, id:\.self) {index in
                     let token = listenIsolation.tokens[index]
                     if range.contains(index) {
@@ -30,20 +34,18 @@ struct ListenIsolationView: View {
                             Text(token.value.map({ _ in "_" }).joined())
                         } else {
                             let option = listenIsolation.options[choiceChosen]
-                            TextWithTTSView(
-                                label: option.text,
-                                speak: option.text,
-                                language: languageSettings.fromLanguage,
-                                onTapGesture: { choiceChosen = -1 }
-                            )
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 15)
-                            .background(.white)
-                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                            .onTapGesture { choiceChosen = -1 }
+                            Text(option.text)
+                                .padding(.all, 10)
+                                .background(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .onTapGesture { choiceChosen = -1 }
                         }
                     } else {
-                        Text(token.value)
+                        TextWithTTSView(
+                            label: token.value,
+                            speak: fullSentence,
+                            language: languageSettings.learningLanguage
+                        )
                     }
                 }
             }
@@ -53,20 +55,18 @@ struct ListenIsolationView: View {
                     let index = listenIsolation.options.firstIndex(of: option) ?? -1
                     return index == -1 || choiceChosen != index
                 })
-                ForEach(availableOptions, id: \.self) { option in
+
+                ForEach(shuffled, id: \.self) { option in
                     let index = listenIsolation.options.firstIndex(of: option)
                     
-                    TextWithTTSView(
-                        label: option.text,
+                    ButtonWithTTSView(
                         speak: option.text,
-                        language: languageSettings.fromLanguage,
+                        language: languageSettings.learningLanguage,
+                        isActive: !availableOptions.contains(option),
                         onTapGesture: { choiceChosen = index! }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen = index! }
+                    ) {
+                        Text(option.text)
+                    }
                 }
             }.padding(.all, 10)
             
@@ -120,4 +120,6 @@ struct ListenIsolationView: View {
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }

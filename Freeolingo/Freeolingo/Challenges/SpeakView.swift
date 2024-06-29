@@ -86,7 +86,6 @@ struct SpeakView: View {
         .padding(.horizontal, 10)
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
         .frame(maxHeight: .infinity)
-        .background(.green)
         .onChange(of: speak) {
             current = nil
             isRecording = false
@@ -105,4 +104,6 @@ struct SpeakView: View {
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter())
 }

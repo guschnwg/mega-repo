@@ -618,211 +618,31 @@ let LISTEN_ISOLATION_CHALLENGE: Challenge = getChallenge(type: "listenIsolation"
 """)
 let LISTEN_MATCH_CHALLENGE: Challenge = getChallenge(type: "listenMatch", json: """
 {
-      "blankRangeEnd": 1,
-      "blankRangeStart": 0,
-      "character": {
-        "url": "https://d2pur3iezf4d1j.cloudfront.net/images/61e19bb4a1ff1d94e58d58b33db58c36",
-        "image": {
-          "pdf": "https://d2pur3iezf4d1j.cloudfront.net/images/61e19bb4a1ff1d94e58d58b33db58c36",
-          "svg": "https://d2pur3iezf4d1j.cloudfront.net/images/52a5a774c4de18f4a4e8c91d91788347"
-        },
-        "gender": "MALE",
-        "correctAnimation": "https://simg-ssl.duolingo.com/lottie/Vikram_CORRECT_Cropped_SpiritFingers.json",
-        "incorrectAnimation": "https://simg-ssl.duolingo.com/lottie/Dan_INCORRECT_Cropped.json",
-        "idleAnimation": "https://simg-ssl.duolingo.com/lottie/Vikram_IDLE_Cropped.json",
-        "name": "VIKRAM",
-        "avatarIconImage": {
-          "pdf": "https://simg-ssl.duolingo.com/world-characters/avatars/vikram_avatar_icon.pdf",
-          "svg": "https://simg-ssl.duolingo.com/world-characters/avatars/vikram_avatar_icon.svg"
-        }
-      },
-      "correctIndex": 1,
-      "options": [
+      "pairs": [
         {
-          "text": "loi",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/8859c31784f6f769fa8208bedfc7cb3b"
+          "tts": "https://d1vq87e9lcf771.cloudfront.net/danielle/9a562a0683f940d6391f99068c51f6e1",
+          "translation": "vestido",
+          "learningWord": "robe"
         },
         {
-          "text": "la",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/d9d719c0aa44cdf871c6a70347b88125"
+          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/2115e65ef8f10fd7e9516ae20b2a1fb2",
+          "translation": "boa",
+          "learningWord": "bonne"
+        },
+        {
+          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/f839cd430f816972aa7169be48974f87",
+          "translation": "bem",
+          "learningWord": "bien"
+        },
+        {
+          "tts": "https://d1vq87e9lcf771.cloudfront.net/danielle/8894ad6883b21d16d220b9f5da198b21",
+          "translation": "é",
+          "learningWord": "es"
         }
       ],
-      "solutionTranslation": "A menina tem um vestido.",
-      "tokens": [
-        {
-          "value": "La",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/d9d719c0aa44cdf871c6a70347b88125",
-          "hintTable": {
-            "headers": [],
-            "rows": [
-              [
-                {
-                  "colspan": 1,
-                  "hint": "a"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "o"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "da"
-                }
-              ]
-            ]
-          }
-        },
-        {
-          "value": " "
-        },
-        {
-          "value": "fille",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/cdc210170cdd7c15c891cac388999a38",
-          "hintTable": {
-            "headers": [],
-            "rows": [
-              [
-                {
-                  "colspan": 1,
-                  "hint": "menina"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "garota"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "moça"
-                }
-              ]
-            ]
-          }
-        },
-        {
-          "value": " "
-        },
-        {
-          "value": "a",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/de19bd7f04ed2f5608a475cb9301cfe5",
-          "hintTable": {
-            "headers": [],
-            "rows": [
-              [
-                {
-                  "colspan": 1,
-                  "hint": "tem"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "possui"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "está com"
-                }
-              ]
-            ]
-          }
-        },
-        {
-          "value": " "
-        },
-        {
-          "value": "une",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/bfd9c1edb5c2ea5dc7bad30ad5e4ab5a",
-          "hintTable": {
-            "headers": [
-              "une",
-              "robe"
-            ],
-            "rows": [
-              [
-                {
-                  "colspan": 2,
-                  "hint": "um vestido"
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "um"
-                },
-                {
-                  "colspan": 1
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "manchete"
-                },
-                {
-                  "colspan": 1
-                }
-              ],
-              [
-                {
-                  "colspan": 1,
-                  "hint": "alguma"
-                },
-                {
-                  "colspan": 1
-                }
-              ]
-            ]
-          }
-        },
-        {
-          "value": " "
-        },
-        {
-          "value": "robe",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/46cc8855e50e6020010894d90923457c",
-          "hintTable": {
-            "headers": [
-              "une",
-              "robe"
-            ],
-            "rows": [
-              [
-                {
-                  "colspan": 2,
-                  "hint": "um vestido"
-                }
-              ],
-              [
-                {
-                  "colspan": 1
-                },
-                {
-                  "colspan": 1,
-                  "hint": "vestido"
-                }
-              ]
-            ]
-          }
-        },
-        {
-          "value": "."
-        }
-      ],
-      "tts": "https://d1vq87e9lcf771.cloudfront.net/vikramfr/e58b00b262af383e19f2753bc4401f17",
-      "type": "listenIsolation",
-      "id": "13c49c5f37864b56aa3ef9f17651e6dd",
-      "progressUpdates": [],
-      "sentenceId": "2fbb403752fbb6f13a0eb01bfabff200",
+      "type": "listenMatch",
+      "id": "46e78b7b7eeb4b45ba7323d682ffca1e",
+      "progressUpdates": []
     }
 """)
 let LISTEN_SPEAK_CHALLENGE: Challenge = getChallenge(type: "listenSpeak", json: """
@@ -1741,12 +1561,12 @@ let TRANSLATE_CHALLENGE: Challenge = getChallenge(type: "translate", json: """
 let CHALLENGES: [Challenge] = [
     ASSIST_CHALLENGE,
     COMPLETE_REVERSE_TRANSLATION_CHALLENGE,
-    LISTEN_CHALLENGE,
     LISTEN_COMPLETE_CHALLENGE,
     LISTEN_ISOLATION_CHALLENGE,
     LISTEN_MATCH_CHALLENGE,
     LISTEN_SPEAK_CHALLENGE,
     LISTEN_TAP_CHALLENGE,
+    LISTEN_CHALLENGE,
     MATCH_CHALLENGE,
     NAME_CHALLENGE,
     PARTIAL_REVERSE_TRANSLATE_CHALLENGE,

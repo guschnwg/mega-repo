@@ -16,12 +16,29 @@ struct ListenMatchView: View {
     @State private var current: (Int, Int) = (-1, -1)
     @State private var shuffledLeft: [Int] = []
     @State private var shuffledRight: [Int] = []
+    @State private var lastListened: (Int, Int) = (-1, -1)
     
     func setChoice(index: Int, value: Int) {
         if index == 0 {
-            current.0 = shuffledLeft[value]
+            if current.0 != -1 && current.1 != -1 {
+                // They got it wrong earlier, reset
+                current.0 = -1
+            }
+            if lastListened.0 == shuffledLeft[value] || lastListened.1 == -1 {
+                // We confirmed that we want this one or we are starting a combination
+                current.0 = shuffledLeft[value]
+            }
+            lastListened.0 = shuffledLeft[value]
         } else if index == 1 {
-            current.1 = shuffledRight[value]
+            if current.0 != -1 && current.1 != -1 {
+                // They got it wrong earlier, reset
+                current.1 = -1
+            }
+            if lastListened.1 == shuffledRight[value] || lastListened.0 == -1 {
+                // We confirmed that we want this one or we are starting a combination
+                current.1 = shuffledRight[value]
+            }
+            lastListened.1 = shuffledRight[value]
         }
         
         if current.0 != -1 && current.1 != -1 {
@@ -29,6 +46,7 @@ struct ListenMatchView: View {
                 // Right
                 matches.append(current)
                 current = (-1, -1)
+                lastListened = (-1, -1)
                 
                 if matches.count == shuffledLeft.count {
                     onComplete(true, Text("Correct"))
@@ -49,61 +67,76 @@ struct ListenMatchView: View {
     var body: some View {
         VStack {
             ForEach(shuffledLeft.indices, id: \.self) { index in
-                let leftIndex = shuffledLeft[index]
-                let left = listenMatch.pairs[leftIndex]
-                let rightIndex = shuffledRight[index]
-                let right = listenMatch.pairs[rightIndex]
-                
                 HStack (alignment: .center, spacing: 50) {
-                    TextWithTTSView(
-                        icon: "speaker.wave.2",
+                    let leftIndex = shuffledLeft[index]
+                    let left = listenMatch.pairs[leftIndex]
+                    let leftAlreadyMatched = matches.map({ $0.0 }).contains(leftIndex)
+
+                    ButtonWithTTSView(
                         speak: left.learningWord,
                         language: languageSettings.learningLanguage,
-                        onTapGesture: { setChoice(index: 0, value: index) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .apply {
-                        if current.0 == leftIndex { $0.background(.red) }
-                        else if matches.map({ $0.0 }).contains(leftIndex) { $0.background(.gray) }
-                        else { $0.background(.white) }
+                        isActive: lastListened.0 == leftIndex,
+                        background: {
+                            if leftAlreadyMatched {
+                                return .gray
+                            } else if current.0 == leftIndex {
+                                return .red
+                            } else  {
+                                return .white
+                            }
+                        }(),
+                        onTapGesture: {
+                            if leftAlreadyMatched { return }
+                            setChoice(index: 0, value: index)
+                        }
+                    ) {
+                        Label("", systemImage: "speaker.wave.2")
                     }
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { setChoice(index: 0, value: index) }
                     
-                    TextWithTTSView(
-                        icon: "speaker.wave.2",
+                    let rightIndex = shuffledRight[index]
+                    let right = listenMatch.pairs[rightIndex]
+                    let rightAlreadyMatched = matches.map({ $0.1 }).contains(rightIndex)
+
+                    ButtonWithTTSView(
                         speak: right.translation,
-                        language: languageSettings.fromLanguage,
-                        onTapGesture:  { setChoice(index: 1, value: index) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .apply {
-                        if current.1 == rightIndex { $0.background(.red) }
-                        else if matches.map({ $0.1 }).contains(rightIndex) { $0.background(.gray) }
-                        else { $0.background(.white) }
+                        language: languageSettings.learningLanguage,
+                        isActive: lastListened.1 == rightIndex,
+                        background: {
+                            if rightAlreadyMatched {
+                                return .gray
+                            } else if current.1 == rightIndex {
+                                return .red
+                            } else {
+                                return .white
+                            }
+                        }(),
+                        onTapGesture: {
+                            if rightAlreadyMatched { return }
+                            setChoice(index: 1, value: index)
+                        }
+                    ) {
+                        Label("", systemImage: "speaker.wave.2")
                     }
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { setChoice(index: 1, value: index) }
                 }
+                .padding(.all, 10)
             }
         }
         .padding(.vertical, 100)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
-        .background(.green)
         .onChange(of: listenMatch) {
             matches = []
             current = (-1, -1)
             shuffledLeft = listenMatch.pairs.indices.shuffled()
             shuffledRight = listenMatch.pairs.indices.shuffled()
+            lastListened = (-1, -1)
         }
         .onAppear {
             matches = []
             current = (-1, -1)
             shuffledLeft = listenMatch.pairs.indices.shuffled()
             shuffledRight = listenMatch.pairs.indices.shuffled()
+            lastListened = (-1, -1)
         }
     }
 }
@@ -119,8 +152,10 @@ struct ListenMatchView: View {
             ]
         ),
         languageSettings: LanguageSettings(
-            fromLanguage: "pt_BR", learningLanguage: "fr_FR"
+            fromLanguage: "pt_BR", learningLanguage: "en_US"
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }

@@ -31,8 +31,9 @@ struct CompleteReverseTranslationView: View {
                             .background(.white)
                             .font(.largeTitle)
                             .frame(width: CGFloat(token.text.count) * 50)
-                            .padding(.all, 0)
                             .focused($focused)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .padding(.all, 5)
                     } else {
                         Text(token.text)
                         .padding(.all, 0)
@@ -79,8 +80,10 @@ struct CompleteReverseTranslationView: View {
             ]
         ),
         languageSettings: LanguageSettings(
-            fromLanguage: "pt_BR", learningLanguage: "fr_FR"
+            fromLanguage: "en_US", learningLanguage: "pt_BR"
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }

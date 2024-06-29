@@ -17,6 +17,7 @@ struct ListenView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 60) {
+            
             TextWithTTSView(
                 speak: listen.prompt,
                 language: languageSettings.learningLanguage
@@ -67,5 +68,7 @@ struct ListenView: View {
             learningLanguage: "fr_FR"
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
-    ).background(.red.lighter(by: 0.5))
+    )
+    .background(.red.lighter(by: 0.5))
+    .environmentObject(Speaker())
 }

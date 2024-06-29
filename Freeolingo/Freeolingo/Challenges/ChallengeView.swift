@@ -53,7 +53,11 @@ struct ChallengeView: View {
             case .assist(let assist):
                 AssistView(assist: assist, languageSettings: languageSettings, onComplete: _onComplete)
             case .completeReverseTranslation(let completeReverseTranslation):
-                CompleteReverseTranslationView(completeReverseTranslation: completeReverseTranslation, languageSettings: languageSettings, onComplete: _onComplete)
+                CompleteReverseTranslationView(
+                    completeReverseTranslation: completeReverseTranslation,
+                    languageSettings: languageSettings,
+                    onComplete: _onComplete
+                )
             case .listen(let listen):
                 ListenView(listen: listen, languageSettings: languageSettings, onComplete: _onComplete)
             case .listenComplete(let listenComplete):

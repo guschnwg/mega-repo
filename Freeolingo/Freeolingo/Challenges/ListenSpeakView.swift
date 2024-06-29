@@ -31,17 +31,15 @@ struct ListenSpeakView: View {
                 ForEach(choiceChosen, id: \.self) { index in
                     let choice = listenSpeak.choices[index]
                     
-                    TextWithTTSView(
-                        label: choice,
+                    ButtonWithTTSView(
                         speak: choice,
                         language: languageSettings.fromLanguage,
-                        onTapGesture: { choiceChosen.remove(at: index) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen.remove(at: index) }
+                        isActive: true,
+                        onTapGesture: { choiceChosen.removeAll(where: { $0 == index }) }
+                    ) {
+                        Text(choice)
+                    }
+                    .frame(width: CGFloat(choice.count * 12 + 15 + 40))
                 }
             }.padding(.all, 10)
             
@@ -52,20 +50,30 @@ struct ListenSpeakView: View {
                     let index = listenSpeak.choices.firstIndex(of: choice) ?? -1
                     return index == -1 || !choiceChosen.contains(index)
                 })
-                ForEach(availableChoices, id: \.self) { choice in
+                ForEach(shuffled, id: \.self) { choice in
                     let index = listenSpeak.choices.firstIndex(of: choice)
+                    let alreadyMatched = choiceChosen.contains(where: { $0 == index })
 
-                    TextWithTTSView(
-                        label: choice,
+                    ButtonWithTTSView(
                         speak: choice,
                         language: languageSettings.fromLanguage,
-                        onTapGesture: { choiceChosen.append(index!) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen.append(index!) }
+                        isActive: false,
+                        background: {
+                            if alreadyMatched {
+                                return .white.opacity(0.5)
+                            } else {
+                                return .white
+                            }
+                        }(),
+                        onTapGesture: {
+                            if alreadyMatched { return }
+                            choiceChosen.append(index!)
+                        }
+                    ) {
+                        Text(choice)
+                            .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                    }
+                    .frame(width: CGFloat(choice.count * 12 + 15 + 40))
                 }
             }.padding(.all, 10)
             
@@ -80,7 +88,6 @@ struct ListenSpeakView: View {
             .disabled(choiceChosen.isEmpty)
         }
         .padding(.vertical, 100)
-        .background(.green)
         .onChange(of: listenSpeak) {
             choiceChosen = []
             shuffled = listenSpeak.choices.shuffled()
@@ -97,7 +104,7 @@ struct ListenSpeakView: View {
         listenSpeak: Challenge.ListenSpeak(
             prompt: "Hi, bye",
             solutionTranslation: "Oi, tchau",
-            choices: ["Oi", "Tchau", "Não", "Sim"],
+            choices: ["Oi", "Tchau", "Não", "Sim", "Tchauziho", "Entshuldingug"],
             correctIndices: [0, 1]
         ),
         languageSettings: LanguageSettings(
@@ -105,4 +112,6 @@ struct ListenSpeakView: View {
         ),
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }

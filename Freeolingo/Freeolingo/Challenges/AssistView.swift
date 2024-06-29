@@ -13,6 +13,7 @@ struct AssistView: View {
     let onComplete: (Bool, Text) -> Void
     
     @State private var choiceChosen: Int = -1
+    @EnvironmentObject private var speaker: Speaker
     
     var body: some View {
         VStack {
@@ -24,26 +25,20 @@ struct AssistView: View {
             
             Spacer()
             
-            ForEach(assist.choices.indices, id: \.self) { index in
-                let choice = assist.choices[index]
-                let choiceStr = index == choiceChosen ? "\(choice) ✅" : choice
-                
-                VStack {
-                    TextWithTTSView(
-                        label: choiceStr,
+            VStack(spacing: 20) {
+                ForEach(assist.choices.indices, id: \.self) { index in
+                    let choice = assist.choices[index]
+                    let isActive = index == choiceChosen
+                    
+                    ButtonWithTTSView(
                         speak: choice,
                         language: languageSettings.learningLanguage,
+                        isActive: isActive,
                         onTapGesture: { self.choiceChosen = index }
-                    )
-                    .padding(.all, 20)
-                    .frame(maxWidth: .infinity)
-                    .background(.white.opacity(0.3))
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture {
-                        self.choiceChosen = index
+                    ) {
+                        Text(choice)
                     }
                 }
-                    
             }
 
             Spacer()
@@ -71,8 +66,10 @@ struct AssistView: View {
             correctIndex: 0
         ),
         languageSettings: LanguageSettings(
-            fromLanguage: "pt_BR", learningLanguage: "fr_FR"
+            fromLanguage: "pt", learningLanguage: "en"
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+        .background(.red.lighter(by: 0.3))
+        .environmentObject(Speaker())
 }

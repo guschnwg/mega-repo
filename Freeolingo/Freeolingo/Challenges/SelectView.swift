@@ -32,38 +32,37 @@ struct SelectView: View {
     @State private var choiceChosen: Int = -1
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 30) {
             TextWithTTSView(
                 label: select.prompt,
                 speak: select.prompt,
                 language: languageSettings.fromLanguage
             ).font(.system(size: 36))
+            
+            Spacer()
 
             VStack {
                 ForEach(select.choices.indices, id: \.self) { index in
                     let choice = select.choices[index]
-                    let choiceStr = index == choiceChosen ? "\(choice.phrase) ✅" : choice.phrase
                     
-                    VStack {
-                        WebView(url: URL(string: choice.image)!)
-                            .frame(width: 55, height: 55, alignment: .center)
-
-                        TextWithTTSView(
-                            label: choiceStr,
-                            speak: choice.phrase,
-                            language: languageSettings.learningLanguage,
-                            onTapGesture: { self.choiceChosen = index }
-                        )
+                    ButtonWithTTSView(
+                        speak: choice.phrase,
+                        language: languageSettings.learningLanguage,
+                        isActive: choiceChosen == index,
+                        onTapGesture: { self.choiceChosen = index }
+                    ) {
+                        VStack {
+                            WebView(url: URL(string: choice.image)!)
+                                .frame(width: 55, height: 55, alignment: .center)
+                            
+                            Text(choice.phrase)
+                        }
                     }
-                    .padding(.all, 20)
-                    .frame(maxWidth: .infinity)
-                    .background(.white.opacity(0.3))
-                    .clipShape(RoundedRectangle(cornerRadius: 25.0))
-                    .onTapGesture {
-                        self.choiceChosen = index
-                    }
+                    
                 }
             }
+            
+            Spacer()
 
             Button("Confirm") {
                 let response = select.choices[select.correctIndex]
@@ -73,10 +72,11 @@ struct SelectView: View {
                 )
             }
             .frame(maxWidth: .infinity)
-            .padding(.all, 20)
             .disabled(choiceChosen == -1)
         }
-        .padding(.all, 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 20)
+        .frame(maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
         .onChange(of: select) { choiceChosen = -1 }
     }
 }
@@ -106,5 +106,6 @@ struct SelectView: View {
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
-    .background(.red)
+    .background(.red.lighter())
+    .environmentObject(Speaker())
 }

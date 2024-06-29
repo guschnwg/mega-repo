@@ -18,54 +18,55 @@ struct ListenTapView: View {
     
     var body: some View {
         VStack {
-            TextListenView(
+            ButtonWithTTSView(
                 speak: listenTap.prompt,
                 language: languageSettings.learningLanguage
-            )
-            .font(.system(size: 48))
-            
+            ) {
+                Label("", systemImage: "speaker.wave.2")
+                    .font(.system(size: 48))
+            }
+            .frame(width: CGFloat(80))
+
             Spacer()
 
             WrappingHStack(alignment: .center) {
                 ForEach(choiceChosen.indices, id: \.self) { index in
                     let choiceIndex = choiceChosen[index]
                     let choice = listenTap.choices[choiceIndex]
-                    
-                    TextWithTTSView(
-                        label: choice.text,
+
+                    ButtonWithTTSView(
                         speak: choice.text,
                         language: languageSettings.fromLanguage,
-                        onTapGesture: { choiceChosen.remove(at: index) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen.remove(at: index) }
+                        isActive: true,
+                        onTapGesture: { choiceChosen.removeAll(where: { $0 == choiceIndex }) }
+                    ) {
+                        Text(choice.text)
+                    }
+                    .frame(width: CGFloat(choice.text.count * 12 + 55))
                 }
             }.padding(.all, 10)
             
             Spacer()
             
             WrappingHStack(alignment: .center) {
-                let availableChoices = shuffled.filter({ choice in
-                    let index = listenTap.choices.firstIndex(of: choice) ?? -1
-                    return index == -1 || !choiceChosen.contains(index)
-                })
-                ForEach(availableChoices, id: \.self) { choice in
+                ForEach(shuffled, id: \.self) { choice in
                     let index = listenTap.choices.firstIndex(of: choice)
-                    
-                    TextWithTTSView(
-                        label: choice.text,
+                    let alreadyMatched = choiceChosen.contains(where: { $0 == index })
+
+                    ButtonWithTTSView(
                         speak: choice.text,
                         language: languageSettings.fromLanguage,
-                        onTapGesture: { choiceChosen.append(index!) }
-                    )
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 15)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
-                    .onTapGesture { choiceChosen.append(index!) }
+                        isActive: false,
+                        background: alreadyMatched ? .white.opacity(0.5) : .white,
+                        onTapGesture: {
+                            if alreadyMatched { return }
+                            choiceChosen.append(index!)
+                        }
+                    ) {
+                        Text(choice.text)
+                            .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                    }
+                    .frame(width: CGFloat(choice.text.count * 12 + 55))
                 }
             }.padding(.all, 10)
             
@@ -80,7 +81,6 @@ struct ListenTapView: View {
             .disabled(choiceChosen.isEmpty)
         }
         .padding(.vertical, 100)
-        .background(.green)
         .onChange(of: listenTap) {
             choiceChosen = []
             shuffled = listenTap.choices.shuffled()
@@ -114,4 +114,6 @@ struct ListenTapView: View {
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }

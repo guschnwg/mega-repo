@@ -14,44 +14,38 @@ struct TextWithTTSView: View {
     let speak: String
     let icon: String
     let language: String
-    var onTapGesture: (() -> Void)? = nil
+    var onTapGesture: () -> Void = {}
     
-    init(speak: String, language: String) {
-        self.label = speak
+    @EnvironmentObject private var speaker: Speaker
+
+    init(label: String, speak: String, icon: String, language: String, onTapGesture: @escaping (() -> Void)) {
+        self.label = label
         self.speak = speak
         self.language = language
-        self.icon = ""
+        self.icon = icon
+        self.onTapGesture = onTapGesture
+    }
+    
+    init(speak: String, language: String) {
+        self.init(label: speak, speak: speak, icon: "", language: language, onTapGesture: {})
     }
     
     init(label: String, speak: String, language: String) {
-        self.label = label
-        self.speak = speak
-        self.language = language
-        self.icon = ""
+        self.init(label: label, speak: speak, icon: "", language: language, onTapGesture: {})
     }
     
     init(label: String, speak: String, language: String, onTapGesture: @escaping (() -> Void)) {
-        self.label = label
-        self.speak = speak
-        self.language = language
-        self.onTapGesture = onTapGesture
-        self.icon = ""
+        self.init(label: label, speak: speak, icon: "", language: language, onTapGesture: onTapGesture)
     }
     
     init(icon: String, speak: String, language: String, onTapGesture: @escaping (() -> Void)) {
-        self.label = ""
-        self.speak = speak
-        self.language = language
-        self.onTapGesture = onTapGesture
-        self.icon = icon
+        self.init(label: "", speak: speak, icon: icon, language: language, onTapGesture: onTapGesture)
     }
 
+    let synthesizer = AVSpeechSynthesizer()
     func onTap() {
-        let synthesizer = AVSpeechSynthesizer()
-        let speechUtterance = AVSpeechUtterance(string: speak)
-        speechUtterance.voice = AVSpeechSynthesisVoice(language: language)
-        synthesizer.speak(speechUtterance)
-        onTapGesture?()
+        speaker.speak(language: language, text: speak)
+        onTapGesture()
     }
     
     var body: some View {
@@ -63,4 +57,9 @@ struct TextWithTTSView: View {
                 .onTapGesture(perform: onTap)
         }
     }
+}
+
+#Preview {
+    TextWithTTSView(speak: "Olá", language: "pt")
+        .environmentObject(Speaker())
 }

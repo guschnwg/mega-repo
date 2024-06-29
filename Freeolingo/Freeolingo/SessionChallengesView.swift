@@ -10,19 +10,32 @@ import SwiftUI
 
 struct Style: ProgressViewStyle {
     let color: Color
+    let current: Int
+    let full: Int
 
     func makeBody(configuration: Configuration) -> some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 10)
-                .frame(width: 250, height: 28)
-                .foregroundColor(.white.opacity(0.6))
+            GeometryReader {reader in
+                let width = reader.size.width
 
-            RoundedRectangle(cornerRadius: 10)
-                .frame(
-                    width: configuration.fractionCompleted! * 250,
-                    height: 28
-                )
-                .foregroundColor(color)
+                RoundedRectangle(cornerRadius: 10)
+                    .frame(width: width, height: 36)
+                    .foregroundColor(.white.opacity(0.6))
+                
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(
+                            width: configuration.fractionCompleted! * width,
+                            height: 36
+                        )
+                        .foregroundColor(color)
+                    
+                    Text("\(current)/\(full)")
+                        .foregroundStyle(.white)
+                        .fontWeight(.bold)
+                        .font(.system(size: 20))
+                }
+            }
         }
     }
 }
@@ -37,19 +50,31 @@ struct SessionChallengesView: View {
     
     let finishSession: () -> Void
     
-    @State private var currentChallenge = 0
+    @State private var currentChallenge = 4
     @State private var increment = 0
     
     var body: some View {
-        VStack {
+        VStack(spacing: 30) {
             HStack {
-                // +1 to have a minimum value set in the ProgressBar
-                let progress = CGFloat(currentChallenge + increment + 1) / CGFloat(session.challenges.count + 1)
+                // +1 to have 1 in the progress bar
+                let current = currentChallenge + increment + 1
+                // +2 to have more space filled in the progress bar so the label shows
+                let currentForProgress = current + 2
+                let count = session.challenges.count + 3
+                let progress = CGFloat(currentForProgress) / CGFloat(count)
 
                 ProgressView(value: progress)
                     .animation(.easeInOut(duration: 0.1), value: increment)
-                    .progressViewStyle(Style(color: color))
+                    .progressViewStyle(
+                        Style(
+                            color: color,
+                            current: current,
+                            full: count
+                        )
+                    )
             }
+            .frame(height: 36)
+            .padding(.horizontal, 10)
             
             ChallengeView(
                 languageSettings: LanguageSettings(
@@ -77,7 +102,7 @@ struct SessionChallengesView: View {
                 }
             )
         }
-        .padding()
+        .padding(.vertical, 20)
         .background(color.lighter(by: 0.5))
     }
 }
@@ -95,5 +120,6 @@ struct SessionChallengesView: View {
                 color: .red
             ) {}
         }
+        .environmentObject(Speaker())
     
 }

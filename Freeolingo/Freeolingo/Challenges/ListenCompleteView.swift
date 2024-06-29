@@ -12,26 +12,63 @@ struct ListenCompleteView: View {
     let languageSettings: LanguageSettings
     let onComplete: (Bool, Text) -> Void
     
+    @State private var current: String = ""
+    @FocusState private var focused: Bool
+    
     var body: some View {
-        var solutions: [String] = []
-
-        let prompt = listenComplete.displayTokens.map { token in
-            let text = token.text
+        let prompt = listenComplete.displayTokens.map { token in token.text }.joined()
+        let promptCensored = listenComplete.displayTokens.map { token in
             if token.isBlank {
-                solutions.append(text)
-                return text.map { _ in "_" }.joined()
+                return token.text.map { _ in "_" }.joined()
             } else {
-                return text
+                return token.text
+            }}.joined()
+        
+        let solutions = listenComplete.displayTokens
+            .filter { $0.isBlank }
+            .map { $0.text }
+        
+        VStack {
+            ButtonWithTTSView(
+                speak: prompt,
+                language: languageSettings.learningLanguage
+            ) {
+                Label(promptCensored, systemImage: "speaker.wave.2")
             }
-        }.joined()
-
-        TextWithTTSView(label: "Prompt: \(prompt)", speak: prompt, language: languageSettings.learningLanguage)
-
-        TextWithTTSView(label: "Translation: \(listenComplete.solutionTranslation)", speak: listenComplete.solutionTranslation, language: languageSettings.fromLanguage)
-
-        List(solutions, id: \.self) { token in
-            TextWithTTSView(label: token, speak: token, language: languageSettings.learningLanguage)
-        }    }
+            
+            // I don't know if there will be many items to fill in this...
+            ForEach(solutions.indices, id: \.self) { index in
+                let token = solutions[index]
+                TextField("...", text: $current)
+                    .background(.white)
+                    .font(.largeTitle)
+                    .frame(width: .infinity)
+                    .padding(.all, 10)
+                    .focused($focused)
+            }
+            .onChange(of: listenComplete) {
+                current = ""
+            }
+            .onAppear {
+                current = ""
+                focused = true
+            }
+            
+            Button("Confirm") {
+                focused = false
+                
+                if solutions[0].distance(between: current) > 0.9 {
+                    onComplete(true, Text("OK"))
+                } else {
+                    onComplete(false, Text("Not ok: \(solutions[0])"))
+                }
+            }.disabled(current.isEmpty)
+        }
+        .padding(.vertical, 100)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity)
+        .frame(maxHeight: .infinity)
+    }
 }
 
 #Preview {
@@ -46,8 +83,10 @@ struct ListenCompleteView: View {
             solutionTranslation: "Oi, tchau"
         ),
         languageSettings: LanguageSettings(
-            fromLanguage: "pt_BR", learningLanguage: "fr_FR"
+            fromLanguage: "pt_BR", learningLanguage: "en_US"
         ),
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
+    .environmentObject(Speaker())
+    .background(.red.lighter(by: 0.3))
 }
