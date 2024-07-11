@@ -94,8 +94,8 @@ struct ButtonWithTTSView<Label: View>: View {
                 self.label
                 Spacer()
             }
+            .padding(.all, 20)
         })
-        .padding(.all, 20)
         .frame(maxWidth: .infinity)
         .background(background.opacity(isActive ? 0.4: 0.1))
         .foregroundColor(.black)

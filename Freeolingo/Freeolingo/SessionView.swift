@@ -14,9 +14,10 @@ struct SessionView: View {
     let unit: Unit
     let level: Level
     let session: Session
-    let color: Color
     
-    let finishSession: () -> Void
+    let finishAction: () -> Void
+    
+    @EnvironmentObject var colorWrapper: ColorWrapper
     
     @State private var isPresented = false
     
@@ -25,7 +26,7 @@ struct SessionView: View {
             isPresented = true
         }
         .padding()
-        .background(color)
+        .background(colorWrapper.color)
         .foregroundColor(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .sheet(isPresented: $isPresented) {
@@ -34,11 +35,10 @@ struct SessionView: View {
                 section: section,
                 unit: unit,
                 level: level,
-                session: session,
-                color: color
+                session: session
             ) {
                 isPresented = false
-                finishSession()
+                finishAction()
             }
         }
     }
@@ -50,7 +50,7 @@ struct SessionView: View {
         section: COURSES[0].sections[0],
         unit: COURSES[0].sections[0].units[0],
         level: COURSES[0].sections[0].units[0].levels[0],
-        session: SESSIONS[0],
-        color: .red
+        session: SESSIONS[0]
     ) {}
+        .environmentObject(ColorWrapper(.red))
 }

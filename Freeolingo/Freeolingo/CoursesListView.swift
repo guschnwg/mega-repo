@@ -11,7 +11,7 @@ import SwiftUI
 struct CoursesListView : View {
     let availableCourses: [AvailableCourse]
 
-    @EnvironmentObject var store: Store
+    @EnvironmentObject var api: Api
     
     var body: some View {
         let baseColor = PALETTE.Primary
@@ -42,6 +42,18 @@ struct CoursesListView : View {
                     .background(rowColor)
                     .foregroundColor(.white)
                 }
+                
+                if UserDefaults.standard.bool(forKey: "debug_mode") {
+                    Spacer()
+
+                    NavigationLink(destination: AllChallengesView()) {
+                        Text("AllChallengesView")
+                    }
+                    .frame(height: 100)
+                    .frame(maxWidth: .infinity)
+                    .background(baseColor)
+                    .foregroundColor(.white)
+                }
             }
         }.navigationTitle("Courses")
             .background(baseColor)
@@ -50,6 +62,6 @@ struct CoursesListView : View {
 
 #Preview {
     NavigationStack {
-        CoursesListView(availableCourses: AVAILABLE_COURSES).environmentObject(previewStore())
+        CoursesListView(availableCourses: AVAILABLE_COURSES).environmentObject(previewApi())
     }
 }

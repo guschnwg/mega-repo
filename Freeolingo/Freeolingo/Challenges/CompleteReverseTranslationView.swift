@@ -24,24 +24,33 @@ struct CompleteReverseTranslationView: View {
                 language: languageSettings.fromLanguage
             ).font(.system(size: 36))
             
+            Spacer()
+            
             WrappingHStack(horizontalSpacing: 0) {
                 ForEach(completeReverseTranslation.displayTokens, id: \.text) { token in
                     if token.isBlank {
+                        let isFirst = completeReverseTranslation.displayTokens.firstIndex(of: token) == 0
                         TextField("...", text: $current)
+                            .padding(.all, 5)
                             .background(.white)
                             .font(.largeTitle)
-                            .frame(width: CGFloat(token.text.count) * 50)
+                            .frame(width: CGFloat(token.text.count) * 25)
                             .focused($focused)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .padding(.all, 5)
+                            .textInputAutocapitalization(isFirst ? .sentences : .never)
+                            .autocorrectionDisabled()
                     } else {
                         Text(token.text)
-                        .padding(.all, 0)
+                            .font(.system(size: 22))
+                            .padding(.all, 0)
                     }
                 }
             }
             
-            Button("Confirm") {
+            Spacer()
+            
+            ConfirmButtonView() {
                 let solutions: [String] = completeReverseTranslation.displayTokens
                     .filter { $0.isBlank }
                     .map { $0.text }
@@ -53,9 +62,9 @@ struct CompleteReverseTranslationView: View {
                 } else {
                     onComplete(false, Text("Not ok: \(solutions[0])"))
                 }
-            }.disabled(current.isEmpty)
+            }
+            .disabled(current.isEmpty)
         }
-        .padding(.vertical, 100)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
         .onChange(of: completeReverseTranslation) {
@@ -85,5 +94,6 @@ struct CompleteReverseTranslationView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter(by: 0.3))
 }

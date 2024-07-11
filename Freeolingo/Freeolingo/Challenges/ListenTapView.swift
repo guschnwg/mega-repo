@@ -29,26 +29,35 @@ struct ListenTapView: View {
 
             Spacer()
 
-            WrappingHStack(alignment: .center) {
-                ForEach(choiceChosen.indices, id: \.self) { index in
-                    let choiceIndex = choiceChosen[index]
-                    let choice = listenTap.choices[choiceIndex]
-
-                    ButtonWithTTSView(
-                        speak: choice.text,
-                        language: languageSettings.fromLanguage,
-                        isActive: true,
-                        onTapGesture: { choiceChosen.removeAll(where: { $0 == choiceIndex }) }
-                    ) {
-                        Text(choice.text)
-                    }
-                    .frame(width: CGFloat(choice.text.count * 12 + 55))
+            VStack {
+                if choiceChosen.isEmpty {
+                    Text("...")
+                } else {
+                    WrappingHStack(alignment: .center, verticalSpacing: 10) {
+                        ForEach(choiceChosen.indices, id: \.self) { index in
+                            let choiceIndex = choiceChosen[index]
+                            let choice = listenTap.choices[choiceIndex]
+                            
+                            ButtonWithTTSView(
+                                speak: choice.text,
+                                language: languageSettings.fromLanguage,
+                                isActive: true,
+                                onTapGesture: { choiceChosen.removeAll(where: { $0 == choiceIndex }) }
+                            ) {
+                                Text(choice.text)
+                                .padding(.all, -8)
+                            }
+                            .frame(width: CGFloat(choice.text.count * 15 + 40))
+                        }
+                    }.padding(.all, 10)
                 }
-            }.padding(.all, 10)
-            
+            }.frame(minHeight: 100)
+                
             Spacer()
             
-            WrappingHStack(alignment: .center) {
+            WrappingHStack(
+                alignment: .center
+            ) {
                 ForEach(shuffled, id: \.self) { choice in
                     let index = listenTap.choices.firstIndex(of: choice)
                     let alreadyMatched = choiceChosen.contains(where: { $0 == index })
@@ -64,23 +73,25 @@ struct ListenTapView: View {
                         }
                     ) {
                         Text(choice.text)
-                            .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                        .foregroundStyle(
+                            alreadyMatched ? .black.opacity(0.5) : .black
+                        )
+                        .padding(.all, -8)
                     }
-                    .frame(width: CGFloat(choice.text.count * 12 + 55))
+                    .frame(width: CGFloat(choice.text.count * 15 + 40))
                 }
-            }.padding(.all, 10)
+            }
             
-            Button("Confirm") {
+            Spacer()
+            
+            ConfirmButtonView() {
                 onComplete(
                     listenTap.correctIndices == choiceChosen,
                     Text("\(listenTap.prompt) or \(listenTap.solutionTranslation)")
                 )
             }
-            .frame(maxWidth: .infinity)
-            .padding(.all, 20)
             .disabled(choiceChosen.isEmpty)
         }
-        .padding(.vertical, 100)
         .onChange(of: listenTap) {
             choiceChosen = []
             shuffled = listenTap.choices.shuffled()
@@ -106,6 +117,7 @@ struct ListenTapView: View {
                 Challenge.Choice(text: "jus"),
                 Challenge.Choice(text: "vos"),
                 Challenge.Choice(text: "fromage"),
+                Challenge.Choice(text: "Mm"),
             ],
             correctIndices: [0, 1, 2, 3]
         ),
@@ -115,5 +127,6 @@ struct ListenTapView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter(by: 0.3))
 }

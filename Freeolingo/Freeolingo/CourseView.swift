@@ -11,12 +11,16 @@ import SwiftUI
 struct InnerCourseView: View {
     let course: Course
     
+    @EnvironmentObject var state: AppState
+    
     @State private var selectedSection: Section? = nil
 
     var body: some View {
         ScrollView {
             ForEach(course.sections.indices, id: \.self) { index in
                 let section = course.sections[index]
+                let isAvailable = state.isAvailable(course: course, section: section)
+                let color = colors[index % colors.count]
                 
                 NavigationLink(
                     destination: SectionView(
@@ -24,37 +28,47 @@ struct InnerCourseView: View {
                         section: section
                     )
                 ) {
-                    VStack (alignment: .leading) {
-                        Spacer()
-                        
-                        Text("Section \(index + 1)")
-                            .font(.system(size: 24))
-                        
-                        switch section.type {
-                        case SectionType.learning:
-                            if section.exampleSentence != nil {
-                                Text(section.exampleSentence!.exampleSentence)
-                                    .font(.system(size: 14))
-                            } else {
-                                Text("Lesson")
+                    HStack(alignment: .top) {
+                        VStack (alignment: .leading) {
+                            Spacer()
+                            
+                            Text("Section \(index + 1)")
+                                .font(.system(size: 24))
+                            
+                            switch section.type {
+                            case SectionType.learning:
+                                if section.exampleSentence != nil {
+                                    Text(section.exampleSentence!.exampleSentence)
+                                        .font(.system(size: 14))
+                                } else {
+                                    Text("Lesson")
+                                }
+                                
+                            case SectionType.dailyRefresh:
+                                Text("Daily Refresh")
+                                
+                            case SectionType.personalizedPractice:
+                                Text("Personalized Practice")
+                                
                             }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        if !isAvailable {
+                            Spacer()
                             
-                        case SectionType.dailyRefresh:
-                            Text("Daily Refresh")
-                            
-                        case SectionType.personalizedPractice:
-                            Text("Personalized Practice")
-                            
+                            Label("", systemImage: "lock")
+                                .padding(.top, 10)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(height: 150)
                 .frame(maxWidth: .infinity)
                 .padding(.all, 10)
-                .background(colors[index % colors.count])
+                .background(isAvailable ? color : color.opacity(0.5))
                 .clipShape(.rect(cornerRadius: 10.0))
                 .foregroundColor(.white)
+                .disabled(!isAvailable)
             }
         }.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Sections")
@@ -65,12 +79,12 @@ struct InnerCourseView: View {
 struct CourseView: View {
     let languageSettings: LanguageSettings
     
-    @EnvironmentObject var store: Store
+    @EnvironmentObject var api: Api
     
     @State private var selectedSection: Section? = nil
     
     var body: some View {
-        let expectedCourse: Course? = store.courses.first(where: {
+        let expectedCourse: Course? = api.courses.first(where: {
             languageSettings.fromLanguage == $0.fromLanguage
             && languageSettings.learningLanguage == $0.learningLanguage
         })
@@ -83,13 +97,13 @@ struct CourseView: View {
             }
         }
         .onAppear {
-            store.getCourse(languageSettings: languageSettings)
+            api.getCourse(languageSettings: languageSettings)
         }.background(PALETTE.Background)
     }
 }
 
 #Preview {
     NavigationStack {
-        InnerCourseView(course: COURSES[0]).environmentObject(previewStore())
-    }
+        InnerCourseView(course: COURSES[0]).environmentObject(previewApi())
+    }.environmentObject(previewState())
 }

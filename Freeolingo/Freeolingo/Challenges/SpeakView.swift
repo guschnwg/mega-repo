@@ -25,8 +25,12 @@ struct SpeakView: View {
                 speak: speak.prompt,
                 language: languageSettings.learningLanguage
             ).font(.system(size: 36))
+            
+            Spacer()
 
-            Text(currentTranscription.isEmpty ? "Let's Speak!" : currentTranscription)
+            Text(currentTranscription.isEmpty ? "..." : currentTranscription)
+            
+            Spacer()
 
             RecognizeSpeechView(
                 result: $current,
@@ -40,7 +44,7 @@ struct SpeakView: View {
                         isRecording = true
                     }) {
                         Label(
-                            currentTranscription.isEmpty ? "Record": "Try again",
+                            currentTranscription.isEmpty ? "Speak it up": "Try again",
                             systemImage: "speaker.wave.2"
                         )
                         .padding()
@@ -81,9 +85,20 @@ struct SpeakView: View {
                         .cornerRadius(10)
                 }
             }
+            
+            Spacer()
+
+            ConfirmButtonView {
+                let score = currentTranscription.distance(between: speak.prompt)
+                
+                if score > 0.85 {
+                    onComplete(true, Text("OK: \(score)"))
+                } else {
+                    onComplete(false, Text("NOT OK: \(score)"))
+                }
+            }
+            .disabled(currentTranscription.isEmpty)
         }
-        .padding(.vertical, 100)
-        .padding(.horizontal, 10)
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
         .frame(maxHeight: .infinity)
         .onChange(of: speak) {
@@ -105,5 +120,6 @@ struct SpeakView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter())
 }

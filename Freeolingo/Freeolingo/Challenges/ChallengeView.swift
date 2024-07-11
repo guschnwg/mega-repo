@@ -37,7 +37,7 @@ struct ChallengeView: View {
     let onComplete: (Bool) -> Void
 
     @State private var showAlert = false
-    @State private var alertText: Text = Text("Nothing")
+    @State private var alertText: Text = Text("")
     @State private var answerCorrect: Bool = false
 
     func _onComplete(isCorrect: Bool, message: Text) {
@@ -88,15 +88,41 @@ struct ChallengeView: View {
                 Text(challenge.type)
             }
         }
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: answerCorrect ? Text("Correct") : Text("WRONG!"),
-                message: alertText,
-                dismissButton: .default(Text("OK")) {
+        .sheet(isPresented: $showAlert) {
+            let background = answerCorrect ? Color.green : Color.red
+
+            VStack(alignment: .leading) {
+                Text(answerCorrect ? "Correct" : "WRONG!")
+                    .bold()
+                    .font(.system(size: 22))
+                
+                Spacer()
+                alertText
+                Spacer()
+                
+                Button(action: {
                     showAlert = false
+
                     onComplete(answerCorrect)
-                }
-            )
+
+                    answerCorrect = false
+                    alertText = Text("")
+                }, label: {
+                    Text(answerCorrect ? "Next" : "Try again")
+                        .padding(.all, 10)
+                        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+                })
+                .background(background)
+                .foregroundColor(.white)
+                .bold()
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                    
+            }
+            .padding(.all, 20)
+            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+            .background(background.lighter(by: 0.8))
+            .foregroundColor(background)
+            .presentationDetents([.height(200)])
         }
     }
 }

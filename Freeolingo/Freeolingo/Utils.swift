@@ -112,3 +112,13 @@ extension Color {
     public func lighter(by amount: CGFloat = 0.2) -> Self { Self(UIColor(self).lighter(by: amount)) }
     public func darker(by amount: CGFloat = 0.2) -> Self { Self(UIColor(self).darker(by: amount)) }
 }
+
+class ColorWrapper: ObservableObject {
+    @Published var color: Color
+    
+    init(_ color: Color) {
+        self.color = color
+    }
+}
+
+// Course -> Section -> Unit -> Level -> Challenge

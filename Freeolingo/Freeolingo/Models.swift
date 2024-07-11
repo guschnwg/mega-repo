@@ -227,6 +227,14 @@ struct Session: Decodable, Identifiable, Equatable {
     let challenges: Array<Challenge>
 }
 
+struct Story: Decodable, Equatable {
+    static func == (lhs: Story, rhs: Story) -> Bool {
+        return lhs.fromLanguageName == rhs.fromLanguageName
+    }
+    
+    let fromLanguageName: String
+}
+
 enum LevelType: String, Decodable {
     case chest = "chest"
     case skill = "skill"
@@ -235,18 +243,31 @@ enum LevelType: String, Decodable {
     case story = "story"
 }
 
-struct Level: Decodable, Identifiable {
-    let id: String
+struct PathLevelMetadata: Decodable {
+    let storyId: String?
+}
+
+struct Level: Decodable, Identifiable, Equatable {
+    static func == (lhs: Level, rhs: Level) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    let id: Int
     let name: String
     let type: LevelType
     let totalSessions: Int
+    let pathLevelMetadata: PathLevelMetadata?
     
     private enum CodingKeys : String, CodingKey {
-        case id, name = "debugName", type, totalSessions
+        case id = "absoluteNodeIndex", name = "debugName", type, totalSessions, pathLevelMetadata
     }
 }
 
-struct Unit: Decodable, Identifiable {
+struct Unit: Decodable, Identifiable, Equatable {
+    static func == (lhs: Unit, rhs: Unit) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     let id: Int
     let name: String?
     
@@ -263,7 +284,12 @@ enum SectionType: String, Decodable {
     case personalizedPractice = "personalized_practice"
 }
 
-struct Section: Decodable {
+struct Section: Decodable, Equatable {
+    static func == (lhs: Section, rhs: Section) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    let id: Int
     let name: String?
     let type: SectionType
     let units: Array<Unit>
@@ -275,7 +301,7 @@ struct Section: Decodable {
     let exampleSentence: ExampleSentence?
     
     private enum CodingKeys : String, CodingKey {
-        case name = "debugName", type, units, exampleSentence
+        case id = "index", name = "debugName", type, units, exampleSentence
     }
 }
 

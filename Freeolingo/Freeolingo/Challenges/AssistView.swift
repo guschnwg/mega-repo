@@ -43,17 +43,14 @@ struct AssistView: View {
 
             Spacer()
 
-            Button("Confirm") {
+            ConfirmButtonView() {
                 onComplete(
                     assist.correctIndex == choiceChosen,
                     Text(assist.choices[assist.correctIndex])
                 )
             }
-            .frame(maxWidth: .infinity)
-            .padding(.all, 20)
             .disabled(choiceChosen == -1)
         }
-        .padding(.all, 100)
         .onChange(of: assist) { choiceChosen = -1 }
     }
 }
@@ -71,5 +68,6 @@ struct AssistView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
         .background(.red.lighter(by: 0.3))
+        .environmentObject(ColorWrapper(.red))
         .environmentObject(Speaker())
 }

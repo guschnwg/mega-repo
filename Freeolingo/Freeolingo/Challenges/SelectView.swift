@@ -61,23 +61,21 @@ struct SelectView: View {
                     
                 }
             }
-            
+
             Spacer()
 
-            Button("Confirm") {
+            ConfirmButtonView {
                 let response = select.choices[select.correctIndex]
                 onComplete(
                     select.correctIndex == choiceChosen,
                     Text("\(response.phrase) - \(response.hint)")
                 )
             }
-            .frame(maxWidth: .infinity)
             .disabled(choiceChosen == -1)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 20)
         .frame(maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
         .onChange(of: select) { choiceChosen = -1 }
+        .onAppear { choiceChosen = -1 }
     }
 }
 
@@ -107,5 +105,6 @@ struct SelectView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
     .background(.red.lighter())
+    .environmentObject(ColorWrapper(.red))
     .environmentObject(Speaker())
 }

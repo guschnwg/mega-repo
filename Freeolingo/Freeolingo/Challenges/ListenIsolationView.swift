@@ -32,6 +32,9 @@ struct ListenIsolationView: View {
                     if range.contains(index) {
                         if choiceChosen == -1 {
                             Text(token.value.map({ _ in "_" }).joined())
+                                .padding(.all, 10)
+                                .background(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
                         } else {
                             let option = listenIsolation.options[choiceChosen]
                             Text(option.text)
@@ -48,9 +51,11 @@ struct ListenIsolationView: View {
                         )
                     }
                 }
-            }
+            }.frame(height: 32)
             
-            WrappingHStack(alignment: .center) {
+            Spacer()
+            
+            VStack {
                 let availableOptions = shuffled.filter({ option in
                     let index = listenIsolation.options.firstIndex(of: option) ?? -1
                     return index == -1 || choiceChosen != index
@@ -70,17 +75,16 @@ struct ListenIsolationView: View {
                 }
             }.padding(.all, 10)
             
-            Button("Confirm") {
+            Spacer()
+            
+            ConfirmButtonView() {
                 onComplete(
                     listenIsolation.correctIndex == choiceChosen,
                     Text(listenIsolation.solutionTranslation)
                 )
             }
-            .frame(maxWidth: .infinity)
-            .padding(.all, 20)
             .disabled(choiceChosen == -1)
         }
-        .padding(.vertical, 100)
         .frame(maxWidth: .infinity, maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
         .onChange(of: listenIsolation) {
             choiceChosen = -1
@@ -121,5 +125,6 @@ struct ListenIsolationView: View {
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter(by: 0.3))
 }

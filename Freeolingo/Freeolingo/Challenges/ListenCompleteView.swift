@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WrappingHStack
 
 struct ListenCompleteView: View {
     var listenComplete: Challenge.ListenComplete
@@ -33,28 +34,38 @@ struct ListenCompleteView: View {
                 speak: prompt,
                 language: languageSettings.learningLanguage
             ) {
-                Label(promptCensored, systemImage: "speaker.wave.2")
+                Image(systemName: "speaker.wave.2")
+                    .resizable()
+                    .frame(width: 32, height: 32)
+            }.frame(width: 200)
+
+            Spacer()
+            
+            WrappingHStack(horizontalSpacing: 0) {
+                ForEach(listenComplete.displayTokens, id: \.text) { token in
+                    if token.isBlank {
+                        let isFirst = listenComplete.displayTokens.firstIndex(of: token) == 0
+                        TextField("...", text: $current)
+                            .padding(.all, 5)
+                            .background(.white)
+                            .font(.largeTitle)
+                            .frame(width: CGFloat(token.text.count) * 25)
+                            .focused($focused)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .padding(.all, 5)
+                            .textInputAutocapitalization(isFirst ? .sentences : .never)
+                            .autocorrectionDisabled()
+                    } else {
+                        Text(token.text)
+                            .font(.system(size: 22))
+                            .padding(.all, 0)
+                    }
+                }
             }
             
-            // I don't know if there will be many items to fill in this...
-            ForEach(solutions.indices, id: \.self) { index in
-                let token = solutions[index]
-                TextField("...", text: $current)
-                    .background(.white)
-                    .font(.largeTitle)
-                    .frame(width: .infinity)
-                    .padding(.all, 10)
-                    .focused($focused)
-            }
-            .onChange(of: listenComplete) {
-                current = ""
-            }
-            .onAppear {
-                current = ""
-                focused = true
-            }
-            
-            Button("Confirm") {
+            Spacer()
+
+            ConfirmButtonView() {
                 focused = false
                 
                 if solutions[0].distance(between: current) > 0.9 {
@@ -62,12 +73,18 @@ struct ListenCompleteView: View {
                 } else {
                     onComplete(false, Text("Not ok: \(solutions[0])"))
                 }
-            }.disabled(current.isEmpty)
+            }
+            .disabled(current.isEmpty)
         }
-        .padding(.vertical, 100)
-        .padding(.horizontal, 10)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
+        .onChange(of: listenComplete) {
+            current = ""
+        }
+        .onAppear {
+            current = ""
+            focused = true
+        }
     }
 }
 
@@ -88,5 +105,6 @@ struct ListenCompleteView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter(by: 0.3))
 }

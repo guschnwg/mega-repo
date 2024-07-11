@@ -27,29 +27,31 @@ struct ListenSpeakView: View {
 
             Spacer()
 
-            WrappingHStack(alignment: .center) {
-                ForEach(choiceChosen, id: \.self) { index in
-                    let choice = listenSpeak.choices[index]
-                    
-                    ButtonWithTTSView(
-                        speak: choice,
-                        language: languageSettings.fromLanguage,
-                        isActive: true,
-                        onTapGesture: { choiceChosen.removeAll(where: { $0 == index }) }
-                    ) {
-                        Text(choice)
-                    }
-                    .frame(width: CGFloat(choice.count * 12 + 15 + 40))
+            VStack {
+                if !choiceChosen.isEmpty {
+                    WrappingHStack(alignment: .center) {
+                        ForEach(choiceChosen, id: \.self) { index in
+                            let choice = listenSpeak.choices[index]
+                            
+                            ButtonWithTTSView(
+                                speak: choice,
+                                language: languageSettings.fromLanguage,
+                                isActive: true,
+                                onTapGesture: { choiceChosen.removeAll(where: { $0 == index }) }
+                            ) {
+                                Text(choice)
+                                .padding(.all, -8) // These kind of stuff is kinda cool
+                            }
+                            .frame(width: CGFloat(choice.count * 15 + 40))
+                        }
+                    }.padding(.all, 10)
                 }
-            }.padding(.all, 10)
+            }
+            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, minHeight: 120)
             
             Spacer()
             
             WrappingHStack(alignment: .center) {
-                let availableChoices = shuffled.filter({ choice in
-                    let index = listenSpeak.choices.firstIndex(of: choice) ?? -1
-                    return index == -1 || !choiceChosen.contains(index)
-                })
                 ForEach(shuffled, id: \.self) { choice in
                     let index = listenSpeak.choices.firstIndex(of: choice)
                     let alreadyMatched = choiceChosen.contains(where: { $0 == index })
@@ -71,23 +73,23 @@ struct ListenSpeakView: View {
                         }
                     ) {
                         Text(choice)
-                            .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                        .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                        .padding(.all, -8)
                     }
-                    .frame(width: CGFloat(choice.count * 12 + 15 + 40))
+                    .frame(width: CGFloat(choice.count * 15 + 40))
                 }
             }.padding(.all, 10)
             
-            Button("Confirm") {
+            Spacer()
+            
+            ConfirmButtonView() {
                 onComplete(
                     listenSpeak.correctIndices == choiceChosen,
                     Text("???")
                 )
             }
-            .frame(maxWidth: .infinity)
-            .padding(.all, 20)
             .disabled(choiceChosen.isEmpty)
         }
-        .padding(.vertical, 100)
         .onChange(of: listenSpeak) {
             choiceChosen = []
             shuffled = listenSpeak.choices.shuffled()
@@ -113,5 +115,6 @@ struct ListenSpeakView: View {
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter(by: 0.3))
 }

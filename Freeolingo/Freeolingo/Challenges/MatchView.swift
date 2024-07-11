@@ -71,57 +71,38 @@ struct MatchView: View {
                     let leftIndex = shuffledLeft[index]
                     let left = match.pairs[leftIndex]
                     let leftAlreadyMatched = matches.map({ $0.0 }).contains(leftIndex)
-
-                    ButtonWithTTSView(
+                    
+                    MatchButtonWithTTSView(
                         speak: left.learningToken,
                         language: languageSettings.learningLanguage,
-                        isActive: lastListened.0 == leftIndex,
-                        background: {
-                            if leftAlreadyMatched {
-                                return .gray
-                            } else if current.0 == leftIndex {
-                                return .red
-                            } else  {
-                                return .white
-                            }
-                        }(),
-                        onTapGesture: {
-                            if leftAlreadyMatched { return }
-                            setChoice(index: 0, value: index)
-                        }
+                        isLastListened: lastListened.0 == leftIndex,
+                        isSelected: current.0 == leftIndex,
+                        isSelectable: !leftAlreadyMatched,
+                        isWrong: current.0 != -1 && current.1 != -1 && current.0 != current.1,
+                        type: .text
                     ) {
-                        Text(left.learningToken)
+                        setChoice(index: 0, value: index)
                     }
                     
                     let rightIndex = shuffledRight[index]
                     let right = match.pairs[rightIndex]
                     let rightAlreadyMatched = matches.map({ $0.1 }).contains(rightIndex)
-
-                    ButtonWithTTSView(
+                    
+                    MatchButtonWithTTSView(
                         speak: right.fromToken,
-                        language: languageSettings.learningLanguage,
-                        isActive: lastListened.1 == rightIndex,
-                        background: {
-                            if rightAlreadyMatched {
-                                return .gray
-                            } else if current.1 == rightIndex {
-                                return .red
-                            } else {
-                                return .white
-                            }
-                        }(),
-                        onTapGesture: {
-                            if rightAlreadyMatched { return }
-                            setChoice(index: 1, value: index)
-                        }
+                        language: languageSettings.fromLanguage,
+                        isLastListened: lastListened.1 == rightIndex,
+                        isSelected: current.1 == rightIndex,
+                        isSelectable: !rightAlreadyMatched,
+                        isWrong: current.0 != -1 && current.1 != -1 && current.0 != current.1,
+                        type: .text
                     ) {
-                        Text(right.fromToken)
+                        setChoice(index: 1, value: index)
                     }
                 }
                 .padding(.all, 10)
             }
         }
-        .padding(.vertical, 100)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
         .onChange(of: match) {

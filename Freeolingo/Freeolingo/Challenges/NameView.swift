@@ -25,15 +25,19 @@ struct NameView: View {
                     .font(.system(size: 48))
             }
             .frame(width: CGFloat(80))
+            
+            Spacer()
 
             TextField("...", text: $current)
                 .padding(.all, 20)
                 .background(.white)
                 .focused($focused)
-                .clipShape(RoundedRectangle(cornerRadius: 25.0))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
                 .font(.system(size: 24))
             
-            Button("Confirm") {
+            Spacer()
+            
+            ConfirmButtonView() {
                 focused = false
                 
                 var maxScore = 0.0
@@ -53,10 +57,9 @@ struct NameView: View {
                 
                 let firstSolution = name.correctSolutions.first ?? ""
                 onComplete(false, Text("Not ok: \(firstSolution), \(maxScore)"))
-            }.disabled(current.isEmpty)
+            }
+            .disabled(current.isEmpty)
         }
-        .padding(.vertical, 100)
-        .padding(.horizontal, 10)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
         .onChange(of: name) {
@@ -80,5 +83,6 @@ struct NameView: View {
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter(by: 0.3))
 }

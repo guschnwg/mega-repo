@@ -12,83 +12,92 @@ struct PartialReverseTranslateView: View {
     var partialReverseTranslate: Challenge.PartialReverseTranslate
     let languageSettings: LanguageSettings
     let onComplete: (Bool, Text) -> Void
-    
-    @State private var current = ""
-    @FocusState private var focused: Bool
-    
-    @State private var tokens: [Challenge.DisplayToken] = []
-    
-    func initTokens(displayTokens: [Challenge.DisplayToken]) -> [Challenge.DisplayToken] {
-        var tokens: [Challenge.DisplayToken] = []
-        
-        for token in displayTokens {
-            let last = tokens.last
-            if tokens.isEmpty || last?.isBlank != token.isBlank {
-                tokens.append(Challenge.DisplayToken(text: token.text, isBlank: token.isBlank))
-            } else {
-                if last!.isBlank == token.isBlank {
-                    let newLast = Challenge.DisplayToken(
-                        text: last!.text + token.text,
-                        isBlank: last!.isBlank
-                    )
-                    tokens[tokens.lastIndex(of: last!)!] = newLast
-                }
-            }
-        }
-        return tokens
-    }
+
+    // current could be a map index -> String instead
+    @State private var current: [String] = []
+    @State private var blankIndexesMap: [Int: Int] = [:]
     
     var body: some View {
-        VStack(spacing: 60) {
+        VStack {
             TextWithTTSView(
                 speak: partialReverseTranslate.prompt,
                 language: languageSettings.fromLanguage
             ).font(.system(size: 36))
+
+            Spacer()
             
-            WrappingHStack(horizontalSpacing: 0) {
-                ForEach(tokens, id: \.text) { token in
-                    if token.isBlank {
-                        TextField("...", text: $current)
-                            .padding(.all, 10)
-                            .background(.white)
-                            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
-                            .frame(width: CGFloat(token.text.count) * 15)
-                            .focused($focused)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                            .font(.system(size: 22))
-                    } else {
-                        Text(token.text)
-                            .padding(.all, 0)
-                            .font(.system(size: 22))
+            if !current.isEmpty && !blankIndexesMap.isEmpty {
+                WrappingHStack(horizontalSpacing: 0.5) {
+                    ForEach(partialReverseTranslate.displayTokens.indices, id: \.self) { index in
+                        let token = partialReverseTranslate.displayTokens[index]
+                        
+                        if let inCurrentIndex = blankIndexesMap[index] {
+                            if current.count > inCurrentIndex {
+                                TextField("...", text: $current[inCurrentIndex])
+                                    .padding(.all, 10)
+                                    .background(.white)
+                                    .frame(width:
+                                            max(CGFloat(token.text.count) * 20, 50)
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .font(.system(size: 22))
+                            }
+                        } else {
+                            Text(token.text)
+                                .padding(.horizontal, 0)
+                                .font(.system(size: 22))
+                        }
                     }
                 }
+            } else {
+                Text(":)")
             }
-            
-            Button("Confirm") {
-                focused = false
 
-                let solution = tokens.first(where: { $0.isBlank })
-                let score = solution!.text.distance(between: current)
-                let fullSolution = partialReverseTranslate.displayTokens.map { $0.text }.joined()
+            Spacer()
+
+            ConfirmButtonView {
+                let solution = partialReverseTranslate.displayTokens.map { $0.text }.joined()
+                let attempt = partialReverseTranslate.displayTokens.map{ token in
+                    let index = partialReverseTranslate.displayTokens.firstIndex(of: token)
+                    if let inCurrentIndex = blankIndexesMap[index!] {
+                        return current[inCurrentIndex]
+                    } else {
+                        return token.text
+                    }
+                }.joined()
+                
+                let score = solution.distance(between: attempt)
                 if score > 0.85 {
-                    onComplete(true, Text("OK: \(fullSolution) \(score)"))
+                    onComplete(true, Text("OK: \(solution) \(score)"))
                 } else {
-                    onComplete(false, Text("NOT OK: \(fullSolution) \(score)"))
+                    onComplete(false, Text("NOT OK: \(solution) \(score)"))
                 }
-            }.disabled(current.isEmpty)
+            }
+            .disabled(current.contains(""))
         }
-        .padding(.vertical, 100)
-        .padding(.horizontal, 30)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
         .onChange(of: partialReverseTranslate) {
-            current = ""
-            tokens = initTokens(displayTokens: partialReverseTranslate.displayTokens)
+            current = []
+            for index in partialReverseTranslate.displayTokens.indices {
+                let token = partialReverseTranslate.displayTokens[index]
+                if token.isBlank && !token.text.isEmpty && token.text != " " {
+                    blankIndexesMap[index] = current.count
+                    current.append("")
+                }
+                
+            }
         }
         .onAppear {
-            current = ""
-            focused = true
-            tokens = initTokens(displayTokens: partialReverseTranslate.displayTokens)
+            current = []
+            for index in partialReverseTranslate.displayTokens.indices {
+                let token = partialReverseTranslate.displayTokens[index]
+                if token.isBlank && !token.text.isEmpty && token.text != " " {
+                    blankIndexesMap[index] = current.count
+                    current.append("")
+                }
+                
+            }
         }
     }
 }
@@ -115,5 +124,6 @@ struct PartialReverseTranslateView: View {
         onComplete: {isCorrect, text in print("Is correct: \(isCorrect) \(text)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.red.lighter())
 }

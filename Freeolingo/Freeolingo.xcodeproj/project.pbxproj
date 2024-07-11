@@ -40,13 +40,16 @@
 		6BA596F92C00BADA007AEEF9 /* CoursesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596F82C00BADA007AEEF9 /* CoursesListView.swift */; };
 		6BA596FB2C00BB02007AEEF9 /* AllChallengesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */; };
 		6BA596FD2C00EC92007AEEF9 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 6BA596FC2C00EC92007AEEF9 /* Settings.bundle */; };
+		6BD1D6772C3309D900F11D32 /* MatchButtonWithTTSView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */; };
 		6BF2BEDE2C2B1E17000ABE81 /* StringMetric in Frameworks */ = {isa = PBXBuildFile; productRef = 6BF2BEDD2C2B1E17000ABE81 /* StringMetric */; };
 		6BF2BEE02C2B1E1D000ABE81 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6BF2BEDF2C2B1E1D000ABE81 /* WrappingHStack */; };
 		6BF2BEE22C2CF6A9000ABE81 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF2BEE12C2CF6A9000ABE81 /* Speaker.swift */; };
 		6BF2BEE62C2CFD16000ABE81 /* ButtonWithTTSView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF2BEE52C2CFD16000ABE81 /* ButtonWithTTSView.swift */; };
+		6BF2BEE82C2FA00C000ABE81 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF2BEE72C2FA00C000ABE81 /* AppState.swift */; };
+		6BF2BEEA2C32EE7F000ABE81 /* ConfirmButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF2BEE92C32EE7E000ABE81 /* ConfirmButtonView.swift */; };
 		EC5C64082BBAE46F00EB1E56 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C64072BBAE46F00EB1E56 /* Models.swift */; };
 		EC5C640A2BBAE49300EB1E56 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C64092BBAE49300EB1E56 /* Utils.swift */; };
-		EC5C640C2BBAE67600EB1E56 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C640B2BBAE67600EB1E56 /* Store.swift */; };
+		EC5C640C2BBAE67600EB1E56 /* Api.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5C640B2BBAE67600EB1E56 /* Api.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,11 +87,14 @@
 		6BA596F82C00BADA007AEEF9 /* CoursesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesListView.swift; sourceTree = "<group>"; };
 		6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllChallengesView.swift; sourceTree = "<group>"; };
 		6BA596FC2C00EC92007AEEF9 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchButtonWithTTSView.swift; sourceTree = "<group>"; };
 		6BF2BEE12C2CF6A9000ABE81 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		6BF2BEE52C2CFD16000ABE81 /* ButtonWithTTSView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonWithTTSView.swift; sourceTree = "<group>"; };
+		6BF2BEE72C2FA00C000ABE81 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		6BF2BEE92C32EE7E000ABE81 /* ConfirmButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmButtonView.swift; sourceTree = "<group>"; };
 		EC5C64072BBAE46F00EB1E56 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		EC5C64092BBAE49300EB1E56 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		EC5C640B2BBAE67600EB1E56 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		EC5C640B2BBAE67600EB1E56 /* Api.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Api.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +128,8 @@
 				6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */,
 				6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */,
 				6B76CD922BD324C100DCA0C0 /* TranslateView.swift */,
+				6BF2BEE92C32EE7E000ABE81 /* ConfirmButtonView.swift */,
+				6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */,
 			);
 			path = Challenges;
 			sourceTree = "<group>";
@@ -154,7 +162,7 @@
 				EC5C64072BBAE46F00EB1E56 /* Models.swift */,
 				6BA596EE2C00AEAA007AEEF9 /* ModelSamples.swift */,
 				EC5C64092BBAE49300EB1E56 /* Utils.swift */,
-				EC5C640B2BBAE67600EB1E56 /* Store.swift */,
+				EC5C640B2BBAE67600EB1E56 /* Api.swift */,
 				6B76CD742BD2F7D700DCA0C0 /* RecognizeSpeechView.swift */,
 				6B76CD762BD2F80A00DCA0C0 /* TextWithTTSView.swift */,
 				6BF2BEE52C2CFD16000ABE81 /* ButtonWithTTSView.swift */,
@@ -169,6 +177,7 @@
 				6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */,
 				6BA596FC2C00EC92007AEEF9 /* Settings.bundle */,
 				6BF2BEE12C2CF6A9000ABE81 /* Speaker.swift */,
+				6BF2BEE72C2FA00C000ABE81 /* AppState.swift */,
 			);
 			path = Freeolingo;
 			sourceTree = "<group>";
@@ -265,11 +274,13 @@
 				6BF2BEE62C2CFD16000ABE81 /* ButtonWithTTSView.swift in Sources */,
 				6BA596F52C00BA6B007AEEF9 /* SectionView.swift in Sources */,
 				6BA596ED2C00AD23007AEEF9 /* SessionChallengesView.swift in Sources */,
+				6BF2BEEA2C32EE7F000ABE81 /* ConfirmButtonView.swift in Sources */,
 				6B76CD9A2BD85DF700DCA0C0 /* TextListenView.swift in Sources */,
-				EC5C640C2BBAE67600EB1E56 /* Store.swift in Sources */,
+				EC5C640C2BBAE67600EB1E56 /* Api.swift in Sources */,
 				EC5C64082BBAE46F00EB1E56 /* Models.swift in Sources */,
 				6BA596F92C00BADA007AEEF9 /* CoursesListView.swift in Sources */,
 				6B76CD812BD31D5500DCA0C0 /* ListenIsolationView.swift in Sources */,
+				6BD1D6772C3309D900F11D32 /* MatchButtonWithTTSView.swift in Sources */,
 				6B76CD7F2BD31C6800DCA0C0 /* ListenCompleteView.swift in Sources */,
 				6B76CD832BD31ED100DCA0C0 /* ListenMatchView.swift in Sources */,
 				6BA596F12C00B9A9007AEEF9 /* SessionView.swift in Sources */,
@@ -295,6 +306,7 @@
 				6B76CD872BD31FFF00DCA0C0 /* ListenTapView.swift in Sources */,
 				6B76CD852BD31F8400DCA0C0 /* ListenSpeakView.swift in Sources */,
 				6B76CD772BD2F80A00DCA0C0 /* TextWithTTSView.swift in Sources */,
+				6BF2BEE82C2FA00C000ABE81 /* AppState.swift in Sources */,
 				6B76CD932BD324C100DCA0C0 /* TranslateView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

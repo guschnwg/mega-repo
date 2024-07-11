@@ -17,35 +17,39 @@ struct ListenView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 60) {
-            
-            TextWithTTSView(
+            ButtonWithTTSView(
                 speak: listen.prompt,
                 language: languageSettings.learningLanguage
-            )
-                .font(.largeTitle)
-                .multilineTextAlignment(.center)
+            ) {
+                Label("", systemImage: "speaker.wave.2")
+                    .font(.system(size: 48))
+            }
+            .frame(width: CGFloat(80))
+            
+            Spacer()
 
             TextField("...", text: $current)
                 .padding(.all, 20)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 25.0))
                 .focused($focused)
-                .font(.largeTitle)
+                .font(.system(size: 22))
             
-            Button("Confirm") {
+            Spacer()
+            
+            ConfirmButtonView() {
                 focused = false
                 
-                let score = listen.solutionTranslation.distance(between: current)
+                let score = listen.prompt.distance(between: current)
                 
                 if score > 0.9 {
-                    onComplete(true, Text("OK"))
+                    onComplete(true, Text("OK: (\(score)) \(listen.solutionTranslation)"))
                 } else {
-                    onComplete(false, Text("Not ok: (\(score)) \(listen.solutionTranslation)"))
+                    onComplete(false, Text("Not ok: (\(score)) \(listen.prompt)"))
                 }
-            }.disabled(current.isEmpty)
+            }
+            .disabled(current.isEmpty)
         }
-        .padding(.vertical, 100)
-        .padding(.horizontal, 50)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: .infinity)
         .onChange(of: listen) {

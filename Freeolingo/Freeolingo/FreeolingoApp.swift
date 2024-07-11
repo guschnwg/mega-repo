@@ -9,16 +9,19 @@ import SwiftUI
 
 @main
 struct FreeolingoApp: App {
-    @StateObject private var store = Store()
+    @StateObject private var api = Api()
+    @StateObject private var state = AppState()
     @StateObject private var speaker = Speaker()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(store)
+                .environmentObject(api)
                 .environmentObject(speaker)
+                .environmentObject(state)
                 .onAppear {
-                    store.getAvailableCourses(fromLanguages: ["pt"])
+                    api.getAvailableCourses(fromLanguages: ["pt"])
+                    Task { try await state.load() }
                 }
         }
     }

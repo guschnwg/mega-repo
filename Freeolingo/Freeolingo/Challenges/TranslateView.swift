@@ -39,10 +39,12 @@ struct TranslateView: View {
                         onTapGesture: { choiceChosen.removeAll(where: { $0 == choiceIndex }) }
                     ) {
                         Text(choice.text)
+                        .padding(.all, -8)
                     }
-                    .frame(width: CGFloat(choice.text.count * 12 + 55))
+                    .frame(width: CGFloat(choice.text.count * 15 + 40))
                 }
-            }.padding(.all, 10)
+            }
+            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, minHeight: 120)
             
             Spacer()
             
@@ -62,25 +64,23 @@ struct TranslateView: View {
                         }
                     ) {
                         Text(choice.text)
-                            .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                        .foregroundStyle(alreadyMatched ? .black.opacity(0.5) : .black)
+                        .padding(.all, -8)
                     }
-                    .frame(width: CGFloat(choice.text.count * 12 + 55))
+                    .frame(width: CGFloat(choice.text.count * 15 + 40))
                 }
             }.padding(.all, 10)
             
             Spacer()
             
-            Button("Confirm") {
+            ConfirmButtonView {
                 onComplete(
                     translate.correctIndices == choiceChosen,
                     Text(translate.correctSolutions[0])
                 )
             }
-            .frame(maxWidth: .infinity)
-            .padding(.all, 20)
             .disabled(choiceChosen.isEmpty)
         }
-        .padding(.vertical, 100)
         .onChange(of: translate) {
             choiceChosen = []
             shuffled = translate.choices.shuffled()
@@ -114,5 +114,6 @@ struct TranslateView: View {
         onComplete: {isCorrect,_ in print("Is correct: \(isCorrect)")}
     )
     .environmentObject(Speaker())
+    .environmentObject(ColorWrapper(.red))
     .background(.blue.lighter(by: 0.3))
 }

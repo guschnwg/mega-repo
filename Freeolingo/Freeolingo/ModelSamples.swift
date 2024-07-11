@@ -670,7 +670,8 @@ let LISTEN_SPEAK_CHALLENGE: Challenge = getChallenge(type: "listenSpeak", json: 
         "óleo",
         "na",
         "sal",
-        "limão"
+        "limão",
+        "Mm"
       ],
       "correctIndices": [
         0,
@@ -1021,159 +1022,337 @@ let NAME_CHALLENGE: Challenge = getChallenge(type: "name", json: """
 """)
 let PARTIAL_REVERSE_TRANSLATE_CHALLENGE: Challenge = getChallenge(type: "partialReverseTranslate", json: """
 {
-      "prompt": "Le cœur est un organe.",
-      "correctTokens": [
-        "Le",
-        "cœur",
-        "est",
-        "un",
-        "organe"
-      ],
-      "wrongTokens": [
-        "une",
-        "calme",
-        "chat",
-        "enfant"
-      ],
-      "choices": [
+  "prompt": "Nós voltamos muito tarde.",
+  "displayTokens": [
+    {
+      "text": "Nous",
+      "isBlank": true
+    },
+    {
+      "text": " ",
+      "isBlank": true
+    },
+    {
+      "text": "sommes",
+      "isBlank": true
+    },
+    {
+      "text": " ",
+      "isBlank": true
+    },
+    {
+      "text": "rentrés",
+      "isBlank": true
+    },
+    {
+      "text": " ",
+      "isBlank": false
+    },
+    {
+      "text": "très",
+      "isBlank": false
+    },
+    {
+      "text": " ",
+      "isBlank": false
+    },
+    {
+      "text": "tard",
+      "isBlank": false
+    },
+    {
+      "text": ".",
+      "isBlank": false
+    }
+  ],
+  "grader": {
+    "version": 0,
+    "vertices": [
+      [
         {
-          "text": "Le",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/ca1ffa8bc37c1bb1da3459c825da65d9"
-        },
-        {
-          "text": "cœur",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/fa55d6c9091abd5f4623f670cb978a6e"
-        },
-        {
-          "text": "est",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/abc620b26452bb26e4fe5a1df039c538"
-        },
-        {
-          "text": "un",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/89b2511798ce14d843da0b80ee03093b"
-        },
-        {
-          "text": "organe",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/8a4c3e499f265f599af9bb6386ff025b"
-        },
-        {
-          "text": "une",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/9da9d3314e4087986594b839095265e9"
-        },
-        {
-          "text": "calme",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/441d8820c3f7d6739dc3c61af4f977f1"
-        },
-        {
-          "text": "chat",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/f0cb17c0f0d55aee3d59959854eda98a"
-        },
-        {
-          "text": "enfant",
-          "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/1d5af41539bbedb3274cc184f4f449b0"
+          "to": 1,
+          "lenient": ""
         }
       ],
-      "correctIndices": [
-        0,
-        1,
-        2,
-        3,
-        4
+      [
+        {
+          "to": 2,
+          "lenient": "nous",
+          "orig": "Nous"
+        },
+        {
+          "to": 10,
+          "lenient": "nous",
+          "orig": "Nous"
+        },
+        {
+          "to": 14,
+          "lenient": "nous",
+          "orig": "Nous"
+        },
+        {
+          "to": 18,
+          "lenient": "nous",
+          "orig": "Nous"
+        },
+        {
+          "to": 22,
+          "lenient": "nous",
+          "orig": "Nous"
+        }
       ],
-      "solutionTranslation": "O coração é um órgão.",
-      "tts": "https://d1vq87e9lcf771.cloudfront.net/victor/524cf63b238631aaf7ee577676a0fbf5",
-      "slowTts": "https://d1vq87e9lcf771.cloudfront.net/victor/6c9eb0773e3f02feccef4a4e5451585b",
-      "grader": {
-        "version": 0,
-        "vertices": [
+      [
+        {
+          "to": 3,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 4,
+          "lenient": "sommes"
+        }
+      ],
+      [
+        {
+          "to": 5,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 6,
+          "lenient": "rentrées"
+        },
+        {
+          "to": 6,
+          "lenient": "rentrés"
+        }
+      ],
+      [
+        {
+          "to": 7,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 8,
+          "lenient": "très"
+        }
+      ],
+      [
+        {
+          "to": 9,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 26,
+          "lenient": "tard",
+          "orig": "tard."
+        }
+      ],
+      [
+        {
+          "to": 11,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 12,
+          "lenient": "sommes"
+        }
+      ],
+      [
+        {
+          "to": 13,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 6,
+          "lenient": "retournées"
+        }
+      ],
+      [
+        {
+          "to": 15,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 16,
+          "lenient": "sommes"
+        }
+      ],
+      [
+        {
+          "to": 17,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 6,
+          "lenient": "retournés"
+        }
+      ],
+      [
+        {
+          "to": 19,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 20,
+          "lenient": "sommes"
+        }
+      ],
+      [
+        {
+          "to": 21,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 6,
+          "lenient": "revenues"
+        }
+      ],
+      [
+        {
+          "to": 23,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 24,
+          "lenient": "sommes"
+        }
+      ],
+      [
+        {
+          "to": 25,
+          "lenient": " "
+        }
+      ],
+      [
+        {
+          "to": 6,
+          "lenient": "revenus"
+        }
+      ],
+      []
+    ],
+    "language": "fr",
+    "whitespaceDelimited": true
+  },
+  "tokens": [
+    {
+      "value": "Nós",
+      "hintTable": {
+        "headers": [],
+        "rows": [
           [
             {
-              "to": 1,
-              "lenient": ""
+              "colspan": 1,
+              "hint": "nous"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "value": " "
+    },
+    {
+      "value": "voltamos",
+      "hintTable": {
+        "headers": [],
+        "rows": [
+          [
+            {
+              "colspan": 1,
+              "hint": "sommes rentrés / sommes rentrées"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "value": " "
+    },
+    {
+      "value": "muito",
+      "hintTable": {
+        "headers": [],
+        "rows": [
+          [
+            {
+              "colspan": 1,
+              "hint": "très"
             }
           ],
           [
             {
-              "to": 2,
-              "lenient": "le",
-              "orig": "Le"
-            },
-            {
-              "to": 2,
-              "lenient": "el",
-              "type": "typo",
-              "orig": "Le"
+              "colspan": 1,
+              "hint": "beaucoup"
             }
           ],
           [
             {
-              "to": 3,
-              "lenient": " "
+              "colspan": 1,
+              "hint": "beaucoup de"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "value": " "
+    },
+    {
+      "value": "tarde",
+      "hintTable": {
+        "headers": [],
+        "rows": [
+          [
+            {
+              "colspan": 1,
+              "hint": "tard"
             }
           ],
           [
             {
-              "to": 4,
-              "lenient": "cœur"
-            },
-            {
-              "to": 4,
-              "lenient": "coeur"
+              "colspan": 1,
+              "hint": "après-midi"
             }
           ],
           [
             {
-              "to": 5,
-              "lenient": " "
+              "colspan": 1,
+              "hint": "midi"
             }
-          ],
-          [
-            {
-              "to": 6,
-              "lenient": "est"
-            }
-          ],
-          [
-            {
-              "to": 7,
-              "lenient": " "
-            }
-          ],
-          [
-            {
-              "to": 8,
-              "lenient": "un"
-            },
-            {
-              "to": 8,
-              "lenient": "1",
-              "auto": true
-            }
-          ],
-          [
-            {
-              "to": 9,
-              "lenient": " "
-            }
-          ],
-          [
-            {
-              "to": 10,
-              "lenient": "organe",
-              "orig": "organe."
-            }
-          ],
-          []
-        ],
-        "language": "fr",
-        "whitespaceDelimited": true
-      },
-      "type": "listenTap",
-      "id": "7d05117d15724c8ab248c5f337066038",
-      "newWords": [],
-      "progressUpdates": [],
-      "sentenceId": "8275642add7c83704e34bf1dd6aa6d69"
+          ]
+        ]
+      }
+    },
+    {
+      "value": "."
     }
+  ],
+  "tts": "https://d1vq87e9lcf771.cloudfront.net/ricardo/507f05286d546e5d95dd8416808c1861",
+  "type": "partialReverseTranslate",
+  "id": "45f9de7e164c4878989fa15ccd4a28ba"
+}
 """)
 let SELECT_CHALLENGE: Challenge = getChallenge(type: "select", json: """
 {
@@ -1578,58 +1757,31 @@ let CHALLENGES: [Challenge] = [
 let SESSIONS = [
     Session(id: "1", type: "LESSON", challenges: CHALLENGES),
     Session(id: "2", type: "LESSON", challenges: CHALLENGES),
-    Session(id: "3", type: "LESSON", challenges: CHALLENGES),
-    Session(id: "4", type: "LESSON", challenges: CHALLENGES),
-    Session(id: "5", type: "LESSON", challenges: CHALLENGES),
 ]
 
 let LEVELS = [
-    Level(id: "1", name: "My level", type: LevelType.skill, totalSessions: 5),
-    Level(id: "2", name: "My level", type: LevelType.skill, totalSessions: 5),
-    Level(id: "3", name: "My level", type: LevelType.skill, totalSessions: 5),
-    Level(id: "4", name: "My level", type: LevelType.chest, totalSessions: 5),
-    Level(id: "5", name: "My level", type: LevelType.skill, totalSessions: 5),
-    Level(id: "6", name: "My level", type: LevelType.skill, totalSessions: 5),
-    Level(id: "7", name: "My level", type: LevelType.unitReview, totalSessions: 5),
+    Level(id: 1, name: "My level", type: LevelType.skill, totalSessions: 5, pathLevelMetadata: nil),
+    Level(id: 2, name: "My level", type: LevelType.skill, totalSessions: 5, pathLevelMetadata: nil),
 ]
 
 let UNITS = [
     Unit(id: 1, name: "My unit", levels: LEVELS),
     Unit(id: 2, name: "My unit", levels: LEVELS),
-    Unit(id: 3, name: "My unit", levels: LEVELS),
-    Unit(id: 4, name: "My unit", levels: LEVELS),
-    Unit(id: 5, name: "My unit", levels: LEVELS),
-    Unit(id: 6, name: "My unit", levels: LEVELS)
 ]
 
 let EXAMPLE_SENTENCE = Section.ExampleSentence(exampleSentence: "Example Sentence")
 
 let SECTIONS = [
-    Section(name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
-    Section(name: "FIrst section", type: SectionType.dailyRefresh, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(id: 0, name: "FIrst section", type: SectionType.learning, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(id: 3, name: "FIrst section", type: SectionType.personalizedPractice, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
+    Section(id: 6, name: "FIrst section", type: SectionType.dailyRefresh, units: UNITS, exampleSentence: EXAMPLE_SENTENCE),
 ]
 
 let COURSES = [
-    Course(id: "1", fromLanguage: "pt", learningLanguage: "en", sections: SECTIONS),
+    Course(id: "1", fromLanguage: "pt", learningLanguage: "fr", sections: SECTIONS),
     Course(id: "2", fromLanguage: "pt", learningLanguage: "fr", sections: SECTIONS)
 ]
 
 let AVAILABLE_COURSES = [
     AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
-    AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "fr", learningLanguageName: "Francês", numLearners: 2000),
 ]

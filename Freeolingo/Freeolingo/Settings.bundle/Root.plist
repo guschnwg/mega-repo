@@ -58,7 +58,7 @@
 			<key>Title</key>
 			<string>Debug Mode</string>
 			<key>Key</key>
-			<string>debug</string>
+			<string>debug_mode</string>
 			<key>DefaultValue</key>
 			<true/>
 		</dict>

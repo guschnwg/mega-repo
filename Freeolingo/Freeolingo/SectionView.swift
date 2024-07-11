@@ -30,6 +30,10 @@ struct SectionView: View {
     let course: Course
     let section: Section
     
+    @EnvironmentObject var state: AppState
+    
+    @State private var counter = 0
+    
     var body: some View {
         ScrollView {
             ForEach(section.units.indices, id: \.self) { index in
@@ -37,39 +41,58 @@ struct SectionView: View {
                 let color = getColor(index: index)
                 let increment = CGFloat(1) / CGFloat(unit.levels.count + 5)
                 
+                let isAvailable = state.isAvailable(
+                    course: course, section: section, unit: unit
+                )
+
                 VStack {
                     Text(unit.name ?? "???")
                         .frame(maxWidth: .infinity)
                         .frame(height: 100).font(.system(size: 20))
-                        .background(color)
+                        .background(isAvailable ? color : color.opacity(0.5))
+                        .foregroundColor(isAvailable ? .black : .black.opacity(0.5))
 
                     Spacer(minLength: 20)
                     
-                    // Can't be more arbitrary than this...
-                    VStack (alignment: .center, spacing: 0) {
-                        ForEach(unit.levels.indices, id: \.self) { levelIndex in
-                            let level = unit.levels[levelIndex]
-                            let levelColor = color.lighter(by: increment * CGFloat(levelIndex))
-                            
-                            LevelView(
-                                course: course,
-                                section: section,
-                                unit: unit,
-                                level: level,
-                                color: levelColor
-                            )
-                            .frame(width: 120, height: 120)
-                            .background(levelColor)
-                            .clipShape(Circle())
-                            .offset(
-                                x: levelIndex % 2 == 0 ? 80.0 : -80.0,
-                                y: CGFloat(-36 * levelIndex)
-                            )
+                    ZStack(alignment: .topLeading) {
+                        VStack (alignment: .center, spacing: 0) {
+                            ForEach(unit.levels.indices, id: \.self) { levelIndex in
+                                let level = unit.levels[levelIndex]
+                                let levelColor = color.lighter(by: increment * CGFloat(levelIndex))
+                                
+                                LevelView(
+                                    course: course,
+                                    section: section,
+                                    unit: unit,
+                                    level: level,
+                                    finishAction: {
+                                        // TODO: Not unlocking the next level
+                                    }
+                                )
+                                .frame(width: 120, height: 120)
+                                .environmentObject(ColorWrapper(levelColor))
+                                .offset(
+                                    x: levelIndex % 2 == 0 ? 80.0 : -80.0,
+                                    y: CGFloat(-36 * levelIndex)
+                                )
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        // Can't be more arbitrary than this...
+                        .padding(.bottom, CGFloat(-36 * (unit.levels.count - 1)))
+                        
+                        if !isAvailable {
+                            Label("Locked", systemImage: "lock")
+                                .padding(.all, 20)
+                                .frame(
+                                    maxWidth: .infinity,
+                                    maxHeight: .infinity,
+                                    alignment: .topLeading
+                                )
+                                .background(.white.opacity(0.5))
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, CGFloat(-36 * (unit.levels.count - 1)))
-                    
+
                     Spacer(minLength: 20)
                 }
                 .frame(maxWidth: .infinity)
@@ -86,5 +109,7 @@ struct SectionView: View {
             course: COURSES[0],
             section: COURSES[0].sections[0]
         )
-    }.environmentObject(previewStore())
+    }
+    .environmentObject(previewApi())
+    .environmentObject(previewState())
 }

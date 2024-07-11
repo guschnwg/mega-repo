@@ -10,30 +10,20 @@ import Foundation
 import AVFoundation
 
 struct ContentView: View {
-    @EnvironmentObject var store: Store
+    @EnvironmentObject var api: Api
 
     @State var state: Int = 0
     
     var body: some View {
-        if store.availableCourses.isEmpty {
+        if api.availableCourses.isEmpty {
             Text("No courses")
             
             Button("Refresh") {
-                store.getAvailableCourses(fromLanguages: ["pt"])
+                api.getAvailableCourses(fromLanguages: ["pt"])
             }
         } else {
             NavigationStack {
-                VStack {
-                    CoursesListView(availableCourses: store.availableCourses)
-
-                    if UserDefaults.standard.bool(forKey: "debug_mode") {
-                        Spacer()
-
-                        NavigationLink(destination: AllChallengesView()) {
-                            Text("AllChallengesView")
-                        }
-                    }
-                }
+                CoursesListView(availableCourses: api.availableCourses)
             }
         }
     }
@@ -41,5 +31,5 @@ struct ContentView: View {
 
 
 #Preview {
-    return ContentView().environmentObject(previewStore())
+    return ContentView().environmentObject(previewApi())
 }
