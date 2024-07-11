@@ -109,7 +109,6 @@
 			isa = PBXGroup;
 			children = (
 				6B76CD782BD31A1300DCA0C0 /* AssistView.swift */,
-				6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */,
 				6B76CD7A2BD31B1A00DCA0C0 /* CompleteReverseTranslationView.swift */,
 				6B76CD7E2BD31C6800DCA0C0 /* ListenCompleteView.swift */,
 				6B76CD802BD31D5500DCA0C0 /* ListenIsolationView.swift */,
@@ -123,8 +122,6 @@
 				6B76CD8E2BD322DE00DCA0C0 /* SelectView.swift */,
 				6B76CD902BD3243D00DCA0C0 /* SpeakView.swift */,
 				6B76CD922BD324C100DCA0C0 /* TranslateView.swift */,
-				6BF2BEE92C32EE7E000ABE81 /* ConfirmButtonView.swift */,
-				6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */,
 			);
 			path = Challenges;
 			sourceTree = "<group>";
@@ -159,6 +156,7 @@
 				6BA596F22C00BA01007AEEF9 /* LevelView.swift */,
 				6BA596F02C00B9A9007AEEF9 /* SessionView.swift */,
 				6BA596EC2C00AD23007AEEF9 /* SessionChallengesView.swift */,
+				6B76CD722BD2F75000DCA0C0 /* ChallengeView.swift */,
 				6BF0C5932C406F48001D151F /* StoryView.swift */,
 				6BA222C62BB8D86B00E11D96 /* Assets.xcassets */,
 				6BA596FC2C00EC92007AEEF9 /* Settings.bundle */,
@@ -184,6 +182,8 @@
 		6BF0C5962C409C64001D151F /* Primitives */ = {
 			isa = PBXGroup;
 			children = (
+				6BF2BEE92C32EE7E000ABE81 /* ConfirmButtonView.swift */,
+				6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */,
 				6B76CD742BD2F7D700DCA0C0 /* RecognizeSpeechView.swift */,
 				6B76CD762BD2F80A00DCA0C0 /* TextWithTTSView.swift */,
 				6BF2BEE52C2CFD16000ABE81 /* ButtonWithTTSView.swift */,
