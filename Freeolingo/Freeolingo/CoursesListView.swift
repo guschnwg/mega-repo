@@ -42,18 +42,6 @@ struct CoursesListView : View {
                     .background(rowColor)
                     .foregroundColor(.white)
                 }
-                
-                if UserDefaults.standard.bool(forKey: "debug_mode") {
-                    Spacer()
-
-                    NavigationLink(destination: AllChallengesView()) {
-                        Text("AllChallengesView")
-                    }
-                    .frame(height: 100)
-                    .frame(maxWidth: .infinity)
-                    .background(baseColor)
-                    .foregroundColor(.white)
-                }
             }
         }.navigationTitle("Courses")
             .background(baseColor)
