@@ -8,6 +8,13 @@
 import Foundation
 import SwiftUI
 
+private struct ApiData: Codable {
+    var availableCourses: [AvailableCourse]
+    var courses: [Course]
+    var sessionsMap: [String: Session]
+    var storiesMap: [String: Story]
+}
+
 class Api: ObservableObject {
     @Published var availableCourses: [AvailableCourse] = []
     @Published var courses: [Course] = []
@@ -21,8 +28,59 @@ class Api: ObservableObject {
         UserDefaults.standard.string(forKey: "header_two") ?? "Key-Two: Value"
     ]
     
-    func apiFetch<T: Decodable>(url: URL, onComplete: @escaping (T) -> Void) {
-        var request = URLRequest(url: url)
+    //
+    
+    private static func fileURL(_ path: String) throws -> URL {
+        var items = path.split(separator: "/")
+        items.remove(at: 1)
+        
+        var url = try FileManager.default.url(for: .documentDirectory,
+                                    in: .userDomainMask,
+                                    appropriateFor: nil,
+                                    create: true)
+
+        url = url.appendingPathComponent(items.joined(separator: "|"))
+        
+        return url
+    }
+    
+    func loadFrom<T: Decodable>(_ type: T.Type, _ path: String) async -> Optional<T> {
+        let task = Task<Optional<T>, Error> {
+            let fileURL = try Self.fileURL(path)
+            guard let data = try? Data(contentsOf: fileURL) else {
+                return nil
+            }
+            do {
+                let stateData = try JSONDecoder().decode(type, from: data)
+                return stateData
+            } catch {
+                return nil
+            }
+        }
+        
+        do {
+            let object = try await task.value
+            return object
+        } catch {
+            return nil
+        }
+    }
+    
+    @MainActor private func save(_ path: String, _ data: Data) async {
+        Task {
+            let outfile = try Self.fileURL(path)
+            do {
+                try data.write(to: outfile)
+            } catch {
+                print("Error saving file \(error)")
+            }
+        }
+    }
+    
+    //
+    
+    func apiFetch<T: Decodable>(_ type: T.Type, _ path: String) async -> (Optional<T>, Optional<Data>) {
+        var request = URLRequest(url: URL(string: "\(baseURL)/\(path)")!)
         for header in headers {
             let components = header.components(separatedBy: ":")
             if components.count == 2 {
@@ -31,56 +89,62 @@ class Api: ObservableObject {
                 request.setValue(value, forHTTPHeaderField: key)
             }
         }
-        let task = URLSession.shared.dataTask(with: request) {data, response, error in
-            do {
-                if let data = data {
-                    let decoded = try JSONDecoder().decode(T.self, from: data)
-                    DispatchQueue.main.async {
-                        onComplete(decoded)
-                    }
-                }
-            } catch {
-                print(error)
-            }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let decoded = try JSONDecoder().decode(T.self, from: data)
+            return (decoded, data)
+        } catch {
+            return (nil, nil)
         }
-        task.resume()
     }
     
-    func getAvailableCourses(fromLanguages: [String]) {
-        // TODO: Keep this persistent in the app, not just the server
+    func localOrFetch<T: Decodable>(_ type: T.Type, _ path: String) async -> Optional<T> {
+        if let data = await loadFrom(type.self, path) {
+            print("Found in local storage")
+            return data
+        }
 
+        print("Calling the API")
+        let (toReturn, data) = await apiFetch(T.self, path)
+        if let data = data {
+            await save(path, data)
+        }
+        return toReturn
+    }
+    
+    //
+    
+    func getAvailableCourses(fromLanguages: [String]) {
         if !self.availableCourses.isEmpty {
             return
         }
         
-        let url = URL(string: "\(baseURL)/getCourseList/\(token)")!
-        apiFetch(url: url) { (courses: [AvailableCourse]) in
-            self.availableCourses = courses.filter { fromLanguages.contains($0.fromLanguage) }
+        Task {
+            let path = "getCourseList/\(token)"
+            if let availableCourses = await localOrFetch([AvailableCourse].self, path) {
+                await MainActor.run {
+                    self.availableCourses = availableCourses.filter { fromLanguages.contains($0.fromLanguage) }
+                }
+            }
         }
     }
     
     func getCourse(languageSettings: LanguageSettings) {
-        // TODO: Keep this persistent in the app, not just the server
-
-        if self.courses.contains(where: { $0.fromLanguage == languageSettings.fromLanguage && $0.learningLanguage == languageSettings.learningLanguage }) {
+        if self.courses.contains(
+            where: { $0.fromLanguage == languageSettings.fromLanguage && $0.learningLanguage == languageSettings.learningLanguage }
+        ) {
             return
         }
 
-        let path = "getSpecificCourse/\(token)/\(languageSettings.fromLanguage)/\(languageSettings.learningLanguage)"
-        let url = URL(string: "\(baseURL)/\(path)")!
-        apiFetch(url: url) { (course: Course) in
-            self.courses.append(course)
+        Task {
+            let path = "getSpecificCourse/\(token)/\(languageSettings.fromLanguage)/\(languageSettings.learningLanguage)"
+            if let course = await localOrFetch(Course.self, path) {
+                await MainActor.run {
+                    self.courses.append(course)
+                }
+            }
         }
-    }
-    
-    func keyFor(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) -> String {
-        let fromLanguage = course.fromLanguage
-        let learningLanguage = course.learningLanguage
-        let sectionIndex = course.sections.firstIndex(where: { $0.name == section.name }) ?? 0
-        let unitIndex = section.units.firstIndex(where: { $0.id == unit.id }) ?? 0
-        let levelIndex = unit.levels.firstIndex(where: { $0.id == level.id }) ?? 0
-        let path = "getSession/\(token)/\(fromLanguage)/\(learningLanguage)/\(sectionIndex)/\(unitIndex)/\(levelIndex)/\(sessionIndex)"
-        return path
     }
     
     func getStory(course: Course, section: Section, unit: Unit, level: Level) {
@@ -88,20 +152,36 @@ class Api: ObservableObject {
 
         let storyId = level.pathLevelMetadata?.storyId ?? "i-dont-know"
         let path = "getStory/\(token)/\(storyId)"
+        let pathTwo = keyFor(course, section, unit, level, 0)
 
         if self.storiesMap.keys.contains(path) {
             return
         }
 
-        let url = URL(string: "\(baseURL)/\(path)")!
-        apiFetch(url: url) { (story: Story) in
-            self.storiesMap[path] = story
+        Task {
+            if let story = await localOrFetch(Story.self, path) {
+                await MainActor.run {
+                    self.storiesMap[path] = story
+                    self.storiesMap[pathTwo] = story
+                }
+            }
         }
     }
     
+    func keyFor(_ course: Course, _ section: Section, _ unit: Unit, _ level: Level, _ sessionIndex: Int) -> String {
+        let fromLanguage = course.fromLanguage
+        let learningLanguage = course.learningLanguage
+        let sectionIndex = course.sections.firstIndex(of: section) ?? 0
+        let unitIndex = section.units.firstIndex(of: unit) ?? 0
+        let levelIndex = unit.levels.firstIndex(of: level) ?? 0
+
+        let actualIndex = level.type == .story ? 0 : sessionIndex
+
+        return "getSession/\(token)/\(fromLanguage)/\(learningLanguage)/\(sectionIndex)/\(unitIndex)/\(levelIndex)/\(actualIndex)"
+    }
+    
     func getSession(course: Course, section: Section, unit: Unit, level: Level, sessionIndex: Int) {
-        // TODO: Keep this persistent in the app, not just the server
-        let path = keyFor(course: course, section: section, unit: unit, level: level, sessionIndex: sessionIndex)
+        let path = keyFor(course, section, unit, level, sessionIndex)
 
         if self.sessionsMap.keys.contains(path) {
             return
@@ -115,9 +195,12 @@ class Api: ObservableObject {
             return
         }
 
-        let url = URL(string: "\(baseURL)/\(path)")!
-        apiFetch(url: url) { (session: Session) in
-            self.sessionsMap[path] = session
+        Task {
+            if let session = await localOrFetch(Session.self, path) {
+                await MainActor.run {
+                    self.sessionsMap[path] = session
+                }
+            }
         }
     }
 }

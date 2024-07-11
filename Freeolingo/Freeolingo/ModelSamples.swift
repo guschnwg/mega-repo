@@ -1760,7 +1760,7 @@ let SESSIONS = [
 ]
 
 let LEVELS = [
-    Level(id: 1, name: "My level", type: LevelType.skill, totalSessions: 5, pathLevelMetadata: nil),
+    Level(id: 1, name: "My levelaaaa a a a a a aaaaa a a", type: LevelType.skill, totalSessions: 5, pathLevelMetadata: nil),
     Level(id: 2, name: "My level", type: LevelType.skill, totalSessions: 5, pathLevelMetadata: nil),
 ]
 
@@ -1784,4 +1784,8 @@ let COURSES = [
 
 let AVAILABLE_COURSES = [
     AvailableCourse(fromLanguage: "pt", fromLanguageName: "Português", learningLanguage: "es", learningLanguageName: "Espanhol", numLearners: 1000),
+]
+
+let STORIES = [
+    Story(fromLanguageName: "en")
 ]

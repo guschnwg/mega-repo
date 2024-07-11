@@ -41,6 +41,7 @@
 		6BA596FB2C00BB02007AEEF9 /* AllChallengesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */; };
 		6BA596FD2C00EC92007AEEF9 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 6BA596FC2C00EC92007AEEF9 /* Settings.bundle */; };
 		6BD1D6772C3309D900F11D32 /* MatchButtonWithTTSView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */; };
+		6BF0C5942C406F48001D151F /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF0C5932C406F48001D151F /* StoryView.swift */; };
 		6BF2BEDE2C2B1E17000ABE81 /* StringMetric in Frameworks */ = {isa = PBXBuildFile; productRef = 6BF2BEDD2C2B1E17000ABE81 /* StringMetric */; };
 		6BF2BEE02C2B1E1D000ABE81 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = 6BF2BEDF2C2B1E1D000ABE81 /* WrappingHStack */; };
 		6BF2BEE22C2CF6A9000ABE81 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF2BEE12C2CF6A9000ABE81 /* Speaker.swift */; };
@@ -88,6 +89,7 @@
 		6BA596FA2C00BB02007AEEF9 /* AllChallengesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllChallengesView.swift; sourceTree = "<group>"; };
 		6BA596FC2C00EC92007AEEF9 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		6BD1D6762C3309D900F11D32 /* MatchButtonWithTTSView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchButtonWithTTSView.swift; sourceTree = "<group>"; };
+		6BF0C5932C406F48001D151F /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
 		6BF2BEE12C2CF6A9000ABE81 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		6BF2BEE52C2CFD16000ABE81 /* ButtonWithTTSView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonWithTTSView.swift; sourceTree = "<group>"; };
 		6BF2BEE72C2FA00C000ABE81 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				6BA596FC2C00EC92007AEEF9 /* Settings.bundle */,
 				6BF2BEE12C2CF6A9000ABE81 /* Speaker.swift */,
 				6BF2BEE72C2FA00C000ABE81 /* AppState.swift */,
+				6BF0C5932C406F48001D151F /* StoryView.swift */,
 			);
 			path = Freeolingo;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 				6BA596F92C00BADA007AEEF9 /* CoursesListView.swift in Sources */,
 				6B76CD812BD31D5500DCA0C0 /* ListenIsolationView.swift in Sources */,
 				6BD1D6772C3309D900F11D32 /* MatchButtonWithTTSView.swift in Sources */,
+				6BF0C5942C406F48001D151F /* StoryView.swift in Sources */,
 				6B76CD7F2BD31C6800DCA0C0 /* ListenCompleteView.swift in Sources */,
 				6B76CD832BD31ED100DCA0C0 /* ListenMatchView.swift in Sources */,
 				6BA596F12C00B9A9007AEEF9 /* SessionView.swift in Sources */,
@@ -449,6 +453,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportsDocumentBrowser = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -479,6 +484,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportsDocumentBrowser = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

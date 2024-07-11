@@ -13,16 +13,29 @@ struct FreeolingoApp: App {
     @StateObject private var state = AppState()
     @StateObject private var speaker = Speaker()
     
+    @State private var isReady = false
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(api)
-                .environmentObject(speaker)
-                .environmentObject(state)
-                .onAppear {
-                    api.getAvailableCourses(fromLanguages: ["pt"])
-                    Task { try await state.load() }
+            VStack {
+                if isReady {
+                    ContentView()
+                        .environmentObject(api)
+                        .environmentObject(speaker)
+                        .environmentObject(state)
+                } else {
+                    Text("Loading...")
                 }
+            }
+            .onAppear {
+                Task {
+                    try await state.load()
+                    
+                    api.getAvailableCourses(fromLanguages: ["pt"])
+                    
+                    isReady = true
+                }
+            }
         }
     }
 }

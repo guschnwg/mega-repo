@@ -9,7 +9,7 @@ import Foundation
 import AVFoundation
 
 class Speaker: ObservableObject {
-    let synthesizer = AVSpeechSynthesizer()
+    var synthesizer = AVSpeechSynthesizer()
 
     func prepare(_ language: String, _ text: String) -> AVSpeechUtterance {
         let speechUtterance = AVSpeechUtterance(string: text)

@@ -32,8 +32,6 @@ struct SectionView: View {
     
     @EnvironmentObject var state: AppState
     
-    @State private var counter = 0
-    
     var body: some View {
         ScrollView {
             ForEach(section.units.indices, id: \.self) { index in
@@ -41,9 +39,7 @@ struct SectionView: View {
                 let color = getColor(index: index)
                 let increment = CGFloat(1) / CGFloat(unit.levels.count + 5)
                 
-                let isAvailable = state.isAvailable(
-                    course: course, section: section, unit: unit
-                )
+                let isAvailable = state.isAvailable(course, section, unit)
 
                 VStack {
                     Text(unit.name ?? "???")
@@ -67,6 +63,12 @@ struct SectionView: View {
                                     level: level,
                                     finishAction: {
                                         // TODO: Not unlocking the next level
+                                        // Complete Unit if last one
+                                        if levelIndex == unit.levels.count - 1 {
+                                            Task {
+                                                await state.complete(course, section, unit)
+                                            }
+                                        }
                                     }
                                 )
                                 .frame(width: 120, height: 120)

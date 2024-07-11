@@ -7,35 +7,35 @@
 
 import Foundation
 
-struct Challenge: Decodable, Identifiable {
-    struct DisplayToken: Decodable, Equatable {
+struct Challenge: Codable, Identifiable {
+    struct DisplayToken: Codable, Equatable {
         let text: String
         let isBlank: Bool
     }
 
-    struct Token: Decodable, Equatable {
+    struct Token: Codable, Equatable {
         let value: String
     }
 
-    struct Option: Decodable, Hashable, Equatable {
+    struct Option: Codable, Hashable, Equatable {
         let text: String
     }
 
-    struct Choice: Decodable, Hashable, Equatable {
+    struct Choice: Codable, Hashable, Equatable {
         let text: String
     }
 
-    struct Pair: Decodable, Hashable, Equatable {
+    struct Pair: Codable, Hashable, Equatable {
         let learningWord: String
         let translation: String
     }
 
-    struct MatchPair: Decodable, Hashable, Equatable {
+    struct MatchPair: Codable, Hashable, Equatable {
         let learningToken: String
         let fromToken: String
     }
 
-    struct SelectChoice: Decodable, Hashable, Equatable {
+    struct SelectChoice: Codable, Hashable, Equatable {
         let image: String
         let phrase: String
         let hint: String
@@ -43,28 +43,28 @@ struct Challenge: Decodable, Identifiable {
 
     //
 
-    struct Assist: Decodable, Equatable {
+    struct Assist: Codable, Equatable {
         let prompt: String
         let choices: [String]
         let correctIndex: Int
     }
 
-    struct CompleteReverseTranslation: Decodable, Equatable {
+    struct CompleteReverseTranslation: Codable, Equatable {
         let prompt: String
         let displayTokens: [DisplayToken]
     }
 
-    struct Listen: Decodable, Equatable {
+    struct Listen: Codable, Equatable {
         let prompt: String
         let solutionTranslation: String
     }
 
-    struct ListenComplete: Decodable, Equatable {
+    struct ListenComplete: Codable, Equatable {
         let displayTokens: [DisplayToken]
         let solutionTranslation: String
     }
 
-    struct ListenIsolation: Decodable, Equatable {
+    struct ListenIsolation: Codable, Equatable {
         let blankRangeStart: Int
         let blankRangeEnd: Int
         let tokens: [Token]
@@ -73,64 +73,64 @@ struct Challenge: Decodable, Identifiable {
         let correctIndex: Int
     }
 
-    struct ListenMatch: Decodable, Equatable {
+    struct ListenMatch: Codable, Equatable {
         let pairs: [Pair]
     }
 
-    struct ListenSpeak: Decodable, Equatable {
+    struct ListenSpeak: Codable, Equatable {
         let prompt: String
         let solutionTranslation: String
         let choices: [String]
         let correctIndices: [Int]
     }
     
-    struct ListenTap: Decodable, Equatable {
+    struct ListenTap: Codable, Equatable {
         let prompt: String
         let solutionTranslation: String
         let choices: [Choice]
         let correctIndices: [Int]
     }
 
-    struct Match: Decodable, Equatable {
+    struct Match: Codable, Equatable {
         let pairs: [MatchPair]
     }
 
-    struct Name: Decodable, Equatable {
+    struct Name: Codable, Equatable {
         let prompt: String
         let correctSolutions: [String]
     }
 
-    struct PartialReverseTranslate: Decodable, Equatable {
+    struct PartialReverseTranslate: Codable, Equatable {
         let prompt: String
         let displayTokens: [DisplayToken]
     }
 
-    struct Select: Decodable, Equatable {
+    struct Select: Codable, Equatable {
         let prompt: String
         let correctIndex: Int
         let choices: [SelectChoice]
     }
 
-    struct Speak: Decodable, Equatable {
+    struct Speak: Codable, Equatable {
         let prompt: String
         let solutionTranslation: String
     }
 
-    struct Translate: Decodable, Equatable {
+    struct Translate: Codable, Equatable {
         let prompt: String
         let correctSolutions: [String]
         let choices: [Choice]
         let correctIndices: [Int]
     }
     
-    struct GapFill: Decodable, Equatable {
+    struct GapFill: Codable, Equatable {
         
     }
     
     let id: String
     let type: String
     
-    enum DataTypes {
+    enum DataTypes: Codable {
         case assist(Assist),
             completeReverseTranslation(CompleteReverseTranslation),
             listen(Listen),
@@ -151,7 +151,7 @@ struct Challenge: Decodable, Identifiable {
     let data: DataTypes?
     
     enum CodingKeys : CodingKey {
-        case id, type, rawData, data
+        case id, type, data
     }
 
     init(type: String) {
@@ -211,12 +211,17 @@ struct Challenge: Decodable, Identifiable {
             }
         } catch {
             print("Error \(error)")
+            do {
+                print(try decoder.singleValueContainer().decode(String.self))
+            } catch {
+                print("Another error \(error)")
+            }
             data = nil
         }
     }
 }
 
-struct Session: Decodable, Identifiable, Equatable {
+struct Session: Codable, Identifiable, Equatable {
     static func == (lhs: Session, rhs: Session) -> Bool {
         return lhs.id == rhs.id
     }
@@ -227,7 +232,7 @@ struct Session: Decodable, Identifiable, Equatable {
     let challenges: Array<Challenge>
 }
 
-struct Story: Decodable, Equatable {
+struct Story: Codable, Equatable {
     static func == (lhs: Story, rhs: Story) -> Bool {
         return lhs.fromLanguageName == rhs.fromLanguageName
     }
@@ -235,7 +240,7 @@ struct Story: Decodable, Equatable {
     let fromLanguageName: String
 }
 
-enum LevelType: String, Decodable {
+enum LevelType: String, Codable {
     case chest = "chest"
     case skill = "skill"
     case unitReview = "unit_review"
@@ -243,11 +248,11 @@ enum LevelType: String, Decodable {
     case story = "story"
 }
 
-struct PathLevelMetadata: Decodable {
+struct PathLevelMetadata: Codable {
     let storyId: String?
 }
 
-struct Level: Decodable, Identifiable, Equatable {
+struct Level: Codable, Identifiable, Equatable {
     static func == (lhs: Level, rhs: Level) -> Bool {
         return lhs.id == rhs.id
     }
@@ -263,7 +268,7 @@ struct Level: Decodable, Identifiable, Equatable {
     }
 }
 
-struct Unit: Decodable, Identifiable, Equatable {
+struct Unit: Codable, Identifiable, Equatable {
     static func == (lhs: Unit, rhs: Unit) -> Bool {
         return lhs.id == rhs.id
     }
@@ -278,13 +283,13 @@ struct Unit: Decodable, Identifiable, Equatable {
     }
 }
 
-enum SectionType: String, Decodable {
+enum SectionType: String, Codable {
     case dailyRefresh = "daily_refresh"
     case learning = "learning"
     case personalizedPractice = "personalized_practice"
 }
 
-struct Section: Decodable, Equatable {
+struct Section: Codable, Equatable {
     static func == (lhs: Section, rhs: Section) -> Bool {
         return lhs.id == rhs.id
     }
@@ -294,7 +299,7 @@ struct Section: Decodable, Equatable {
     let type: SectionType
     let units: Array<Unit>
     
-    struct ExampleSentence: Decodable {
+    struct ExampleSentence: Codable {
         let exampleSentence: String
     }
 
@@ -305,7 +310,7 @@ struct Section: Decodable, Equatable {
     }
 }
 
-struct Course: Decodable, Identifiable {
+struct Course: Codable, Identifiable {
     let id: String
     let fromLanguage: String
     let learningLanguage: String
@@ -317,7 +322,7 @@ struct Course: Decodable, Identifiable {
     }
 }
 
-struct AvailableCourse: Decodable {
+struct AvailableCourse: Codable {
 //    {
 //        "num_learners": 332,
 //        "from_language_name": "Russian",

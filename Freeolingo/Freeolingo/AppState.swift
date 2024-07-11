@@ -24,7 +24,7 @@ class AppState: ObservableObject {
         .appendingPathComponent("freeolingo.state.data")
     }
     
-    func load() async throws {
+    @MainActor func load() async throws {
         let task = Task<StateData, Error> {
             let fileURL = try Self.fileURL()
             guard let data = try? Data(contentsOf: fileURL) else {
@@ -42,14 +42,17 @@ class AppState: ObservableObject {
         let data = try await task.value
         self.completed = data.completed
         self.currentSessionFor = data.currentSessionFor
+        
+        self.objectWillChange.send()
     }
     
-    private func save() async {
+    @MainActor private func save() async {
         let stateData = StateData(
             completed: completed,
             currentSessionFor: currentSessionFor
         )
         let task = Task {
+            // ?????? Saving an array as a dict ????
             let data = try JSONEncoder().encode(stateData)
             let outfile = try Self.fileURL()
             try data.write(to: outfile)
@@ -59,6 +62,8 @@ class AppState: ObservableObject {
         } catch {
             print(error)
         }
+
+        self.objectWillChange.send()
     }
     
     //
@@ -79,7 +84,7 @@ class AppState: ObservableObject {
         return false
     }
     
-    func isAvailable(course: Course, section: Section, unit: Unit) -> Bool {
+    func isAvailable(_ course: Course, _ section: Section, _ unit: Unit) -> Bool {
         let sectionIndex = course.sections.firstIndex(of: section)!
         let unitIndex = section.units.firstIndex(of: unit)!
         
@@ -108,7 +113,7 @@ class AppState: ObservableObject {
         
         // First level
         if levelIndex == 0 {
-            return isAvailable(course: course, section: section, unit: unit)
+            return isAvailable(course, section, unit)
         }
         
         // If this is already complete
@@ -126,6 +131,13 @@ class AppState: ObservableObject {
     
     //
     
+    func complete(_ course: Course, _ section: Section, _ unit: Unit) async {
+        let sectionIndex = course.sections.firstIndex(of: section)!
+        let unitIndex = section.units.firstIndex(of: unit)!
+        completed.append("\(course.id)|\(sectionIndex)|\(unitIndex)")
+        await save()
+    }
+    
     func complete(_ course: Course, _ section: Section, _ unit: Unit, _ level: Level) async {
         let sectionIndex = course.sections.firstIndex(of: section)!
         let unitIndex = section.units.firstIndex(of: unit)!
@@ -142,7 +154,6 @@ class AppState: ObservableObject {
         let levelIndex = unit.levels.firstIndex(of: level)!
 
         let key = "\(course.id)|\(sectionIndex)|\(unitIndex)|\(levelIndex)"
-
         if let currentSession = currentSessionFor[key] {
             return currentSession
         }

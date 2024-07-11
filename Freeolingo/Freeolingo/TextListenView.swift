@@ -37,7 +37,7 @@ struct TextListenView: View {
         }, label: {
             Label("", systemImage: "speaker.wave.2")
             .padding()
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
         })
     }
 }

@@ -54,45 +54,78 @@ struct LevelPopoverView: View {
             } else {
                 Text(level.name)
 
-                ZStack {
-                    CircularProgressView(
-                        progress: Double(currentSession) / Double(level.totalSessions),
-                        color: colorWrapper.color
-                    )
-                    Text("\(currentSession)/\(level.totalSessions)")
-                        .foregroundStyle(colorWrapper.color)
-                }.frame(width: 75, height: 75)
-                
-                let key = api.keyFor(
-                    course: course,
-                    section: section,
-                    unit: unit,
-                    level: level,
-                    sessionIndex: currentSession
-                )
-                
-                if api.sessionsMap.keys.contains(key) {
-                    HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
-                        SessionView(
-                            course: course,
-                            section: section,
-                            unit: unit,
-                            level: level,
-                            session: api.sessionsMap[key]!,
-                            finishAction: finishAction
-                        )
+                if level.type == .story {
+                    let completed = currentSession > 0
+                    let icon = completed ? "hand.thumbsup" : "hand.thumbsdown"
+                    let background = completed ? colorWrapper.color : colorWrapper.color.lighter(by: 0.3)
+                    HStack(spacing: 0) {
+                        Image(systemName: icon)
+                        if currentSession > 1 {
+                            Text("x\(currentSession)")
+                        }
                     }
+                    .frame(width: 75, height: 75)
+                    .background(background)
+                    .foregroundColor(.white)
+                    .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
                 } else {
-                    Button("Start") {}
+                    ZStack {
+                        CircularProgressView(
+                            progress: Double(currentSession) / Double(level.totalSessions),
+                            color: colorWrapper.color
+                        )
+
+                        if currentSession >= level.totalSessions {
+                            HStack(spacing: 0) {
+                                Image(systemName: "hand.thumbsup")
+                                if currentSession > level.totalSessions {
+                                    Text("+\(currentSession - level.totalSessions)")
+                                }
+                            }.foregroundColor(colorWrapper.color)
+                        } else {
+                            Text("\(currentSession)/\(level.totalSessions)")
+                                .foregroundStyle(colorWrapper.color)
+                        }
+                    }.frame(width: 75, height: 75)
+                }
+
+                let key = api.keyFor(course, section, unit, level, currentSession)
+
+                if let session = api.sessionsMap[key] {
+                    SessionView(
+                        course: course,
+                        section: section,
+                        unit: unit,
+                        level: level,
+                        session: session,
+                        finishAction: finishAction
+                    )
+                } else if let story = api.storiesMap[key] {
+                    StoryView(
+                        course: course,
+                        section: section,
+                        unit: unit,
+                        level: level,
+                        story: story,
+                        finishAction: finishAction
+                    )
+                } else {
+                    VStack {
+                        ProgressView()
+                            .progressViewStyle(
+                                CircularProgressViewStyle(tint: Color.white)
+                            )
+                    }
                     .padding()
+                    .frame(maxWidth: .infinity)
                     .background(colorWrapper.color.opacity(0.5))
                     .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     .disabled(true)
                 }
             }
         }
-        .frame(minWidth: 150)
+        .frame(minWidth: 150, maxWidth: UIScreen.main.bounds.width / 2)
         .padding(.all, 20)
         .presentationCompactAdaptation((.popover))
     }
@@ -127,9 +160,10 @@ struct LevelView: View {
                     sessionIndex: currentSession
                 )
             } else {
-                isPresented = false
                 await state.complete(course, section, unit, level)
                 finishAction()
+                isPresented = false
+                currentSession = 0
             }
         }
     }
@@ -153,6 +187,7 @@ struct LevelView: View {
             ZStack(alignment: .center) {
                 Text(level.name)
                     .foregroundColor(isAvailable ? .white : .white.opacity(0.5))
+                    .padding(.all, 15)
                 
                 if !isAvailable {
                     VStack {

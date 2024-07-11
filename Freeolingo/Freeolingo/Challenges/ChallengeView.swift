@@ -84,8 +84,10 @@ struct ChallengeView: View {
                 TranslateView(translate: translate, languageSettings: languageSettings, onComplete: _onComplete)
             case .gapFill(let gapFill):
                 Text("GAP FILL")
+                    .frame(maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
             default:
                 Text(challenge.type)
+                    .frame(maxHeight: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
             }
         }
         .sheet(isPresented: $showAlert) {
