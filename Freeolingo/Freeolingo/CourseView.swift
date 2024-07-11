@@ -28,37 +28,61 @@ struct InnerCourseView: View {
                         section: section
                     )
                 ) {
-                    HStack(alignment: .top) {
-                        VStack (alignment: .leading) {
-                            Spacer()
-                            
-                            Text("Section \(index + 1)")
-                                .font(.system(size: 24))
-                            
-                            switch section.type {
-                            case SectionType.learning:
-                                if section.exampleSentence != nil {
-                                    Text(section.exampleSentence!.exampleSentence)
-                                        .font(.system(size: 14))
-                                } else {
-                                    Text("Lesson")
+                    VStack {
+                        HStack(alignment: .top) {
+                            VStack (alignment: .leading) {
+                                Spacer()
+                                
+                                Text("Section \(index + 1)")
+                                    .font(.system(size: 24))
+                                
+                                switch section.type {
+                                case SectionType.learning:
+                                    if section.exampleSentence != nil {
+                                        Text(section.exampleSentence!.exampleSentence)
+                                            .font(.system(size: 14))
+                                    } else {
+                                        Text("Lesson")
+                                    }
+                                    
+                                case SectionType.dailyRefresh:
+                                    Text("Daily Refresh")
+                                    
+                                case SectionType.personalizedPractice:
+                                    Text("Personalized Practice")
+                                    
                                 }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            if !isAvailable {
+                                Spacer()
                                 
-                            case SectionType.dailyRefresh:
-                                Text("Daily Refresh")
+                                Label("", systemImage: "lock")
+                                    .padding(.top, 10)
+                            } else {
+                                Spacer()
                                 
-                            case SectionType.personalizedPractice:
-                                Text("Personalized Practice")
+                                ZStack {
+                                    let completed = state.completed(course, section)
+                                    let all = section.units.count
+
+                                    CircularProgressView(
+                                        progress: CGFloat(completed) / CGFloat(all),
+                                        color: color.lighter(by: 0.3),
+                                        lineWidth: 5
+                                    )
+                                    
+                                    if completed == all {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 12))
+                                    } else {
+                                        Text("\(completed)/\(all)")
+                                            .font(.system(size: 12))
+                                    }
+                                }.frame(width: 40, height: 40)
                                 
                             }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        if !isAvailable {
-                            Spacer()
-                            
-                            Label("", systemImage: "lock")
-                                .padding(.top, 10)
                         }
                     }
                 }
@@ -106,4 +130,5 @@ struct CourseView: View {
     NavigationStack {
         InnerCourseView(course: COURSES[0]).environmentObject(previewApi())
     }.environmentObject(previewState())
+        .environmentObject(previewApi())
 }

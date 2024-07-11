@@ -69,13 +69,13 @@ struct SessionChallengesView: View {
             // Add the same challenge in the end so we can retry?
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 30) {
             HStack {
                 let current = currentChallenge + increment
                 let count = session.challenges.count
-                let progress = CGFloat(current + 4) / CGFloat(count + 5)
+                let progress = 0.75 / CGFloat(count) * CGFloat(current) + 0.25
 
                 ProgressView(value: progress)
                     .animation(.easeInOut(duration: 0.1), value: increment)

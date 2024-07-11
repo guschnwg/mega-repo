@@ -11,18 +11,19 @@ import SwiftUI
 struct CircularProgressView: View {
     let progress: Double
     let color: Color
+    let lineWidth: CGFloat
     
     var body: some View {
         let fixedProgress = progress == 0 ? 0.001 : progress
         
         ZStack {
             Circle()
-                .stroke(color.opacity(0.5), lineWidth: 10)
+                .stroke(color.opacity(0.5), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: fixedProgress)
                 .stroke(
                     color,
-                    style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .animation(.easeOut, value: fixedProgress)
@@ -72,7 +73,8 @@ struct LevelPopoverView: View {
                     ZStack {
                         CircularProgressView(
                             progress: Double(currentSession) / Double(level.totalSessions),
-                            color: colorWrapper.color
+                            color: colorWrapper.color,
+                            lineWidth: 10
                         )
 
                         if currentSession >= level.totalSessions {

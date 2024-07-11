@@ -131,6 +131,27 @@ class AppState: ObservableObject {
     
     //
     
+    func completed(_ course: Course, _ section: Section) -> Int {
+        var completed = 0
+
+        for index in 0...section.units.count - 1 {
+            if !isAvailable(course, section, section.units[index]) {
+                break
+            }
+            completed = index + 1
+        }
+        
+        return completed
+    }
+    
+    //
+    
+    func complete(_ course: Course, _ section: Section) async {
+        let sectionIndex = course.sections.firstIndex(of: section)!
+        completed.append("\(course.id)|\(sectionIndex)")
+        await save()
+    }
+    
     func complete(_ course: Course, _ section: Section, _ unit: Unit) async {
         let sectionIndex = course.sections.firstIndex(of: section)!
         let unitIndex = section.units.firstIndex(of: unit)!

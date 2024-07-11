@@ -22,28 +22,38 @@ struct SessionView: View {
     @State private var isPresented = false
     
     var body: some View {
-        Button(action: { isPresented = true }) {
-            Text("Start").frame(maxWidth: .infinity)
-        }
-        .onLongPressGesture(perform: {
-            isPresented = false
-            finishAction()
-        })
-        .padding()
-        .background(colorWrapper.color)
-        .foregroundColor(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .sheet(isPresented: $isPresented) {
-            SessionChallengesView(
-                course: course,
-                section: section,
-                unit: unit,
-                level: level,
-                session: session
-            ) {
-                isPresented = false
-                finishAction()
+        HStack(spacing: 0) {
+            Button(action: { isPresented = true }) {
+                Text("Start").frame(maxWidth: .infinity)
             }
+            .padding()
+            .background(colorWrapper.color)
+            .foregroundColor(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .sheet(isPresented: $isPresented) {
+                SessionChallengesView(
+                    course: course,
+                    section: section,
+                    unit: unit,
+                    level: level,
+                    session: session
+                ) {
+                    isPresented = false
+                    finishAction()
+                }
+            }
+
+//            Button(action: {
+//                finishAction()
+//            }) {
+//                Image(systemName: "figure.jumprope")
+//                    .frame(width: 30)
+//                    .frame(height: 20)
+//            }
+//            .padding()
+//            .background(colorWrapper.color)
+//            .foregroundColor(.white)
+//            .clipShape(RoundedRectangle(cornerRadius: 10))
         }
     }
 }

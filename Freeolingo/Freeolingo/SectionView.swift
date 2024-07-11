@@ -62,11 +62,18 @@ struct SectionView: View {
                                     unit: unit,
                                     level: level,
                                     finishAction: {
-                                        // TODO: Not unlocking the next level
-                                        // Complete Unit if last one
+                                        // Complete Unit if last level
                                         if levelIndex == unit.levels.count - 1 {
                                             Task {
                                                 await state.complete(course, section, unit)
+                                                
+                                                // Complete Section if last unit
+                                                let unitIndex = section.units.firstIndex(of: unit)
+                                                if unitIndex == section.units.count - 1 {
+                                                    Task {
+                                                        await state.complete(course, section)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
