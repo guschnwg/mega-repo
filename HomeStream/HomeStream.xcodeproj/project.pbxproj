@@ -13,6 +13,7 @@
 		6BF0C5AB2C448A63001D151F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BF0C5AA2C448A63001D151F /* Assets.xcassets */; };
 		6BF0C5AE2C448A63001D151F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6BF0C5AD2C448A63001D151F /* Preview Assets.xcassets */; };
 		EC2042772C4562CE00FDA24D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC2042762C4562CE00FDA24D /* Utils.swift */; };
+		EC2042792C456A7C00FDA24D /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EC2042782C456A7C00FDA24D /* Settings.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		6BF0C5AA2C448A63001D151F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6BF0C5AD2C448A63001D151F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		EC2042762C4562CE00FDA24D /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		EC2042782C456A7C00FDA24D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +41,7 @@
 		6BF0C59A2C448A60001D151F = {
 			isa = PBXGroup;
 			children = (
+				EC2042782C456A7C00FDA24D /* Settings.bundle */,
 				6BF0C5A52C448A60001D151F /* HomeStream */,
 				6BF0C5A42C448A60001D151F /* Products */,
 			);
@@ -132,6 +135,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6BF0C5AE2C448A63001D151F /* Preview Assets.xcassets in Resources */,
+				EC2042792C456A7C00FDA24D /* Settings.bundle in Resources */,
 				6BF0C5AB2C448A63001D151F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
