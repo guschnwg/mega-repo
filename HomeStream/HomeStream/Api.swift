@@ -14,16 +14,20 @@ enum Source {
 
 class Api: ObservableObject {
     private var source = Source.remote;
+    var isLocal: Bool { source == .local }
+    var isRemote: Bool { source == .remote }
 
     private let localURL  = UserDefaults.standard.string(forKey: "local_url") ?? "http://192.168.0.35:9997"
     private let remoteURL = UserDefaults.standard.string(forKey: "remote_url") ?? "http://192.168.0.35:9997"
 
     private let headers = [
-        UserDefaults.standard.string(forKey: "header_one") ?? "Key-One: Value",
-        UserDefaults.standard.string(forKey: "header_two") ?? "Key-Two: Value"
+        UserDefaults.standard.string(forKey: "header_one") ?? "Header-One: Value",
+        UserDefaults.standard.string(forKey: "header_two") ?? "Header-Two: Value"
     ]
     
-    @Published var turning = false
+    @Published var isTurning = false
+    @Published var isResetting = false
+    var isDoingSomething: Bool { isTurning || isResetting }
 
     func getRequest(_ path: String = "") -> URLRequest {
         let stringURL = source == .local ? localURL : remoteURL
@@ -46,19 +50,31 @@ class Api: ObservableObject {
         source = newSource
     }
     
+    @MainActor func turn(x: Int) async {
+        isTurning = true
+        do {
+            try await URLSession.shared.data(for: getRequest("/turn?x=\(x)&y=0&timeout=1&wait=0"))
+        } catch {}
+        self.isTurning = false
+    }
+    
     func turnRight() {
-        turning = true
-        let task = URLSession.shared.dataTask(with: getRequest("/turn?x=1&y=0&timeout=1&wait=0")) { _, _, _ in
-            self.turning = false
+        Task {
+            await turn(x: 1)
         }
-        task.resume()
     }
     
     func turnLeft() {
-        turning = true
-        let task = URLSession.shared.dataTask(with: getRequest("/turn?x=-1&y=0&timeout=1&wait=0")) { _, _, _ in
-            self.turning = false
+        Task {
+            await turn(x: -1)
         }
-        task.resume()
+    }
+    
+    @MainActor func reset() async {
+        isResetting = true
+        do {
+            try await URLSession.shared.data(for: getRequest("/reset"))
+        } catch {}
+        self.isResetting = false
     }
 }

@@ -21,6 +21,7 @@ struct WebView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         return webView
     }
+
     func updateUIView(_ uiView: WKWebView, context: Context) {
         webView.load(api.getRequest("/my_camera"))
     }
@@ -33,32 +34,63 @@ struct ContentView: View {
         VStack {
             HStack {
                 Button("Em casa?") {}
-                Button("Na rua?") {}
+                    .padding(.all, 10)
+                    .foregroundColor(api.isLocal ? .blue : .white)
+                    .background(api.isLocal ? .white : .blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .disabled(api.isLocal)
                 
                 Spacer()
+                
+                Button("Resetar") {}
+                    .padding(.all, 10)
+                    .foregroundColor(.red)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .disabled(api.isDoingSomething)
+                
+                Spacer()
+                
+                Button("Na rua?") {}
+                    .padding(.all, 10)
+                    .foregroundColor(api.isRemote ? .blue : .white)
+                    .background(api.isRemote ? .white : .blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .disabled(api.isRemote)
             }
-            .padding()
-
-            HStack(spacing: 30) {
+            
+            HStack {
                 Button(action: api.turnLeft) {
                     Image(systemName: "arrowshape.left")
-                        .font(.system(size: 36))
+                        .font(.system(size: 22))
+                        .padding(.all, 20)
                 }
-                .disabled(api.turning)
+                .background(.blue)
+                .foregroundColor(.white)
+                .clipShape(Circle())
+                .disabled(api.isDoingSomething)
                 
-                WebView()
-//                GeometryReader { geo in
-//                    WebView()
-//                        .frame(maxWidth: geo.size.width - 100)
-//                }
+                GeometryReader { geo in
+                    let height = geo.size.width / 16 * 9
+                    WebView()
+                        .frame(height: height)
+                        .padding(.vertical, (geo.size.height - height) / 2)
+                }
                 
                 Button(action: api.turnRight) {
                     Image(systemName: "arrowshape.right")
-                        .font(.system(size: 36))
+                        .font(.system(size: 22))
+                        .padding(.all, 20)
                 }
-                .disabled(api.turning)
+                .background(.blue)
+                .foregroundColor(.white)
+                .clipShape(Circle())
+                .disabled(api.isDoingSomething)
             }
-        }.padding()
+        }
+        .padding()
+        .background(.blue.lighter(by: 0.9))
+        .edgesIgnoringSafeArea(.vertical)
     }
 }
 
