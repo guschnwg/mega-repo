@@ -8,6 +8,9 @@ run:
 	TUNNEL_TOKEN=? \
 	docker compose up --build -d
 
+stop:
+	docker compose down
+
 ngrok: TOKEN?=$(shell op item get NGrok --vault Private --format json | op item get - --fields label="authtoken")
 ngrok: DOMAIN?=$(shell op item get NGrok --vault Private --format json | op item get - --fields label="domain")
 ngrok:
