@@ -7,12 +7,63 @@
 </head>
 <body>
     <img id="output" height="600" width="800" />
-    <input type="range" id="per-second" min="1" max="120" value="1" oninput="event.target.nextElementSibling.firstChild.textContent = event.target.value" />
-    <div><span>1</span> per second</div>
 
-    <button onclick="ws.send('800|600|1000')">Start</button>
+    <div>
+        <input
+            type="range"
+            id="per-second"
+            min="1"
+            max="120"
+            value="1"
+            oninput="event.target.nextElementSibling.firstChild.textContent = event.target.value"
+        />
+        <div><span>1</span> per second</div>
+    </div>
+
+    <div>
+        <input
+            type="range"
+            id="width"
+            min="640"
+            max="1920"
+            value="800"
+            oninput="event.target.nextElementSibling.firstChild.textContent = event.target.value"
+        />
+        <div><span>800</span> WIDTH</div>
+    </div>
+
+    <div>
+        <input
+            type="range"
+            id="height"
+            min="480"
+            max="1080"
+            value="600"
+            oninput="event.target.nextElementSibling.firstChild.textContent = event.target.value"
+        />
+        <div><span>600</span> HEIGHT</div>
+    </div>
+
+    <button onclick="start()">Start</button>
+    <button onclick="pause()">Pause</button>
 
     <script>
+        var output = document.getElementById("output");
+        var perSecond = document.getElementById("per-second");
+        var width = document.getElementById("width");
+        var height = document.getElementById("height");
+
+        var timeout = null;
+
+        function start() {
+            debugger
+            window.ws.send(`${width.value}|${height.value}|1000`);
+        }
+
+        function pause() {
+            clearTimeout(timeout);
+        }
+
         window.addEventListener("load", function() {
             window.ws = new WebSocket("/stream/ws");
 
@@ -20,16 +71,19 @@
             var lastReceived = Date.now();
             window.ws.onmessage = (event) => {
                 if (event.data === "DONE") {
-                    var output = document.getElementById("output");
                     output.src = `data:image/png;base64,` + buffer;
                     buffer = '';
-                    console.log("Next");
-                    var when = 1000 / document.getElementById("per-second").value;
-                    setTimeout(() => window.ws.send('640|480|1000'), when);
+
+                    var when = 1000 / perSecond.value;
+                    timeout = setTimeout(start, when);
+
+                    output.height = height.value;
+                    output.width = width.value;
                 } else {
                     buffer += event.data;
                 }
             };
+
             window.ws.onopen = (event) => {
                 console.log("Connection established");
                 window.ws.send('640|480|1000');
