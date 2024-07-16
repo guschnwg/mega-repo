@@ -18,8 +18,14 @@ services:
   stream:
     container_name: stream
     environment:
-      - STREAM_URL=http://camera.buffalotrace.com/mjpg/video.mjpg
+      # - STREAM_URL=http://camera.buffalotrace.com/mjpg/video.mjpg
       - START_LIVE=1
+      - HOST=192.168.0.108
+      - PORT=80
+      - STREAM_USER=admin
+      - STREAM_PASSWORD=********
+      - ONVIF_USER=admin
+      - ONVIF_PASSWORD=********
     build:
       context: ../
       dockerfile: ./Dockerfile

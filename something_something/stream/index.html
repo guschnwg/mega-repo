@@ -44,8 +44,21 @@
         <div><span>600</span> HEIGHT</div>
     </div>
 
-    <button onclick="start()">Start</button>
-    <button onclick="pause()">Pause</button>
+    <div>
+        <button onclick="start()">Start</button>
+        <button onclick="pause()">Pause</button>
+    </div>
+
+    <div>
+        <button onclick="turn(-1, 0, 1, 0)">Turn Left</button>
+        <button onclick="turn(1, 0, 1, 0)">Turn Right</button>
+    </div>
+
+    <div>
+        <button onclick="move(-1, 0, 1)">Move Left</button>
+        <button onclick="move(1, 0, 1)">Move Right</button>
+        <button onclick="stopIt()">Stop</button>
+    </div>
 
     <script>
         var output = document.getElementById("output");
@@ -56,12 +69,23 @@
         var timeout = null;
 
         function start() {
-            debugger
-            window.ws.send(`${width.value}|${height.value}|1000`);
+            window.ws.send(`frame|${width.value}|${height.value}|1000`);
         }
 
         function pause() {
             clearTimeout(timeout);
+        }
+
+        function turn(x, y, timeout, wait) {
+            window.ws.send(`turn|${x}|${y}|${timeout}|${wait}`);
+        }
+
+        function move(x, y, timeout) {
+            window.ws.send(`move|${x}|${y}|${timeout}`);
+        }
+
+        function stopIt(x, y, timeout) {
+            window.ws.send('stop|');
         }
 
         window.addEventListener("load", function() {
@@ -70,23 +94,29 @@
             var buffer = '';
             var lastReceived = Date.now();
             window.ws.onmessage = (event) => {
-                if (event.data === "DONE") {
-                    output.src = `data:image/png;base64,` + buffer;
-                    buffer = '';
+                const [type, ...rest] = event.data.split('|');
 
-                    var when = 1000 / perSecond.value;
-                    timeout = setTimeout(start, when);
+                if (type === 'chunk') {
+                    if (rest[0] === "DONE") {
+                        output.src = `data:image/png;base64,` + buffer;
+                        buffer = '';
 
-                    output.height = height.value;
-                    output.width = width.value;
-                } else {
-                    buffer += event.data;
+                        var when = 1000 / perSecond.value;
+                        timeout = setTimeout(start, when);
+
+                        output.height = height.value;
+                        output.width = width.value;
+                    } else {
+                        buffer += rest[0];
+                    }
                 }
             };
 
             window.ws.onopen = (event) => {
                 console.log("Connection established");
-                window.ws.send('640|480|1000');
+                var name = Math.random();
+                window.ws.send(`hello|${name}`)
+                document.title = name;
             };
         });
     </script>

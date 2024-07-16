@@ -1,4 +1,5 @@
 import asyncio
+import time
 import cv2
 from mjpeg_streamer import MjpegServer, Stream
 from onvif import ONVIFCamera
@@ -43,7 +44,39 @@ else:
 stream = Stream("my_camera", size=(1366, 768), quality=50, fps=60)
 server.add_stream(stream)
 
+mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
+ptz_service = mycam.create_ptz_service()
+media_service = mycam.create_media_service()
+media_profile = media_service.GetProfiles()[0]
+
 is_live = START_LIVE
+
+def move(x, y, timeout):
+    thread = threading.Thread(
+        target=ptz_service.ContinuousMove,
+        args=({
+            'ProfileToken': media_profile.token, 'Velocity': {'PanTilt': {'x': x, 'y': y}}, 'Timeout': timeout
+        },),
+        daemon=True
+    )
+    thread.start()
+
+def stop():
+    thread = threading.Thread(
+        target=ptz_service.Stop,
+        args=({'ProfileToken': media_profile.token},),
+        daemon=True
+    )
+    thread.start()
+
+def turn(x, y, timeout, wait):
+    def inner():
+        move(x, y, timeout)
+        time.sleep(wait)
+        stop()
+
+    thread = threading.Thread(target=inner, daemon=True)
+    thread.start()
 
 class TurnHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
@@ -52,17 +85,7 @@ class TurnHandler:
         timeout = request.rel_url.query.get("timeout", 0)
         wait = request.rel_url.query.get("wait", 0)
 
-        mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
-        ptz_service = mycam.create_ptz_service()
-        media_service = mycam.create_media_service()
-        media_profile = media_service.GetProfiles()[0]
-        ptz_service.ContinuousMove({
-            'ProfileToken': media_profile.token,
-            'Velocity': {'PanTilt': {'x': float(x), 'y': float(y)}},
-            'Timeout': int(timeout)
-        })
-        await asyncio.sleep(int(wait))
-        ptz_service.Stop({'ProfileToken': media_profile.token})
+        turn(float(x), float(y), int(timeout), int(wait))
 
         headers = {"Content-Type": "application/json"}
         response = web.StreamResponse(status=200, reason="OK", headers=headers)
@@ -120,6 +143,33 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 class WebSocketHandler:
+    clients: dict[str, web.WebSocketResponse] = {}
+
+    async def handle_hello(self, ws: web.WebSocketResponse, new_client: str):
+        who_is_here = ",".join(self.clients.keys())
+
+        await ws.send_str(f"hello|{new_client}|{who_is_here}")
+        for client in self.clients.values():
+            try:
+                await client.send_str(f"new_client|{who_is_here},{new_client}")
+            except:
+                pass
+
+        self.clients[new_client] = ws
+
+    async def handle_frame(self, ws: web.WebSocketResponse, width: int, height: int, buffer_size: int):
+        try:
+            resized_image = cv2.resize(stream._frame, (width, height))
+            _, buffer = cv2.imencode('.jpg', resized_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            message = base64.b64encode(buffer).decode()
+
+            for chunk in chunks(message, buffer_size):
+                await ws.send_str(f"chunk|{chunk}")
+        except:
+            pass
+
+        await ws.send_str("chunk|DONE")
+
     async def __call__(self, request: web.Request) -> web.WebSocketResponse:
         ws = web.WebSocketResponse()
         await ws.prepare(request)
@@ -129,20 +179,33 @@ class WebSocketHandler:
                 msg = await ws.receive()
 
                 if msg.type == web.WSMsgType.TEXT:
-                    width, height, buffer_size = msg.data.strip().split("|")
-                    resized_image = cv2.resize(stream._frame, (int(width), int(height)))
-                    _, buffer = cv2.imencode('.jpg', resized_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
-                    message = base64.b64encode(buffer).decode()
+                    type, rest = msg.data.strip().split("|", maxsplit=1)
 
-                    for chunk in chunks(message, int(buffer_size)):
-                        await ws.send_str(chunk)
-                    await ws.send_str("DONE")
+                    if type == "hello":
+                        await self.handle_hello(ws, rest)
+
+                    elif type == "frame":
+                        width, height, buffer_size = rest.split("|")
+                        await self.handle_frame(ws, int(width), int(height), int(buffer_size))
+
+                    elif type == "turn":
+                        x, y, timeout, wait = rest.split("|")
+                        turn(float(x), float(y), int(timeout), int(wait))
+
+                    elif type == "move":
+                        x, y, timeout = rest.split("|")
+                        move(float(x), float(y), int(timeout))
+
+                    elif type == "stop":
+                        stop()
 
                     if msg.data == "close":
                         await ws.close()
+                        self.clients.pop(ws, None)
                 elif msg.type == web.WSMsgType.ERROR:
                     print("ws connection closed with exception %s" % ws.exception())
                 elif msg.type == web.WSMsgType.CLOSE:
+                    self.clients.pop(ws, None)
                     break
             except Exception as e:
                 print(f"Error {e.__class__} {e}")
@@ -167,15 +230,12 @@ server._app.router.add_route("GET", "/ws", WebSocketHandler())
 server._app.router.add_route("GET", "/ws-ui", WebSocketUIHandler())
 server.start()
 
-def update_stream():
-    while True:
-        if not is_live:
-            continue
+while True:
+    if not is_live:
+        continue
 
-        ret, frame = cap.read()
-        if not ret:
-            continue
+    ret, frame = cap.read()
+    if not ret:
+        continue
 
-        stream.set_frame(frame)
-
-threading.Thread(target=update_stream).start()
+    stream.set_frame(frame)
