@@ -14,7 +14,7 @@
 
     <script>
         window.addEventListener("load", function() {
-            window.ws = new WebSocket("ws://localhost:1234/ws");
+            window.ws = new WebSocket("/stream/ws");
 
             var buffer = '';
             var lastReceived = Date.now();
