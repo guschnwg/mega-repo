@@ -4,8 +4,12 @@ from mjpeg_streamer import MjpegServer, Stream
 from onvif import ONVIFCamera
 import threading
 from aiohttp import web
+import base64
 
 import os
+
+STREAM_URL = os.getenv("STREAM_URL", "")
+START_LIVE = bool(os.getenv("START_LIVE", ""))
 
 HOST = os.getenv("HOST", "")
 PORT = int(os.getenv("PORT", "80") or "80")
@@ -16,13 +20,30 @@ ONVIF_PASSWORD = os.getenv("ONVIF_PASSWORD", "")
 WSDL = os.getenv("WSDL", "/usr/local/lib/python3.11/site-packages/wsdl/")
 RTSP_PATH = os.getenv("RTSP_PATH", "/cam/realmonitor?channel=1&subtype=0")
 
+print(f"""
+STREAM_URL: {STREAM_URL}
+START_LIVE: {START_LIVE}
+HOST: {HOST}
+PORT: {PORT}
+STREAM_USER: {STREAM_USER}
+STREAM_PASSWORD: {STREAM_PASSWORD}
+ONVIF_USER: {ONVIF_USER}
+ONVIF_PASSWORD: {ONVIF_PASSWORD}
+WSDL: {WSDL}
+RTSP_PATH: {RTSP_PATH}
+""")
+
 server = MjpegServer("0.0.0.0", 8080)
 
-cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
+if STREAM_URL:
+    cap = cv2.VideoCapture(STREAM_URL)
+else:
+    cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
+
 stream = Stream("my_camera", size=(1366, 768), quality=50, fps=60)
 server.add_stream(stream)
 
-is_live = False
+is_live = START_LIVE
 
 class TurnHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
@@ -74,7 +95,6 @@ class OffHandler:
 
         return response
 
-
 class ResetHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
         global is_live, cap
@@ -95,10 +115,56 @@ class ResetHandler:
 
         return response
 
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+class WebSocketHandler:
+    async def __call__(self, request: web.Request) -> web.WebSocketResponse:
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+
+        while True:
+            try:
+                msg = await ws.receive()
+
+                if msg.type == web.WSMsgType.TEXT:
+                    width, height, buffer_size = msg.data.strip().split("|")
+                    resized_image = cv2.resize(stream._frame, (int(width), int(height)))
+                    _, buffer = cv2.imencode('.jpg', resized_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                    message = base64.b64encode(buffer).decode()
+
+                    for chunk in chunks(message, int(buffer_size)):
+                        await ws.send_str(chunk)
+                    await ws.send_str("DONE")
+
+                    if msg.data == "close":
+                        await ws.close()
+                elif msg.type == web.WSMsgType.ERROR:
+                    print("ws connection closed with exception %s" % ws.exception())
+                elif msg.type == web.WSMsgType.CLOSE:
+                    break
+            except Exception as e:
+                print(f"Error {e.__class__} {e}")
+                break
+
+        return ws
+
+class WebSocketUIHandler:
+    async def __call__(self, request: web.Request) -> web.StreamResponse:
+        headers = {"Content-Type": "text/html"}
+        response = web.StreamResponse(status=200, reason="OK", headers=headers)
+        await response.prepare(request)
+        with open("index.html", "r") as f:
+            await response.write(f.read().encode())
+        return response
+
 server._app.router.add_route("GET", "/turn", TurnHandler())
 server._app.router.add_route("GET", "/on", OnHandler())
 server._app.router.add_route("GET", "/off", OffHandler())
 server._app.router.add_route("GET", "/reset", ResetHandler())
+server._app.router.add_route("GET", "/ws", WebSocketHandler())
+server._app.router.add_route("GET", "/ws-ui", WebSocketUIHandler())
 server.start()
 
 def update_stream():

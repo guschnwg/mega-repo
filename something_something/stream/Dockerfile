@@ -3,4 +3,5 @@ RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 RUN pip install --upgrade mjpeg-streamer onvif_zeep
 EXPOSE 8080
 COPY main.py /main.py
+COPY index.html /index.html
 CMD ["python", "/main.py"]

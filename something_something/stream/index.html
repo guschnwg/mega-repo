@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <img id="output" height="600" width="800" />
+    <input type="range" id="per-second" min="1" max="120" value="1" oninput="event.target.nextElementSibling.firstChild.textContent = event.target.value" />
+    <div><span>1</span> per second</div>
+
+    <button onclick="ws.send('800|600|1000')">Start</button>
+
+    <script>
+        window.addEventListener("load", function() {
+            window.ws = new WebSocket("ws://localhost:1234/ws");
+
+            var buffer = '';
+            var lastReceived = Date.now();
+            window.ws.onmessage = (event) => {
+                if (event.data === "DONE") {
+                    var output = document.getElementById("output");
+                    output.src = `data:image/png;base64,` + buffer;
+                    buffer = '';
+                    console.log("Next");
+                    var when = 1000 / document.getElementById("per-second").value;
+                    setTimeout(() => window.ws.send('640|480|1000'), when);
+                } else {
+                    buffer += event.data;
+                }
+            };
+            window.ws.onopen = (event) => {
+                console.log("Connection established");
+                window.ws.send('640|480|1000');
+            };
+        });
+    </script>
+</body>
+</html>
