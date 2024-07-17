@@ -230,12 +230,16 @@ server._app.router.add_route("GET", "/ws", WebSocketHandler())
 server._app.router.add_route("GET", "/ws-ui", WebSocketUIHandler())
 server.start()
 
-while True:
-    if not is_live:
-        continue
+def update_stream():
+    while True:
+        if not is_live:
+            continue
 
-    ret, frame = cap.read()
-    if not ret:
-        continue
+        ret, frame = cap.read()
+        if not ret:
+            continue
 
-    stream.set_frame(frame)
+        stream.set_frame(frame)
+
+thread = threading.Thread(target=update_stream)
+thread.start()
