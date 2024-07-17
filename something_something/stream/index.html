@@ -47,11 +47,12 @@
     <div>
         <button onclick="start()">Start</button>
         <button onclick="pause()">Pause</button>
+        <button onclick="reset()">Reset</button>
     </div>
 
     <div>
-        <button onclick="turn(-1, 0, 1, 0)">Turn Left</button>
-        <button onclick="turn(1, 0, 1, 0)">Turn Right</button>
+        <button onclick="turn(-0.2, 0, 2, 2)">Turn Left</button>
+        <button onclick="turn(0.2, 0, 2, 2)">Turn Right</button>
     </div>
 
     <div>
@@ -74,6 +75,10 @@
 
         function pause() {
             clearTimeout(timeout);
+        }
+
+        function reset() {
+            window.ws.send(`reset|`);
         }
 
         function turn(x, y, timeout, wait) {

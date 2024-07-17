@@ -78,6 +78,19 @@ def turn(x, y, timeout, wait):
     thread = threading.Thread(target=inner, daemon=True)
     thread.start()
 
+async def reset():
+    global is_live, cap
+
+    is_live = False
+
+    await asyncio.sleep(5)
+
+    cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
+
+    await asyncio.sleep(5)
+
+    is_live = True
+
 class TurnHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
         x = request.rel_url.query.get("x", 0)
@@ -120,21 +133,12 @@ class OffHandler:
 
 class ResetHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
-        global is_live, cap
-        is_live = False
-
-        await asyncio.sleep(5)
-
-        cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
-
-        await asyncio.sleep(5)
+        await reset()
 
         headers = {"Content-Type": "application/json"}
         response = web.StreamResponse(status=200, reason="OK", headers=headers)
         await response.prepare(request)
         await response.write(b"{}")
-
-        is_live = True
 
         return response
 
@@ -199,6 +203,9 @@ class WebSocketHandler:
                     elif type == "stop":
                         stop()
 
+                    elif type == "reset":
+                        await reset()
+
                     if msg.data == "close":
                         await ws.close()
                         self.clients.pop(ws, None)
@@ -241,5 +248,4 @@ def update_stream():
 
         stream.set_frame(frame)
 
-thread = threading.Thread(target=update_stream)
-thread.start()
+threading.Thread(target=update_stream).start()
