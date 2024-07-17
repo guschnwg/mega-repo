@@ -33,7 +33,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             HStack {
-                Button("Em casa?") {}
+                Button("Em casa?") { api.setSource(.local) }
                     .padding(.all, 10)
                     .foregroundColor(api.isLocal ? .blue : .white)
                     .background(api.isLocal ? .white : .blue)
@@ -42,7 +42,7 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                Button("Resetar") {}
+                Button("Resetar") { Task { await api.reset() } }
                     .padding(.all, 10)
                     .foregroundColor(.red)
                     .background(.white)
@@ -51,7 +51,7 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                Button("Na rua?") {}
+                Button("Na rua?") { api.setSource(.remote) }
                     .padding(.all, 10)
                     .foregroundColor(api.isRemote ? .blue : .white)
                     .background(api.isRemote ? .white : .blue)

@@ -13,7 +13,7 @@ enum Source {
 }
 
 class Api: ObservableObject {
-    private var source = Source.remote;
+    @Published private var source = Source.remote;
     var isLocal: Bool { source == .local }
     var isRemote: Bool { source == .remote }
 
@@ -50,23 +50,23 @@ class Api: ObservableObject {
         source = newSource
     }
     
-    @MainActor func turn(x: Int) async {
+    @MainActor func turn(x: Double) async {
         isTurning = true
         do {
-            try await URLSession.shared.data(for: getRequest("/turn?x=\(x)&y=0&timeout=1&wait=0"))
+            try await URLSession.shared.data(for: getRequest("/turn?x=\(x)&y=0&timeout=2&wait=2"))
         } catch {}
         self.isTurning = false
     }
     
     func turnRight() {
         Task {
-            await turn(x: 1)
+            await turn(x: 0.2)
         }
     }
     
     func turnLeft() {
         Task {
-            await turn(x: -1)
+            await turn(x: -0.2)
         }
     }
     
