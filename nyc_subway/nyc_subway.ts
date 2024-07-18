@@ -1,5 +1,3 @@
-// deno run --allow-net --allow-write --allow-read nyc_subway.ts
-
 import GtfsRealtimeBindings from "npm:gtfs-realtime-bindings";
 
 async function getRealtime() {
@@ -80,14 +78,6 @@ async function getStationData(stationId: string) {
       });
     }
   }
-
-  // Setting the last one as the current station, just for testing
-  const fileContent = Deno.readTextFileSync("nyc_subway.html");
-  const updatedFileContent = fileContent.replace(
-    /window\.subwayData = [\s\S]*?;\n/,
-    `window.subwayData = ${JSON.stringify({ now, station, data: stationData })};\n`
-  );
-  Deno.writeTextFileSync("nyc_subway.html", updatedFileContent);
 
   return { now, station, data: stationData };
 }
