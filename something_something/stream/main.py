@@ -44,14 +44,14 @@ else:
 stream = Stream("my_camera", size=(1366, 768), quality=50, fps=60)
 server.add_stream(stream)
 
-mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
-ptz_service = mycam.create_ptz_service()
-media_service = mycam.create_media_service()
-media_profile = media_service.GetProfiles()[0]
-
 is_live = START_LIVE
 
 def move(x, y, timeout):
+    mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
+    ptz_service = mycam.create_ptz_service()
+    media_service = mycam.create_media_service()
+    media_profile = media_service.GetProfiles()[0]
+
     thread = threading.Thread(
         target=ptz_service.ContinuousMove,
         args=({
@@ -62,6 +62,11 @@ def move(x, y, timeout):
     thread.start()
 
 def stop():
+    mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
+    ptz_service = mycam.create_ptz_service()
+    media_service = mycam.create_media_service()
+    media_profile = media_service.GetProfiles()[0]
+
     thread = threading.Thread(
         target=ptz_service.Stop,
         args=({'ProfileToken': media_profile.token},),
