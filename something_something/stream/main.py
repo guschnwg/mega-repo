@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import time
 import cv2
 from mjpeg_streamer import MjpegServer, Stream
@@ -9,7 +10,6 @@ import base64
 
 import os
 
-STREAM_URL = os.getenv("STREAM_URL", "")
 START_LIVE = bool(os.getenv("START_LIVE", ""))
 
 HOST = os.getenv("HOST", "")
@@ -20,6 +20,8 @@ ONVIF_USER = os.getenv("ONVIF_USER", "")
 ONVIF_PASSWORD = os.getenv("ONVIF_PASSWORD", "")
 WSDL = os.getenv("WSDL", "/usr/local/lib/python3.11/site-packages/wsdl/")
 RTSP_PATH = os.getenv("RTSP_PATH", "/cam/realmonitor?channel=1&subtype=0")
+
+STREAM_URL = os.getenv("STREAM_URL", "") or f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}'
 
 print(f"""
 STREAM_URL: {STREAM_URL}
@@ -36,63 +38,77 @@ RTSP_PATH: {RTSP_PATH}
 
 server = MjpegServer("0.0.0.0", 8080)
 
-if STREAM_URL:
-    cap = cv2.VideoCapture(STREAM_URL)
-else:
-    cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
+cap = cv2.VideoCapture(STREAM_URL)
+mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
+ptz_service = mycam.create_ptz_service()
+media_service = mycam.create_media_service()
+media_profile = media_service.GetProfiles()[0]
 
 stream = Stream("my_camera", size=(1366, 768), quality=50, fps=60)
 server.add_stream(stream)
 
 is_live = START_LIVE
 
-def move(x, y, timeout):
-    mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
-    ptz_service = mycam.create_ptz_service()
-    media_service = mycam.create_media_service()
-    media_profile = media_service.GetProfiles()[0]
 
-    thread = threading.Thread(
-        target=ptz_service.ContinuousMove,
-        args=({
-            'ProfileToken': media_profile.token, 'Velocity': {'PanTilt': {'x': x, 'y': y}}, 'Timeout': timeout
-        },),
-        daemon=True
-    )
-    thread.start()
+## MISC
+
+def get_capabilities():
+    capabilities = mycam.devicemgmt.GetCapabilities()
+    return capabilities
+
+def get_system_datetime():
+    return mycam.devicemgmt.GetSystemDateAndTime()
+
+def set_system_datetime():
+    now = datetime.utcnow()
+
+    time_params = mycam.devicemgmt.create_type('SetSystemDateAndTime')
+    time_params.DateTimeType = 'Manual'
+    time_params.DaylightSavings = True
+    time_params.TimeZone = {'TZ': 'GMT-03:00'}
+    time_params.UTCDateTime = {
+        'Time': {'Hour': now.hour, 'Minute': now.minute, 'Second': now.second},
+        'Date': {'Year': now.year, 'Month': now.month, 'Day': now.day}
+    }
+
+    return mycam.devicemgmt.SetSystemDateAndTime(time_params)
+
+def get_profiles():
+    return media_service.GetProfiles()
+
+def get_ptz_configuration():
+    ptz_configuration = ptz_service.GetConfigurationOptions(media_profile.PTZConfiguration.token)
+
+    return ptz_configuration
+    
+
+def continuous_move(x, y, timeout):
+    params = {'ProfileToken': media_profile.token, 'Velocity': {'PanTilt': {'x': x, 'y': y}}, 'Timeout': timeout}
+    ptz_service.ContinuousMove(params)
 
 def stop():
-    mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
-    ptz_service = mycam.create_ptz_service()
-    media_service = mycam.create_media_service()
-    media_profile = media_service.GetProfiles()[0]
+    ptz_service.Stop({'ProfileToken': media_profile.token})
 
-    thread = threading.Thread(
-        target=ptz_service.Stop,
-        args=({'ProfileToken': media_profile.token},),
-        daemon=True
-    )
-    thread.start()
+def move_and_stop():
+    params = {'ProfileToken': media_profile.token, 'Velocity': {'PanTilt': {'x': 0, 'y': 0}}, 'Timeout': 1}
+    ptz_service.ContinuousMove(params)
+    time.sleep(1)
+    ptz_service.Stop({'ProfileToken': media_profile.token})
 
-def turn(x, y, timeout, wait):
-    def inner():
-        move(x, y, timeout)
-        time.sleep(wait)
-        stop()
+## MISC
 
-    thread = threading.Thread(target=inner, daemon=True)
-    thread.start()
-
-async def reset():
-    global is_live, cap
+def reset():
+    global is_live, cap, ptz_service, media_service, media_profile
 
     is_live = False
 
-    await asyncio.sleep(5)
-
-    cap = cv2.VideoCapture(f'rtsp://{STREAM_USER}:{STREAM_PASSWORD}@{HOST}:{PORT}{RTSP_PATH}')
-
-    await asyncio.sleep(5)
+    time.sleep(1)
+    cap = cv2.VideoCapture(STREAM_URL)
+    mycam = ONVIFCamera(HOST, PORT, ONVIF_USER, ONVIF_PASSWORD, WSDL, adjust_time=True)
+    ptz_service = mycam.create_ptz_service()
+    media_service = mycam.create_media_service()
+    media_profile = media_service.GetProfiles()[0]
+    time.sleep(1)
 
     is_live = True
 
@@ -101,21 +117,8 @@ class TurnHandler:
         x = request.rel_url.query.get("x", 0)
         y = request.rel_url.query.get("y", 0)
         timeout = request.rel_url.query.get("timeout", 0)
-        wait = request.rel_url.query.get("wait", 0)
 
-        turn(float(x), float(y), int(timeout), int(wait))
-
-        headers = {"Content-Type": "application/json"}
-        response = web.StreamResponse(status=200, reason="OK", headers=headers)
-        await response.prepare(request)
-        await response.write(b"{}")
-
-        return response
-
-class OnHandler:
-    async def __call__(self, request: web.Request) -> web.StreamResponse:
-        global is_live
-        is_live = True
+        continuous_move(float(x), float(y), int(timeout))
 
         headers = {"Content-Type": "application/json"}
         response = web.StreamResponse(status=200, reason="OK", headers=headers)
@@ -123,11 +126,10 @@ class OnHandler:
         await response.write(b"{}")
 
         return response
-
-class OffHandler:
+    
+class StopHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
-        global is_live
-        is_live = False
+        stop()
 
         headers = {"Content-Type": "application/json"}
         response = web.StreamResponse(status=200, reason="OK", headers=headers)
@@ -138,7 +140,7 @@ class OffHandler:
 
 class ResetHandler:
     async def __call__(self, request: web.Request) -> web.StreamResponse:
-        await reset()
+        reset()
 
         headers = {"Content-Type": "application/json"}
         response = web.StreamResponse(status=200, reason="OK", headers=headers)
@@ -198,18 +200,14 @@ class WebSocketHandler:
                         await self.handle_frame(ws, int(width), int(height), int(buffer_size))
 
                     elif type == "turn":
-                        x, y, timeout, wait = rest.split("|")
-                        turn(float(x), float(y), int(timeout), int(wait))
-
-                    elif type == "move":
                         x, y, timeout = rest.split("|")
-                        move(float(x), float(y), int(timeout))
+                        threading.Thread(target=continuous_move, args=(float(x), float(y), int(timeout))).start()
 
                     elif type == "stop":
-                        stop()
+                        threading.Thread(target=stop).start()
 
                     elif type == "reset":
-                        await reset()
+                        reset()
 
                     if msg.data == "close":
                         await ws.close()
@@ -235,8 +233,7 @@ class WebSocketUIHandler:
         return response
 
 server._app.router.add_route("GET", "/turn", TurnHandler())
-server._app.router.add_route("GET", "/on", OnHandler())
-server._app.router.add_route("GET", "/off", OffHandler())
+server._app.router.add_route("GET", "/stop", StopHandler())
 server._app.router.add_route("GET", "/reset", ResetHandler())
 server._app.router.add_route("GET", "/ws", WebSocketHandler())
 server._app.router.add_route("GET", "/ws-ui", WebSocketUIHandler())

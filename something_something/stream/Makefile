@@ -14,5 +14,7 @@ run-local:
 		-e PORT=80 \
 		-e STREAM_USER=admin \
 		-e STREAM_PASSWORD= \
+		-e ONVIF_USER=admin \
+		-e ONVIF_PASSWORD= \
 		-e START_LIVE=1 \
 		streaming

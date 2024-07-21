@@ -51,13 +51,8 @@
     </div>
 
     <div>
-        <button onclick="turn(-0.2, 0, 2, 2)">Turn Left</button>
-        <button onclick="turn(0.2, 0, 2, 2)">Turn Right</button>
-    </div>
-
-    <div>
-        <button onclick="move(-1, 0, 1)">Move Left</button>
-        <button onclick="move(1, 0, 1)">Move Right</button>
+        <button onclick="turn(-0.2, 0, 2)">Turn Left</button>
+        <button onclick="turn(0.2, 0, 2)">Turn Right</button>
         <button onclick="stopIt()">Stop</button>
     </div>
 
@@ -82,11 +77,7 @@
         }
 
         function turn(x, y, timeout, wait) {
-            window.ws.send(`turn|${x}|${y}|${timeout}|${wait}`);
-        }
-
-        function move(x, y, timeout) {
-            window.ws.send(`move|${x}|${y}|${timeout}`);
+            window.ws.send(`turn|${x}|${y}|${timeout}`);
         }
 
         function stopIt(x, y, timeout) {
@@ -94,7 +85,7 @@
         }
 
         window.addEventListener("load", function() {
-            window.ws = new WebSocket("/stream/ws");
+            window.ws = new WebSocket(window.location.pathname.includes('stream') ? "/stream/ws" : "/ws");
 
             var buffer = '';
             var lastReceived = Date.now();
