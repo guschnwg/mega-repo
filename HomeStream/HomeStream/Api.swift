@@ -50,12 +50,11 @@ class Api: ObservableObject {
         source = newSource
     }
     
-    @MainActor func turn(x: Double) async {
-        isTurning = true
-        do {
-            try await URLSession.shared.data(for: getRequest("/turn?x=\(x)&y=0&timeout=2&wait=2"))
-        } catch {}
-        self.isTurning = false
+    func turn(x: Double) async {
+        Task {
+            let url = "/turn?x=\(x)&y=0&timeout=2"
+            _ = try await URLSession.shared.data(for: getRequest(url))
+        }
     }
     
     func turnRight() {
@@ -70,11 +69,15 @@ class Api: ObservableObject {
         }
     }
     
-    @MainActor func reset() async {
-        isResetting = true
-        do {
-            try await URLSession.shared.data(for: getRequest("/reset"))
-        } catch {}
-        self.isResetting = false
+    func stop() {
+        Task {
+            _ = try await URLSession.shared.data(for: getRequest("/stop"))
+        }
+    }
+    
+    func reset() async {
+        Task {
+            _ = try await URLSession.shared.data(for: getRequest("/reset"))
+        }
     }
 }

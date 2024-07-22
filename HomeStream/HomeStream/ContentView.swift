@@ -60,15 +60,26 @@ struct ContentView: View {
             }
             
             HStack {
-                Button(action: api.turnLeft) {
-                    Image(systemName: "arrowshape.left")
-                        .font(.system(size: 22))
-                        .padding(.all, 20)
+                VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: 50) {
+                    Button(action: api.turnLeft) {
+                        Image(systemName: "arrowshape.left")
+                            .font(.system(size: 22))
+                            .padding(.all, 20)
+                    }
+                    .background(.blue)
+                    .foregroundColor(.white)
+                    .clipShape(Circle())
+                    .disabled(api.isDoingSomething)
+                    
+                    Button(action: api.stop) {
+                        Image(systemName: "stop")
+                            .font(.system(size: 22))
+                            .padding(.all, 10)
+                    }
+                    .background(.white)
+                    .foregroundColor(.red)
+                    .clipShape(Circle())
                 }
-                .background(.blue)
-                .foregroundColor(.white)
-                .clipShape(Circle())
-                .disabled(api.isDoingSomething)
                 
                 GeometryReader { geo in
                     let height = geo.size.width / 16 * 9
@@ -77,15 +88,26 @@ struct ContentView: View {
                         .padding(.vertical, (geo.size.height - height) / 2)
                 }
                 
-                Button(action: api.turnRight) {
-                    Image(systemName: "arrowshape.right")
-                        .font(.system(size: 22))
-                        .padding(.all, 20)
+                VStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/, spacing: 50) {
+                    Button(action: api.turnRight) {
+                        Image(systemName: "arrowshape.right")
+                            .font(.system(size: 22))
+                            .padding(.all, 20)
+                    }
+                    .background(.blue)
+                    .foregroundColor(.white)
+                    .clipShape(Circle())
+                    .disabled(api.isDoingSomething)
+                    
+                    Button(action: api.stop) {
+                        Image(systemName: "stop")
+                            .font(.system(size: 22))
+                            .padding(.all, 10)
+                    }
+                    .background(.white)
+                    .foregroundColor(.red)
+                    .clipShape(Circle())
                 }
-                .background(.blue)
-                .foregroundColor(.white)
-                .clipShape(Circle())
-                .disabled(api.isDoingSomething)
             }
         }
         .padding()
