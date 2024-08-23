@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div style="border: 1px solid red">
+        My video
+        <video id="my_video" autoplay width="100" height="100"></video>
+    </div>
+    <div style="border: 1px solid green">
+        Remote video <button onclick="this.nextElementSibling.play()">Play</button>
+        <video id="remote_video" autoplay width="100" height="100"></video>
+    </div>
+
+    <button onclick="sendMedia()">Send media</button>
+    <button onclick="sendMessage()">Send WebRTC message</button>
+
+    <script>
+        const myVideo = document.getElementById("my_video");
+        const remoteVideo = document.getElementById("remote_video");
+
+        const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+        const socket = new WebSocket("ws://localhost:8080/ws");
+        const channel = peerConnection.createDataChannel("chat", { negotiated: true, id: 0 });
+
+        peerConnection.onicecandidate = e => {
+            if (!e.candidate) return;
+            socket.send(JSON.stringify({ type: "candidate", candidate: e.candidate }));
+        };
+        peerConnection.ontrack = e => remoteVideo.srcObject = e.streams[0];
+
+        socket.addEventListener('message', message => {
+            const data = JSON.parse(message.data);
+
+            if (data.type === "offer") {
+                if (confirm("Do you want to accept the call?")) {
+                    sendAnswer(data.offer);
+                }
+            } else if (data.type === "answer") {
+                peerConnection.setRemoteDescription(data.answer);
+            } else if (data.type === "candidate") {
+                peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        });
+
+        channel.onmessage = (event) => alert(event.data);
+
+        // ...
+
+        const sendAnswer = (remoteSdp) => {
+            peerConnection.setRemoteDescription(remoteSdp).then(() => {
+                peerConnection
+                    .createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
+                    .then(localSdp => {
+                        peerConnection.setLocalDescription(localSdp);
+                        socket.send(JSON.stringify({ type: "answer", answer: localSdp }));
+                    });
+            });
+        };
+
+        function sendMessage() {
+            channel.send('HI!');
+        }
+
+        function sendMedia() {
+            navigator.mediaDevices
+                .getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    myVideo.srcObject = stream;
+                    myVideo.play();
+
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+                    peerConnection
+                        .createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
+                        .then(sdp => {
+                            peerConnection.setLocalDescription(sdp);
+
+                            socket.send(JSON.stringify({ type: "offer", offer: sdp }));
+                        });
+                });
+        }
+    </script>
+</body>
+</html>
