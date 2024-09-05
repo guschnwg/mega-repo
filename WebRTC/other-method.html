@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="offer()">Get offer (Tab 1)</button>
+
+    <button onclick="answer(JSON.parse(prompt('SDP from offer:')))">Get answer from offer (Tab 2)</button>
+
+    <button onclick="receiveAnswer(JSON.parse(prompt('SDP from answer:')))">Receive answer (Tab 1)</button>
+
+    <button onclick="receiveIceCandidate(JSON.parse(prompt('Ice Candidate')))">Receive ICE Candidade</button>
+
+    <button onclick="sendMessge()">Send a message</button>
+
+    <script>
+        const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+        const channel = peerConnection.createDataChannel("chat", { negotiated: true, id: 0 });
+
+        channel.onmessage = (event) => alert(event.data);
+
+        peerConnection.addEventListener('icecandidate', async event => {
+            console.log('Local ICE candidate: ', event.candidate);
+        });
+
+        // Tab 1
+        function offer() {
+            // peerConnection.addTrack(track, stream);
+
+            peerConnection
+                .createOffer()
+                .then(sdp => {
+                    peerConnection.setLocalDescription(sdp);
+                    console.log("offer", sdp);
+                    navigator.clipboard.writeText(sdp.sdp);
+                });
+        }
+
+        // Tab 2
+        function answer(sdp) {
+            peerConnection.setRemoteDescription(sdp);
+            peerConnection
+                .createAnswer()
+                .then(sdp => {
+                    peerConnection.setLocalDescription(sdp);
+                    console.log("answer", sdp);
+                });
+        }
+
+        // Tab 1
+        function receiveAnswer(sdp) {
+            peerConnection.setRemoteDescription(sdp);
+        }
+
+        function receiveIceCandidate(event) {
+            peerConnection.addIceCandidate(new RTCIceCandidate(event));
+        }
+
+        function sendMessage() {
+            channel.send('HI!');
+        }
+    </script>
+    
+</body>
+</html>
