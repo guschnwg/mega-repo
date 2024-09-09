@@ -1,0 +1,628 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6B20ABF32C49C5F200F853AB /* NycSubwayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B20ABF22C49C5F200F853AB /* NycSubwayApp.swift */; };
+		6B20ABF52C49C5F200F853AB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B20ABF42C49C5F200F853AB /* ContentView.swift */; };
+		6B20ABF72C49C5F200F853AB /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B20ABF62C49C5F200F853AB /* Models.swift */; };
+		6B20ABF92C49C5F400F853AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B20ABF82C49C5F400F853AB /* Assets.xcassets */; };
+		6B20AC042C49C7CF00F853AB /* GTFS in Frameworks */ = {isa = PBXBuildFile; productRef = 6B20AC032C49C7CF00F853AB /* GTFS */; };
+		6B20AC062C49CE0F00F853AB /* GTFS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B20AC052C49CE0F00F853AB /* GTFS.swift */; };
+		6B4876F12C7D339000F850F4 /* GTFS in Resources */ = {isa = PBXBuildFile; fileRef = 6B4876F02C7D339000F850F4 /* GTFS */; };
+		6B4876F32C7D397E00F850F4 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4876F22C7D397E00F850F4 /* Graphics.swift */; };
+		6B4876F52C87F2D200F850F4 /* Stations.csv in Resources */ = {isa = PBXBuildFile; fileRef = 6B4876F42C87F2D200F850F4 /* Stations.csv */; };
+		6B4877512C8D356F00F850F4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6B48771D2C8D334A00F850F4 /* WidgetKit.framework */; };
+		6B4877522C8D356F00F850F4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6B48771F2C8D334A00F850F4 /* SwiftUI.framework */; };
+		6B4877552C8D356F00F850F4 /* NycSubwayWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4877542C8D356F00F850F4 /* NycSubwayWidgetBundle.swift */; };
+		6B4877572C8D356F00F850F4 /* NycSubwayWidgetLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4877562C8D356F00F850F4 /* NycSubwayWidgetLiveActivity.swift */; };
+		6B4877592C8D356F00F850F4 /* NycSubwayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4877582C8D356F00F850F4 /* NycSubwayWidget.swift */; };
+		6B48775D2C8D357100F850F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B48775C2C8D357100F850F4 /* Assets.xcassets */; };
+		6B4877612C8D357100F850F4 /* NycSubwayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6B4877502C8D356F00F850F4 /* NycSubwayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6B4877662C8D372300F850F4 /* NycSubwayWidgetAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4877652C8D372300F850F4 /* NycSubwayWidgetAttributes.swift */; };
+		6B4877672C8D372300F850F4 /* NycSubwayWidgetAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4877652C8D372300F850F4 /* NycSubwayWidgetAttributes.swift */; };
+		6B48776A2C8D39FD00F850F4 /* NotificationPayload.json in Resources */ = {isa = PBXBuildFile; fileRef = 6B4877692C8D39FD00F850F4 /* NotificationPayload.json */; };
+		6B48776B2C8D39FD00F850F4 /* NotificationPayload.json in Resources */ = {isa = PBXBuildFile; fileRef = 6B4877692C8D39FD00F850F4 /* NotificationPayload.json */; };
+		6B48776D2C8D3F6E00F850F4 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B48776C2C8D3F6E00F850F4 /* CanvasView.swift */; };
+		6B48776E2C8D3F6E00F850F4 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B48776C2C8D3F6E00F850F4 /* CanvasView.swift */; };
+		6B48776F2C8D412D00F850F4 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B20ABF62C49C5F200F853AB /* Models.swift */; };
+		6B4877702C8D414100F850F4 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4876F22C7D397E00F850F4 /* Graphics.swift */; };
+		6B4877712C8D414A00F850F4 /* GTFS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B20AC052C49CE0F00F853AB /* GTFS.swift */; };
+		6B4877732C8D416600F850F4 /* GTFS in Frameworks */ = {isa = PBXBuildFile; productRef = 6B4877722C8D416600F850F4 /* GTFS */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6B48775F2C8D357100F850F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6B20ABE72C49C5F200F853AB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6B48774F2C8D356F00F850F4;
+			remoteInfo = NycSubwayWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6B48770E2C8A8EF100F850F4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6B4877612C8D357100F850F4 /* NycSubwayWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		6B20ABEF2C49C5F200F853AB /* NycSubway.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NycSubway.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B20ABF22C49C5F200F853AB /* NycSubwayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NycSubwayApp.swift; sourceTree = "<group>"; };
+		6B20ABF42C49C5F200F853AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		6B20ABF62C49C5F200F853AB /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		6B20ABF82C49C5F400F853AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6B20AC052C49CE0F00F853AB /* GTFS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GTFS.swift; sourceTree = "<group>"; };
+		6B4876F02C7D339000F850F4 /* GTFS */ = {isa = PBXFileReference; lastKnownFileType = file; path = GTFS; sourceTree = "<group>"; };
+		6B4876F22C7D397E00F850F4 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
+		6B4876F42C87F2D200F850F4 /* Stations.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Stations.csv; sourceTree = "<group>"; };
+		6B48771D2C8D334A00F850F4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		6B48771F2C8D334A00F850F4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		6B4877502C8D356F00F850F4 /* NycSubwayWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NycSubwayWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B4877542C8D356F00F850F4 /* NycSubwayWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NycSubwayWidgetBundle.swift; sourceTree = "<group>"; };
+		6B4877562C8D356F00F850F4 /* NycSubwayWidgetLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NycSubwayWidgetLiveActivity.swift; sourceTree = "<group>"; };
+		6B4877582C8D356F00F850F4 /* NycSubwayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NycSubwayWidget.swift; sourceTree = "<group>"; };
+		6B48775C2C8D357100F850F4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6B48775E2C8D357100F850F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6B4877652C8D372300F850F4 /* NycSubwayWidgetAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NycSubwayWidgetAttributes.swift; sourceTree = "<group>"; };
+		6B4877692C8D39FD00F850F4 /* NotificationPayload.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = NotificationPayload.json; sourceTree = "<group>"; };
+		6B48776C2C8D3F6E00F850F4 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6B20ABEC2C49C5F200F853AB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B20AC042C49C7CF00F853AB /* GTFS in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B48774D2C8D356F00F850F4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4877522C8D356F00F850F4 /* SwiftUI.framework in Frameworks */,
+				6B4877732C8D416600F850F4 /* GTFS in Frameworks */,
+				6B4877512C8D356F00F850F4 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6B20ABE62C49C5F200F853AB = {
+			isa = PBXGroup;
+			children = (
+				6B20ABF12C49C5F200F853AB /* NycSubway */,
+				6B4877532C8D356F00F850F4 /* NycSubwayWidget */,
+				6B48771C2C8D334A00F850F4 /* Frameworks */,
+				6B20ABF02C49C5F200F853AB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6B20ABF02C49C5F200F853AB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6B20ABEF2C49C5F200F853AB /* NycSubway.app */,
+				6B4877502C8D356F00F850F4 /* NycSubwayWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6B20ABF12C49C5F200F853AB /* NycSubway */ = {
+			isa = PBXGroup;
+			children = (
+				6B20ABF82C49C5F400F853AB /* Assets.xcassets */,
+				6B9075382C7A55BC0091F8DD /* Data */,
+				6B20ABF22C49C5F200F853AB /* NycSubwayApp.swift */,
+				6B20ABF42C49C5F200F853AB /* ContentView.swift */,
+				6B48776C2C8D3F6E00F850F4 /* CanvasView.swift */,
+				6B20ABF62C49C5F200F853AB /* Models.swift */,
+				6B20AC052C49CE0F00F853AB /* GTFS.swift */,
+				6B4876F22C7D397E00F850F4 /* Graphics.swift */,
+				6B4877652C8D372300F850F4 /* NycSubwayWidgetAttributes.swift */,
+				6B4877692C8D39FD00F850F4 /* NotificationPayload.json */,
+			);
+			path = NycSubway;
+			sourceTree = "<group>";
+		};
+		6B48771C2C8D334A00F850F4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6B48771D2C8D334A00F850F4 /* WidgetKit.framework */,
+				6B48771F2C8D334A00F850F4 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6B4877532C8D356F00F850F4 /* NycSubwayWidget */ = {
+			isa = PBXGroup;
+			children = (
+				6B48775C2C8D357100F850F4 /* Assets.xcassets */,
+				6B4877542C8D356F00F850F4 /* NycSubwayWidgetBundle.swift */,
+				6B4877562C8D356F00F850F4 /* NycSubwayWidgetLiveActivity.swift */,
+				6B4877582C8D356F00F850F4 /* NycSubwayWidget.swift */,
+				6B48775E2C8D357100F850F4 /* Info.plist */,
+			);
+			path = NycSubwayWidget;
+			sourceTree = "<group>";
+		};
+		6B9075382C7A55BC0091F8DD /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				6B4876F02C7D339000F850F4 /* GTFS */,
+				6B4876F42C87F2D200F850F4 /* Stations.csv */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6B20ABEE2C49C5F200F853AB /* NycSubway */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B20ABFF2C49C5F400F853AB /* Build configuration list for PBXNativeTarget "NycSubway" */;
+			buildPhases = (
+				6B20ABEB2C49C5F200F853AB /* Sources */,
+				6B20ABEC2C49C5F200F853AB /* Frameworks */,
+				6B20ABED2C49C5F200F853AB /* Resources */,
+				6B48770E2C8A8EF100F850F4 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6B4877602C8D357100F850F4 /* PBXTargetDependency */,
+			);
+			name = NycSubway;
+			packageProductDependencies = (
+				6B20AC032C49C7CF00F853AB /* GTFS */,
+			);
+			productName = NycSubway;
+			productReference = 6B20ABEF2C49C5F200F853AB /* NycSubway.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6B48774F2C8D356F00F850F4 /* NycSubwayWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B4877622C8D357100F850F4 /* Build configuration list for PBXNativeTarget "NycSubwayWidgetExtension" */;
+			buildPhases = (
+				6B48774C2C8D356F00F850F4 /* Sources */,
+				6B48774D2C8D356F00F850F4 /* Frameworks */,
+				6B48774E2C8D356F00F850F4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NycSubwayWidgetExtension;
+			packageProductDependencies = (
+				6B4877722C8D416600F850F4 /* GTFS */,
+			);
+			productName = NycSubwayWidgetExtension;
+			productReference = 6B4877502C8D356F00F850F4 /* NycSubwayWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6B20ABE72C49C5F200F853AB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					6B20ABEE2C49C5F200F853AB = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					6B48774F2C8D356F00F850F4 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+				};
+			};
+			buildConfigurationList = 6B20ABEA2C49C5F200F853AB /* Build configuration list for PBXProject "NycSubway" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6B20ABE62C49C5F200F853AB;
+			packageReferences = (
+				6B20AC022C49C7CF00F853AB /* XCRemoteSwiftPackageReference "GTFS" */,
+			);
+			productRefGroup = 6B20ABF02C49C5F200F853AB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6B20ABEE2C49C5F200F853AB /* NycSubway */,
+				6B48774F2C8D356F00F850F4 /* NycSubwayWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6B20ABED2C49C5F200F853AB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4876F12C7D339000F850F4 /* GTFS in Resources */,
+				6B20ABF92C49C5F400F853AB /* Assets.xcassets in Resources */,
+				6B48776A2C8D39FD00F850F4 /* NotificationPayload.json in Resources */,
+				6B4876F52C87F2D200F850F4 /* Stations.csv in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B48774E2C8D356F00F850F4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B48776B2C8D39FD00F850F4 /* NotificationPayload.json in Resources */,
+				6B48775D2C8D357100F850F4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6B20ABEB2C49C5F200F853AB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B20ABF52C49C5F200F853AB /* ContentView.swift in Sources */,
+				6B4876F32C7D397E00F850F4 /* Graphics.swift in Sources */,
+				6B48776D2C8D3F6E00F850F4 /* CanvasView.swift in Sources */,
+				6B20AC062C49CE0F00F853AB /* GTFS.swift in Sources */,
+				6B4877662C8D372300F850F4 /* NycSubwayWidgetAttributes.swift in Sources */,
+				6B20ABF72C49C5F200F853AB /* Models.swift in Sources */,
+				6B20ABF32C49C5F200F853AB /* NycSubwayApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B48774C2C8D356F00F850F4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4877572C8D356F00F850F4 /* NycSubwayWidgetLiveActivity.swift in Sources */,
+				6B4877712C8D414A00F850F4 /* GTFS.swift in Sources */,
+				6B4877672C8D372300F850F4 /* NycSubwayWidgetAttributes.swift in Sources */,
+				6B48776E2C8D3F6E00F850F4 /* CanvasView.swift in Sources */,
+				6B4877702C8D414100F850F4 /* Graphics.swift in Sources */,
+				6B48776F2C8D412D00F850F4 /* Models.swift in Sources */,
+				6B4877552C8D356F00F850F4 /* NycSubwayWidgetBundle.swift in Sources */,
+				6B4877592C8D356F00F850F4 /* NycSubwayWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6B4877602C8D357100F850F4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6B48774F2C8D356F00F850F4 /* NycSubwayWidgetExtension */;
+			targetProxy = 6B48775F2C8D357100F850F4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6B20ABFD2C49C5F400F853AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		6B20ABFE2C49C5F400F853AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		6B20AC002C49C5F400F853AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NycSubway/NycSubway.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"NycSubway/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = giovanna.NycSubway;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6B20AC012C49C5F400F853AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NycSubway/NycSubway.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"NycSubway/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = giovanna.NycSubway;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6B4877632C8D357100F850F4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = NycSubwayWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z9JYZQ2HZ9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NycSubwayWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NycSubwayWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = giovanna.NycSubway.NycSubwayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6B4877642C8D357100F850F4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = NycSubwayWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z9JYZQ2HZ9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NycSubwayWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NycSubwayWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = giovanna.NycSubway.NycSubwayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6B20ABEA2C49C5F200F853AB /* Build configuration list for PBXProject "NycSubway" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B20ABFD2C49C5F400F853AB /* Debug */,
+				6B20ABFE2C49C5F400F853AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B20ABFF2C49C5F400F853AB /* Build configuration list for PBXNativeTarget "NycSubway" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B20AC002C49C5F400F853AB /* Debug */,
+				6B20AC012C49C5F400F853AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B4877622C8D357100F850F4 /* Build configuration list for PBXNativeTarget "NycSubwayWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B4877632C8D357100F850F4 /* Debug */,
+				6B4877642C8D357100F850F4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6B20AC022C49C7CF00F853AB /* XCRemoteSwiftPackageReference "GTFS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/emma-k-alexandra/GTFS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6B20AC032C49C7CF00F853AB /* GTFS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6B20AC022C49C7CF00F853AB /* XCRemoteSwiftPackageReference "GTFS" */;
+			productName = GTFS;
+		};
+		6B4877722C8D416600F850F4 /* GTFS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6B20AC022C49C7CF00F853AB /* XCRemoteSwiftPackageReference "GTFS" */;
+			productName = GTFS;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6B20ABE72C49C5F200F853AB /* Project object */;
+}

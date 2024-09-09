@@ -1,0 +1,15 @@
+{
+    "//": "xcrun simctl push booted giovanna.NycSubway NotificationPayload.json",
+    "aps": {
+        "category": "customNotificationIdentifier",
+        "alert" : {
+            "title" : "EXTENDED NOTIFICATION",
+            "subtitle" : "Subtitle of the push payload",
+            "body" : "This is the text inside the body of the payload. This is displayed below the subtitle and above the footer."
+        },
+        "footer": "Footnote inside the push payload",
+        "firstButton": "Main Button",
+        "secondButton": "Secondary Button",
+        "imageUrl": "https://raw.githubusercontent.com/MarkWarriors/MGExtendedNotifications/main/mount_fuji.jpg"
+    }
+}

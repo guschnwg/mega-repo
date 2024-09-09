@@ -1127,7 +1127,7 @@
                 [1, 1],
                 [0, 1]
             ],
-            '\\': [
+            '#': [
                 [0, 0, 0, 0, 0],
                 [0, 1, 0, 1, 0],
                 [0, 1, 0, 1, 0],
@@ -1443,15 +1443,16 @@
 
         function rightAlignText(x, y, text, color, from = CHARACTERS, cropAfter = Number.NEGATIVE_INFINITY) {
             const rows = container.children;
+            const _x = x;
 
             for (let i = text.length - 1; i >=0 ; i--) {
                 const char = text[i];
                 const charRow = from[char];
                 for (let r = 0; r < charRow.length; r++) {
                     for (let c = charRow[r].length - 1; c >= 0; c--) {
-                        // if (x - c < cropAfter) {
-                        //     break;
-                        // }
+                        if (x - (charRow[r].length - c) < _x - cropAfter) {
+                            break;
+                        }
 
                         if (charRow[r][c] === 1) {
                             rows[y + r]?.children[x - (charRow[r].length - c)]?.style.setProperty('--color', color);
