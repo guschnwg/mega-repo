@@ -50,9 +50,7 @@ struct SwiftDataView: View {
                     }
                 } catch {}
             }
-            
-            
-            
+
             // load(path: "/Stations.csv") {
             fetch(url: "https://data.ny.gov/resource/5f5g-n3cz.csv") { data in
                 do {
@@ -86,7 +84,7 @@ struct NycSubwayApp: App {
     var body: some Scene {
         WindowGroup {
             RegularView()
-            //            SwiftDataView()
+//            SwiftDataView()
         }.modelContainer(sharedModelContainer)
     }
 }

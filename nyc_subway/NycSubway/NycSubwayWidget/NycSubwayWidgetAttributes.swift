@@ -10,6 +10,7 @@ import Foundation
 
 struct NycSubwayWidgetAttributes : ActivityAttributes {
     struct ContentState: Codable & Hashable {
+        var secondIndex: Int = 0
     }
     
     var info: [SubwayInfo]

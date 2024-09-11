@@ -14,9 +14,13 @@ struct NycSubwayWidgetLiveActivity: Widget {
         ActivityConfiguration(for: NycSubwayWidgetAttributes.self) { context in
             // Lock screen/banner UI goes here
             VStack {
-                CanvasView(realtime: [], stations: [])
+                CanvasView(
+                    subway: context.attributes.info,
+                    cols: COLS - 40,
+                    secondIndex: context.state.secondIndex
+                )
             }
-            .activityBackgroundTint(Color.cyan)
+            .activityBackgroundTint(.black)
             .activitySystemActionForegroundColor(Color.black)
             
         } dynamicIsland: { context in
@@ -45,11 +49,11 @@ struct NycSubwayWidgetLiveActivity: Widget {
     }
 }
 
-#Preview("Notification",
-         as: .content,
-         using: NycSubwayWidgetAttributes(info: [])) {
-    NycSubwayWidgetLiveActivity()
-} contentStates: {
-    NycSubwayWidgetAttributes.ContentState()
-    NycSubwayWidgetAttributes.ContentState()
-}
+//#Preview("Notification",
+//         as: .content,
+//         using: NycSubwayWidgetAttributes(info: [])) {
+//    NycSubwayWidgetLiveActivity()
+//} contentStates: {
+//    NycSubwayWidgetAttributes.ContentState()
+//    NycSubwayWidgetAttributes.ContentState()
+//}

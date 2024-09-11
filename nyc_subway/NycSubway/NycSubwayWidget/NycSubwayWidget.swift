@@ -9,13 +9,28 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 
+
 struct ConfigurationAppIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Configuration"
     static var description = IntentDescription("This is an example widget.")
 
-    // An example configurable parameter.
-    @Parameter(title: "Favorite Emoji", default: "😃")
-    var favoriteEmoji: String
+    @Parameter(title: "First route ID", default: "1")
+    var firstRouteId: String
+    
+    @Parameter(title: "First going to", default: "1")
+    var firstGoingTo: String
+    
+    @Parameter(title: "First time left", default: 1)
+    var firstTimeLeft: Int
+    
+    @Parameter(title: "Second route ID", default: "2")
+    var secondRouteId: String
+    
+    @Parameter(title: "Second going to", default: "2")
+    var secondGoingTo: String
+    
+    @Parameter(title: "Second time left", default: 2)
+    var secondTimeLeft: Int
 }
 
 
@@ -48,48 +63,34 @@ struct SimpleEntry: TimelineEntry {
     let configuration: ConfigurationAppIntent
 }
 
-struct NycSubwayWidgetEntryView : View {
-    var entry: Provider.Entry
-
-    var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
-        }
-    }
-}
-
 struct NycSubwayWidget: Widget {
     let kind: String = "NycSubwayWidget"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
-            NycSubwayWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+        AppIntentConfiguration(
+            kind: kind,
+            intent: ConfigurationAppIntent.self,
+            provider: Provider()
+        ) { entry in
+            CanvasView(
+                subway: [
+                    SubwayInfo(
+                        routeId: entry.configuration.firstRouteId,
+                        leftFromName: "",
+                        goingToName: entry.configuration.firstGoingTo,
+                        timeLeft: entry.configuration.firstTimeLeft
+                    ),
+                    SubwayInfo(
+                        routeId: entry.configuration.secondRouteId,
+                        leftFromName: "",
+                        goingToName: entry.configuration.secondGoingTo,
+                        timeLeft: entry.configuration.secondTimeLeft
+                    ),
+                ],
+                cols: COLS - 40
+            )
+                .containerBackground(.black, for: .widget)
+                .padding(.all, -5)
         }
     }
-}
-
-extension ConfigurationAppIntent {
-    fileprivate static var smiley: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "😀"
-        return intent
-    }
-    
-    fileprivate static var starEyes: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "🤩"
-        return intent
-    }
-}
-
-#Preview(as: .systemSmall) {
-    NycSubwayWidget()
-} timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
 }

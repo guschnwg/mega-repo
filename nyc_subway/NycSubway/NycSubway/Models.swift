@@ -8,6 +8,13 @@
 import Foundation
 import SwiftData
 
+struct SubwayInfo: Codable & Hashable {
+    var routeId: String
+    var leftFromName: String
+    var goingToName: String
+    var timeLeft: Int
+}
+
 @Model
 final class Info {
     var routeId: String
@@ -20,6 +27,21 @@ final class Info {
         self.leftFrom = leftFrom
         self.goingTo = goingTo
         self.timeLeft = timeLeft
+    }
+    
+    func toSubwayInfo(stations: [Station]) -> SubwayInfo {
+        return SubwayInfo(
+            routeId: self.routeId,
+            leftFromName: getStationName(stations: stations, id: self.leftFrom),
+            goingToName: getStationName(stations: stations, id: self.goingTo),
+            timeLeft: self.timeLeft
+        )
+    }
+}
+
+extension [Info] {
+    func toSubwayInfo(stations: [Station]) -> [SubwayInfo] {
+        return self.map { $0.toSubwayInfo(stations: stations) }
     }
 }
 
@@ -118,11 +140,4 @@ func parseStations(data: Data) -> [Station] {
     }
     
     return allStations
-}
-
-struct SubwayInfo: Codable & Hashable {
-    var routeId: String
-    var leftFromName: String
-    var goingToName: String
-    var timeLeft: Int
 }
