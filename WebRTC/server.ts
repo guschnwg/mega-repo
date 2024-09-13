@@ -48,20 +48,25 @@ const handler = (request: Request): Response => {
     });
 
     socket.addEventListener("message", (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === "ping") {
-        clients[id].lastPing = Date.now();
-      } else if (data.type === "offer") {
-        send(data.to, { type: "offer", from: id, offer: data.offer });
-      } else if (data.type === "answer") {
-        send(data.to, { type: "answer", from: id, answer: data.answer });
-      } else if (data.type === "candidate") {
-        send(data.to, {
-          type: "candidate",
-          from: id,
-          candidate: data.candidate,
-        });
+      try {
+        const data = JSON.parse(event.data);
+  
+        if (data.type === "ping") {
+          clients[id].lastPing = Date.now();
+        } else if (data.type === "offer") {
+          send(data.to, { type: "offer", from: id, offer: data.offer });
+        } else if (data.type === "answer") {
+          send(data.to, { type: "answer", from: id, answer: data.answer });
+        } else if (data.type === "candidate") {
+          send(data.to, {
+            type: "candidate",
+            from: id,
+            candidate: data.candidate,
+          });
+        }
+      } catch {
+        console.log(event.data);
+        socket.close();
       }
     });
 
@@ -72,10 +77,10 @@ const handler = (request: Request): Response => {
 };
 
 setInterval(() => {
-  const now = Date.now();
-  Object.values(clients).forEach(({ lastPing, socket }) => {
-    if (now - lastPing > 10_000) socket.close();
-  });
+  // const now = Date.now();
+  // Object.values(clients).forEach(({ lastPing, socket }) => {
+  //   if (now - lastPing > 10_000) socket.close();
+  // });
 }, 1000);
 
 Deno.serve({ port }, handler);

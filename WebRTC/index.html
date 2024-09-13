@@ -18,21 +18,21 @@
         <li v-for="client in clients">
             {{ client }}
 
-            <div v-if="clientsRTCMap[client]" @class="clientsRTCMap[client].lastPing" style="display: inline;">
-                <span v-if="clientsRTCMap[client].lastMessageReceived.data">
+            <div v-if="Object.keys(clientsRTCMap).includes(client)" @class="clientsRTCMap[client].lastPing" style="display: inline;">
+                <span v-if="clientsRTCMap[client]?.lastMessageReceived?.data">
                     Last message: {{ clientsRTCMap[client].lastMessageReceived.data }}
                 </span>
 
-                <span v-if="clientsRTCMap[client].lastPing && isActive(client)">
+                <span v-if="clientsRTCMap[client]?.lastPing && isActive(client)">
                     <button @click="sendMessage(client)">
                         Send message
                     </button>
                 </span>
-                <button v-else disabled>
+                <button v-else disabled :title="clientsRTCMap[client]?.peerConnection.connectionState + ' - ' + clientsRTCMap[client]?.channel.readyState">
                     Connecting...
                 </button>
 
-                <video :id="'video-for-' + client" height="100" v-if="clientsRTCMap[client].tracks.length"
+                <video :id="'video-for-' + client" height="100" v-if="clientsRTCMap[client]?.tracks.length"
                     crossorigin="anonymous"></video>
                 <button @click="$event.target.previousElementSibling.play(); $event.target.remove()">Receive
                     video</button>
@@ -61,10 +61,10 @@
                         if (channel.readyState === 'open') {
                             this.clientsRTCMap[client].lastPing = Date.now();
                         }
-                        if (Date.now() - this.clientsRTCMap[client].lastPing > 5000) {
-                            peerConnection.close();
-                            delete this.clientsRTCMap[client];
-                        }
+                        // if (Date.now() - this.clientsRTCMap[client].lastPing > 5000) {
+                        //     peerConnection.close();
+                        //     delete this.clientsRTCMap[client];
+                        // }
                     });
                 }, 1000);
 
