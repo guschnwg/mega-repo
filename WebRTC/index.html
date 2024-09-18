@@ -13,6 +13,8 @@
         preload="auto"></video>
 
     <div v-scope @vue:mounted="mounted">
+        <h1>Open the DevTools to prevent the suppression of the prompt</h1>
+
         <h1>{{ id }}</h1>
 
         <li v-for="client in clients">
@@ -118,7 +120,9 @@
             sendOffer(to) {
                 const { peerConnection } = this.createPeerConnection(to);
 
-                peerConnection.addStream(document.getElementById('video').captureStream());
+                if (document.getElementById('video').captureStream) {
+                    peerConnection.addStream(document.getElementById('video').captureStream());
+                }
                 peerConnection
                     .createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
                     .then(sdp => {

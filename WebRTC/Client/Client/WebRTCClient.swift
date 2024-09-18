@@ -71,7 +71,7 @@ class WebRTCClient: NSObject {
 extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         print("Generated local ICE candidate: \(candidate)")
-        delegate?.onCandidate(candidate: candidate)
+        delegate?.onCandidate(to: otherOne, candidate: candidate)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, iceGatheringChanged newState: RTCIceGatheringState) {
@@ -118,7 +118,7 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
 extension WebRTCClient: RTCDataChannelDelegate {
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
         if !buffer.isBinary, let message = String(data: buffer.data, encoding: .utf8) {
-            print("Received message: \(message)")
+            delegate?.onMessage(from: otherOne, message: message)
             sendData("You sent me \(message)")
         } else {
             print("Received binary data")
@@ -127,9 +127,14 @@ extension WebRTCClient: RTCDataChannelDelegate {
 
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
         print("Data channel state changed: \(dataChannel.readyState.rawValue)")
+        if dataChannel.readyState == .open {
+            delegate?.onChannelReady(from: otherOne)
+        }
     }
 }
 
 protocol WebRTCClientDelegate: AnyObject {
-    func onCandidate(candidate: RTCIceCandidate)
+    func onCandidate(to: String, candidate: RTCIceCandidate)
+    func onChannelReady(from: String)
+    func onMessage(from: String, message: String)
 }

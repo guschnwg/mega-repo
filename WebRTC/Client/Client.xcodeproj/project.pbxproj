@@ -3,10 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6B4A010E2C9A64820016F184 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A010D2C9A647B0016F184 /* Clients.swift */; };
+		6B4A010F2C9A65630016F184 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A010D2C9A647B0016F184 /* Clients.swift */; };
+		6B4A01102C9A65630016F184 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D42C950CE900879DE7 /* WebSocketClient.swift */; };
+		6B4A01112C9A65630016F184 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */; };
+		6B4A01122C9A65630016F184 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A010D2C9A647B0016F184 /* Clients.swift */; };
+		6B4A01132C9A65630016F184 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */; };
+		6B4A01142C9A65630016F184 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D42C950CE900879DE7 /* WebSocketClient.swift */; };
+		6B4A01162C9A65B20016F184 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 6B4A01152C9A65B20016F184 /* WebRTC */; };
 		6B6068C72C950B9700879DE7 /* StreamClientApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068C62C950B9700879DE7 /* StreamClientApp.swift */; };
 		6B6068C92C950B9700879DE7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068C82C950B9700879DE7 /* ContentView.swift */; };
 		6B6068CB2C950B9800879DE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B6068CA2C950B9800879DE7 /* Assets.xcassets */; };
@@ -30,6 +38,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6B4A00FE2C9A64000016F184 /* StreamMacClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StreamMacClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B4A010D2C9A647B0016F184 /* Clients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clients.swift; sourceTree = "<group>"; };
 		6B6068C42C950B9700879DE7 /* StreamClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StreamClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B6068C62C950B9700879DE7 /* StreamClientApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamClientApp.swift; sourceTree = "<group>"; };
 		6B6068C82C950B9700879DE7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -42,7 +52,19 @@
 		6BDCBBD32C75576800FC4396 /* Client.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Client.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		6B4A00FF2C9A64000016F184 /* StreamMacClient */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = StreamMacClient; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		6B4A00FB2C9A64000016F184 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4A01162C9A65B20016F184 /* WebRTC in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6B6068C12C950B9700879DE7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -85,6 +107,7 @@
 			children = (
 				6BDCBBC62C75527D00FC4396 /* Client */,
 				6B6068C52C950B9700879DE7 /* StreamClient */,
+				6B4A00FF2C9A64000016F184 /* StreamMacClient */,
 				6BDCBBC52C75527D00FC4396 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,6 +117,7 @@
 			children = (
 				6BDCBBC42C75527D00FC4396 /* Client */,
 				6B6068C42C950B9700879DE7 /* StreamClient.app */,
+				6B4A00FE2C9A64000016F184 /* StreamMacClient.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -103,6 +127,7 @@
 			children = (
 				6BDCBBD32C75576800FC4396 /* Client.entitlements */,
 				6BDCBBC72C75527D00FC4396 /* main.swift */,
+				6B4A010D2C9A647B0016F184 /* Clients.swift */,
 				6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */,
 				6B6068D42C950CE900879DE7 /* WebSocketClient.swift */,
 			);
@@ -112,6 +137,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6B4A00FD2C9A64000016F184 /* StreamMacClient */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B4A010C2C9A64020016F184 /* Build configuration list for PBXNativeTarget "StreamMacClient" */;
+			buildPhases = (
+				6B4A00FA2C9A64000016F184 /* Sources */,
+				6B4A00FB2C9A64000016F184 /* Frameworks */,
+				6B4A00FC2C9A64000016F184 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6B4A00FF2C9A64000016F184 /* StreamMacClient */,
+			);
+			name = StreamMacClient;
+			packageProductDependencies = (
+				6B4A01152C9A65B20016F184 /* WebRTC */,
+			);
+			productName = StreamMacClient;
+			productReference = 6B4A00FE2C9A64000016F184 /* StreamMacClient.app */;
+			productType = "com.apple.product-type.application";
+		};
 		6B6068C32C950B9700879DE7 /* StreamClient */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6B6068D12C950B9800879DE7 /* Build configuration list for PBXNativeTarget "StreamClient" */;
@@ -156,9 +204,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1530;
+				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1530;
 				TargetAttributes = {
+					6B4A00FD2C9A64000016F184 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					6B6068C32C950B9700879DE7 = {
 						CreatedOnToolsVersion = 15.3;
 					};
@@ -185,11 +236,19 @@
 			targets = (
 				6BDCBBC32C75527D00FC4396 /* Client */,
 				6B6068C32C950B9700879DE7 /* StreamClient */,
+				6B4A00FD2C9A64000016F184 /* StreamMacClient */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6B4A00FC2C9A64000016F184 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6B6068C22C950B9700879DE7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -202,12 +261,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6B4A00FA2C9A64000016F184 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4A01122C9A65630016F184 /* Clients.swift in Sources */,
+				6B4A01132C9A65630016F184 /* WebRTCClient.swift in Sources */,
+				6B4A01142C9A65630016F184 /* WebSocketClient.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6B6068C02C950B9700879DE7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				6B6068C92C950B9700879DE7 /* ContentView.swift in Sources */,
 				6B6068C72C950B9700879DE7 /* StreamClientApp.swift in Sources */,
+				6B4A010F2C9A65630016F184 /* Clients.swift in Sources */,
+				6B4A01102C9A65630016F184 /* WebSocketClient.swift in Sources */,
+				6B4A01112C9A65630016F184 /* WebRTCClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,6 +289,7 @@
 			files = (
 				6BDCBBC82C75527D00FC4396 /* main.swift in Sources */,
 				6B6068D32C950BBC00879DE7 /* WebRTCClient.swift in Sources */,
+				6B4A010E2C9A64820016F184 /* Clients.swift in Sources */,
 				6B6068D52C950CE900879DE7 /* WebSocketClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -224,6 +297,62 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		6B4A010A2C9A64020016F184 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = StreamMacClient/StreamMacClient.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StreamMacClient/Preview Content\"";
+				DEVELOPMENT_TEAM = Z9JYZQ2HZ9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = giovanna.StreamMacClient;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6B4A010B2C9A64020016F184 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = StreamMacClient/StreamMacClient.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"StreamMacClient/Preview Content\"";
+				DEVELOPMENT_TEAM = Z9JYZQ2HZ9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = giovanna.StreamMacClient;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		6B6068CF2C950B9800879DE7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -432,6 +561,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6B4A010C2C9A64020016F184 /* Build configuration list for PBXNativeTarget "StreamMacClient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B4A010A2C9A64020016F184 /* Debug */,
+				6B4A010B2C9A64020016F184 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6B6068D12C950B9800879DE7 /* Build configuration list for PBXNativeTarget "StreamClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -473,6 +611,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6B4A01152C9A65B20016F184 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6BDCBBCE2C75529600FC4396 /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
 		6BDCBBD12C75566B00FC4396 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6BDCBBCE2C75529600FC4396 /* XCRemoteSwiftPackageReference "WebRTC" */;

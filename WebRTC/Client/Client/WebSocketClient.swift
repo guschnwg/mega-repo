@@ -10,6 +10,8 @@ import WebRTC
 
 class WebSocketClient: NSObject {
     var webSocketTask = URLSession.shared.webSocketTask(with: URL(string: "ws://localhost:8080/ws")!)
+    var clients: [String] = []
+    var me = ""
     
     weak var delegate: WebSocketClientDelegate?
     
@@ -28,9 +30,9 @@ class WebSocketClient: NSObject {
             print("Received type \(type)")
             
             if type == "welcome" {
-                print(data!["id"]!)
+                me = data!["id"]! as! String
             } else if type == "refresh" {
-                print(data!["clients"]!)
+                clients = data!["clients"]! as! [String]
             } else if type == "offer" {
                 let from = data!["from"]! as! String
                 let offer = data!["offer"] as? [String: String]

@@ -14,8 +14,8 @@
             filePath = "Client/WebSocketClient.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "62"
-            endingLineNumber = "62"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
             landmarkName = "receiveMessage()"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "Client/WebSocketClient.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "64"
-            endingLineNumber = "64"
+            startingLineNumber = "66"
+            endingLineNumber = "66"
             landmarkName = "receiveMessage()"
             landmarkType = "7">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "Client/WebSocketClient.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "41"
-            endingLineNumber = "41"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
             landmarkName = "handleMessage(text:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -119,47 +119,33 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "F448C542-8EBA-4552-996E-E1C9F99BE2F0"
-            shouldBeEnabled = "Yes"
+            uuid = "084536A9-8D83-462D-BABA-83D1EDEB71E1"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Client/main.swift"
+            filePath = "Client/WebRTCClient.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "23"
-            endingLineNumber = "23"
-            landmarkName = "onCandidate(candidate:)"
+            startingLineNumber = "130"
+            endingLineNumber = "130"
+            landmarkName = "dataChannelDidChangeState(_:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "F448C542-8EBA-4552-996E-E1C9F99BE2F0 - 80b3ddf6fc345800"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Client.RTCClient.onCandidate(candidate: __C.RTCIceCandidate) -&gt; ()"
-                  moduleName = "Client"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/gigigi/Documents/Projects/mega-repo/WebRTC/Client/Client/main.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "24"
-                  endingLineNumber = "24">
-               </Location>
-               <Location
-                  uuid = "F448C542-8EBA-4552-996E-E1C9F99BE2F0 - 80b3ddf6fc3459ef"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Client.RTCClient.onCandidate(candidate: __C.RTCIceCandidate) -&gt; ()"
-                  moduleName = "Client"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/gigigi/Documents/Projects/mega-repo/WebRTC/Client/Client/main.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "23"
-                  endingLineNumber = "23">
-               </Location>
-            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E6B85F65-7BAC-4D15-B9AE-D7C95E559542"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Client/Clients.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
+            landmarkName = "onChannelReady(from:)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
