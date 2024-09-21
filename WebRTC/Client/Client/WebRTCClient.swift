@@ -119,7 +119,7 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
 extension WebRTCClient: RTCDataChannelDelegate {
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
         if !buffer.isBinary, let message = String(data: buffer.data, encoding: .utf8) {
-            delegate?.onMessage(from: otherOne, message: message)
+            delegate?.onMessage(from: otherOne, inConversation: otherOne, message: message)
             sendData("You sent me \(message)")
         } else {
             print("Received binary data")
@@ -137,6 +137,6 @@ extension WebRTCClient: RTCDataChannelDelegate {
 protocol WebRTCClientDelegate: AnyObject {
     func onCandidate(to: String, candidate: RTCIceCandidate)
     func onChannelReady(from: String)
-    func onMessage(from: String, message: String)
+    func onMessage(from: String, inConversation: String, message: String)
     func onStream(from: String, stream: RTCMediaStream)
 }

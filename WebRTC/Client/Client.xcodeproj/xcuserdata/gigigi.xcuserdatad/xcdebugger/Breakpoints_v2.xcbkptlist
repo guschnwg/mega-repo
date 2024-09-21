@@ -167,16 +167,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "B0BC5BAF-06DC-4FA3-84FF-C97E97945164"
-            shouldBeEnabled = "Yes"
+            uuid = "C47A09B1-9E11-426C-9FB3-5A72DA9FD660"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "StreamMacClient/StreamMacClientApp.swift"
+            filePath = "StreamMacClient/ContentView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "18"
-            endingLineNumber = "18"
-            landmarkName = "makeNSView(context:)"
+            startingLineNumber = "19"
+            endingLineNumber = "19"
+            landmarkName = "updateNSView(_:context:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

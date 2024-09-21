@@ -59,8 +59,8 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
         }
     }
         
-    func onMessage(from: String, message: String) {
-        rtcClientMap[from]!.1.append((Date.now, from, message))
+    func onMessage(from: String, inConversation: String, message: String) {
+        rtcClientMap[inConversation]!.1.append((Date.now, from, message))
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
