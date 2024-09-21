@@ -64,7 +64,7 @@
                 <video
                     v-if="clientsRTCMapKey && clientsRTCMap[client]?.tracks.length"
                     :id="'video-for-' + client"
-                    :style="hasClient(client) && isActive(client) ? 'display: 'block;' 'display: none;'"
+                    :style="(clientsRTCMapKey && hasClient(client) && isActive(client)) ? 'display: block;' : 'display: none;'"
                     height="50"
                     crossorigin="anonymous"></video>
 
@@ -164,9 +164,10 @@
                 });
                 peerConnection.addEventListener('track', event => {
                     this.clientsRTCMap[client].tracks.push(event.track);
-                    const video = document.getElementById('video-for-' + client);
                     const stream = new MediaStream(this.clientsRTCMap[client].tracks);
+                    const video = document.getElementById('video-for-' + client);
                     if (video) video.srcObject = stream;
+                    console.log(this.clientsRTCMap[client].tracks);
                 });
                 channel.addEventListener('message', event => {
                     this.clientsRTCMap[client].lastMessageReceived = { at: Date.now(), data: event.data };
@@ -237,6 +238,23 @@
                 const file = event.target.files[0];
                 const video = document.getElementById('video');
                 video.src = URL.createObjectURL(file);
+
+                // Give some time for it to become the active
+                setTimeout(() => {
+                    video.play();
+
+                    const stream = video.captureStream();
+                    Object.keys(this.clientsRTCMap).forEach(client => {
+                        const { peerConnection } = this.clientsRTCMap[client];
+                        peerConnection.getSenders().forEach(sender => {
+                            if (sender.track.kind === 'video') {
+                                sender.replaceTrack(stream.getVideoTracks()[0]).then(() => {}).catch(console.error);
+                            } else if (sender.track.kind === 'audio') {
+                                sender.replaceTrack(stream.getAudioTracks()[0]).then(() => {}).catch(console.error);
+                            }
+                        });
+                    });
+                }, 100);
             },
         }).mount()
     </script>
