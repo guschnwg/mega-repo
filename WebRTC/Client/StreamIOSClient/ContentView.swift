@@ -1,8 +1,8 @@
 //
 //  ContentView.swift
-//  StreamClient
+//  StreamIOSClient
 //
-//  Created by Giovanna Zanardini on 13/09/24.
+//  Created by Giovanna Zanardini on 20/09/24.
 //
 
 import SwiftUI

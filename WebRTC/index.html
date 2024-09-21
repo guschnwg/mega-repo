@@ -15,7 +15,7 @@
     <div v-scope @vue:mounted="mounted">
         <h1>Open the DevTools to prevent the suppression of the prompt</h1>
 
-        <h1>{{ id }}</h1>
+        <h1>{{ id }} - {{ clientsRTCMapKey }}</h1>
 
         <li v-for="client in clients">
             {{ client }}
@@ -25,13 +25,22 @@
                     Last message: {{ clientsRTCMap[client].lastMessageReceived.data }}
                 </span>
 
-                <span v-if="clientsRTCMap[client]?.lastPing && isActive(client)">
+                <!-- clientsRTCMapKey in the template is used to force the reactivity of the buttons -->
+                <span v-if="clientsRTCMapKey && isActive(client)">
                     <button @click="sendMessage(client)">
                         Send message
                     </button>
                 </span>
-                <button v-else disabled :title="clientsRTCMap[client]?.peerConnection.connectionState + ' - ' + clientsRTCMap[client]?.channel.readyState">
-                    Connecting...
+                <span v-else-if="clientsRTCMapKey && isPendingAnswering(client)">
+                    <button @click="sendAnswer(client)">
+                        Accept call {{ clientsRTCMapKey }}
+                    </button>
+                </span>
+                <button v-else-if="clientsRTCMapKey && isPendingBeingAnswered(client)" disabled>
+                    Waiting for answer {{ clientsRTCMapKey }}
+                </button>
+                <button v-else disabled :title="clientsRTCMap[client]?.peerConnection.signalingState + ' - ' + clientsRTCMap[client]?.peerConnection.connectionState + ' - ' + clientsRTCMap[client]?.channel.readyState">
+                    Something else........
                 </button>
 
                 <video :id="'video-for-' + client" height="100" v-if="clientsRTCMap[client]?.tracks.length"
@@ -52,7 +61,7 @@
             id: null,
             clients: [],
             clientsRTCMap: {},
-            clientsRTCMapKey: 0,
+            clientsRTCMapKey: 1,
             socket: new WebSocket("ws://localhost:8080/ws"),
             mounted() {
                 setInterval(() => {
@@ -78,9 +87,7 @@
                     } else if (data.type === 'refresh') {
                         this.clients = data.clients.filter(c => c !== this.id);
                     } else if (data.type === 'offer') {
-                        if (confirm("Do you want to accept the call?")) {
-                            this.sendAnswer(data.from, data.offer);
-                        }
+                        this.receiveOffer(data.from, data.offer);
                     } else if (data.type === 'answer') {
                         this.receiveAnswer(data.from, data.answer);
                     } else if (data.type === 'candidate') {
@@ -88,10 +95,18 @@
                     }
                 })
             },
+            bumpKey() {
+                this.clientsRTCMapKey++;
+            },
             //
             createPeerConnection(client) {
                 const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
                 const channel = peerConnection.createDataChannel("chat", { negotiated: true, id: 0 });
+
+                // SHITTY
+                channel.addEventListener('open', this.bumpKey);
+                peerConnection.addEventListener('signalingstatechange', this.bumpKey);
+                peerConnection.addEventListener('connectionstatechange', this.bumpKey);
 
                 this.clientsRTCMap[client] = {
                     peerConnection,
@@ -131,17 +146,19 @@
                         this.socket.send(JSON.stringify({ type: "offer", to, offer: sdp }));
                     });
             },
-            sendAnswer(to, offer) {
-                const { peerConnection } = this.createPeerConnection(to);
+            receiveOffer(from, offer) {
+                const { peerConnection } = this.createPeerConnection(from);
+                peerConnection.setRemoteDescription(offer).then(() => {});
+            },
+            sendAnswer(to) {
+                const { peerConnection } = this.clientsRTCMap[to];
 
-                peerConnection.setRemoteDescription(offer).then(() => {
-                    peerConnection
-                        .createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
-                        .then(localSdp => {
-                            peerConnection.setLocalDescription(localSdp);
-                            this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp }));
-                        });
-                });
+                peerConnection
+                    .createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
+                    .then(localSdp => {
+                        peerConnection.setLocalDescription(localSdp);
+                        this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp }));
+                    });
             },
             receiveAnswer(from, answer) {
                 const { peerConnection } = this.clientsRTCMap[from];
@@ -155,8 +172,13 @@
             },
             //
             isActive(client) {
-                console.log(this.clientsRTCMap[client]?.channel.readyState);
                 return this.clientsRTCMap[client]?.channel.readyState === 'open';
+            },
+            isPendingBeingAnswered(client) {
+                return this.clientsRTCMap[client]?.peerConnection.signalingState === 'have-local-offer';
+            },
+            isPendingAnswering(client) {
+                return this.clientsRTCMap[client]?.peerConnection.signalingState === 'have-remote-offer';
             },
             sendMessage(to) {
                 const { channel } = this.clientsRTCMap[to];
