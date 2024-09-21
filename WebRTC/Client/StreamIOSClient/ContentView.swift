@@ -6,6 +6,20 @@
 //
 
 import SwiftUI
+import WebRTC
+
+struct WebView: UIViewRepresentable {
+    var url: URL
+
+    func makeUIView(context: Context) -> RTCMTLVideoView {
+        return RTCMTLVideoView()
+    }
+
+    func updateUIView(_ view: RTCMTLVideoView, context: Context) {
+        
+    }
+}
+
 
 struct ContentView: View {
     var body: some View {

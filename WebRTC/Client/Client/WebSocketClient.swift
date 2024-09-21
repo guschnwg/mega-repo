@@ -32,7 +32,7 @@ class WebSocketClient: NSObject {
             if type == "welcome" {
                 me = data!["id"]! as! String
             } else if type == "refresh" {
-                clients = data!["clients"]! as! [String]
+                clients = (data!["clients"]! as! [String]).filter { $0 != me }
             } else if type == "offer" {
                 let from = data!["from"]! as! String
                 let offer = data!["offer"] as? [String: String]

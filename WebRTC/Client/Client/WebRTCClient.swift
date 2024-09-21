@@ -88,6 +88,7 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         print("Stream added")
+        delegate?.onStream(from: otherOne, stream: stream)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
@@ -137,4 +138,5 @@ protocol WebRTCClientDelegate: AnyObject {
     func onCandidate(to: String, candidate: RTCIceCandidate)
     func onChannelReady(from: String)
     func onMessage(from: String, message: String)
+    func onStream(from: String, stream: RTCMediaStream)
 }
