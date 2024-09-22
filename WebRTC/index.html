@@ -174,7 +174,8 @@
                 });
 
                 if (document.getElementById('video').captureStream) {
-                    peerConnection.addStream(document.getElementById('video').captureStream());
+                    const stream = document.getElementById('video').captureStream();
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
                 }
 
                 return this.clientsRTCMap[client];
