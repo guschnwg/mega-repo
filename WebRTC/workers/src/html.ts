@@ -1,0 +1,331 @@
+export default `
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        .client {
+            display: flex;
+            height: 50px;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid red;
+
+            padding: 5px;
+        }
+
+        .info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+
+        .client video {
+            vertical-align: middle;
+        }
+
+        .clients {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div v-scope @vue:mounted="mounted">
+        <div class="my-video">
+            <div class="choose-video">
+                <span>Change the video file</span>
+                <input type="file" id="file" accept="video/*" @change="fileSelected">
+            </div>
+
+            <div>
+                <video id="video" crossorigin="anonymous"
+                    src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" height="100" controls loop
+                    preload="auto"
+                    @click="updateStreamFrom(event.target)"></video>
+
+                <canvas id="canvas" width="178" height="100"
+                    @click="updateStreamFrom(event.target)"></canvas>
+
+                <button
+                    @click="useCamera">
+                    Use camera
+                </button>
+
+                <button
+                    @click="addCameraToCanvas">
+                    Add camera to canvas
+                </button>
+            </div>
+        </div>
+
+        <h1>I am: {{ id }}</h1>
+
+        <h2>Clients:</h2>
+        <div class="clients">
+            <div v-for="client in clients" class="client">
+                <div class="info">
+                    <span :title="clientsRTCMap[client]?.lastPing">{{ client }}</span>
+
+                    <span v-if="clientsRTCMap[client]?.lastMessageReceived?.data">
+                        Last message: {{ clientsRTCMap[client].lastMessageReceived.data }}
+                    </span>
+                </div>
+
+                <video
+                    v-if="clientsRTCMapKey && clientsRTCMap[client]?.tracks.length"
+                    :id="'video-for-' + client"
+                    :style="(clientsRTCMapKey && hasClient(client) && isActive(client)) ? 'display: block;' : 'display: none;'"
+                    height="50"
+                    crossorigin="anonymous"></video>
+
+                <!-- clientsRTCMapKey in the template is used to force the reactivity of the buttons -->
+                <div v-if="clientsRTCMapKey && !hasClient(client)">
+                    <button @click="sendOffer(client)">Call</button>
+                </div>
+                <div v-else>
+                    <button v-if="clientsRTCMapKey && isPendingAnswering(client)" @click="sendAnswer(client)">
+                        Accept call?
+                    </button>
+
+                    <button v-else-if="clientsRTCMapKey && isPendingBeingAnswered(client)" disabled>
+                        Ringing...
+                    </button>
+
+                    <button v-else-if="clientsRTCMapKey && isActive(client)" @click="sendMessage(client)">
+                        Send message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createApp } from 'https://unpkg.com/petite-vue?module'
+
+        createApp({
+            id: null,
+            clients: [],
+            clientsRTCMap: {},
+            clientsRTCMapKey: 1,
+            socket: new WebSocket("/ws"),
+            addStreamToCanvas: null,
+            addImageToCanvas: null,
+            mounted() {
+                setInterval(() => {
+                    this.socket.send(JSON.stringify({ type: 'ping' }));
+
+                    Object.keys(this.clientsRTCMap).forEach(client => {
+                        const { peerConnection, channel } = this.clientsRTCMap[client];
+                        if (channel.readyState === 'open') {
+                            this.clientsRTCMap[client].lastPing = Date.now();
+                        }
+                        // if (Date.now() - this.clientsRTCMap[client].lastPing > 5000) {
+                        //     peerConnection.close();
+                        //     delete this.clientsRTCMap[client];
+                        // }
+                    });
+                }, 1000);
+
+                this.socket.addEventListener('message', message => {
+                    const data = JSON.parse(message.data);
+
+                    if (data.type === 'welcome') {
+                        this.id = data.id;
+                    } else if (data.type === 'refresh') {
+                        this.clients = data.clients.filter(c => c !== this.id);
+                    } else if (data.type === 'offer') {
+                        this.receiveOffer(data.from, data.offer);
+                    } else if (data.type === 'answer') {
+                        this.receiveAnswer(data.from, data.answer);
+                    } else if (data.type === 'candidate') {
+                        this.receiveIceCandidade(data.from, data.candidate);
+                    }
+                });
+
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                const video = document.getElementById('video');
+                const draw = (x, vx, y, vy) => {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(x += vx, y += vy, 10, 10);
+
+                    if (this.addImageToCanvas) {
+                        ctx.drawImage(this.addImageToCanvas, canvas.width - x - 16, canvas.height - y - 9, 16, 9);
+                    }
+
+                    requestAnimationFrame(() => {
+                        draw(
+                            x, x > canvas.width - 10 || x < 0 ? -vx : vx,
+                            y, y > canvas.height - 10 || y < 0 ? -vy : vy
+                        )
+                    });
+                };
+                draw(0, 1, 0, 1);
+
+                setInterval(async () => {
+                    if (this.addStreamToCanvas) {
+                        const capture = new ImageCapture(this.addStreamToCanvas.getVideoTracks()[0]);
+                        const bitmap = await capture.grabFrame();
+                        this.addImageToCanvas = bitmap;
+                    }
+                }, 50);
+            },
+            bumpKey() {
+                this.clientsRTCMapKey++;
+            },
+            //
+            createPeerConnection(client) {
+                const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+                const channel = peerConnection.createDataChannel("chat", { negotiated: true, id: 0 });
+
+                // SHITTY
+                channel.addEventListener('open', this.bumpKey);
+                peerConnection.addEventListener('signalingstatechange', this.bumpKey);
+                peerConnection.addEventListener('connectionstatechange', event => {
+                    if (event.target.connectionState === 'connected') {
+                        const video = document.getElementById('video-for-' + client);
+                        if (video) video.play();
+                    }
+
+                    this.bumpKey();
+                });
+
+                this.clientsRTCMap[client] = {
+                    peerConnection,
+                    channel,
+                    lastPing: Date.now(),
+                    lastMessageReceived: {},
+                    tracks: []
+                };
+
+                peerConnection.addEventListener("icecandidate", (event) => {
+                    if (!event.candidate) return;
+                    this.socket.send(JSON.stringify({ type: "candidate", to: client, candidate: event.candidate }));
+                });
+                peerConnection.addEventListener('track', event => {
+                    this.clientsRTCMap[client].tracks.push(event.track);
+                    const stream = new MediaStream(this.clientsRTCMap[client].tracks);
+                    const video = document.getElementById('video-for-' + client);
+                    if (video) video.srcObject = stream;
+                    console.log(this.clientsRTCMap[client].tracks);
+                });
+                channel.addEventListener('message', event => {
+                    this.clientsRTCMap[client].lastMessageReceived = { at: Date.now(), data: event.data };
+                });
+
+                if (document.getElementById('video').captureStream) {
+                    const stream = document.getElementById('video').captureStream();
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+                }
+
+                return this.clientsRTCMap[client];
+            },
+            //
+            sendOffer(to) {
+                const { peerConnection } = this.createPeerConnection(to);
+
+                peerConnection
+                    .createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
+                    .then(sdp => {
+                        peerConnection.setLocalDescription(sdp);
+
+                        this.socket.send(JSON.stringify({ type: "offer", to, offer: sdp }));
+                    });
+            },
+            receiveOffer(from, offer) {
+                const { peerConnection } = this.createPeerConnection(from);
+
+                peerConnection.setRemoteDescription(offer).then(() => {});
+            },
+            sendAnswer(to) {
+                const { peerConnection } = this.clientsRTCMap[to];
+
+                peerConnection
+                    .createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
+                    .then(localSdp => {
+                        peerConnection.setLocalDescription(localSdp);
+                        this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp }));
+                    });
+            },
+            receiveAnswer(from, answer) {
+                const { peerConnection } = this.clientsRTCMap[from];
+
+                peerConnection.setRemoteDescription(answer);
+            },
+            receiveIceCandidade(from, candidate) {
+                const { peerConnection, channel } = this.clientsRTCMap[from];
+
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            },
+            //
+            replaceStream(stream) {
+                Object.keys(this.clientsRTCMap).forEach(client => {
+                    const { peerConnection } = this.clientsRTCMap[client];
+                    peerConnection.getSenders().forEach(sender => {
+                        if (!sender.track) return;
+
+                        if (sender.track.kind === 'video') {
+                            sender.replaceTrack(stream.getVideoTracks()[0]).then(() => {}).catch(console.error);
+                        } else if (sender.track.kind === 'audio') {
+                            sender.replaceTrack(stream.getAudioTracks()[0]).then(() => {}).catch(console.error);
+                        }
+                    });
+                });
+            },
+            //
+            hasClient(client) {
+                return Object.keys(this.clientsRTCMap).includes(client);
+            },
+            isActive(client) {
+                return this.clientsRTCMap[client]?.channel.readyState === 'open';
+            },
+            isPendingBeingAnswered(client) {
+                return this.clientsRTCMap[client]?.peerConnection.signalingState === 'have-local-offer';
+            },
+            isPendingAnswering(client) {
+                return this.clientsRTCMap[client]?.peerConnection.signalingState === 'have-remote-offer';
+            },
+            //
+            sendMessage(to) {
+                const { channel } = this.clientsRTCMap[to];
+                channel.send(prompt('Send:', 'nothing'));
+            },
+            fileSelected(event) {
+                const file = event.target.files[0];
+                const video = document.getElementById('video');
+                video.src = URL.createObjectURL(file);
+                video.play();
+
+                // Give some time for it to become the active
+                setTimeout(() => this.updateStreamFrom(video), 100);
+            },
+            updateStreamFrom(from) {
+                if (!from.captureStream) return;
+
+                const stream = from.captureStream();
+                this.replaceStream(stream);
+            },
+            useCamera() {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+                    this.replaceStream(stream);
+                });
+            },
+            addCameraToCanvas() {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+                    this.addStreamToCanvas = stream;
+                });
+            },
+        }).mount()
+    </script>
+</body>
+
+</html>
+`
