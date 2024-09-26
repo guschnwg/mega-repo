@@ -10,8 +10,6 @@ import SwiftUI
 @main
 struct StreamMacClientApp: App {
     @ObservedObject var client = WSClient(baseUrl: "wss://workers.giovanna.workers.dev")
-    @State private var messageToSend = ""
-    @State private var sendMessageTo = ""
     
     var body: some Scene {
         WindowGroup {

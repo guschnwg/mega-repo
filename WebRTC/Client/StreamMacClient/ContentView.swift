@@ -60,8 +60,12 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    if client.rtcClientMap[id] != nil {
-                        Image(systemName: "checkmark.seal")
+                    if let this = client.rtcClientMap[id] {
+                        if this.0.peerConnection?.connectionState == .connected {
+                            Image(systemName: "checkmark.seal")
+                        } else if this.0.peerConnection?.connectionState == .new || this.0.peerConnection?.connectionState == .connecting {
+                            Image(systemName: "arrow.2.circlepath.circle")
+                        }
                     }
                 }
             }
