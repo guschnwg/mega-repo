@@ -78,7 +78,6 @@
                 </div>
 
                 <video
-                    v-if="clientsRTCMapKey && clientsRTCMap[client]?.tracks.length"
                     :id="'video-for-' + client"
                     :style="(clientsRTCMapKey && hasClient(client) && isActive(client)) ? 'display: block;' : 'display: none;'"
                     height="50"
@@ -214,7 +213,6 @@
                     const stream = new MediaStream(this.clientsRTCMap[client].tracks);
                     const video = document.getElementById('video-for-' + client);
                     if (video) video.srcObject = stream;
-                    console.log(this.clientsRTCMap[client].tracks);
                 });
                 channel.addEventListener('message', event => {
                     this.clientsRTCMap[client].lastMessageReceived = { at: Date.now(), data: event.data };

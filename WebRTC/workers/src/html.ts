@@ -79,7 +79,6 @@ export default `
                 </div>
 
                 <video
-                    v-if="clientsRTCMapKey && clientsRTCMap[client]?.tracks.length"
                     :id="'video-for-' + client"
                     :style="(clientsRTCMapKey && hasClient(client) && isActive(client)) ? 'display: block;' : 'display: none;'"
                     height="50"
