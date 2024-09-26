@@ -10,11 +10,11 @@ import WebRTC
 
 struct VideoView: NSViewRepresentable {
     var rtcTrack: RTCVideoTrack
-
+    
     func makeNSView(context: Context) -> RTCMTLNSVideoView {
         return RTCMTLNSVideoView()
     }
-
+    
     func updateNSView(_ view: RTCMTLNSVideoView, context: Context) {
         rtcTrack.add(view)
     }
@@ -28,7 +28,7 @@ struct CommunicateView: View {
     
     var body: some View {
         VStack {
-            if !item.2[0].videoTracks.isEmpty {
+            if !item.2.isEmpty && !item.2[0].videoTracks.isEmpty {
                 VideoView(rtcTrack: item.2[0].videoTracks[0])
                     .frame(height: 100)
             }
@@ -40,8 +40,6 @@ struct CommunicateView: View {
             TextField("Message", text: $messageToSend)
                 .onSubmit {
                     item.0.sendData(messageToSend)
-//                    item.onMessage(from: "Me", message: messageToSend)
-//                    item.1.append((Date.now, "Me", messageToSend))
                     onNewMessage(messageToSend)
                     messageToSend = ""
                 }
@@ -51,7 +49,7 @@ struct CommunicateView: View {
 
 struct ContentView: View {
     @ObservedObject var client: WSClient
-
+    
     @State var selectedSideBarItem: String = ""
     
     var body: some View {
@@ -73,7 +71,18 @@ struct ContentView: View {
                     client.onMessage(from: "me", inConversation: selectedSideBarItem, message: $0)
                 }
             } else {
-                Button("Connect") {}
+                if selectedSideBarItem != "" {
+                    Button("Chat") {
+                        client.sendOffer(to: selectedSideBarItem)
+//                        AVCaptureDevice.requestAccess(for: .video) { granted in
+//                            if granted {
+//                                client.sendOffer(to: selectedSideBarItem)
+//                            }
+//                        }
+                    }
+                } else {
+                    Text("Choose someone to chat with")
+                }
             }
         }.navigationTitle(client.wsClient.me)
     }

@@ -7,6 +7,6 @@
 
 import Foundation
 
-let client = WSClient()
+let client = WSClient(baseUrl: "ws://localhost:8080")
 
 RunLoop.main.run()

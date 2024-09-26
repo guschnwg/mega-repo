@@ -8,6 +8,12 @@
 import Foundation
 import WebRTC
 
+let constraints = RTCMediaConstraints(
+    mandatoryConstraints: [kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,
+                           kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueTrue],
+    optionalConstraints: ["DtlsSrtpKeyAgreement":kRTCMediaConstraintsValueTrue]
+)
+
 class WebRTCClient: NSObject {
     var peerConnection: RTCPeerConnection?
     var dataChannel: RTCDataChannel?
@@ -23,23 +29,34 @@ class WebRTCClient: NSObject {
         createDataChannel()
     }
     
-    func receivedOfferFromPeer(offerSDP: String) {
-        let remoteSDP = RTCSessionDescription(type: .offer, sdp: offerSDP)
+    private func setLocalDescription(_ sdp: RTCSessionDescription) {
+        self.peerConnection!.setLocalDescription(sdp, completionHandler: { (error) in
+            if let error = error { return }
+            print("Local description set")
+        })
+    }
+    
+    func sendOfferToPeer(_ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
+        self.peerConnection!.offer(for: constraints) { (sdp, error) in
+            guard let sdp = sdp else { return }
+            
+            self.setLocalDescription(sdp)
+            
+            completionHandler(sdp)
+        }
+    }
+    
+    func receivedRemoteDescriptionFromPeer(type: RTCSdpType, sdp: String) {
+        let remoteSDP = RTCSessionDescription(type: type, sdp: sdp)
         peerConnection!.setRemoteDescription(remoteSDP) { _ in }
+        print("Remote description received")
     }
     
     func sendAnswerToPeer(_ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
-        let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         self.peerConnection!.answer(for: constraints) { (sdp, error) in
             guard let sdp = sdp else { return }
             
-            self.peerConnection!.setLocalDescription(sdp, completionHandler: { (error) in
-                if let error = error {
-                    print("Failed to set local description: \(error)")
-                    return
-                }
-                print("Local description set")
-            })
+            self.setLocalDescription(sdp)
             
             completionHandler(sdp)
         }
@@ -48,14 +65,19 @@ class WebRTCClient: NSObject {
     private func setupPeerConnection() {
         let config = RTCConfiguration()
         config.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])]
+        config.sdpSemantics = .unifiedPlan
+        config.continualGatheringPolicy = .gatherContinually
         
         let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
-        peerConnection = RTCPeerConnectionFactory().peerConnection(with: config, constraints: constraints, delegate: self)!
+        peerConnection = RTCPeerConnectionFactory().peerConnection(
+            with: config, constraints: constraints, delegate: self
+        )!
     }
     
     private func createDataChannel() {
         let config = RTCDataChannelConfiguration()
-        config.isOrdered = true // You can customize this based on your requirements
+        config.isNegotiated = true
+        config.channelId = 0
         
         dataChannel = peerConnection?.dataChannel(forLabel: "dataChannel", configuration: config)
         dataChannel?.delegate = self // Set delegate to receive data
@@ -70,7 +92,7 @@ class WebRTCClient: NSObject {
 
 extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        print("Generated local ICE candidate: \(candidate)")
+        print("Generated local ICE candidate")
         delegate?.onCandidate(to: otherOne, candidate: candidate)
     }
     
@@ -120,7 +142,6 @@ extension WebRTCClient: RTCDataChannelDelegate {
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
         if !buffer.isBinary, let message = String(data: buffer.data, encoding: .utf8) {
             delegate?.onMessage(from: otherOne, inConversation: otherOne, message: message)
-            sendData("You sent me \(message)")
         } else {
             print("Received binary data")
         }

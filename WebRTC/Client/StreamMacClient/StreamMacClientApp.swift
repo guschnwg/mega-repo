@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct StreamMacClientApp: App {
-    @ObservedObject var client = WSClient()
+    @ObservedObject var client = WSClient(baseUrl: "wss://workers.giovanna.workers.dev")
     @State private var messageToSend = ""
     @State private var sendMessageTo = ""
     

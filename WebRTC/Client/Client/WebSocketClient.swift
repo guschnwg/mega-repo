@@ -9,17 +9,25 @@ import Foundation
 import WebRTC
 
 class WebSocketClient: NSObject {
-    var webSocketTask = URLSession.shared.webSocketTask(with: URL(string: "ws://localhost:8080/ws")!)
+    var webSocketTask: URLSessionWebSocketTask
     var clients: [String] = []
     var me = ""
     
     weak var delegate: WebSocketClientDelegate?
     
     override init() {
+        self.webSocketTask = URLSession.shared.webSocketTask(with: URL(string: "ws://localhost:8080/ws")!)
+
         super.init()
-        
-        receiveMessage()
+    }
+
+    convenience init(baseUrl: String) {
+        self.init()
+
+        self.webSocketTask = URLSession.shared.webSocketTask(with: URL(string: "\(baseUrl)/ws")!)
         webSocketTask.resume()
+
+        receiveMessage()
     }
     
     private func handleMessage(text: String) {
@@ -33,14 +41,17 @@ class WebSocketClient: NSObject {
                 me = data!["id"]! as! String
             } else if type == "refresh" {
                 clients = (data!["clients"]! as! [String]).filter { $0 != me }
+                delegate?.onRefresh()
             } else if type == "offer" {
                 let from = data!["from"]! as! String
                 let offer = data!["offer"] as? [String: String]
                 
-                print(from)
-                print(offer!["sdp"]!)
-                
                 delegate?.onOffer(from: from, offer: offer!["sdp"]!)
+            } else if type == "answer" {
+                let from = data!["from"]! as! String
+                let answer = data!["answer"] as? [String: String]
+                
+                delegate?.onAnswer(from: from, answer: answer!["sdp"]!)
             } else if type == "candidate" {
                 let from = data!["from"]! as! String
                 let candidate = data!["candidate"] as! [String: Any]
@@ -95,6 +106,10 @@ class WebSocketClient: NSObject {
         }
     }
     
+    func sendOffer(_ to: String, _ offer: [String: String]) {
+        sendMessage(to: to, type: "offer", data: offer)
+    }
+    
     func sendAnswer(_ to: String, _ answer: [String: String]) {
         sendMessage(to: to, type: "answer", data: answer)
     }
@@ -106,5 +121,7 @@ class WebSocketClient: NSObject {
 
 protocol WebSocketClientDelegate: AnyObject {
     func onOffer(from: String, offer: String)
+    func onAnswer(from: String, answer: String)
     func onCandidate(from: String, candidate: RTCIceCandidate)
+    func onRefresh()
 }
