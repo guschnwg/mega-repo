@@ -13,11 +13,17 @@ let constraints = RTCMediaConstraints(
                            kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueTrue],
     optionalConstraints: ["DtlsSrtpKeyAgreement":kRTCMediaConstraintsValueTrue]
 )
+let factory = RTCPeerConnectionFactory()
 
 class WebRTCClient: NSObject {
     var peerConnection: RTCPeerConnection?
     var dataChannel: RTCDataChannel?
+
     var otherOne: String = ""
+    
+    private var capturer: RTCCameraVideoCapturer?
+    var localVideoTrack: RTCMediaStreamTrack? = nil
+    var localAudioTrack: RTCMediaStreamTrack? = nil
     
     weak var delegate: WebRTCClientDelegate?
     
@@ -27,11 +33,12 @@ class WebRTCClient: NSObject {
         self.otherOne = otherOne
         setupPeerConnection()
         createDataChannel()
+        createMediaChannel()
     }
     
     private func setLocalDescription(_ sdp: RTCSessionDescription) {
         self.peerConnection!.setLocalDescription(sdp, completionHandler: { (error) in
-            if let error = error { return }
+            if error != nil { return }
             print("Local description set")
         })
     }
@@ -83,6 +90,22 @@ class WebRTCClient: NSObject {
         dataChannel?.delegate = self // Set delegate to receive data
     }
     
+    private func createMediaChannel() {
+        localAudioTrack = factory.audioTrack(withTrackId: "ARDAMSa0")
+        
+        let videoSource = factory.videoSource()
+        capturer = RTCCameraVideoCapturer(delegate: videoSource)
+        if let frontCamera = RTCCameraVideoCapturer.captureDevices().first {
+            let format = frontCamera.formats.first!
+            let fps = format.videoSupportedFrameRateRanges.first!.minFrameRate
+            capturer!.startCapture(with: frontCamera, format: format, fps: Int(fps))
+        }
+        localVideoTrack = factory.videoTrack(with: videoSource, trackId: "ARDAMSv0")
+        
+        peerConnection!.add(localAudioTrack!, streamIds: ["ARDAMSv0"])
+        peerConnection!.add(localVideoTrack!, streamIds: ["ARDAMSv0"])
+    }
+    
     func sendData(_ message: String) {
         guard let dataChannel = dataChannel else { return }
         let buffer = RTCDataBuffer(data: message.data(using: .utf8)!, isBinary: false)
@@ -123,6 +146,11 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         print("ICE Connection state changed: \(newState)")
+        
+        if newState == .failed || newState == .disconnected || newState == .closed {
+            delegate?.onClose(from: otherOne)
+            capturer?.stopCapture()
+        }
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
@@ -160,4 +188,5 @@ protocol WebRTCClientDelegate: AnyObject {
     func onChannelReady(from: String)
     func onMessage(from: String, inConversation: String, message: String)
     func onStream(from: String, stream: RTCMediaStream)
+    func onClose(from: String)
 }

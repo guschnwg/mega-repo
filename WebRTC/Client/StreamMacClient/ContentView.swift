@@ -33,6 +33,11 @@ struct CommunicateView: View {
                     .frame(height: 100)
             }
             
+            if let videoTrack = item.0.localVideoTrack as? RTCVideoTrack {
+                VideoView(rtcTrack: videoTrack)
+                    .frame(height: 100)
+            }
+
             ForEach(item.1, id: \.self.0) { (date, from, content) in
                 Text("\(from): \(content) (\(date))")
             }
@@ -94,11 +99,11 @@ struct ContentView: View {
                 if selectedSideBarItem != "" {
                     Button("Chat") {
                         client.sendOffer(to: selectedSideBarItem)
-//                        AVCaptureDevice.requestAccess(for: .video) { granted in
-//                            if granted {
-//                                client.sendOffer(to: selectedSideBarItem)
-//                            }
-//                        }
+                        AVCaptureDevice.requestAccess(for: .video) { granted in
+                            if granted {
+                                client.sendOffer(to: selectedSideBarItem)
+                            }
+                        }
                     }
                 } else {
                     Text("Choose someone to chat with")

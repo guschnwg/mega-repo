@@ -94,6 +94,10 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     func onChannelReady(from: String) {
         self.refresh()
     }
+    
+    func onClose(from: String) {
+        self.refresh()
+    }
         
     func onMessage(from: String, inConversation: String, message: String) {
         rtcClientMap[inConversation]!.1.append((Date.now, from, message))
