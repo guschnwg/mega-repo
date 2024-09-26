@@ -61,18 +61,34 @@ struct ContentView: View {
                     Spacer()
                     
                     if let this = client.rtcClientMap[id] {
-                        if this.0.peerConnection?.connectionState == .connected {
-                            Image(systemName: "checkmark.seal")
-                        } else if this.0.peerConnection?.connectionState == .new || this.0.peerConnection?.connectionState == .connecting {
-                            Image(systemName: "arrow.2.circlepath.circle")
-                        }
+                        switch this.0.peerConnection?.connectionState {
+                            case .connected:
+                                Image(systemName: "checkmark.seal")
+                            case .new, .connecting:
+                                Image(systemName: "arrow.2.circlepath.circle")
+                            default:
+                                Spacer()
+                            }
+                        
+                        switch this.0.dataChannel?.readyState {
+                            case .open:
+                                Image(systemName: "checkmark.seal")
+                            case .connecting:
+                                Image(systemName: "arrow.2.circlepath.circle")
+                            default:
+                                Spacer()
+                            }
                     }
                 }
             }
         } detail: {
             if let item = client.rtcClientMap[selectedSideBarItem] {
-                CommunicateView(item: item) {
-                    client.onMessage(from: "me", inConversation: selectedSideBarItem, message: $0)
+                if item.0.peerConnection?.connectionState == .connected && item.0.dataChannel?.readyState == .open {
+                    CommunicateView(item: item) {
+                        client.onMessage(from: "me", inConversation: selectedSideBarItem, message: $0)
+                    }
+                } else {
+                    Text("Connecting...?")
                 }
             } else {
                 if selectedSideBarItem != "" {
