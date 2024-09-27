@@ -8,6 +8,8 @@
 import Foundation
 import WebRTC
 
+typealias Mine = (RTCPeerConnection, RTCDataChannel, [RTCMediaStream], [(Date, String, String)])
+
 let constraints = RTCMediaConstraints(
     mandatoryConstraints: [kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,
                            kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueTrue],
@@ -16,10 +18,7 @@ let constraints = RTCMediaConstraints(
 let factory = RTCPeerConnectionFactory()
 
 class WebRTCClient: NSObject {
-    var peerConnection: RTCPeerConnection?
-    var dataChannel: RTCDataChannel?
-
-    var otherOne: String = ""
+    var clientsMap: [String: Mine] = [:]
     
     private var capturer: RTCCameraVideoCapturer?
     var localVideoTrack: RTCMediaStreamTrack? = nil
@@ -27,70 +26,7 @@ class WebRTCClient: NSObject {
     
     weak var delegate: WebRTCClientDelegate?
     
-    init(otherOne: String) {
-        super.init()
-
-        self.otherOne = otherOne
-        setupPeerConnection()
-        createDataChannel()
-        createMediaChannel()
-    }
-    
-    private func setLocalDescription(_ sdp: RTCSessionDescription) {
-        self.peerConnection!.setLocalDescription(sdp, completionHandler: { (error) in
-            if error != nil { return }
-            print("Local description set")
-        })
-    }
-    
-    func sendOfferToPeer(_ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
-        self.peerConnection!.offer(for: constraints) { (sdp, error) in
-            guard let sdp = sdp else { return }
-            
-            self.setLocalDescription(sdp)
-            
-            completionHandler(sdp)
-        }
-    }
-    
-    func receivedRemoteDescriptionFromPeer(type: RTCSdpType, sdp: String) {
-        let remoteSDP = RTCSessionDescription(type: type, sdp: sdp)
-        peerConnection!.setRemoteDescription(remoteSDP) { _ in }
-        print("Remote description received")
-    }
-    
-    func sendAnswerToPeer(_ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
-        self.peerConnection!.answer(for: constraints) { (sdp, error) in
-            guard let sdp = sdp else { return }
-            
-            self.setLocalDescription(sdp)
-            
-            completionHandler(sdp)
-        }
-    }
-    
-    private func setupPeerConnection() {
-        let config = RTCConfiguration()
-        config.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])]
-        config.sdpSemantics = .unifiedPlan
-        config.continualGatheringPolicy = .gatherContinually
-        
-        let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
-        peerConnection = RTCPeerConnectionFactory().peerConnection(
-            with: config, constraints: constraints, delegate: self
-        )!
-    }
-    
-    private func createDataChannel() {
-        let config = RTCDataChannelConfiguration()
-        config.isNegotiated = true
-        config.channelId = 0
-        
-        dataChannel = peerConnection?.dataChannel(forLabel: "dataChannel", configuration: config)
-        dataChannel?.delegate = self // Set delegate to receive data
-    }
-    
-    private func createMediaChannel() {
+    override init() {
         localAudioTrack = factory.audioTrack(withTrackId: "ARDAMSa0")
         
         let videoSource = factory.videoSource()
@@ -101,22 +37,118 @@ class WebRTCClient: NSObject {
             capturer!.startCapture(with: frontCamera, format: format, fps: Int(fps))
         }
         localVideoTrack = factory.videoTrack(with: videoSource, trackId: "ARDAMSv0")
-        
-        peerConnection!.add(localAudioTrack!, streamIds: ["ARDAMSv0"])
-        peerConnection!.add(localVideoTrack!, streamIds: ["ARDAMSv0"])
     }
     
-    func sendData(_ message: String) {
-        guard let dataChannel = dataChannel else { return }
-        let buffer = RTCDataBuffer(data: message.data(using: .utf8)!, isBinary: false)
-        dataChannel.sendData(buffer)
+    func create(otherOne: String) {
+        if let _ = self.clientsMap[otherOne] { return }
+        
+        let peerConnection = createPeerConnection()
+        let dataChannel = createDataChannel(peerConnection: peerConnection)
+        
+        self.clientsMap[otherOne] = (peerConnection, dataChannel, [], [])
+    }
+    
+    func getClientKey(peerConnection: RTCPeerConnection) -> String? {
+        if let client = self.clientsMap.first(where: { key, value in value.0 == peerConnection }) {
+            return client.key
+        }
+        return nil
+    }
+    
+    func getClientKey(dataChannel: RTCDataChannel) -> String? {
+        if let client = self.clientsMap.first(where: { key, value in value.1 == dataChannel }) {
+            return client.key
+        }
+        return nil
+    }
+    
+    
+    private func createPeerConnection() -> RTCPeerConnection {
+        let config = RTCConfiguration()
+        config.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])]
+        config.sdpSemantics = .unifiedPlan
+        config.continualGatheringPolicy = .gatherContinually
+        
+        let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
+        let peerConnection = factory.peerConnection(with: config, constraints: constraints, delegate: self)!
+
+        peerConnection.add(localAudioTrack!, streamIds: ["ARDAMSv0"])
+        peerConnection.add(localVideoTrack!, streamIds: ["ARDAMSv0"])
+
+        return peerConnection
+    }
+    
+    private func createDataChannel(peerConnection: RTCPeerConnection) -> RTCDataChannel {
+        let config = RTCDataChannelConfiguration()
+        config.isNegotiated = true
+        config.channelId = 0
+        
+        let dataChannel = peerConnection.dataChannel(forLabel: "dataChannel", configuration: config)!
+        dataChannel.delegate = self // Set delegate to receive data
+        
+        return dataChannel
+    }
+
+    private func setLocalDescription(to: String, _ sdp: RTCSessionDescription) {
+        guard let client = self.clientsMap[to] else { return }
+
+        client.0.setLocalDescription(sdp, completionHandler: { (error) in
+            if error != nil { return }
+            print("Local description set")
+        })
+    }
+    
+    func sendOfferToPeer(to: String, _ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
+        guard let client = self.clientsMap[to] else { return }
+
+        client.0.offer(for: constraints) { (sdp, error) in
+            guard let sdp = sdp else { return }
+            
+            self.setLocalDescription(to: to, sdp)
+            
+            completionHandler(sdp)
+        }
+    }
+    
+    func receivedRemoteDescriptionFromPeer(from: String, type: RTCSdpType, sdp: String) {
+        guard let client = self.clientsMap[from] else { return }
+
+        client.0.setRemoteDescription(RTCSessionDescription(type: type, sdp: sdp)) { _ in }
+    }
+    
+    func receivedCandidateFromPeer(from: String, candidate: RTCIceCandidate) {
+        guard let client = self.clientsMap[from] else { return }
+        
+        client.0.add(candidate) { _ in }
+    }
+    
+    func sendAnswerToPeer(to: String, _ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
+        guard let client = self.clientsMap[to] else { return }
+
+        client.0.answer(for: constraints) { (sdp, error) in
+            guard let sdp = sdp else { return }
+            
+            self.setLocalDescription(to: to, sdp)
+            
+            completionHandler(sdp)
+        }
+    }
+    
+    func sendData(to: String, _ message: String) {
+        guard self.clientsMap[to] != nil else { return }
+
+        self.clientsMap[to]!.1.sendData(RTCDataBuffer(data: message.data(using: .utf8)!, isBinary: false))
+        self.clientsMap[to]!.3.append((Date.now, "ME", message))
+        
+        delegate?.onMessage(from: to)
     }
 }
 
 extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        print("Generated local ICE candidate")
-        delegate?.onCandidate(to: otherOne, candidate: candidate)
+        if let client = self.clientsMap.first(where: { key, value in value.0 == peerConnection }) {
+            delegate?.onCandidate(sendTo: client.key, candidate: candidate)
+        }
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, iceGatheringChanged newState: RTCIceGatheringState) {
@@ -132,8 +164,11 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        print("Stream added")
-        delegate?.onStream(from: otherOne, stream: stream)
+        guard let key = getClientKey(peerConnection: peerConnection) else { return }
+        guard self.clientsMap[key] != nil else { return }
+
+        self.clientsMap[key]!.2.append(stream)
+        delegate?.onStream(from: key)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
@@ -148,8 +183,8 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
         print("ICE Connection state changed: \(newState)")
         
         if newState == .failed || newState == .disconnected || newState == .closed {
-            delegate?.onClose(from: otherOne)
-            capturer?.stopCapture()
+            guard let key = getClientKey(peerConnection: peerConnection) else { return }
+            delegate?.onClose(from: key)
         }
     }
     
@@ -168,25 +203,29 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
 
 extension WebRTCClient: RTCDataChannelDelegate {
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
-        if !buffer.isBinary, let message = String(data: buffer.data, encoding: .utf8) {
-            delegate?.onMessage(from: otherOne, inConversation: otherOne, message: message)
-        } else {
-            print("Received binary data")
-        }
+        if buffer.isBinary { return }
+
+        guard let message = String(data: buffer.data, encoding: .utf8) else { return }
+
+        guard let key = self.getClientKey(dataChannel: dataChannel) else { return }
+        guard self.clientsMap[key] != nil else { return }
+
+        self.clientsMap[key]!.3.append((Date.now, key, message))
+        delegate?.onMessage(from: key)
     }
 
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
-        print("Data channel state changed: \(dataChannel.readyState.rawValue)")
         if dataChannel.readyState == .open {
-            delegate?.onChannelReady(from: otherOne)
+            guard let key = self.getClientKey(dataChannel: dataChannel) else { return }
+            delegate?.onChannelReady(from: key)
         }
     }
 }
 
 protocol WebRTCClientDelegate: AnyObject {
-    func onCandidate(to: String, candidate: RTCIceCandidate)
+    func onCandidate(sendTo: String, candidate: RTCIceCandidate)
+    func onStream(from: String)
     func onChannelReady(from: String)
-    func onMessage(from: String, inConversation: String, message: String)
-    func onStream(from: String, stream: RTCMediaStream)
+    func onMessage(from: String)
     func onClose(from: String)
 }

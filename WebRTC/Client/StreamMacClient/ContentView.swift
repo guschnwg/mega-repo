@@ -21,7 +21,7 @@ struct VideoView: NSViewRepresentable {
 }
 
 struct CommunicateView: View {
-    var item: (WebRTCClient, [(Date, String, String)], [RTCMediaStream])
+    var item: Mine
     var onNewMessage: (String) -> Void
     
     @State private var messageToSend = ""
@@ -32,19 +32,13 @@ struct CommunicateView: View {
                 VideoView(rtcTrack: item.2[0].videoTracks[0])
                     .frame(height: 100)
             }
-            
-            if let videoTrack = item.0.localVideoTrack as? RTCVideoTrack {
-                VideoView(rtcTrack: videoTrack)
-                    .frame(height: 100)
-            }
 
-            ForEach(item.1, id: \.self.0) { (date, from, content) in
+            ForEach(item.3, id: \.self.0) { (date, from, content) in
                 Text("\(from): \(content) (\(date))")
             }
             
             TextField("Message", text: $messageToSend)
                 .onSubmit {
-                    item.0.sendData(messageToSend)
                     onNewMessage(messageToSend)
                     messageToSend = ""
                 }
@@ -55,7 +49,8 @@ struct CommunicateView: View {
 struct ContentView: View {
     @ObservedObject var client: WSClient
     
-    @State var selectedSideBarItem: String = ""
+    @State private var selectedSideBarItem: String = ""
+    @State private var isGranted = false
     
     var body: some View {
         NavigationSplitView() {
@@ -65,8 +60,8 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    if let this = client.rtcClientMap[id] {
-                        switch this.0.peerConnection?.connectionState {
+                    if let this = client.rtcClient.clientsMap[id] {
+                        switch this.0.connectionState {
                             case .connected:
                                 Image(systemName: "checkmark.seal")
                             case .new, .connecting:
@@ -75,7 +70,7 @@ struct ContentView: View {
                                 Spacer()
                             }
                         
-                        switch this.0.dataChannel?.readyState {
+                        switch this.1.readyState {
                             case .open:
                                 Image(systemName: "checkmark.seal")
                             case .connecting:
@@ -86,29 +81,41 @@ struct ContentView: View {
                     }
                 }
             }
+            
+            Text("HI")
+
+            if let videoTrack = client.rtcClient.localVideoTrack as? RTCVideoTrack {
+                VideoView(rtcTrack: videoTrack).frame(height: 100)
+            }
         } detail: {
-            if let item = client.rtcClientMap[selectedSideBarItem] {
-                if item.0.peerConnection?.connectionState == .connected && item.0.dataChannel?.readyState == .open {
+            if let item = client.rtcClient.clientsMap[selectedSideBarItem] {
+                if item.0.connectionState == .connected && item.1.readyState == .open {
                     CommunicateView(item: item) {
-                        client.onMessage(from: "me", inConversation: selectedSideBarItem, message: $0)
+                        client.rtcClient.sendData(to: selectedSideBarItem, $0)
                     }
                 } else {
                     Text("Connecting...?")
                 }
             } else {
-                if selectedSideBarItem != "" {
-                    Button("Chat") {
-                        client.sendOffer(to: selectedSideBarItem)
-                        AVCaptureDevice.requestAccess(for: .video) { granted in
-                            if granted {
-                                client.sendOffer(to: selectedSideBarItem)
-                            }
+                if isGranted {
+                    if selectedSideBarItem != "" {
+                        Button("Chat") {
+                            client.sendOffer(to: selectedSideBarItem)
                         }
+                    } else {
+                        Text("Choose someone to chat with")
                     }
                 } else {
-                    Text("Choose someone to chat with")
+                    Text("Camera access not granted")
                 }
             }
         }.navigationTitle(client.wsClient.me)
+            .onAppear {
+                AVCaptureDevice.requestAccess(for: .video) { granted in
+                    if granted {
+                        self.isGranted = true
+                    }
+                }
+            }
     }
 }

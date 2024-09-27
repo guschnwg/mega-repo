@@ -9,11 +9,17 @@ import SwiftUI
 
 @main
 struct StreamMacClientApp: App {
-    @ObservedObject var client = WSClient(baseUrl: "wss://workers.giovanna.workers.dev")
+    @State var client: WSClient?
     
     var body: some Scene {
         WindowGroup {
-            ContentView(client: client)
+            if let client = client {
+                ContentView(client: client)
+            } else {
+                Button("Start") {
+                    client = WSClient(baseUrl: "wss://workers.giovanna.workers.dev")
+                }
+            }
         }
     }
 }

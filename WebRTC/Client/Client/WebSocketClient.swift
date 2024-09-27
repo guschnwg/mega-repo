@@ -57,7 +57,7 @@ class WebSocketClient: NSObject {
                 let candidate = data!["candidate"] as! [String: Any]
                 
                 delegate?.onCandidate(
-                    from: from,
+                    receivedFrom: from,
                     candidate: RTCIceCandidate(
                         sdp: candidate["candidate"] as! String,
                         sdpMLineIndex: Int32(candidate["sdpMid"] as! String)!,
@@ -106,6 +106,8 @@ class WebSocketClient: NSObject {
         }
     }
     
+    //
+    
     func sendOffer(_ to: String, _ offer: [String: String]) {
         sendMessage(to: to, type: "offer", data: offer)
     }
@@ -122,6 +124,6 @@ class WebSocketClient: NSObject {
 protocol WebSocketClientDelegate: AnyObject {
     func onOffer(from: String, offer: String)
     func onAnswer(from: String, answer: String)
-    func onCandidate(from: String, candidate: RTCIceCandidate)
+    func onCandidate(receivedFrom: String, candidate: RTCIceCandidate)
     func onRefresh()
 }

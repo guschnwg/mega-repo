@@ -10,11 +10,13 @@ import SwiftUICore
 
 class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject {
     var wsClient: WebSocketClient
-    var rtcClientMap: [String: (WebRTCClient, [(Date, String, String)], [RTCMediaStream])] = [:]
+    var rtcClient: WebRTCClient
 
     init(baseUrl: String) {
         self.wsClient = WebSocketClient(baseUrl: baseUrl)
+        self.rtcClient = WebRTCClient()
         wsClient.delegate = self
+        rtcClient.delegate = self
     }
     
     private func refresh() {
@@ -23,18 +25,10 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
         }
     }
     
-    private func createClientIfNeeded(from: String) {
-        if rtcClientMap.keys.contains(where: { $0 == from }) { return }
-    
-        let client = WebRTCClient(otherOne: from)
-        client.delegate = self
-        rtcClientMap[from] = (client, [], [])
-    }
-    
     func sendOffer(to: String) {
-        createClientIfNeeded(from: to)
-
-        rtcClientMap[to]!.0.sendOfferToPeer { sessionDescription in
+        self.rtcClient.create(otherOne: to)
+        
+        self.rtcClient.sendOfferToPeer(to: to) { sessionDescription in
             self.wsClient.sendOffer(to, ["sdp": sessionDescription.sdp, "type": "offer"])
             
             self.refresh()
@@ -42,10 +36,11 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
 
     func onOffer(from: String, offer: String) {
-        createClientIfNeeded(from: from)
+        self.rtcClient.create(otherOne: from)
 
-        rtcClientMap[from]!.0.receivedRemoteDescriptionFromPeer(type: .offer, sdp: offer)
-        rtcClientMap[from]!.0.sendAnswerToPeer { sessionDescription in
+        self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .offer, sdp: offer)
+
+        self.rtcClient.sendAnswerToPeer(to: from) { sessionDescription in
             self.wsClient.sendAnswer(from, ["sdp": sessionDescription.sdp, "type": "answer"])
             
             self.refresh()
@@ -53,41 +48,43 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
     
     func onAnswer(from: String, answer: String) {
-        createClientIfNeeded(from: from)
-
-        rtcClientMap[from]!.0.receivedRemoteDescriptionFromPeer(type: .answer, sdp: answer)
+        self.rtcClient.create(otherOne: from)
+        
+        self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .answer, sdp: answer)
         
         self.refresh()
     }
+
+    func onCandidate(receivedFrom: String, candidate: RTCIceCandidate) {
+        self.rtcClient.create(otherOne: receivedFrom)
+        self.rtcClient.receivedCandidateFromPeer(from: receivedFrom, candidate: candidate)
+        self.refresh()
+    }
     
-    func onCandidate(to: String, candidate: RTCIceCandidate) {
+    //
+    
+    func onRefresh() {
+        self.refresh()
+    }
+    
+    //
+    
+    func onCandidate(sendTo: String, candidate: RTCIceCandidate) {
         wsClient.sendCandidate(
-            to,
+            sendTo,
             [
                 "candidate": candidate.sdp,
                 "sdpMid": candidate.sdpMid!,
                 "sdpMLineIndex": candidate.sdpMLineIndex
             ]
         )
-        
-        self.refresh()
     }
-
-    func onCandidate(from: String, candidate: RTCIceCandidate) {
-        createClientIfNeeded(from: from)
-        rtcClientMap[from]!.0.peerConnection?.add(candidate, completionHandler: {_ in})
-        
+    
+    func onStream(from: String) {
         self.refresh()
     }
     
-    func onStream(from: String, stream: RTCMediaStream) {
-        createClientIfNeeded(from: from)
-        rtcClientMap[from]!.2.append(stream)
-        
-        self.refresh()
-    }
-    
-    func onRefresh() {
+    func onMessage(from: String) {
         self.refresh()
     }
     
@@ -96,11 +93,6 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
     
     func onClose(from: String) {
-        self.refresh()
-    }
-        
-    func onMessage(from: String, inConversation: String, message: String) {
-        rtcClientMap[inConversation]!.1.append((Date.now, from, message))
         self.refresh()
     }
 }
