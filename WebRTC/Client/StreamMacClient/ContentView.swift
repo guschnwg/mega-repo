@@ -21,19 +21,19 @@ struct VideoView: NSViewRepresentable {
 }
 
 struct CommunicateView: View {
-    var item: Mine
+    var item: WebRTCUser
     var onNewMessage: (String) -> Void
     
     @State private var messageToSend = ""
     
     var body: some View {
         VStack {
-            if !item.2.isEmpty && !item.2[0].videoTracks.isEmpty {
-                VideoView(rtcTrack: item.2[0].videoTracks[0])
+            if !item.mediaStreams.isEmpty && !item.mediaStreams[0].videoTracks.isEmpty {
+                VideoView(rtcTrack: item.mediaStreams[0].videoTracks[0])
                     .frame(height: 100)
             }
 
-            ForEach(item.3, id: \.self.0) { (date, from, content) in
+            ForEach(item.messages, id: \.self.0) { (date, from, content) in
                 Text("\(from): \(content) (\(date))")
             }
             
@@ -61,7 +61,7 @@ struct ContentView: View {
                     Spacer()
                     
                     if let this = client.rtcClient.clientsMap[id] {
-                        switch this.0.connectionState {
+                        switch this.peerConnection.connectionState {
                             case .connected:
                                 Image(systemName: "checkmark.seal")
                             case .new, .connecting:
@@ -70,7 +70,7 @@ struct ContentView: View {
                                 Spacer()
                             }
                         
-                        switch this.1.readyState {
+                        switch this.dataChannel.readyState {
                             case .open:
                                 Image(systemName: "checkmark.seal")
                             case .connecting:
@@ -89,7 +89,7 @@ struct ContentView: View {
             }
         } detail: {
             if let item = client.rtcClient.clientsMap[selectedSideBarItem] {
-                if item.0.connectionState == .connected && item.1.readyState == .open {
+                if item.peerConnection.connectionState == .connected && item.dataChannel.readyState == .open {
                     CommunicateView(item: item) {
                         client.rtcClient.sendData(to: selectedSideBarItem, $0)
                     }
