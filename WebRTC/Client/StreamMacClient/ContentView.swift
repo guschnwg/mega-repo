@@ -29,6 +29,7 @@ struct CommunicateView: View {
     var body: some View {
         VStack {
             if !item.mediaStreams.isEmpty && !item.mediaStreams[0].videoTracks.isEmpty {
+                // TODO: this is probably something that i want to add only one time
                 VideoView(rtcTrack: item.mediaStreams[0].videoTracks[0])
                     .frame(height: 100)
             }
