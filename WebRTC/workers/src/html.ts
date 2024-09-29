@@ -38,6 +38,11 @@ export default `
 
 <body>
     <div v-scope @vue:mounted="mounted">
+        <div>
+            <span>Auto accept calls</span>
+            <input type="checkbox" v-model="autoAccept">
+        </div>
+
         <div class="my-video">
             <div class="choose-video">
                 <span>Change the video file</span>
@@ -110,6 +115,7 @@ export default `
 
         createApp({
             id: null,
+            autoAccept: false,
             clients: [],
             clientsRTCMap: {},
             clientsRTCMapKey: 1,
@@ -214,7 +220,6 @@ export default `
                     const stream = new MediaStream(this.clientsRTCMap[client].tracks);
                     const video = document.getElementById('video-for-' + client);
                     if (video) video.srcObject = stream;
-                    console.log(this.clientsRTCMap[client].tracks);
                 });
                 channel.addEventListener('message', event => {
                     this.clientsRTCMap[client].lastMessageReceived = { at: Date.now(), data: event.data };
@@ -243,6 +248,10 @@ export default `
                 const { peerConnection } = this.createPeerConnection(from);
 
                 peerConnection.setRemoteDescription(offer).then(() => {});
+
+                if (this.autoAccept) {
+                    this.sendAnswer(from);
+                }
             },
             sendAnswer(to) {
                 const { peerConnection } = this.clientsRTCMap[to];
