@@ -39,7 +39,7 @@ class WebRTCClient: NSObject {
         capturer = RTCCameraVideoCapturer(delegate: videoSource)
         if let frontCamera = RTCCameraVideoCapturer.captureDevices().first {
             let format = frontCamera.formats.first!
-            let fps = format.videoSupportedFrameRateRanges.first!.minFrameRate
+            let fps = max(format.videoSupportedFrameRateRanges.first!.maxFrameRate, 30)
             capturer!.startCapture(with: frontCamera, format: format, fps: Int(fps))
         }
         localVideoTrack = factory.videoTrack(with: videoSource, trackId: "ARDAMSv0")

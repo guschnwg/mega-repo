@@ -11,12 +11,15 @@ import WebRTC
 @main
 struct StreamIOSClientApp: App {
     @State var client: WSClient?
+    @State var showMyVideo: Bool = false
 
     var body: some Scene {
         WindowGroup {
             if let client = client {
+                Toggle("Show my video", isOn: $showMyVideo)
+
                 NavigationStack {
-                    HeaderView(client: client, showMyVideo: false, selection: nil)
+                    HeaderView(client: client, showMyVideo: showMyVideo, selection: nil)
                         .navigationDestination(for: String.self) { chosen in
                             DetailView(client: client, selectedSideBarItem: chosen)
                         }
