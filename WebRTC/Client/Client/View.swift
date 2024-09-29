@@ -8,18 +8,6 @@
 import SwiftUI
 import WebRTC
 
-struct VideoView: NSViewRepresentable {
-    var rtcTrack: RTCVideoTrack
-    
-    func makeNSView(context: Context) -> RTCMTLNSVideoView {
-        return RTCMTLNSVideoView()
-    }
-    
-    func updateNSView(_ view: RTCMTLNSVideoView, context: Context) {
-        rtcTrack.add(view)
-    }
-}
-
 struct CommunicateView: View {
     var item: WebRTCUser
     var onNewMessage: (String) -> Void
@@ -32,7 +20,7 @@ struct CommunicateView: View {
                 VideoView(rtcTrack: item.mediaStreams[0].videoTracks[0])
                     .frame(height: 100)
             }
-
+            
             ForEach(item.messages, id: \.self.0) { (date, from, content) in
                 Text("\(from): \(content) (\(date))")
             }
@@ -46,52 +34,14 @@ struct CommunicateView: View {
     }
 }
 
-struct ContentView: View {
+struct DetailView: View {
     @ObservedObject var client: WSClient
+    var selectedSideBarItem: String
     
-    @State private var selectedSideBarItem: String = ""
-    @State private var isGranted = false
+    @State private var isGranted: Bool = false
     
     var body: some View {
-        NavigationSplitView() {
-            List(client.wsClient.clients, id: \.self, selection: $selectedSideBarItem) { id in
-                HStack {
-                    NavigationLink(id, value: id)
-
-                    Spacer()
-                    
-                    if let this = client.rtcClient.clientsMap[id] {
-                        switch this.peerConnection.connectionState {
-                            case .connected:
-                                Image(systemName: "checkmark.seal")
-                            case .new, .connecting:
-                                Image(systemName: "arrow.2.circlepath.circle")
-                            default:
-                                Spacer()
-                            }
-                        
-                        switch this.dataChannel.readyState {
-                            case .open:
-                                Image(systemName: "checkmark.seal")
-                            case .connecting:
-                                Image(systemName: "arrow.2.circlepath.circle")
-                            default:
-                                Spacer()
-                            }
-                    }
-                }
-            }
-            
-            // Méh
-            Button(client.autoAccept ? "Don't auto accept" : "Auto Accept") {
-                client.autoAccept = !client.autoAccept
-                client.onRefresh()
-            }
-
-            if let videoTrack = client.rtcClient.localVideoTrack as? RTCVideoTrack {
-                VideoView(rtcTrack: videoTrack).frame(height: 100)
-            }
-        } detail: {
+        VStack {
             if isGranted {
                 if client.wsClient.clients.isEmpty {
                     Text("There is no one to chat with")
@@ -108,7 +58,7 @@ struct ContentView: View {
                         }
                     }
                 }
-
+                
                 // This is to not have the blinking effect
                 ForEach(client.rtcClient.clientsMap.keys.sorted(), id: \.self) {
                     let item = client.rtcClient.clientsMap[$0]!
@@ -130,13 +80,60 @@ struct ContentView: View {
             } else {
                 Text("Camera access not granted")
             }
-        }.navigationTitle(client.wsClient.me)
-            .onAppear {
-                AVCaptureDevice.requestAccess(for: .video) { granted in
-                    if granted {
-                        self.isGranted = true
+        }.onAppear {
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    self.isGranted = true
+                }
+            }
+        }
+    }
+}
+
+struct HeaderView: View {
+    @ObservedObject var client: WSClient
+    
+    var showMyVideo: Bool
+    var selection: Binding<String?>? // Only use with NavigationSplitView
+
+    var body: some View {
+        List(client.wsClient.clients, id: \.self, selection: selection) { id in
+            HStack {
+                NavigationLink(id, value: id)
+
+                Spacer()
+                
+                if let this = client.rtcClient.clientsMap[id] {
+                    switch this.peerConnection.connectionState {
+                    case .connected:
+                        Image(systemName: "checkmark.seal")
+                    case .new, .connecting:
+                        Image(systemName: "arrow.2.circlepath.circle")
+                    default:
+                        Spacer()
+                    }
+                    
+                    switch this.dataChannel.readyState {
+                    case .open:
+                        Image(systemName: "checkmark.seal")
+                    case .connecting:
+                        Image(systemName: "arrow.2.circlepath.circle")
+                    default:
+                        Spacer()
                     }
                 }
             }
+        }
+        .navigationTitle(client.wsClient.me)
+        
+        // Méh
+        Button(client.autoAccept ? "Don't auto accept" : "Auto Accept") {
+            client.autoAccept = !client.autoAccept
+            client.onRefresh()
+        }
+        
+        if showMyVideo, let videoTrack = client.rtcClient.localVideoTrack as? RTCVideoTrack {
+            VideoView(rtcTrack: videoTrack).frame(height: 100)
+        }
     }
 }
