@@ -29,7 +29,6 @@ struct CommunicateView: View {
     var body: some View {
         VStack {
             if !item.mediaStreams.isEmpty && !item.mediaStreams[0].videoTracks.isEmpty {
-                // TODO: this is probably something that i want to add only one time
                 VideoView(rtcTrack: item.mediaStreams[0].videoTracks[0])
                     .frame(height: 100)
             }
@@ -58,7 +57,7 @@ struct ContentView: View {
             List(client.wsClient.clients, id: \.self, selection: $selectedSideBarItem) { id in
                 HStack {
                     NavigationLink(id, value: id)
-                    
+
                     Spacer()
                     
                     if let this = client.rtcClient.clientsMap[id] {
@@ -83,32 +82,53 @@ struct ContentView: View {
                 }
             }
             
-            Text("HI")
+            // Méh
+            Button(client.autoAccept ? "Don't auto accept" : "Auto Accept") {
+                client.autoAccept = !client.autoAccept
+                client.onRefresh()
+            }
 
             if let videoTrack = client.rtcClient.localVideoTrack as? RTCVideoTrack {
                 VideoView(rtcTrack: videoTrack).frame(height: 100)
             }
         } detail: {
-            if let item = client.rtcClient.clientsMap[selectedSideBarItem] {
-                if item.peerConnection.connectionState == .connected && item.dataChannel.readyState == .open {
-                    CommunicateView(item: item) {
-                        client.rtcClient.sendData(to: selectedSideBarItem, $0)
-                    }
+            if isGranted {
+                if client.wsClient.clients.isEmpty {
+                    Text("There is no one to chat with")
                 } else {
-                    Text("Connecting...?")
+                    if selectedSideBarItem == "" {
+                        Text("Choose someone to chat with")
+                    } else {
+                        if let client = client.rtcClient.clientsMap[selectedSideBarItem] {
+                            Text("Chatting with \(client.id)")
+                        } else {
+                            Button("Chat") {
+                                client.sendOffer(to: selectedSideBarItem)
+                            }
+                        }
+                    }
+                }
+
+                // This is to not have the blinking effect
+                ForEach(client.rtcClient.clientsMap.keys.sorted(), id: \.self) {
+                    let item = client.rtcClient.clientsMap[$0]!
+                    
+                    if selectedSideBarItem == $0 {
+                        if item.peerConnection.connectionState == .connected && item.dataChannel.readyState == .open {
+                            CommunicateView(item: item) {
+                                client.rtcClient.sendData(to: selectedSideBarItem, $0)
+                            }
+                        } else if item.peerConnection.signalingState == .haveRemoteOffer {
+                            Button("Accept call?") {
+                                client.sendAnswer(to: item.id)
+                            }
+                        } else {
+                            Text("Connecting...?")
+                        }
+                    }
                 }
             } else {
-                if isGranted {
-                    if selectedSideBarItem != "" {
-                        Button("Chat") {
-                            client.sendOffer(to: selectedSideBarItem)
-                        }
-                    } else {
-                        Text("Choose someone to chat with")
-                    }
-                } else {
-                    Text("Camera access not granted")
-                }
+                Text("Camera access not granted")
             }
         }.navigationTitle(client.wsClient.me)
             .onAppear {

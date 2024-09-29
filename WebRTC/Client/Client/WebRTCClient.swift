@@ -9,6 +9,7 @@ import Foundation
 import WebRTC
 
 struct WebRTCUser {
+    let id: String
     let peerConnection: RTCPeerConnection
     let dataChannel: RTCDataChannel
     var mediaStreams: [RTCMediaStream]
@@ -51,6 +52,7 @@ class WebRTCClient: NSObject {
         let dataChannel = createDataChannel(peerConnection: peerConnection)
         
         self.clientsMap[otherOne] = WebRTCUser(
+            id: otherOne,
             peerConnection: peerConnection,
             dataChannel: dataChannel,
             mediaStreams: [],

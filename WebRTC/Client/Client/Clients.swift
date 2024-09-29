@@ -11,6 +11,7 @@ import SwiftUICore
 class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject {
     var wsClient: WebSocketClient
     var rtcClient: WebRTCClient
+    var autoAccept: Bool = false
 
     init(baseUrl: String) {
         self.wsClient = WebSocketClient(baseUrl: baseUrl)
@@ -19,7 +20,9 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
         rtcClient.delegate = self
     }
     
-    private func refresh() {
+    private func refresh(_ from: String) {
+        print("Refreshing from \(from)")
+
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
@@ -31,7 +34,7 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
         self.rtcClient.sendOfferToPeer(to: to) { sessionDescription in
             self.wsClient.sendOffer(to, ["sdp": sessionDescription.sdp, "type": "offer"])
             
-            self.refresh()
+            self.refresh("sendOffer")
         }
     }
 
@@ -40,10 +43,18 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
 
         self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .offer, sdp: offer)
 
-        self.rtcClient.sendAnswerToPeer(to: from) { sessionDescription in
-            self.wsClient.sendAnswer(from, ["sdp": sessionDescription.sdp, "type": "answer"])
+        if autoAccept {
+            self.sendAnswer(to: from)
+        }
+    }
+    
+    func sendAnswer(to: String) {
+        self.rtcClient.create(otherOne: to)
+
+        self.rtcClient.sendAnswerToPeer(to: to) { sessionDescription in
+            self.wsClient.sendAnswer(to, ["sdp": sessionDescription.sdp, "type": "answer"])
             
-            self.refresh()
+            self.refresh("onOffer")
         }
     }
     
@@ -52,19 +63,19 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
         
         self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .answer, sdp: answer)
         
-        self.refresh()
+        self.refresh("onAnswer")
     }
 
     func onCandidate(receivedFrom: String, candidate: RTCIceCandidate) {
         self.rtcClient.create(otherOne: receivedFrom)
         self.rtcClient.receivedCandidateFromPeer(from: receivedFrom, candidate: candidate)
-        self.refresh()
+        self.refresh("onCandidate")
     }
     
     //
     
     func onRefresh() {
-        self.refresh()
+        self.refresh("onRefresh")
     }
     
     //
@@ -81,18 +92,18 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
     
     func onStream(from: String) {
-        self.refresh()
+        self.refresh("onStream")
     }
     
     func onMessage(from: String) {
-        self.refresh()
+        self.refresh("onMessage")
     }
     
     func onChannelReady(from: String) {
-        self.refresh()
+        self.refresh("onChannelReady")
     }
     
     func onClose(from: String) {
-        self.refresh()
+        self.refresh("onClose")
     }
 }
