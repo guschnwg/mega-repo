@@ -52,13 +52,15 @@ public extension PlatformAgnosticViewRepresentable where NSViewType == PlatformV
 #endif
 
 struct VideoView: PlatformAgnosticViewRepresentable {
-    var rtcTrack: RTCVideoTrack
+    var rtcTrack: RTCVideoTrack?
     
     func makePlatformView(context: Context) -> PlatformRTCMTLVideoView {
         return PlatformRTCMTLVideoView()
     }
     
     func updatePlatformView(_ view: PlatformRTCMTLVideoView, context: Context) {
-        rtcTrack.add(view)
+        if let rtcTrack = rtcTrack {
+            rtcTrack.add(view)
+        }
     }
 }

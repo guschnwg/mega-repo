@@ -17,7 +17,11 @@ struct StreamMacClientApp: App {
         WindowGroup {
             if let client = client {
                 NavigationSplitView {
-                    HeaderView(client: client, showMyVideo: true, selection: $selection)
+                    VStack {
+                        HeaderView(client: client, selection: $selection)
+                        Spacer()
+                        VideoView(rtcTrack: client.rtcClient.localVideoTrack as? RTCVideoTrack).frame(height: 100)
+                    }
                 } detail: {
                     DetailView(client: client, selectedSideBarItem: selection ?? "")
                 }.navigationTitle(client.wsClient.me)
