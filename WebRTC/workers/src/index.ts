@@ -40,8 +40,14 @@ export class MyDurableObject extends DurableObject {
     server.id = Math.random().toString(36).substring(2, 9);
     this.ctx.acceptWebSocket(server);
 
-    this.send(server.id, { type: "welcome", id: server.id });
-    this.broadcast("-1", { type: "refresh", clients: this.ctx.getWebSockets().map(ws => ws.id) });
+    this.send(
+      server.id,
+      { type: "welcome", id: server.id }
+    );
+    this.broadcast(
+      "-1",
+      { type: "refresh", clients: this.ctx.getWebSockets().map(ws => ws.id).filter(Boolean) }
+    );
 
     return new Response(null, {
       status: 101,

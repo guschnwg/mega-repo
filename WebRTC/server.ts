@@ -39,12 +39,12 @@ const handler = (request: Request): Response => {
 
     socket.addEventListener("open", () => {
       send(id, { type: "welcome", id });
-      broadcast("-1", { type: "refresh", clients: Object.keys(clients) });
+      broadcast("-1", { type: "refresh", clients: Object.keys(clients).filter(Boolean) });
     });
 
     socket.addEventListener("close", () => {
       delete clients[id];
-      broadcast(id, { type: "refresh", clients: Object.keys(clients) });
+      broadcast(id, { type: "refresh", clients: Object.keys(clients).filter(Boolean) });
     });
 
     socket.addEventListener("message", (event) => {
