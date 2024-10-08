@@ -27,22 +27,20 @@ class WebRTCClient: NSObject {
     var clientsMap: [String: WebRTCUser] = [:]
     
     private var capturer: RTCCameraVideoCapturer?
-    var localVideoTrack: RTCMediaStreamTrack? = nil
-    var localAudioTrack: RTCMediaStreamTrack? = nil
+    var localVideoTrack: RTCMediaStreamTrack?
+    private var videoSource: RTCVideoSource?
+    private var localAudioTrack: RTCMediaStreamTrack?
+    private var cameraIndex = 0
     
     weak var delegate: WebRTCClientDelegate?
     
     override init() {
-        localAudioTrack = factory.audioTrack(withTrackId: "ARDAMSa0")
+        super.init()
         
-        let videoSource = factory.videoSource()
-        capturer = RTCCameraVideoCapturer(delegate: videoSource)
-        if let frontCamera = RTCCameraVideoCapturer.captureDevices().first {
-            let format = frontCamera.formats.first!
-            let fps = max(format.videoSupportedFrameRateRanges.first!.maxFrameRate, 30)
-            capturer!.startCapture(with: frontCamera, format: format, fps: Int(fps))
-        }
-        localVideoTrack = factory.videoTrack(with: videoSource, trackId: "ARDAMSv0")
+        videoSource = factory.videoSource()
+        capturer = RTCCameraVideoCapturer(delegate: videoSource!)
+
+        setupTracks()
     }
     
     func create(otherOne: String) {
@@ -74,7 +72,43 @@ class WebRTCClient: NSObject {
         return nil
     }
     
+    func changeCamera() {
+        setupTracks()
+        setupTracksToPeerConnections()
+    }
     
+    private func setupTracks() {
+        cameraIndex += 1
+
+        localAudioTrack = factory.audioTrack(withTrackId: "camera_v\(cameraIndex)")
+
+        let devices = RTCCameraVideoCapturer.captureDevices()
+        if devices.isEmpty { return }
+
+        capturer!.stopCapture()
+
+        let camera = devices[cameraIndex % devices.count]
+        let format = camera.formats.first!
+        let fps = max(format.videoSupportedFrameRateRanges.first!.maxFrameRate, 30)
+
+        capturer!.startCapture(with: camera, format: format, fps: Int(fps))
+
+        localVideoTrack = factory.videoTrack(with: videoSource!, trackId: "camera_v\(cameraIndex)")
+    }
+
+    private func setupTracksToPeerConnection(peerConnection: RTCPeerConnection) {
+        peerConnection.add(localAudioTrack!, streamIds: ["ARDAMSv0"])
+        peerConnection.add(localVideoTrack!, streamIds: ["ARDAMSv0"])
+    }
+
+    func setupTracksToPeerConnections() {
+        let peerConnections = self.clientsMap.values.map(\.peerConnection)
+        for peerConnection in peerConnections {
+            setupTracksToPeerConnection(peerConnection: peerConnection)
+        }
+        delegate?.onStream(from: "")
+    }
+
     private func createPeerConnection() -> RTCPeerConnection {
         let config = RTCConfiguration()
         config.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])]
@@ -83,10 +117,9 @@ class WebRTCClient: NSObject {
         
         let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         let peerConnection = factory.peerConnection(with: config, constraints: constraints, delegate: self)!
-
-        peerConnection.add(localAudioTrack!, streamIds: ["ARDAMSv0"])
-        peerConnection.add(localVideoTrack!, streamIds: ["ARDAMSv0"])
-
+        
+        setupTracksToPeerConnection(peerConnection: peerConnection)
+        
         return peerConnection
     }
     
@@ -100,10 +133,10 @@ class WebRTCClient: NSObject {
         
         return dataChannel
     }
-
+    
     private func setLocalDescription(to: String, _ sdp: RTCSessionDescription) {
         guard let client = self.clientsMap[to] else { return }
-
+        
         client.peerConnection.setLocalDescription(sdp, completionHandler: { (error) in
             if error != nil { return }
             print("Local description set")
@@ -112,7 +145,7 @@ class WebRTCClient: NSObject {
     
     func sendOfferToPeer(to: String, _ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
         guard let client = self.clientsMap[to] else { return }
-
+        
         client.peerConnection.offer(for: constraints) { (sdp, error) in
             guard let sdp = sdp else { return }
             
@@ -124,7 +157,7 @@ class WebRTCClient: NSObject {
     
     func receivedRemoteDescriptionFromPeer(from: String, type: RTCSdpType, sdp: String) {
         guard let client = self.clientsMap[from] else { return }
-
+        
         client.peerConnection.setRemoteDescription(RTCSessionDescription(type: type, sdp: sdp)) { _ in }
     }
     
@@ -136,7 +169,7 @@ class WebRTCClient: NSObject {
     
     func sendAnswerToPeer(to: String, _ completionHandler: @escaping (_ sdp: RTCSessionDescription) -> Void) {
         guard let client = self.clientsMap[to] else { return }
-
+        
         client.peerConnection.answer(for: constraints) { (sdp, error) in
             guard let sdp = sdp else { return }
             
@@ -148,7 +181,7 @@ class WebRTCClient: NSObject {
     
     func sendData(to: String, _ message: String) {
         guard self.clientsMap[to] != nil else { return }
-
+        
         self.clientsMap[to]!.dataChannel.sendData(RTCDataBuffer(data: message.data(using: .utf8)!, isBinary: false))
         self.clientsMap[to]!.messages.append((Date.now, "ME", message))
         
@@ -178,7 +211,7 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         guard let key = getClientKey(peerConnection: peerConnection) else { return }
         guard self.clientsMap[key] != nil else { return }
-
+        
         self.clientsMap[key]!.mediaStreams.append(stream)
         delegate?.onStream(from: key)
     }
@@ -216,16 +249,16 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
 extension WebRTCClient: RTCDataChannelDelegate {
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
         if buffer.isBinary { return }
-
+        
         guard let message = String(data: buffer.data, encoding: .utf8) else { return }
-
+        
         guard let key = self.getClientKey(dataChannel: dataChannel) else { return }
         guard self.clientsMap[key] != nil else { return }
-
+        
         self.clientsMap[key]!.messages.append((Date.now, key, message))
         delegate?.onMessage(from: key)
     }
-
+    
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
         if dataChannel.readyState == .open {
             guard let key = self.getClientKey(dataChannel: dataChannel) else { return }
