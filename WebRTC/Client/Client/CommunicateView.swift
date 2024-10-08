@@ -11,7 +11,7 @@ import Combine
 import UIKit
 
 
-/// Publisher to read keyboard changes.
+// Publisher to read keyboard changes.
 protocol KeyboardReadable {
     var keyboardPublisher: AnyPublisher<Bool, Never> { get }
 }
