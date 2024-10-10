@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  tunnel:
+    container_name: tunnel
+    image: cloudflare/cloudflared:latest
+    environment:
+      - TUNNEL_TOKEN=$TUNNEL_TOKEN
+    command: [
+      "tunnel",
+      "--no-autoupdate",
+      "run",
+      "--token",
+      "$TUNNEL_TOKEN",
+    ]
+    networks:
+      - shared
+    restart: always
+
+  webrtc:
+    container_name: webrtc
+    image: denoland/deno:1.43.6
+    environment:
+      - PWD=/code
+    command: [
+      "deno",
+      "run",
+      "--allow-net",
+      "--allow-read",
+      "/code/server.ts",
+      "/code"
+    ]
+    volumes:
+      - ./:/code:rw
+    ports:
+      - "5678:8080"
+    networks:
+      - shared
+    restart: always
+
+networks:
+  shared:

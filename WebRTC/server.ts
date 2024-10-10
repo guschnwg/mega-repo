@@ -1,4 +1,5 @@
 const port = 8080;
+const basePath = Deno.args[0] || ".";
 
 const clients: { [id: string]: { lastPing: number, socket: WebSocket } } = {};
 
@@ -15,6 +16,7 @@ const broadcast = (from: string, message: object) => {
     }
   });
 };
+
 const send = (to: string, message: object) => {
   const client = clients[to];
   if (client) {
@@ -30,7 +32,12 @@ const send = (to: string, message: object) => {
 
 const handler = (request: Request): Response => {
   const url = new URL(request.url);
-  if (url.pathname === "/") return new Response(Deno.readTextFileSync("./index.html"), { headers: { "Content-Type": "text/html" } });
+  if (url.pathname === "/") {
+    return new Response(
+      Deno.readTextFileSync(`${basePath}/index.html`),
+      { headers: { "Content-Type": "text/html" } }
+    );
+  }
 
   if (url.pathname === "/ws") {
     const { socket, response } = Deno.upgradeWebSocket(request);
@@ -50,7 +57,7 @@ const handler = (request: Request): Response => {
     socket.addEventListener("message", (event) => {
       try {
         const data = JSON.parse(event.data);
-  
+
         if (data.type === "ping") {
           clients[id].lastPing = Date.now();
         } else if (data.type === "offer") {
