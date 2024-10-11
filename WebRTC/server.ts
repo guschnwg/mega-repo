@@ -61,9 +61,9 @@ const handler = (request: Request): Response => {
         if (data.type === "ping") {
           clients[id].lastPing = Date.now();
         } else if (data.type === "offer") {
-          send(data.to, { type: "offer", from: id, offer: data.offer });
+          send(data.to, { type: "offer", from: id, offer: data.offer, password: data.password });
         } else if (data.type === "answer") {
-          send(data.to, { type: "answer", from: id, answer: data.answer });
+          send(data.to, { type: "answer", from: id, answer: data.answer, password: data.password });
         } else if (data.type === "candidate") {
           send(data.to, {
             type: "candidate",

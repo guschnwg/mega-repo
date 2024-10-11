@@ -94,7 +94,7 @@
                 </div>
                 <div v-else>
                     <button v-if="clientsRTCMapKey && isPendingAnswering(client)" @click="sendAnswer(client)">
-                        Accept call?
+                        Accept call? {{ clientsRTCMap[client]?.password }}
                     </button>
 
                     <button v-else-if="clientsRTCMapKey && isPendingBeingAnswered(client)" disabled>
@@ -145,9 +145,9 @@
                     } else if (data.type === 'refresh') {
                         this.clients = data.clients.filter(c => c !== this.id);
                     } else if (data.type === 'offer') {
-                        this.receiveOffer(data.from, data.offer);
+                        this.receiveOffer(data.from, data.offer, data.password);
                     } else if (data.type === 'answer') {
-                        this.receiveAnswer(data.from, data.answer);
+                        this.receiveAnswer(data.from, data.answer, data.password);
                     } else if (data.type === 'candidate') {
                         this.receiveIceCandidade(data.from, data.candidate);
                     }
@@ -186,7 +186,9 @@
                 this.clientsRTCMapKey++;
             },
             //
-            createPeerConnection(client) {
+            createPeerConnection(client, password) {
+                if (this.clientsRTCMap[client]) return this.clientsRTCMap[client];
+
                 const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
                 const channel = peerConnection.createDataChannel("chat", { negotiated: true, id: 0 });
 
@@ -207,7 +209,8 @@
                     channel,
                     lastPing: Date.now(),
                     lastMessageReceived: {},
-                    tracks: []
+                    tracks: [],
+                    password,
                 };
 
                 peerConnection.addEventListener("icecandidate", (event) => {
@@ -233,18 +236,20 @@
             },
             //
             sendOffer(to) {
-                const { peerConnection } = this.createPeerConnection(to);
+                const password = prompt('Password:', '123456');
+
+                const { peerConnection } = this.createPeerConnection(to, password);
 
                 peerConnection
                     .createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
                     .then(sdp => {
                         peerConnection.setLocalDescription(sdp);
 
-                        this.socket.send(JSON.stringify({ type: "offer", to, offer: sdp }));
+                        this.socket.send(JSON.stringify({ type: "offer", to, offer: sdp, password }));
                     });
             },
-            receiveOffer(from, offer) {
-                const { peerConnection } = this.createPeerConnection(from);
+            receiveOffer(from, offer, password) {
+                const { peerConnection } = this.createPeerConnection(from, password);
 
                 peerConnection.setRemoteDescription(offer).then(() => {});
 
@@ -253,17 +258,20 @@
                 }
             },
             sendAnswer(to) {
-                const { peerConnection } = this.clientsRTCMap[to];
+                const { peerConnection, password } = this.createPeerConnection(to);
 
                 peerConnection
                     .createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
                     .then(localSdp => {
                         peerConnection.setLocalDescription(localSdp);
-                        this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp }));
+                        this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp, password }));
                     });
             },
-            receiveAnswer(from, answer) {
-                const { peerConnection } = this.clientsRTCMap[from];
+            receiveAnswer(from, answer, password) {
+                if (!this.clientsRTCMap[from]) return;
+                if (this.clientsRTCMap[from].password !== password) return;
+
+                const { peerConnection } = this.createPeerConnection(from, password);
 
                 peerConnection.setRemoteDescription(answer);
             },

@@ -6,5 +6,5 @@ swift:
 
 docker:
 	docker compose down
-	TUNNEL_TOKEN=? \
+	CLIENT_PASSWORD=? \
 	docker compose up

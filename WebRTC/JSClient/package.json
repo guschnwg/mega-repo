@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@roamhq/wrtc": "^0.8.0",
+    "ffmpeg": "^0.0.4",
+    "jpeg-js": "^0.4.4",
+    "rtsp-ffmpeg": "^0.0.19",
+    "ws": "^8.18.0",
+    "ffmpeg-static": "^2.3.0"
+  }
+}
