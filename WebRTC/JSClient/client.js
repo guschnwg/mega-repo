@@ -23,22 +23,8 @@ const STREAM_URL = process.env.STREAM_URL || "";
 const stream = new rtsp.FFMpeg({
   input: STREAM_URL,
   resolution: '640x480',
-  // DOES NOT ACTUALLY CHANGE ANYTHING, but i think that's because of jpeg decode
-  // arguments: ['-vf', 'format=yuv420p'],
+  arguments: ['-rtsp_transport', 'tcp'],
 });
-// stream._args = function () {
-//   return [
-// 		'-loglevel', 'quiet',
-// 		'-i', this.input,
-//     ...(this.arguments || []),
-// 		'-r', this.rate.toString(),
-//     ...(this.quality ? ['-q:v', this.quality.toString()] : []),
-//     ...(this.resolution ? ['-s', this.resolution] : []),
-//     '-f', 'image2',
-// 		'-update', '1',
-// 		'-'
-// 	];
-// };
 const frameEmitter = new EventEmitter();
 stream.on('data', data => {
   try {
@@ -133,6 +119,8 @@ async function sendAnswer(to, password) {
   const answer = await peerConnection.createAnswer()
   await peerConnection.setLocalDescription(answer)
   socket.send(JSON.stringify({ type: "answer", to, answer, password }));
+
+  console.log("Set local description to: ", to);
 }
 
 async function receiveIceCandidade(from, candidate) {

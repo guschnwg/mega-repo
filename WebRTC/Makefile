@@ -5,8 +5,9 @@ swift:
 	swift client.swift
 
 docker:
-	docker compose down \
+	docker compose down; \
 	TUNNEL_TOKEN=? \
+	WS_HOST=? \
 	CLIENT_PASSWORD=? \
 	STREAM_PASSWORD=? \
 	docker compose up

@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  tunnel:
-    container_name: tunnel
+  webrtc_tunnel:
+    container_name: webrtc_tunnel
     image: cloudflare/cloudflared:latest
     environment:
       - TUNNEL_TOKEN=$TUNNEL_TOKEN
@@ -45,7 +45,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - PASSWORD=$CLIENT_PASSWORD
-      - WS_HOST=http://webrtc:8080
+      - WS_HOST=$WS_HOST
       - STREAM_URL=rtsp://admin:$STREAM_PASSWORD@192.168.0.108:80/cam/realmonitor?channel=1&subtype=0
     networks:
       - shared
