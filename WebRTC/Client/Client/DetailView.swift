@@ -14,6 +14,9 @@ struct DetailView: View {
     
     @State private var isGranted: Bool = false
     
+    @State private var showingAlert = false
+    @State private var password = ""
+    
     var body: some View {
         VStack {
             if isGranted {
@@ -24,10 +27,18 @@ struct DetailView: View {
                         Text("Choose someone to chat with")
                     } else {
                         if let client = client.rtcClient.clientsMap[selectedSideBarItem] {
-//                            Text("Chatting with \(client.id)")
+                            Text("Chatting with \(client.id)")
                         } else {
                             Button("Chat") {
-                                client.sendOffer(to: selectedSideBarItem)
+                                
+                            }
+                            .alert("Enter your name", isPresented: $showingAlert) {
+                                TextField("Enter password:", text: $password)
+                                Button("OK") {
+                                    client.sendOffer(to: selectedSideBarItem, password: password)
+                                }
+                            } message: {
+                                Text("????")
                             }
                         }
                     }
@@ -43,7 +54,7 @@ struct DetailView: View {
                                 client.rtcClient.sendData(to: selectedSideBarItem, $0)
                             }
                         } else if item.peerConnection.signalingState == .haveRemoteOffer {
-                            Button("Accept call?") {
+                            Button("Accept call? \(item.password)") {
                                 client.sendAnswer(to: item.id)
                             }
                         } else {

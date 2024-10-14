@@ -45,8 +45,9 @@ class WebSocketClient: NSObject {
             } else if type == "offer" {
                 let from = data!["from"]! as! String
                 let offer = data!["offer"] as? [String: String]
-                
-                delegate?.onOffer(from: from, offer: offer!["sdp"]!)
+                let password = data!["password"] as! String
+
+                delegate?.onOffer(from: from, offer: offer!["sdp"]!, password: password)
             } else if type == "answer" {
                 let from = data!["from"]! as! String
                 let answer = data!["answer"] as? [String: String]
@@ -91,9 +92,10 @@ class WebSocketClient: NSObject {
         }
     }
     
-    private func sendMessage(to: String, type: String, data: Any) {
+    private func sendMessage(to: String, type: String, data: Any, extra: [String: Any] = [:]) {
         do {
-            let json = ["type": type, "to": to, type: data] as [String : Any]
+            var json = ["type": type, "to": to, type: data] as [String : Any]
+            extra.forEach { (key, value) in json[key] = value }
             let jsonData = try JSONSerialization.data(withJSONObject: json)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 webSocketTask.send(
@@ -108,12 +110,12 @@ class WebSocketClient: NSObject {
     
     //
     
-    func sendOffer(_ to: String, _ offer: [String: String]) {
-        sendMessage(to: to, type: "offer", data: offer)
+    func sendOffer(_ to: String, _ offer: [String: String], password: String) {
+        sendMessage(to: to, type: "offer", data: offer, extra: ["password": password])
     }
     
-    func sendAnswer(_ to: String, _ answer: [String: String]) {
-        sendMessage(to: to, type: "answer", data: answer)
+    func sendAnswer(_ to: String, _ answer: [String: String], password: String) {
+        sendMessage(to: to, type: "answer", data: answer, extra: ["password": password])
     }
     
     func sendCandidate(_ to: String, _ candidate: [String: Any]) {
@@ -122,7 +124,7 @@ class WebSocketClient: NSObject {
 }
 
 protocol WebSocketClientDelegate: AnyObject {
-    func onOffer(from: String, offer: String)
+    func onOffer(from: String, offer: String, password: String)
     func onAnswer(from: String, answer: String)
     func onCandidate(receivedFrom: String, candidate: RTCIceCandidate)
     func onRefresh()

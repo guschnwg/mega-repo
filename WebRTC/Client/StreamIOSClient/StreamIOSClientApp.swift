@@ -42,7 +42,7 @@ struct StreamIOSClientApp: App {
                     Spacer()
                     
                     Button("Start from remote") {
-                        client = WSClient(baseUrl: "wss://workers.giovanna.workers.dev")
+                        client = WSClient(baseUrl: "wss://webrtc.giovanna.cc")
                     }.buttonStyle(BorderedButtonStyle())
                     
                     Spacer()

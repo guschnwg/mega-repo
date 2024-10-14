@@ -28,18 +28,17 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
         }
     }
     
-    func sendOffer(to: String) {
-        self.rtcClient.create(otherOne: to)
-        
+    func sendOffer(to: String, password: String) {
+        let _ = self.rtcClient.create(otherOne: to, password: password)
+
         self.rtcClient.sendOfferToPeer(to: to) { sessionDescription in
-            self.wsClient.sendOffer(to, ["sdp": sessionDescription.sdp, "type": "offer"])
-            
+            self.wsClient.sendOffer(to, ["sdp": sessionDescription.sdp, "type": "offer"], password: password)
             self.refresh("sendOffer")
         }
     }
 
-    func onOffer(from: String, offer: String) {
-        self.rtcClient.create(otherOne: from)
+    func onOffer(from: String, offer: String, password: String) {
+        let _ = self.rtcClient.create(otherOne: from, password: password)
 
         self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .offer, sdp: offer)
 
@@ -49,25 +48,25 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
     
     func sendAnswer(to: String) {
-        self.rtcClient.create(otherOne: to)
+        let client = self.rtcClient.create(otherOne: to)
 
         self.rtcClient.sendAnswerToPeer(to: to) { sessionDescription in
-            self.wsClient.sendAnswer(to, ["sdp": sessionDescription.sdp, "type": "answer"])
+            self.wsClient.sendAnswer(to, ["sdp": sessionDescription.sdp, "type": "answer"], password: client.password)
             
             self.refresh("onOffer")
         }
     }
     
     func onAnswer(from: String, answer: String) {
-        self.rtcClient.create(otherOne: from)
-        
+        let _ = self.rtcClient.create(otherOne: from)
+
         self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .answer, sdp: answer)
-        
         self.refresh("onAnswer")
     }
 
     func onCandidate(receivedFrom: String, candidate: RTCIceCandidate) {
-        self.rtcClient.create(otherOne: receivedFrom)
+        let _ = self.rtcClient.create(otherOne: receivedFrom)
+
         self.rtcClient.receivedCandidateFromPeer(from: receivedFrom, candidate: candidate)
         self.refresh("onCandidate")
     }

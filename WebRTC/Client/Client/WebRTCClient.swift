@@ -14,6 +14,7 @@ struct WebRTCUser {
     let dataChannel: RTCDataChannel
     var mediaStreams: [RTCMediaStream]
     var messages: [(Date, String, String)]
+    var password: String
 }
 
 let constraints = RTCMediaConstraints(
@@ -42,20 +43,32 @@ class WebRTCClient: NSObject {
 
         setupTracks()
     }
-    
-    func create(otherOne: String) {
-        if let _ = self.clientsMap[otherOne] { return }
+
+    func get(otherOne: String) -> WebRTCUser {
+        if let client = self.clientsMap[otherOne] { return client }
+
+        // Shouldn't reach here, but let's not fail for now
+        return self.create(otherOne: otherOne, password: "")
+    }
+
+    func create(otherOne: String, password: String) -> WebRTCUser {
+        if let client = self.clientsMap[otherOne] { return client }
         
         let peerConnection = createPeerConnection()
         let dataChannel = createDataChannel(peerConnection: peerConnection)
         
-        self.clientsMap[otherOne] = WebRTCUser(
+        let user = WebRTCUser(
             id: otherOne,
             peerConnection: peerConnection,
             dataChannel: dataChannel,
             mediaStreams: [],
-            messages: []
+            messages: [],
+            password: password
         )
+
+        self.clientsMap[otherOne] = user
+
+        return user
     }
     
     func getClientKey(peerConnection: RTCPeerConnection) -> String? {

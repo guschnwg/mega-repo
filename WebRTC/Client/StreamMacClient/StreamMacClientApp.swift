@@ -27,7 +27,7 @@ struct StreamMacClientApp: App {
                 }.navigationTitle(client.wsClient.me)
             } else {
                 Button("Start from remote") {
-                    client = WSClient(baseUrl: "wss://workers.giovanna.workers.dev")
+                    client = WSClient(baseUrl: "wss://webrtc.giovanna.cc")
                 }
                 
                 Button("Start from local") {
