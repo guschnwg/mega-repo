@@ -13,6 +13,14 @@ docker-cloudflare:
 	STREAM_URL="rtsp://admin:123456@192.168.0.108:80/cam/realmonitor?channel=1&subtype=0" \
 	docker compose up socket tunnel client
 
+docker-cloudflare-with-local-stream:
+	docker compose down; \
+	TUNNEL_TOKEN=? \
+	WS_HOST=https://webrtc.giovanna.cc \
+	CLIENT_PASSWORD=123456 \
+	STREAM_URL=rtsp://stream:8554/live.stream \
+	docker compose up tunnel socket client stream ffmpeg
+
 # http://localhost:5678/
 docker-local:
 	docker compose down; \
