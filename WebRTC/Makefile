@@ -27,4 +27,4 @@ docker-local:
 	WS_HOST=http://socket:8080 \
 	CLIENT_PASSWORD=123456 \
 	STREAM_URL=rtsp://stream:8554/live.stream \
-	docker compose up socket client stream ffmpeg
+	docker compose up socket client stream ffmpeg mjpeg

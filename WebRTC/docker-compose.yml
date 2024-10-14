@@ -92,7 +92,7 @@ services:
   mjpeg:
     container_name: webrtc_mjpeg
     environment:
-      - STREAM_URL=rtsp://webrtc_stream:8554/live.stream
+      - STREAM_URL=$STREAM_URL
     build:
       context: ./mjpeg
       dockerfile: ./Dockerfile
