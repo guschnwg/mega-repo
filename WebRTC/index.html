@@ -50,20 +50,16 @@
 
             <div>
                 <video id="video" crossorigin="anonymous"
-                    src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" height="100" controls loop
-                    preload="auto"
-                    @click="updateStreamFrom(event.target)"></video>
+                    src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4" height="100"
+                    controls loop preload="auto" @click="updateStreamFrom(event.target)"></video>
 
-                <canvas id="canvas" width="178" height="100"
-                    @click="updateStreamFrom(event.target)"></canvas>
+                <canvas id="canvas" width="178" height="100" @click="updateStreamFrom(event.target)"></canvas>
 
-                <button
-                    @click="useCamera">
+                <button @click="useCamera">
                     Use camera
                 </button>
 
-                <button
-                    @click="addCameraToCanvas">
+                <button @click="addCameraToCanvas">
                     Add camera to canvas
                 </button>
             </div>
@@ -82,11 +78,9 @@
                     </span>
                 </div>
 
-                <video
-                    :id="'video-for-' + client"
+                <video :id="'video-for-' + client"
                     :style="(clientsRTCMapKey && hasClient(client) && isActive(client)) ? 'display: block;' : 'display: none;'"
-                    height="50"
-                    crossorigin="anonymous"></video>
+                    height="50" crossorigin="anonymous"></video>
 
                 <!-- clientsRTCMapKey in the template is used to force the reactivity of the buttons -->
                 <div v-if="clientsRTCMapKey && !hasClient(client)">
@@ -235,62 +229,54 @@
                 return this.clientsRTCMap[client];
             },
             //
-            sendOffer(to) {
+            async sendOffer(to) {
                 const password = prompt('Password:', '123456');
 
                 const { peerConnection } = this.createPeerConnection(to, password);
 
-                peerConnection
-                    .createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true })
-                    .then(sdp => {
-                        peerConnection.setLocalDescription(sdp);
-
-                        this.socket.send(JSON.stringify({ type: "offer", to, offer: sdp, password }));
-                    });
+                const sdp = await peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+                await peerConnection.setLocalDescription(sdp);
+                this.socket.send(JSON.stringify({ type: "offer", to, offer: sdp, password }));
             },
-            receiveOffer(from, offer, password) {
+            async receiveOffer(from, offer, password) {
                 const { peerConnection } = this.createPeerConnection(from, password);
 
-                peerConnection.setRemoteDescription(offer).then(() => {});
-
+                await peerConnection.setRemoteDescription(offer);
                 if (this.autoAccept) {
                     this.sendAnswer(from);
                 }
             },
-            sendAnswer(to) {
+            async sendAnswer(to) {
                 const { peerConnection, password } = this.createPeerConnection(to);
 
-                peerConnection
-                    .createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
-                    .then(localSdp => {
-                        peerConnection.setLocalDescription(localSdp);
-                        this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp, password }));
-                    });
+                const localSdp = await peerConnection.createAnswer({ offerToReceiveVideo: true, offerToReceiveAudio: true })
+                await peerConnection.setLocalDescription(localSdp);
+                this.socket.send(JSON.stringify({ type: "answer", to, answer: localSdp, password }));
             },
-            receiveAnswer(from, answer, password) {
+            async receiveAnswer(from, answer, password) {
                 if (!this.clientsRTCMap[from]) return;
                 if (this.clientsRTCMap[from].password !== password) return;
 
                 const { peerConnection } = this.createPeerConnection(from, password);
 
-                peerConnection.setRemoteDescription(answer);
+                await peerConnection.setRemoteDescription(answer)
             },
-            receiveIceCandidade(from, candidate) {
+            async receiveIceCandidade(from, candidate) {
                 const { peerConnection, channel } = this.clientsRTCMap[from];
 
-                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
             },
             //
             replaceStream(stream) {
                 Object.keys(this.clientsRTCMap).forEach(client => {
                     const { peerConnection } = this.clientsRTCMap[client];
-                    peerConnection.getSenders().forEach(sender => {
+                    peerConnection.getSenders().forEach(async sender => {
                         if (!sender.track) return;
 
                         if (sender.track.kind === 'video') {
-                            sender.replaceTrack(stream.getVideoTracks()[0]).then(() => {}).catch(console.error);
+                            await sender.replaceTrack(stream.getVideoTracks()[0]);
                         } else if (sender.track.kind === 'audio') {
-                            sender.replaceTrack(stream.getAudioTracks()[0]).then(() => {}).catch(console.error);
+                            await sender.replaceTrack(stream.getAudioTracks()[0]);
                         }
                     });
                 });
@@ -328,15 +314,13 @@
                 const stream = from.captureStream();
                 this.replaceStream(stream);
             },
-            useCamera() {
-                navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-                    this.replaceStream(stream);
-                });
+            async useCamera() {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                this.replaceStream(stream);
             },
-            addCameraToCanvas() {
-                navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-                    this.addStreamToCanvas = stream;
-                });
+            async addCameraToCanvas() {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                this.addStreamToCanvas = stream;
             },
         }).mount()
     </script>
