@@ -89,5 +89,20 @@ services:
       - shared
     restart: always
 
+  mjpeg:
+    container_name: webrtc_mjpeg
+    environment:
+      - STREAM_URL=rtsp://webrtc_stream:8554/live.stream
+    build:
+      context: ./mjpeg
+      dockerfile: ./Dockerfile
+    ports:
+      - "9997:8080"
+    volumes:
+      - ./mjpeg:/mjpeg:rw
+    restart: always
+    networks:
+      - shared
+
 networks:
   shared:
