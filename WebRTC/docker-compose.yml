@@ -1,11 +1,7 @@
-version: '3'
-
 services:
-  webrtc_tunnel:
+  tunnel:
     container_name: webrtc_tunnel
     image: cloudflare/cloudflared:latest
-    environment:
-      - TUNNEL_TOKEN=$TUNNEL_TOKEN
     command: [
       "tunnel",
       "--no-autoupdate",
@@ -17,8 +13,8 @@ services:
       - shared
     restart: always
 
-  webrtc:
-    container_name: webrtc
+  socket:
+    container_name: webrtc_socket
     image: denoland/deno:1.43.6
     environment:
       - PWD=/code
@@ -39,7 +35,7 @@ services:
     restart: always
 
   client:
-    container_name: client
+    container_name: webrtc_client
     build:
       context: ./JSClient
       dockerfile: Dockerfile
@@ -53,7 +49,7 @@ services:
 
   stream:
     image: aler9/rtsp-simple-server
-    container_name: stream
+    container_name: webrtc_stream
     environment:
       - RTSP_PROTOCOLS=tcp
     networks:
@@ -63,7 +59,7 @@ services:
 
   ffmpeg:
     image: jrottenberg/ffmpeg
-    container_name: ffmpeg
+    container_name: webrtc_ffmpeg
     command: [
       "-stream_loop",
       "-1",
@@ -85,7 +81,7 @@ services:
       "experimental",
       "-f",
       "rtsp",
-      "rtsp://stream:8554/live.stream"
+      "rtsp://webrtc_stream:8554/live.stream"
     ]
     volumes:
       - ./video.mp4:/video.mp4:r
