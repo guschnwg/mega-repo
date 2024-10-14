@@ -51,5 +51,47 @@ services:
       - shared
     restart: always
 
+  stream:
+    image: aler9/rtsp-simple-server
+    container_name: stream
+    environment:
+      - RTSP_PROTOCOLS=tcp
+    networks:
+      - shared
+    ports:
+      - "8554:8554"
+
+  ffmpeg:
+    image: jrottenberg/ffmpeg
+    container_name: ffmpeg
+    command: [
+      "-stream_loop",
+      "-1",
+      "-i",
+      "/video.mp4",
+      "-rtsp_transport",
+      "tcp",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-tune",
+      "zerolatency",
+      "-b:v",
+      "500k",
+      "-c:a",
+      "aac",
+      "-strict",
+      "experimental",
+      "-f",
+      "rtsp",
+      "rtsp://stream:8554/live.stream"
+    ]
+    volumes:
+      - ./video.mp4:/video.mp4:r
+    networks:
+      - shared
+    restart: always
+
 networks:
   shared:
