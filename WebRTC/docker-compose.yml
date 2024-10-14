@@ -46,7 +46,7 @@ services:
     environment:
       - PASSWORD=$CLIENT_PASSWORD
       - WS_HOST=$WS_HOST
-      - STREAM_URL=rtsp://admin:$STREAM_PASSWORD@192.168.0.108:80/cam/realmonitor?channel=1&subtype=0
+      - STREAM_URL=$STREAM_URL
     networks:
       - shared
     restart: always

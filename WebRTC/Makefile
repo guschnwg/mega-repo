@@ -9,5 +9,5 @@ docker:
 	TUNNEL_TOKEN=? \
 	WS_HOST=? \
 	CLIENT_PASSWORD=? \
-	STREAM_PASSWORD=? \
+	STREAM_URL=? \
 	docker compose up
