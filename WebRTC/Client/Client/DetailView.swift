@@ -30,15 +30,15 @@ struct DetailView: View {
                             Text("Chatting with \(client.id)")
                         } else {
                             Button("Chat") {
-                                
+                                showingAlert.toggle()
                             }
-                            .alert("Enter your name", isPresented: $showingAlert) {
-                                TextField("Enter password:", text: $password)
+                            .alert("Enter password", isPresented: $showingAlert) {
+                                TextField("123456", text: $password)
                                 Button("OK") {
                                     client.sendOffer(to: selectedSideBarItem, password: password)
                                 }
                             } message: {
-                                Text("????")
+                                Text(":)")
                             }
                         }
                     }

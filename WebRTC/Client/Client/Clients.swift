@@ -48,7 +48,7 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
     
     func sendAnswer(to: String) {
-        let client = self.rtcClient.create(otherOne: to)
+        let client = self.rtcClient.get(otherOne: to)
 
         self.rtcClient.sendAnswerToPeer(to: to) { sessionDescription in
             self.wsClient.sendAnswer(to, ["sdp": sessionDescription.sdp, "type": "answer"], password: client.password)
@@ -58,14 +58,14 @@ class WSClient: WebSocketClientDelegate, WebRTCClientDelegate, ObservableObject 
     }
     
     func onAnswer(from: String, answer: String) {
-        let _ = self.rtcClient.create(otherOne: from)
+        let _ = self.rtcClient.get(otherOne: from)
 
         self.rtcClient.receivedRemoteDescriptionFromPeer(from: from, type: .answer, sdp: answer)
         self.refresh("onAnswer")
     }
 
     func onCandidate(receivedFrom: String, candidate: RTCIceCandidate) {
-        let _ = self.rtcClient.create(otherOne: receivedFrom)
+        let _ = self.rtcClient.get(otherOne: receivedFrom)
 
         self.rtcClient.receivedCandidateFromPeer(from: receivedFrom, candidate: candidate)
         self.refresh("onCandidate")
