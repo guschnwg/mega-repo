@@ -22,7 +22,16 @@ let constraints = RTCMediaConstraints(
                            kRTCMediaConstraintsOfferToReceiveVideo: kRTCMediaConstraintsValueTrue],
     optionalConstraints: ["DtlsSrtpKeyAgreement":kRTCMediaConstraintsValueTrue]
 )
-let factory = RTCPeerConnectionFactory()
+
+let factory = {
+    let encoderFactory = RTCDefaultVideoEncoderFactory()
+    encoderFactory.preferredCodec = RTCVideoCodecInfo(name: kRTCVideoCodecVp8Name)
+
+    return RTCPeerConnectionFactory(
+        encoderFactory: encoderFactory,
+        decoderFactory: RTCDefaultVideoDecoderFactory()
+    )
+}()
 
 class WebRTCClient: NSObject {
     var clientsMap: [String: WebRTCUser] = [:]
@@ -110,8 +119,12 @@ class WebRTCClient: NSObject {
     }
 
     private func setupTracksToPeerConnection(peerConnection: RTCPeerConnection) {
-        peerConnection.add(localAudioTrack!, streamIds: ["ARDAMSv0"])
-        peerConnection.add(localVideoTrack!, streamIds: ["ARDAMSv0"])
+        if let localAudioTrack = localAudioTrack {
+            peerConnection.add(localAudioTrack, streamIds: ["ARDAMSv0"])
+        }
+        if let localVideoTrack = localVideoTrack {
+            peerConnection.add(localVideoTrack, streamIds: ["ARDAMSv0"])
+        }
     }
 
     func setupTracksToPeerConnections() {

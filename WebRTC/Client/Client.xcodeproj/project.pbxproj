@@ -11,14 +11,10 @@
 		6B3671FF2C9E04B9000E0F3B /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 6B3671FE2C9E04B9000E0F3B /* WebRTC */; };
 		6B3672012C9E04C2000E0F3B /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 6B3672002C9E04C2000E0F3B /* WebRTC */; };
 		6B4A010E2C9A64820016F184 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A010D2C9A647B0016F184 /* Clients.swift */; };
-		6B4A010F2C9A65630016F184 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A010D2C9A647B0016F184 /* Clients.swift */; };
-		6B4A01102C9A65630016F184 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D42C950CE900879DE7 /* WebSocketClient.swift */; };
-		6B4A01112C9A65630016F184 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */; };
 		6B4A01122C9A65630016F184 /* Clients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4A010D2C9A647B0016F184 /* Clients.swift */; };
 		6B4A01132C9A65630016F184 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */; };
 		6B4A01142C9A65630016F184 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D42C950CE900879DE7 /* WebSocketClient.swift */; };
 		6B5AB8E62CB5658F00E60A7E /* FloatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5AB8E52CB5658C00E60A7E /* FloatingView.swift */; };
-		6B5AB8E72CB5658F00E60A7E /* FloatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5AB8E52CB5658C00E60A7E /* FloatingView.swift */; };
 		6B5AB8E82CB5658F00E60A7E /* FloatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5AB8E52CB5658C00E60A7E /* FloatingView.swift */; };
 		6B5AB8E92CB5658F00E60A7E /* FloatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5AB8E52CB5658C00E60A7E /* FloatingView.swift */; };
 		6B6068D32C950BBC00879DE7 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */; };
@@ -26,13 +22,10 @@
 		6B6BF43E2CAED00300DEDC52 /* CommunicateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF43D2CAED00000DEDC52 /* CommunicateView.swift */; };
 		6B6BF43F2CAED00300DEDC52 /* CommunicateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF43D2CAED00000DEDC52 /* CommunicateView.swift */; };
 		6B6BF4402CAED00300DEDC52 /* CommunicateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF43D2CAED00000DEDC52 /* CommunicateView.swift */; };
-		6B6BF4412CAED00300DEDC52 /* CommunicateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF43D2CAED00000DEDC52 /* CommunicateView.swift */; };
 		6B6BF4432CAED04B00DEDC52 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF4422CAED04900DEDC52 /* DetailView.swift */; };
-		6B6BF4442CAED04B00DEDC52 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF4422CAED04900DEDC52 /* DetailView.swift */; };
 		6B6BF4452CAED04B00DEDC52 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF4422CAED04900DEDC52 /* DetailView.swift */; };
 		6B6BF4462CAED04B00DEDC52 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6BF4422CAED04900DEDC52 /* DetailView.swift */; };
 		6B6BF4472CAED07800DEDC52 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BFD1FC92CA99C9E00F37C27 /* HeaderView.swift */; };
-		6B6BF4482CAED07800DEDC52 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BFD1FC92CA99C9E00F37C27 /* HeaderView.swift */; };
 		6BDCBBC82C75527D00FC4396 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BDCBBC72C75527D00FC4396 /* main.swift */; };
 		6BFD1FCE2CA99C9E00F37C27 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BFD1FC92CA99C9E00F37C27 /* HeaderView.swift */; };
 		6BFD1FDB2CA9A52C00F37C27 /* PlatformViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BFD1FDA2CA9A44D00F37C27 /* PlatformViewRepresentable.swift */; };
@@ -60,7 +53,6 @@
 		6B4A00FE2C9A64000016F184 /* StreamMacClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StreamMacClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B4A010D2C9A647B0016F184 /* Clients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clients.swift; sourceTree = "<group>"; };
 		6B5AB8E52CB5658C00E60A7E /* FloatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingView.swift; sourceTree = "<group>"; };
-		6B6068C42C950B9700879DE7 /* StreamClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StreamClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B6068D22C950BBC00879DE7 /* WebRTCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCClient.swift; sourceTree = "<group>"; };
 		6B6068D42C950CE900879DE7 /* WebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketClient.swift; sourceTree = "<group>"; };
 		6B6BF43D2CAED00000DEDC52 /* CommunicateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunicateView.swift; sourceTree = "<group>"; };
@@ -97,13 +89,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6B6068C12C950B9700879DE7 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		6BDCBBC12C75527D00FC4396 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +122,6 @@
 			isa = PBXGroup;
 			children = (
 				6BDCBBC42C75527D00FC4396 /* Client */,
-				6B6068C42C950B9700879DE7 /* StreamClient.app */,
 				6B4A00FE2C9A64000016F184 /* StreamMacClient.app */,
 				6BF024392C9DFA8700D1BB97 /* StreamIOSClient.app */,
 			);
@@ -185,23 +169,6 @@
 			);
 			productName = StreamMacClient;
 			productReference = 6B4A00FE2C9A64000016F184 /* StreamMacClient.app */;
-			productType = "com.apple.product-type.application";
-		};
-		6B6068C32C950B9700879DE7 /* StreamClient */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 6B6068D12C950B9800879DE7 /* Build configuration list for PBXNativeTarget "StreamClient" */;
-			buildPhases = (
-				6B6068C02C950B9700879DE7 /* Sources */,
-				6B6068C12C950B9700879DE7 /* Frameworks */,
-				6B6068C22C950B9700879DE7 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = StreamClient;
-			productName = StreamClient;
-			productReference = 6B6068C42C950B9700879DE7 /* StreamClient.app */;
 			productType = "com.apple.product-type.application";
 		};
 		6BDCBBC32C75527D00FC4396 /* Client */ = {
@@ -260,9 +227,6 @@
 					6B4A00FD2C9A64000016F184 = {
 						CreatedOnToolsVersion = 16.0;
 					};
-					6B6068C32C950B9700879DE7 = {
-						CreatedOnToolsVersion = 15.3;
-					};
 					6BDCBBC32C75527D00FC4396 = {
 						CreatedOnToolsVersion = 15.3;
 					};
@@ -288,7 +252,6 @@
 			projectRoot = "";
 			targets = (
 				6BDCBBC32C75527D00FC4396 /* Client */,
-				6B6068C32C950B9700879DE7 /* StreamClient */,
 				6B4A00FD2C9A64000016F184 /* StreamMacClient */,
 				6BF024382C9DFA8700D1BB97 /* StreamIOSClient */,
 			);
@@ -297,13 +260,6 @@
 
 /* Begin PBXResourcesBuildPhase section */
 		6B4A00FC2C9A64000016F184 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6B6068C22C950B9700879DE7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -332,20 +288,6 @@
 				6B6BF43E2CAED00300DEDC52 /* CommunicateView.swift in Sources */,
 				6B5AB8E82CB5658F00E60A7E /* FloatingView.swift in Sources */,
 				6B4A01142C9A65630016F184 /* WebSocketClient.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6B6068C02C950B9700879DE7 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6B6BF4412CAED00300DEDC52 /* CommunicateView.swift in Sources */,
-				6B6BF4482CAED07800DEDC52 /* HeaderView.swift in Sources */,
-				6B5AB8E72CB5658F00E60A7E /* FloatingView.swift in Sources */,
-				6B4A010F2C9A65630016F184 /* Clients.swift in Sources */,
-				6B4A01102C9A65630016F184 /* WebSocketClient.swift in Sources */,
-				6B6BF4442CAED04B00DEDC52 /* DetailView.swift in Sources */,
-				6B4A01112C9A65630016F184 /* WebRTCClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,69 +380,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		6B6068CF2C950B9800879DE7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"StreamClient/Preview Content\"";
-				DEVELOPMENT_TEAM = Z9JYZQ2HZ9;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = giovanna.StreamClient;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		6B6068D02C950B9800879DE7 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"StreamClient/Preview Content\"";
-				DEVELOPMENT_TEAM = Z9JYZQ2HZ9;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = giovanna.StreamClient;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -727,15 +606,6 @@
 			buildConfigurations = (
 				6B4A010A2C9A64020016F184 /* Debug */,
 				6B4A010B2C9A64020016F184 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		6B6068D12C950B9800879DE7 /* Build configuration list for PBXNativeTarget "StreamClient" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				6B6068CF2C950B9800879DE7 /* Debug */,
-				6B6068D02C950B9800879DE7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
