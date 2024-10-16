@@ -80,7 +80,7 @@
 
                 <video :id="'video-for-' + client"
                     :style="(clientsRTCMapKey && hasClient(client) && isActive(client)) ? 'display: block;' : 'display: none;'"
-                    height="50" crossorigin="anonymous"></video>
+                    height="50" crossorigin="anonymous" controls></video>
 
                 <!-- clientsRTCMapKey in the template is used to force the reactivity of the buttons -->
                 <div v-if="clientsRTCMapKey && !hasClient(client)">
