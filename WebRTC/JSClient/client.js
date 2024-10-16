@@ -22,7 +22,7 @@ const STREAM_URL = process.env.STREAM_URL || "";
 
 const stream = new rtsp.FFMpeg({
   input: STREAM_URL,
-  resolution: '640x480',
+  resolution: '1920x1080',
   arguments: ['-rtsp_transport', 'tcp'],
 });
 const frameEmitter = new EventEmitter();
