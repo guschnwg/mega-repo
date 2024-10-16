@@ -4,6 +4,14 @@ run:
 swift:
 	swift client.swift
 
+client:
+	cd JSClient && \
+	npm install && \
+	PASSWORD=123456 \
+	WS_HOST=https://webrtc.giovanna.cc \
+	STREAM_URL="rtsp://admin:123456@192.168.0.108:80/cam/realmonitor?channel=1&subtype=0" \
+	node client
+
 # https://webrtc.giovanna.cc
 docker-cloudflare:
 	docker compose down; \
@@ -28,3 +36,5 @@ docker-local:
 	CLIENT_PASSWORD=123456 \
 	STREAM_URL=rtsp://stream:8554/live.stream \
 	docker compose up socket client stream ffmpeg mjpeg
+
+.PHONY: run swift client docker-cloudflare docker-local
