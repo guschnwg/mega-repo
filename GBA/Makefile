@@ -16,3 +16,4 @@ example:
 .PHONY: run
 run:
 	make GAME=mine game
+	open ./mine/game.gba
