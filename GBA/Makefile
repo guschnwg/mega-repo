@@ -17,3 +17,10 @@ example:
 run:
 	make GAME=mine game
 	open ./mine/game.gba
+
+copy-libs: CONTAINER=$(shell docker create --rm gba-dev)
+copy-libs:
+	mkdir ${PWD}/libraries || true
+	docker cp ${CONTAINER}:/opt/devkitpro/libtonc ${PWD}/libraries/libtonc
+	docker cp ${CONTAINER}:/opt/devkitpro/libgba ${PWD}/libraries/libgba
+	docker rm ${CONTAINER}

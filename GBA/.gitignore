@@ -3,3 +3,4 @@ build/
 *.sav
 *.gba
 *.elf
+libraries
