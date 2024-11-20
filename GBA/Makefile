@@ -9,9 +9,10 @@ game:
 		sh -c "cd game && make"
 
 .PHONY: example
-example: EXAMPLE?=hello
+example: EXAMPLE?=basic/hello
 example:
-	make GAME="libtonc-examples/basic/${EXAMPLE}" game
+	make GAME="libtonc-examples/${EXAMPLE}" game
+	open libtonc-examples/${EXAMPLE}/game.gba
 
 .PHONY: run
 run:
