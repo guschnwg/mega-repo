@@ -6,20 +6,37 @@
 //
 // === NOTES ===
 
+#include "tonc_tte.h"
 #include <stdio.h>
+
 #include <tonc.h>
 
-int main()
-{
-	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0;
+int main() {
+  REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;
 
-	// Init BG 0 for text on screen entries.
-	tte_init_se_default(0, BG_CBB(0)|BG_SBB(31));
+  tte_init_bmp_default(3);
 
-	tte_write("#{P:72,64}");		// Goto (72, 64).
-	tte_write("Hello World!");		// Print "Hello world!"
+  int i = 10;
+  int increment = 1;
+  char move[11];
 
-	while(1);
+  while (1) {
+    vid_vsync();
 
-	return 0;
+    m3_fill(CLR_BLACK);
+
+    m3_plot(120, i, RGB15(31, 0, 0)); // or CLR_RED
+    m3_plot(136, i, RGB15(0, 31, 0)); // or CLR_LIME
+    m3_plot(152, i, RGB15(0, 0, 31)); // or CLR_BLUE
+
+    snprintf(move, sizeof(move), "#{P:%d,64}", i % 100);
+    tte_write(move);
+    tte_write("Hello World!");
+
+    i += increment;
+    if (i == 99 || i == 10)
+      increment *= -1;
+  }
+
+  return 0;
 }
