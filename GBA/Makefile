@@ -2,7 +2,10 @@
 build:
 	docker build . -t gba-dev
 
+.PHONY: game
 game:
+	rm -rf ${PWD}/${GAME}/build
+	rm -f ${PWD}/${GAME}/game.gba
 	docker run \
 		-v ${PWD}/${GAME}:/game:rw \
 		gba-dev \
