@@ -4,6 +4,7 @@
 
 #include "player.h"
 #include "tonc_input.h"
+#include "tonc_memdef.h"
 
 extern OBJ_ATTR obj_buffer[128];
 extern OBJ_AFFINE *obj_aff_buffer;
@@ -39,6 +40,23 @@ void player_init(TSprite *player, int objId, int x, int y, int palette) {
   OBJ_ATTR *playerBody = &obj_buffer[objId + 1];
 
   obj_set_attr(playerHead, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 0);
+
+  // ATTR 0:
+  //    0-7: Y coordinate
+  //    8-9: object mode
+  //    A-B: Gfx mode
+  //    C:   mosaic effect
+  //    D:   color mode
+  //    E-F: Sprite shape
+  // ATTR 1:
+  //    0-8: X coordinate
+  //    9-D: Affine index
+  //    C-D: Horizontal/vertical flipping
+  //    E-F: Sprite size
+  // ATTR 2:
+  //    0-9: Base tile index
+  //    A-B: Priority
+  //    C-F: Palette bank
   obj_set_attr(playerBody, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 0);
 }
 
