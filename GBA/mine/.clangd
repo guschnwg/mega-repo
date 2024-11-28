@@ -2,4 +2,26 @@ CompileFlags:
   Add:
     - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libtonc/include"
     - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libgba/include"
-    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/mine/build"
+    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/mine/build"# To fix in macos
+
+# To fix in macos
+# clang: Argument to 'section' attribute is not valid for this target:
+#   mach-o section specifier requires a segment and section separated by a comma
+
+# #ifdef __MACH__
+# #define IWRAM_CODE __attribute__((section("__TEXT,.iwram")))
+# #else
+# #define IWRAM_CODE __attribute__((section(".iwram"), long_call))
+# #endif
+
+# #ifdef __MACH__
+# #define EWRAM_DATA __attribute__((section("__TEXT,.ewram")))
+# #else
+# #define EWRAM_DATA __attribute__((section(".ewram")))
+# #endif
+
+# #ifdef __MACH__
+# #define EWRAM_CODE __attribute__((section("__TEXT,.ewram")))
+# #else
+# #define EWRAM_CODE __attribute__((section(".ewram"), long_call))
+# #endif
