@@ -7,3 +7,6 @@
 [submodule "vitasdk-m1/vdpm"]
 	path = vitasdk-m1/vdpm
 	url = https://github.com/SonicMastr/vdpm.git
+[submodule "GBA/libtonc-examples"]
+	path = GBA/libtonc-examples
+	url = https://github.com/gbadev-org/libtonc-examples.git
