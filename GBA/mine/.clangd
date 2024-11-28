@@ -1,8 +1,9 @@
 CompileFlags:
   Add:
-    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libtonc/include"
-    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libgba/include"
-    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/mine/build"# To fix in macos
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/libraries/libtonc/include"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/libraries/libgba/include"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/mine/build"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/mine/source"
 
 # To fix in macos
 # clang: Argument to 'section' attribute is not valid for this target:

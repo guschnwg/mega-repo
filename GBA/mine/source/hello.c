@@ -9,8 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <aaa.h>
+#include "player.h"
 #include <tonc.h>
+
+OBJ_ATTR obj_buffer[128];
+OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
+
+TSprite player;
 
 void level_one() {
   REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;
@@ -53,89 +58,23 @@ void level_one() {
   }
 }
 
-OBJ_ATTR obj_buffer[128];
-OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
-
-const OBJ_ATTR cLinkObjs[3] = {{0, ATTR1_SIZE_16, 4, 0},
-                               {8, ATTR1_SIZE_16 + 1, 32, 0},
-                               {ATTR0_WIDE + 17, ATTR1_SIZE_8 + 1, 2, 0}};
-
-const s8 bodies[3][8] = {{64, 68, 72, 76, 64, -68, -72, -76},
-                         {32, 36, 40, 44, 48, 52, 56, 60},
-                         {80, 84, 88, 92, -80, -84, -88, -92}};
-const s8 heads[3][8] = {{8, 8, -8, -8, 8, 8, -8, -8},
-                        {4, 4, 16, 20, 4, 4, 16, 20},
-                        {12, 12, -12, -12, 12, 12, -12, -12}};
-
 void level_two() {
   REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D;
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
 
-  memcpy32(&tile_mem[4][0], aaaTiles, aaaTilesLen / sizeof(u32));
-  memcpy16(pal_obj_mem, aaaPal, aaaPalLen / sizeof(u16));
+  int palette = 0;
 
   oam_init(obj_buffer, 128);
 
-  int x = 96, y = 32;
-  int vx = 0, vy = 9;
-  int dir = 1;
-  u32 frame = 0;
-  int head = 8, body = 0, palette = 0;
-  u32 headBodyOffset = 8;
-
-  OBJ_ATTR *playerHead = &obj_buffer[0];
-  OBJ_ATTR *playerBody = &obj_buffer[1];
-
-  obj_set_attr(playerHead, ATTR0_SQUARE, ATTR1_SIZE_16,
-               ATTR2_PALBANK(palette) | head);
-  obj_set_attr(playerBody, ATTR0_SQUARE, ATTR1_SIZE_16,
-               ATTR2_PALBANK(palette) | body);
-
-  obj_set_pos(playerHead, x, y);
-  obj_set_pos(playerBody, x, y + headBodyOffset);
+  player_init(&player, 0, 96, 32, palette);
 
   while (1) {
     key_poll();
     vid_vsync();
 
-    frame += 0x12;
-
-    vy = bit_tribool(key_held(-1), KI_DOWN, KI_UP);
-    vx = bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
-
-    if (vy == 0) {
-      if (vx == 1) {
-        dir = 1;
-      } else if (vx == -1) {
-        dir = -1;
-      }
-    } else if (vy == 1) {
-      dir = 0;
-    } else if (vy == -1) {
-      dir = 2;
-    }
-
-    playerHead->attr1 &= ~ATTR1_HFLIP;
-    playerBody->attr1 &= ~ATTR1_HFLIP;
-
-    body = bodies[abs(dir)][(frame >> 8) & 7];
-    if (body < 0 || dir < 0) {
-      playerBody->attr1 ^= ATTR1_HFLIP;
-    }
-    playerBody->attr2 = ATTR2_BUILD(abs(body), palette, 0);
-
-    head = heads[abs(dir)][(frame >> 8) & 7];
-    if (head < 0 || dir < 0) {
-      playerHead->attr1 ^= ATTR1_HFLIP;
-    }
-    playerHead->attr2 = ATTR2_BUILD(abs(head), palette, 0);
-
     palette += bit_tribool(key_hit(-1), KI_A, KI_B);
-    y += vy;
-    x += vx;
 
-    obj_set_pos(playerHead, x, y);
-    obj_set_pos(playerBody, x, y + headBodyOffset);
+    player_update(&player, palette);
 
     oam_copy(oam_mem, obj_buffer, 2);
   }
