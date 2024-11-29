@@ -58,6 +58,57 @@ void level_one() {
   }
 }
 
+#include <bbb.h>
+
+void something_else_init() {
+  // Add another tileset
+  memcpy32(&tile_mem[4][96], bbbTiles, bbbTilesLen / sizeof(u32));
+  // Add another palette
+  memcpy16(&pal_obj_mem[16], bbbPal, bbbPalLen / sizeof(u16));
+}
+
+void something_else_update(int palette) {
+  static int counter = 0;
+
+  // 0 and 1 are taken by the player
+  OBJ_ATTR *playerHead = &obj_buffer[2];
+  OBJ_ATTR *playerBody = &obj_buffer[3];
+
+  // 96 - 100 - 104 --- 188
+  // 24 -  25 -  26 ---  47 // /4
+  //  0 -   1 -   2 ---  23 // -24
+
+  int tile_index = counter >> 8;
+  if (tile_index == 24) {
+    counter = 0;
+    tile_index = 0;
+  } else {
+    counter += 48;
+  }
+
+  obj_set_attr(playerHead,
+               // ATTR 0:
+               //    0-7: Y coordinate
+               //    8-9: object mode
+               //    A-B: Gfx mode
+               //    C:   mosaic effect
+               //    D:   color mode
+               //    E-F: Sprite shape
+               ATTR0_SQUARE + 12, // 0b0000000000001100,
+               // ATTR 1:
+               //    0-8: X coordinate
+               //    9-D: Affine index
+               //    C-D: Horizontal/vertical flipping
+               //    E-F: Sprite size
+               ATTR1_SIZE_16, // 0b0100000000000000,
+               // ATTR 2:
+               //    0-9: Base tile index
+               //    A-B: Priority
+               //    C-F: Palette bank
+               (tile_index + 24) * 4 | ATTR2_PALBANK(palette));
+  // obj_set_attr(playerBody, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_PALBANK(0));
+}
+
 void level_two() {
   REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D;
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
@@ -67,6 +118,7 @@ void level_two() {
   oam_init(obj_buffer, 128);
 
   player_init(&player, 0, 96, 32, palette);
+  something_else_init();
 
   while (1) {
     key_poll();
@@ -75,8 +127,9 @@ void level_two() {
     palette += bit_tribool(key_hit(-1), KI_A, KI_B);
 
     player_update(&player, palette);
+    something_else_update(palette);
 
-    oam_copy(oam_mem, obj_buffer, 2);
+    oam_copy(oam_mem, obj_buffer, 128);
   }
 }
 
