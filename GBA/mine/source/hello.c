@@ -141,8 +141,16 @@ void map_init() {
   memcpy(&tile_mem[0][0], brinTiles, brinTilesLen);
   memcpy(&se_mem[30][0], brinMap, brinMapLen);
 
-  // How do I use other tilemap in BG1???
-  REG_BG1CNT = BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_64x32;
+  // How do I use other tilemap in BG1??? Or other palette
+  REG_BG1CNT = BG_CBB(1) | BG_SBB(27) | BG_4BPP | BG_REG_64x32;
+  memcpy(&tile_mem[1][0], brinTiles, brinTilesLen);
+  memcpy(&se_mem[27][0], brinMap, brinMapLen);
+
+  // Change the palette for the BG1 - FUN
+  for (int i = 0; i < 2048; i++) { // 64 * 32
+    // Keep tile index, set palette to 1 (ChatGPT)
+    se_mem[27][i] = (se_mem[27][i] & 0x03FF) | (1 << 12);
+  }
 }
 
 void level_three() {
