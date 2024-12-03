@@ -7,10 +7,12 @@
 // === NOTES ===
 
 #include <stdio.h>
-#include <stdlib.h>
-
-#include "player.h"
+#include <string.h>
 #include <tonc.h>
+
+#include "bbb.h"
+#include "brin.h"
+#include "player.h"
 
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
@@ -58,12 +60,12 @@ void level_one() {
   }
 }
 
-#include <bbb.h>
-
 void something_else_init() {
-  // Add another tileset
+  // Add another tileset, starting at 96 because it is the last one after the
+  // player's
   memcpy32(&tile_mem[4][96], bbbTiles, bbbTilesLen / sizeof(u32));
-  // Add another palette
+  // Add another palette, starting at 16 because it is the first one after the
+  // player's
   memcpy16(&pal_obj_mem[16], bbbPal, bbbPalLen / sizeof(u16));
 }
 
@@ -133,9 +135,46 @@ void level_two() {
   }
 }
 
+void map_init() {
+  REG_BG0CNT = BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_64x32;
+  memcpy(pal_bg_mem, brinPal, brinPalLen);
+  memcpy(&tile_mem[0][0], brinTiles, brinTilesLen);
+  memcpy(&se_mem[30][0], brinMap, brinMapLen);
+
+  // How do I use other tilemap in BG1???
+  REG_BG1CNT = BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_64x32;
+}
+
+void level_three() {
+  REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
+  REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+
+  oam_init(obj_buffer, 128);
+
+  player_init(&player, 0, 96, 32, 0);
+  map_init();
+
+  while (1) {
+    key_poll();
+    vid_vsync();
+
+    // Kinda nice to play around
+    player_update(&player, 0);
+    REG_BG0HOFS = -player.x;
+    REG_BG0VOFS = player.y * 2;
+
+    // Some nice effect
+    REG_BG1HOFS = player.x * 2;
+    REG_BG1VOFS = -player.y * 2 * 2;
+
+    oam_copy(oam_mem, obj_buffer, 128);
+  }
+}
+
 int main() {
   // level_one();
-  level_two();
+  // level_two();
+  level_three();
 
   return 0;
 }
