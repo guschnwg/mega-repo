@@ -12,7 +12,9 @@
 
 #include "bbb.h"
 #include "brin.h"
+#include "kakariko.h"
 #include "player.h"
+#include "tonc_input.h"
 
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
@@ -179,10 +181,40 @@ void level_three() {
   }
 }
 
+void level_four() {
+  oam_init(obj_buffer, 128);
+  LZ77UnCompVram(kakarikoTiles, tile_mem[0]);
+  GRIT_CPY(pal_bg_mem, kakarikoPal);
+  tte_init_chr4c_b4_default(0, BG_CBB(2) | BG_SBB(28));
+
+  REG_BGCNT[1] = BG_CBB(0) | BG_SBB(29);
+  REG_BG_OFS[1].x = 0;
+  REG_BG_OFS[1].y = 0;
+
+  int ix, iy;
+  SCR_ENTRY *dst = se_mem[BFN_GET(BG_CBB(0) | BG_SBB(29), BG_SBB)],
+            *src = (SCR_ENTRY *)kakarikoMap;
+  for (iy = 0; iy < 32; iy++)
+    for (ix = 0; ix < 32; ix++)
+      dst[iy * 32 + ix] = src[iy * 128 + ix];
+
+  REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
+
+  oam_copy(oam_mem, obj_buffer, 128);
+  while (1) {
+    vid_vsync();
+    key_poll();
+
+    if (key_hit(KEY_START))
+      break;
+  }
+}
+
 int main() {
   // level_one();
   // level_two();
-  level_three();
+  // level_three();
+  level_four();
 
   return 0;
 }
