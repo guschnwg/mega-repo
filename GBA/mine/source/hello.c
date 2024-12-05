@@ -265,7 +265,8 @@ void level_four() {
         int xMult = ix < (mapX & 31) ? (mapX / 32 + 1) : (mapX / 32);
         int yMult = iy < (mapY & 31) ? (mapY / 32 + 1) : (mapY / 32);
 
-        dst[iy * 32 + ix] = kakarikoMap[(iy + yMult) * 128 + ix + 32 * xMult];
+        dst[iy * 32 + ix] =
+            kakarikoMap[(iy + 32 * yMult) * 128 + ix + 32 * xMult];
       }
     }
 
