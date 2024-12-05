@@ -15,6 +15,8 @@
 #include "kakariko.h"
 #include "player.h"
 #include "tonc_input.h"
+#include "tonc_math.h"
+#include "tonc_video.h"
 
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
@@ -181,32 +183,99 @@ void level_three() {
   }
 }
 
+void init_textbox(int bgnr, int left, int top, int right, int bottom) {
+  tte_init_con();
+
+  tte_set_margins(left, top, right, bottom);
+
+  REG_DISPCNT |= DCNT_WIN0;
+
+  REG_WIN0H = left << 8 | right;
+  REG_WIN0V = top << 8 | bottom;
+  REG_WIN0CNT = WIN_ALL | WIN_BLD;
+  REG_WINOUTCNT = WIN_ALL;
+
+  REG_BLDCNT = (BLD_ALL & ~BIT(bgnr)) | BLD_BLACK;
+  REG_BLDY = 5;
+}
+
 void level_four() {
+  REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+  REG_DISPCNT =
+      DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D | DCNT_WIN0;
+
   oam_init(obj_buffer, 128);
+
   LZ77UnCompVram(kakarikoTiles, tile_mem[0]);
   GRIT_CPY(pal_bg_mem, kakarikoPal);
   tte_init_chr4c_b4_default(0, BG_CBB(2) | BG_SBB(28));
 
-  REG_BGCNT[1] = BG_CBB(0) | BG_SBB(29);
-  REG_BG_OFS[1].x = 0;
-  REG_BG_OFS[1].y = 0;
+  init_textbox(0, 8, SCR_H - (8 + 2 * 12), SCR_W - 8, SCR_H - 8);
 
-  int ix, iy;
-  SCR_ENTRY *dst = se_mem[BFN_GET(BG_CBB(0) | BG_SBB(29), BG_SBB)],
-            *src = (SCR_ENTRY *)kakarikoMap;
-  for (iy = 0; iy < 32; iy++)
-    for (ix = 0; ix < 32; ix++)
-      dst[iy * 32 + ix] = src[iy * 128 + ix];
+  REG_BG1CNT = BG_CBB(0) | BG_SBB(29);
+  REG_BG1HOFS = 0;
+  REG_BG1VOFS = 0;
 
-  REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
+  // Copy map to BG1
+  SCR_ENTRY *dst = se_mem[BFN_GET(REG_BG1CNT, BG_SBB)];
+  for (int iy = 0; iy < 32; iy++)
+    for (int ix = 0; ix < 32; ix++)
+      dst[iy * 32 + ix] = kakarikoMap[iy * 128 + ix];
 
-  oam_copy(oam_mem, obj_buffer, 128);
+  int x = 0, y = 0;
   while (1) {
     vid_vsync();
     key_poll();
 
     if (key_hit(KEY_START))
       break;
+
+    x += bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    y += bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+
+    x = clamp(x, 0, 1024 - SCREEN_WIDTH);
+    y = clamp(y, 0, 1024 - SCREEN_HEIGHT);
+
+    // // This works but it's ugly in the game...
+    // int mapX = x >> 4;
+    // int mapY = y >> 4;
+    // for (int iy = 0; iy < 32; iy++) {
+    //   for (int ix = 0; ix < 32; ix++) {
+    //     int index = (iy + mapY) * 128 + ix + mapX;
+    //     dst[iy * 32 + ix] = kakarikoMap[index];
+    //   }
+    // }
+
+    // Tile size is 8, so everytime we walk 8, we update the map
+    int mapX = x >> 3;
+    int mapY = y >> 3;
+
+    //    mapX = 0       |    mapX = 1        |    mapX = 2
+    // 0 1 2 3 4 ... 31  | 32 1 2 3 4 ... 31  | 32 33 2 3 4 ... 31
+    //
+    //    mapX = 31                mapX = 32
+    // 32 33 34 35 36 ... 63  | 64 33 34 35 36 ...
+
+    // If we want to follow this, we can update atomically instead of the whole
+    // dst array...
+    for (int iy = 0; iy < 32; iy++) {
+      for (int ix = 0; ix < 32; ix++) {
+        // This is absolute garbage
+
+        int xMult = ix < (mapX & 31) ? (mapX / 32 + 1) : (mapX / 32);
+        int yMult = iy < (mapY & 31) ? (mapY / 32 + 1) : (mapY / 32);
+
+        dst[iy * 32 + ix] = kakarikoMap[(iy + yMult) * 128 + ix + 32 * xMult];
+      }
+    }
+
+    REG_BG1HOFS = x;
+    REG_BG1VOFS = y;
+
+    // tte_printf("#{es;P} (%d,%d)", x, y);
+    tte_printf("#{es;P} (%d,%d) - (%d, %d)", x, y, mapX, mapY);
+
+    oam_copy(oam_mem, obj_buffer, 128);
   }
 }
 
