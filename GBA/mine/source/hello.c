@@ -193,8 +193,6 @@ void level_four() {
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
   REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
 
-  oam_init(obj_buffer, 128);
-
   // NOT: memcpy(&tile_mem[0][0], kakarikoTiles, kakarikoTilesLen);
   LZ77UnCompVram(kakarikoTiles, tile_mem[0]);
   memcpy(pal_bg_mem, kakarikoPal, kakarikoPalLen);
@@ -244,8 +242,6 @@ void level_four() {
 
     REG_BG0HOFS = x;
     REG_BG0VOFS = y;
-
-    oam_copy(oam_mem, obj_buffer, 128);
   }
 }
 
