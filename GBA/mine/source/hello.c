@@ -15,17 +15,14 @@
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *obj_aff_buffer = (OBJ_AFFINE *)obj_buffer;
 
-void level_six() {}
-
 int main() {
   // Demos
 
-  level_one();
-  level_two();
-  level_three();
-  level_four();
-  level_five();
-
+  // level_one();
+  // level_two();
+  // level_three();
+  // level_four();
+  // level_five();
   level_six();
 
   return 0;

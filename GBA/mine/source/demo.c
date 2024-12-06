@@ -8,6 +8,7 @@
 #include "brin.h"
 #include "kakariko.h"
 #include "player.h"
+#include "tonc_types.h"
 
 extern OBJ_ATTR obj_buffer[128];
 extern OBJ_AFFINE *obj_aff_buffer;
@@ -332,5 +333,83 @@ void level_five() {
                actual_tile_position_x, actual_tile_position_y);
 
     oam_copy(oam_mem, obj_buffer, 128);
+  }
+}
+
+typedef struct Bomb {
+  int x, y, objId;
+} Bomb;
+
+void level_six() {
+  REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+  REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D;
+
+  oam_init(obj_buffer, 128);
+  memcpy16(pal_obj_mem, aaaPal, aaaPalLen / sizeof(u16));
+
+  OBJ_ATTR *sprite = &obj_buffer[0];
+  int x = 120 - 16, y = 80 - 16;
+  // Copying just 8, 9, 10, 11
+  memcpy32(&tile_mem[4][0], &aaaTiles[8 * 8], 4 * 8);
+  obj_set_attr(sprite, ATTR0_SQUARE | ATTR0_AFF,
+               ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_BUILD(0, 0, 0));
+  obj_set_pos(sprite, x, y);
+  obj_aff_identity(&obj_aff_buffer[0]);
+
+  memcpy32(&tile_mem[4][4], &aaaTiles[24 * 8], 4 * 8);
+  int bombs_count = 0;
+  Bomb bombs[16] = {};
+
+  int counter = 0;
+  bool shearX = false;
+  while (1) {
+    key_poll();
+    vid_vsync();
+
+    x += bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    y += bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+
+    obj_set_pos(sprite, x, y);
+
+    if (counter >> 4 == 1) {
+      counter = 0;
+
+      int index = bombs_count & 15;
+      bombs[index].x = qran_range(0, 240 - 16);
+      bombs[index].y = qran_range(0, 160 - 16);
+      bombs[index].objId = index + 1;
+      OBJ_ATTR *bomb = &obj_buffer[bombs[index].objId];
+      obj_set_attr(bomb, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_BUILD(4, 0, 0));
+      obj_set_pos(bomb, bombs[index].x, bombs[index].y);
+
+      bombs_count += 1;
+    }
+
+    // Make it spin
+    OBJ_AFFINE *oaff_curr = &obj_aff_buffer[0];
+    OBJ_AFFINE *oaff_base = &obj_aff_buffer[1];
+    OBJ_AFFINE *oaff_new = &obj_aff_buffer[2];
+    if (counter % 2 == 0) {
+      shearX = !shearX;
+
+      obj_aff_copy(oaff_base, oaff_curr, 1);
+      obj_aff_identity(oaff_new);
+    } else {
+      if (shearX) {
+        obj_aff_shearx(oaff_new, counter * 2);
+      } else {
+        obj_aff_sheary(oaff_new, -counter * 2);
+      }
+      obj_aff_copy(oaff_curr, oaff_base, 1);
+      obj_aff_postmul(oaff_curr, oaff_new);
+    }
+
+    oam_copy(oam_mem, obj_buffer, 128);
+    obj_aff_copy(obj_aff_mem, obj_aff_buffer, 1);
+
+    if (key_hit(KEY_START))
+      break;
+
+    counter++;
   }
 }
