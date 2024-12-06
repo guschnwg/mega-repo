@@ -223,6 +223,9 @@ void level_four() {
       dst[iy * 32 + ix] = kakarikoMap[iy * 128 + ix];
 
   int x = 0, y = 0;
+  int vx = 0, vy = 0;
+
+  int dstx = 0, dsty = 0;
   while (1) {
     vid_vsync();
     key_poll();
@@ -230,21 +233,11 @@ void level_four() {
     if (key_hit(KEY_START))
       break;
 
-    x += bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
-    y += bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+    vx = bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    vy = bit_tribool(key_held(-1), KI_DOWN, KI_UP);
 
-    x = clamp(x, 0, 1024 - SCREEN_WIDTH);
-    y = clamp(y, 0, 1024 - SCREEN_HEIGHT);
-
-    // // This works but it's ugly in the game...
-    // int mapX = x >> 4;
-    // int mapY = y >> 4;
-    // for (int iy = 0; iy < 32; iy++) {
-    //   for (int ix = 0; ix < 32; ix++) {
-    //     int index = (iy + mapY) * 128 + ix + mapX;
-    //     dst[iy * 32 + ix] = kakarikoMap[index];
-    //   }
-    // }
+    x = clamp(x + vx, 0, 1024 - SCREEN_WIDTH);
+    y = clamp(y + vy, 0, 1024 - SCREEN_HEIGHT);
 
     // Tile size is 8, so everytime we walk 8, we update the map
     int mapX = x >> 3;
@@ -256,25 +249,55 @@ void level_four() {
     //    mapX = 31                mapX = 32
     // 32 33 34 35 36 ... 63  | 64 33 34 35 36 ...
 
-    // If we want to follow this, we can update atomically instead of the whole
-    // dst array...
-    for (int iy = 0; iy < 32; iy++) {
-      for (int ix = 0; ix < 32; ix++) {
-        // This is absolute garbage
+    // This runs fine, but it has a nested for loop
+    if (vx != 0 || vy != 0) {
+      for (int iy = 0; iy < 32; iy++) {
+        for (int ix = 0; ix < 32; ix++) {
+          int xIncr = 32 * (ix < (mapX & 31) ? mapX / 32 + 1 : mapX / 32);
+          int yIncr = 32 * (iy < (mapY & 31) ? mapY / 32 + 1 : mapY / 32);
 
-        int xMult = ix < (mapX & 31) ? (mapX / 32 + 1) : (mapX / 32);
-        int yMult = iy < (mapY & 31) ? (mapY / 32 + 1) : (mapY / 32);
-
-        dst[iy * 32 + ix] =
-            kakarikoMap[(iy + 32 * yMult) * 128 + ix + 32 * xMult];
+          dst[iy * 32 + ix] = kakarikoMap[(iy + yIncr) * 128 + ix + xIncr];
+        }
       }
     }
 
+    tte_printf("#{es;P} (%d,%d) - (%d, %d) - (%d, %d)", x, y, mapX, mapY, dstx,
+               dsty);
+
+    // This below is working,
+    // but not together because when i change the Y it
+    // overrides the changes from X
+    //
+    // mapX = 2 mapY = 2 width = 10 height = 4
+    //
+    //  26 27 22 23 24 25 -> 02 03 04 05 26 27
+    //  36 37 32 33 34 35 -> 16 17 72 73 74 75
+    //  06 07 02 03 04 05 -> 26 37 22 23 24 25
+    //  16 17 12 13 14 15 -> 36 37 32 33 34 35
+    //
+    // if (vx != 0 && x != 0 && (x & 7) == 0) {
+    //   // We need to add the new tile on the right or on the left
+    //   int dstIdx = vx > 0 ? (dstx & 31) : ((dstx - 1) & 31);
+    //   int srcIdx = vx > 0 ? dstx + 32 : dstx - 1;
+
+    //   for (int iy = 0; iy < 32; iy++) {
+    //     dst[iy * 32 + dstIdx] = kakarikoMap[iy * 128 + srcIdx];
+    //   }
+    //   dstx += vx;
+    // }
+    // if (vy != 0 && y != 0 && (y & 7) == 0) {
+    //   // We need to add the new tile on the top or on the bottom
+    //   int dstIdx = vy > 0 ? (dsty & 31) : ((dsty - 1) & 31);
+    //   int srcIdx = vy > 0 ? (dsty + 32) : dsty - 1;
+
+    //   for (int ix = 0; ix < 32; ix++) {
+    //     dst[dstIdx * 32 + ix] = kakarikoMap[srcIdx * 128 + ix];
+    //   }
+    //   dsty += vy;
+    // }
+
     REG_BG1HOFS = x;
     REG_BG1VOFS = y;
-
-    // tte_printf("#{es;P} (%d,%d)", x, y);
-    tte_printf("#{es;P} (%d,%d) - (%d, %d)", x, y, mapX, mapY);
 
     oam_copy(oam_mem, obj_buffer, 128);
   }
