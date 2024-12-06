@@ -76,6 +76,9 @@ void something_else_init() {
 void something_else_update(int palette) {
   static int counter = 0;
 
+  static int y = 120;
+  static int x = 160;
+
   // 0 and 1 are taken by the player
   OBJ_ATTR *playerHead = &obj_buffer[2];
   OBJ_ATTR *playerBody = &obj_buffer[3];
@@ -83,6 +86,9 @@ void something_else_update(int palette) {
   // 96 - 100 - 104 --- 188
   // 24 -  25 -  26 ---  47 // /4
   //  0 -   1 -   2 ---  23 // -24
+
+  y += bit_tribool(key_held(-1), KI_LEFT, KI_DOWN);
+  x += bit_tribool(key_held(-1), KI_UP, KI_RIGHT);
 
   int tile_index = counter >> 8;
   if (tile_index == 24) {
@@ -93,21 +99,21 @@ void something_else_update(int palette) {
   }
 
   obj_set_attr(playerHead,
-               // ATTR 0:
+               // ATTR 0: 0b0000000000000000
                //    0-7: Y coordinate
                //    8-9: object mode
                //    A-B: Gfx mode
                //    C:   mosaic effect
                //    D:   color mode
                //    E-F: Sprite shape
-               ATTR0_SQUARE + 12, // 0b0000000000001100,
-               // ATTR 1:
+               ATTR0_SQUARE + y,
+               // ATTR 1: 0b0000000000000000
                //    0-8: X coordinate
                //    9-D: Affine index
                //    C-D: Horizontal/vertical flipping
                //    E-F: Sprite size
-               ATTR1_SIZE_16, // 0b0100000000000000,
-               // ATTR 2:
+               ATTR1_SIZE_16 + x,
+               // ATTR 2: 0b0000000000000000
                //    0-9: Base tile index
                //    A-B: Priority
                //    C-F: Palette bank
@@ -183,41 +189,22 @@ void level_three() {
   }
 }
 
-void init_textbox(int bgnr, int left, int top, int right, int bottom) {
-  tte_init_con();
-
-  tte_set_margins(left, top, right, bottom);
-
-  REG_DISPCNT |= DCNT_WIN0;
-
-  REG_WIN0H = left << 8 | right;
-  REG_WIN0V = top << 8 | bottom;
-  REG_WIN0CNT = WIN_ALL | WIN_BLD;
-  REG_WINOUTCNT = WIN_ALL;
-
-  REG_BLDCNT = (BLD_ALL & ~BIT(bgnr)) | BLD_BLACK;
-  REG_BLDY = 5;
-}
-
 void level_four() {
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
-  REG_DISPCNT =
-      DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D | DCNT_WIN0;
+  REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
 
   oam_init(obj_buffer, 128);
 
+  // NOT: memcpy(&tile_mem[0][0], kakarikoTiles, kakarikoTilesLen);
   LZ77UnCompVram(kakarikoTiles, tile_mem[0]);
-  GRIT_CPY(pal_bg_mem, kakarikoPal);
-  tte_init_chr4c_b4_default(0, BG_CBB(2) | BG_SBB(28));
+  memcpy(pal_bg_mem, kakarikoPal, kakarikoPalLen);
 
-  init_textbox(0, 8, SCR_H - (8 + 2 * 12), SCR_W - 8, SCR_H - 8);
+  REG_BG0CNT = BG_CBB(0) | BG_SBB(29);
+  REG_BG0HOFS = 0;
+  REG_BG0VOFS = 0;
 
-  REG_BG1CNT = BG_CBB(0) | BG_SBB(29);
-  REG_BG1HOFS = 0;
-  REG_BG1VOFS = 0;
-
-  // Copy map to BG1
-  SCR_ENTRY *dst = se_mem[BFN_GET(REG_BG1CNT, BG_SBB)];
+  // Copy map to BG0
+  SCR_ENTRY *dst = se_mem[BFN_GET(REG_BG0CNT, BG_SBB)];
   for (int iy = 0; iy < 32; iy++)
     for (int ix = 0; ix < 32; ix++)
       dst[iy * 32 + ix] = kakarikoMap[iy * 128 + ix];
@@ -225,7 +212,6 @@ void level_four() {
   int x = 0, y = 0;
   int vx = 0, vy = 0;
 
-  int dstx = 0, dsty = 0;
   while (1) {
     vid_vsync();
     key_poll();
@@ -243,13 +229,8 @@ void level_four() {
     int mapX = x >> 3;
     int mapY = y >> 3;
 
-    //    mapX = 0       |    mapX = 1        |    mapX = 2
-    // 0 1 2 3 4 ... 31  | 32 1 2 3 4 ... 31  | 32 33 2 3 4 ... 31
-    //
-    //    mapX = 31                mapX = 32
-    // 32 33 34 35 36 ... 63  | 64 33 34 35 36 ...
-
-    // This runs fine, but it has a nested for loop
+    // This runs fine, but it has a nested for loop that i wanted to get rid eventually
+    // But i won't spend much time on it, i tried and failed
     if (vx != 0 || vy != 0) {
       for (int iy = 0; iy < 32; iy++) {
         for (int ix = 0; ix < 32; ix++) {
@@ -261,43 +242,8 @@ void level_four() {
       }
     }
 
-    tte_printf("#{es;P} (%d,%d) - (%d, %d) - (%d, %d)", x, y, mapX, mapY, dstx,
-               dsty);
-
-    // This below is working,
-    // but not together because when i change the Y it
-    // overrides the changes from X
-    //
-    // mapX = 2 mapY = 2 width = 10 height = 4
-    //
-    //  26 27 22 23 24 25 -> 02 03 04 05 26 27
-    //  36 37 32 33 34 35 -> 16 17 72 73 74 75
-    //  06 07 02 03 04 05 -> 26 37 22 23 24 25
-    //  16 17 12 13 14 15 -> 36 37 32 33 34 35
-    //
-    // if (vx != 0 && x != 0 && (x & 7) == 0) {
-    //   // We need to add the new tile on the right or on the left
-    //   int dstIdx = vx > 0 ? (dstx & 31) : ((dstx - 1) & 31);
-    //   int srcIdx = vx > 0 ? dstx + 32 : dstx - 1;
-
-    //   for (int iy = 0; iy < 32; iy++) {
-    //     dst[iy * 32 + dstIdx] = kakarikoMap[iy * 128 + srcIdx];
-    //   }
-    //   dstx += vx;
-    // }
-    // if (vy != 0 && y != 0 && (y & 7) == 0) {
-    //   // We need to add the new tile on the top or on the bottom
-    //   int dstIdx = vy > 0 ? (dsty & 31) : ((dsty - 1) & 31);
-    //   int srcIdx = vy > 0 ? (dsty + 32) : dsty - 1;
-
-    //   for (int ix = 0; ix < 32; ix++) {
-    //     dst[dstIdx * 32 + ix] = kakarikoMap[srcIdx * 128 + ix];
-    //   }
-    //   dsty += vy;
-    // }
-
-    REG_BG1HOFS = x;
-    REG_BG1VOFS = y;
+    REG_BG0HOFS = x;
+    REG_BG0VOFS = y;
 
     oam_copy(oam_mem, obj_buffer, 128);
   }
