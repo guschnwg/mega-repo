@@ -10,6 +10,7 @@
 #include <string.h>
 #include <tonc.h>
 
+#include "aaa.h"
 #include "bbb.h"
 #include "brin.h"
 #include "kakariko.h"
@@ -227,8 +228,8 @@ void level_four() {
     int mapX = x >> 3;
     int mapY = y >> 3;
 
-    // This runs fine, but it has a nested for loop that i wanted to get rid eventually
-    // But i won't spend much time on it, i tried and failed
+    // This runs fine, but it has a nested for loop that i wanted to get rid
+    // eventually But i won't spend much time on it, i tried and failed
     if (vx != 0 || vy != 0) {
       for (int iy = 0; iy < 32; iy++) {
         for (int ix = 0; ix < 32; ix++) {
@@ -245,11 +246,105 @@ void level_four() {
   }
 }
 
+void level_five() {
+  REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+  REG_DISPCNT =
+      DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D | DCNT_WIN0;
+
+  // The text box
+  tte_init_chr4c_b4_default(0, BG_CBB(2) | BG_SBB(28));
+  tte_set_drawg(chr4c_drawg_b4cts_fast);
+  tte_init_con();
+  tte_set_margins(0, SCR_H - (8 + 2 * 12), SCR_W - 8, SCR_H - 8);
+  REG_WIN0H = 0 << 8 | (SCR_W - 8);
+  REG_WIN0V = (SCR_H - (8 + 2 * 12)) << 8 | (SCR_H - 8);
+  REG_WIN0CNT = WIN_ALL | WIN_BLD;
+  REG_WINOUTCNT = WIN_ALL;
+  REG_BLDCNT = (BLD_ALL & ~BIT(0)) | BLD_BLACK;
+  REG_BLDY = 5;
+
+  // The BG
+  REG_BG1CNT = BG_CBB(0) | BG_SBB(29);
+  REG_BG1HOFS = 0;
+  REG_BG1VOFS = 0;
+  // NOT: memcpy(&tile_mem[0][0], kakarikoTiles, kakarikoTilesLen);
+  LZ77UnCompVram(kakarikoTiles, tile_mem[0]);
+  memcpy(pal_bg_mem, kakarikoPal, kakarikoPalLen);
+  SCR_ENTRY *dst = se_mem[BFN_GET(REG_BG1CNT, BG_SBB)];
+  for (int iy = 0; iy < 32; iy++)
+    for (int ix = 0; ix < 32; ix++)
+      dst[iy * 32 + ix] = kakarikoMap[iy * 128 + ix];
+
+  // The Sprite
+  oam_init(obj_buffer, 1);
+  int tile_x = 120, tile_y = 60;
+  memcpy32(&tile_mem[4][0], aaaTiles, aaaTilesLen / sizeof(u32));
+  memcpy16(pal_obj_mem, aaaPal, aaaPalLen / sizeof(u16));
+  obj_set_attr(&obj_buffer[0], ATTR0_SQUARE, ATTR1_SIZE_16,
+               ATTR2_BUILD(8, 0, 0));
+  obj_set_pos(&obj_buffer[0], tile_x, tile_y);
+
+  int x = 0, y = 0;
+  int vx = 0, vy = 0;
+  while (1) {
+    vid_vsync();
+    key_poll();
+
+    if (key_hit(KEY_START))
+      break;
+
+    vx = bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    vy = bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+
+    if (tile_x == 120) {
+      x = clamp(x + vx, 0, 1024 - SCREEN_WIDTH);
+    }
+    if (tile_y == 80) {
+      y = clamp(y + vy, 0, 1024 - SCREEN_HEIGHT);
+    }
+
+    if (vx != 0 && (x == 0 || x == 1024 - SCREEN_WIDTH - 1)) {
+      tile_x = clamp(tile_x += vx, 0, 240 - 16);
+    }
+    if (vy != 0 && (y == 0 || y == 1024 - SCREEN_HEIGHT - 1)) {
+      tile_y = clamp(tile_y += vy, 0, 160 - 16);
+    }
+    obj_set_pos(&obj_buffer[0], tile_x, tile_y);
+
+    // Tile size is 8, so everytime we walk 8, we update the map
+    int mapX = x >> 3;
+    int mapY = y >> 3;
+
+    if (vx != 0 || vy != 0) {
+      for (int iy = 0; iy < 32; iy++) {
+        for (int ix = 0; ix < 32; ix++) {
+          int xIncr = 32 * (ix < (mapX & 31) ? mapX / 32 + 1 : mapX / 32);
+          int yIncr = 32 * (iy < (mapY & 31) ? mapY / 32 + 1 : mapY / 32);
+
+          dst[iy * 32 + ix] = kakarikoMap[(iy + yIncr) * 128 + ix + xIncr];
+        }
+      }
+    }
+
+    REG_BG1HOFS = x;
+    REG_BG1VOFS = y;
+
+    // Unused but just to illustrate
+    int actual_tile_position_x = x + tile_x;
+    int actual_tile_position_y = y + tile_y;
+    tte_printf("#{es;P} (%d, %d) - (%d, %d) - (%d, %d)", x, y, tile_x, tile_y,
+               actual_tile_position_x, actual_tile_position_y);
+
+    oam_copy(oam_mem, obj_buffer, 1);
+  }
+}
+
 int main() {
   // level_one();
   // level_two();
   // level_three();
-  level_four();
+  // level_four();
+  level_five();
 
   return 0;
 }
