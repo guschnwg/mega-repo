@@ -28,3 +28,6 @@ copy-libs:
 	docker cp ${CONTAINER}:/opt/devkitpro/libtonc ${PWD}/libraries/libtonc
 	docker cp ${CONTAINER}:/opt/devkitpro/libgba ${PWD}/libraries/libgba
 	docker rm ${CONTAINER}
+	echo "Fixing this file"
+	vim --clean -E -s -c 'argdo set fileencoding=utf-8 nobomb | update' -c q -- ./libraries/libtonc/include/tonc_tte.h
+	vim --clean -E -s -c 'argdo set fileencoding=utf-8 nobomb | update' -c q -- ./libraries/libtonc/include/tonc_math.h

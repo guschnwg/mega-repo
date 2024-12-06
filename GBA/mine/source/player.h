@@ -1,3 +1,6 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
 typedef struct TSprite {
   int x, y;   //!< Position
   int vx, vy; //!< Velocity
@@ -9,3 +12,5 @@ typedef struct TSprite {
 
 void player_init(TSprite *player, int objId, int x, int y, int palette);
 void player_update(TSprite *player, int palette);
+
+#endif
