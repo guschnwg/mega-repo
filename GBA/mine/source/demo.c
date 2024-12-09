@@ -361,7 +361,9 @@ void level_six() {
   Bomb bombs[16] = {};
 
   int counter = 0;
-  bool shearX = false;
+  bool shearXOne = false;
+  bool shearX[3] = {false, false, false};
+  int mult[3] = {2, -2, 4};
   while (1) {
     key_poll();
     vid_vsync();
@@ -379,33 +381,44 @@ void level_six() {
       bombs[index].y = qran_range(0, 160 - 16);
       bombs[index].objId = index + 1;
       OBJ_ATTR *bomb = &obj_buffer[bombs[index].objId];
-      obj_set_attr(bomb, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_BUILD(4, 0, 0));
+
+      // IDK why 4 tho, or 7... (in theory it should be 0...3...6)
+      // is there anything in affine position 4????
+      int affine_index = bombs_count % 2 == 0 ? 4 : 7;
+      obj_set_attr(bomb, ATTR0_SQUARE | ATTR0_AFF,
+                   ATTR1_SIZE_16 | ATTR1_AFF_ID(affine_index),
+                   ATTR2_BUILD(4, 0, 0));
       obj_set_pos(bomb, bombs[index].x, bombs[index].y);
+      obj_aff_identity(&obj_aff_buffer[affine_index]);
 
       bombs_count += 1;
     }
 
     // Make it spin
-    OBJ_AFFINE *oaff_curr = &obj_aff_buffer[0];
-    OBJ_AFFINE *oaff_base = &obj_aff_buffer[1];
-    OBJ_AFFINE *oaff_new = &obj_aff_buffer[2];
-    if (counter % 2 == 0) {
-      shearX = !shearX;
+    int baseIndex = 0;
+    for (int i = 0; i < 3; i++) {
+      OBJ_AFFINE *oaff_curr = &obj_aff_buffer[i * 3];
+      OBJ_AFFINE *oaff_base = &obj_aff_buffer[i * 3 + 1];
+      OBJ_AFFINE *oaff_new = &obj_aff_buffer[i * 3 + 2];
 
-      obj_aff_copy(oaff_base, oaff_curr, 1);
-      obj_aff_identity(oaff_new);
-    } else {
-      if (shearX) {
-        obj_aff_shearx(oaff_new, counter * 2);
+      if (counter % 2 == 0) {
+        shearX[i] = !shearX[i];
+
+        obj_aff_copy(oaff_base, oaff_curr, 1);
+        obj_aff_identity(oaff_new);
       } else {
-        obj_aff_sheary(oaff_new, -counter * 2);
+        if (shearX[i]) {
+          obj_aff_shearx(oaff_new, counter * 2 * mult[i]);
+        } else {
+          obj_aff_sheary(oaff_new, -counter * 2 * mult[i]);
+        }
+        obj_aff_copy(oaff_curr, oaff_base, 1);
+        obj_aff_postmul(oaff_curr, oaff_new);
       }
-      obj_aff_copy(oaff_curr, oaff_base, 1);
-      obj_aff_postmul(oaff_curr, oaff_new);
     }
 
     oam_copy(oam_mem, obj_buffer, 128);
-    obj_aff_copy(obj_aff_mem, obj_aff_buffer, 1);
+    obj_aff_copy(obj_aff_mem, obj_aff_buffer, 6);
 
     if (key_hit(KEY_START))
       break;
