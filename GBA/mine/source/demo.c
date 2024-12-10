@@ -6,8 +6,11 @@
 #include "aaa.h"
 #include "bbb.h"
 #include "brin.h"
+#include "demo.h"
 #include "kakariko.h"
 #include "player.h"
+#include "tonc_memdef.h"
+#include "tonc_oam.h"
 #include "tonc_types.h"
 
 extern OBJ_ATTR obj_buffer[128];
@@ -361,7 +364,6 @@ void level_six() {
   Bomb bombs[16] = {};
 
   int counter = 0;
-  bool shearXOne = false;
   bool shearX[3] = {false, false, false};
   int mult[3] = {2, -2, 4};
   while (1) {
@@ -395,7 +397,6 @@ void level_six() {
     }
 
     // Make it spin
-    int baseIndex = 0;
     for (int i = 0; i < 3; i++) {
       OBJ_AFFINE *oaff_curr = &obj_aff_buffer[i * 3];
       OBJ_AFFINE *oaff_base = &obj_aff_buffer[i * 3 + 1];
@@ -419,6 +420,43 @@ void level_six() {
 
     oam_copy(oam_mem, obj_buffer, 128);
     obj_aff_copy(obj_aff_mem, obj_aff_buffer, 6);
+
+    if (key_hit(KEY_START))
+      break;
+
+    counter++;
+  }
+}
+
+void level_seven() {
+  REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+  REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D;
+
+  oam_init(obj_buffer, 128);
+  memcpy16(pal_obj_mem, aaaPal, aaaPalLen / sizeof(u16));
+
+  OBJ_ATTR *sprite = &obj_buffer[0];
+  int x = 120 - 16, y = 80 - 16;
+  // Copying just 8, 9, 10, 11
+  memcpy32(&tile_mem[4][0], &aaaTiles[8 * 8], 4 * 8);
+  obj_set_attr(sprite, ATTR0_SQUARE | ATTR0_AFF,
+               ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_BUILD(0, 0, 0));
+  obj_set_pos(sprite, x, y);
+  obj_aff_identity(&obj_aff_buffer[0]);
+
+  int counter = 0;
+  while (1) {
+    key_poll();
+    vid_vsync();
+
+    x += bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    y += bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+
+    obj_set_pos(sprite, x, y);
+    obj_aff_rotate(&obj_aff_buffer[0], counter * 1000);
+
+    oam_copy(oam_mem, obj_buffer, 128);
+    obj_aff_copy(obj_aff_mem, obj_aff_buffer, 1);
 
     if (key_hit(KEY_START))
       break;

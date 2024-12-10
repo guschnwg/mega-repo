@@ -7,5 +7,6 @@ void level_three();
 void level_four();
 void level_five();
 void level_six();
+void level_seven();
 
 #endif
