@@ -5,12 +5,15 @@
 
 #include "aaa.h"
 #include "bbb.h"
+#include "border.h"
 #include "brin.h"
 #include "demo.h"
 #include "kakariko.h"
 #include "player.h"
 #include "tonc_memdef.h"
+#include "tonc_memmap.h"
 #include "tonc_oam.h"
+#include "tonc_tte.h"
 #include "tonc_types.h"
 
 extern OBJ_ATTR obj_buffer[128];
@@ -462,5 +465,98 @@ void level_seven() {
       break;
 
     counter++;
+  }
+}
+
+void txt_se_frame(int l, int t, int r, int b, u16 se0) {
+  int ix, iy;
+  u8 *lut = gptxt->chars;
+  u16 *pse = (u16 *)gptxt->dst0;
+  pse += t * 32 + l;
+  r -= (l + 1);
+  b -= (t + 1);
+
+  // corners
+  pse[32 * 0 + 0] = se0 + lut['/'];
+  pse[32 * 0 + r] = se0 + lut['\\'];
+  pse[32 * b + 0] = se0 + lut['`'];
+  pse[32 * b + r] = se0 + lut['\''];
+
+  // horizontal
+  for (ix = 1; ix < r; ix++) {
+    pse[32 * 0 + ix] = se0 + lut['^'];
+    pse[32 * b + ix] = se0 + lut['_'];
+  }
+  // vertical + inside
+  pse += 32;
+  for (iy = 1; iy < b; iy++) {
+    pse[0] = se0 + lut['['];
+    pse[r] = se0 + lut[']'];
+    for (ix = 1; ix < r; ix++)
+      pse[ix] = se0 + lut['#'];
+    pse += 32;
+  }
+}
+
+void level_eight() {
+
+  REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+  REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+
+  oam_init(obj_buffer, 128);
+  memcpy16(pal_obj_mem, aaaPal, aaaPalLen / sizeof(u16));
+
+  OBJ_ATTR *sprite = &obj_buffer[0];
+  int x = 120 - 16, y = 80 - 16;
+  // Copying just 8, 9, 10, 11
+  memcpy32(&tile_mem[4][0], &aaaTiles[8 * 8], 4 * 8);
+  obj_set_attr(sprite, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_BUILD(0, 0, 1));
+  obj_set_pos(sprite, x, y);
+
+  irq_init(NULL);
+  irq_add(II_VBLANK, NULL);
+  txt_init_std();
+  txt_init_se(0, BG_CBB(0) | BG_SBB(31), 0x1000, CLR_RED, 0x0E);
+  memcpy32(pal_bg_mem, borderPal, borderPalLen / 4);
+  memcpy32(&tile_mem[0][96], borderTiles, borderTilesLen / 4);
+  const u8 bdr_lut[9] = "/^\\[#]`_\'";
+  for (int ii = 0; ii < 9; ii++)
+    gptxt->chars[bdr_lut[ii]] = 96 + ii;
+
+  bool showWindow = false;
+  bool selected = true;
+  bool offset = 0;
+  while (1) {
+    key_poll();
+    vid_vsync();
+
+    if (showWindow) {
+      txt_se_frame(0 + offset, 12 + offset, 30 - offset, 20 - offset, 0);
+      se_puts(10, 110, "frame 0:", 0);
+      se_puts(10, 130, "bank  0:\n  basic text,\n  transparent bg", 0);
+
+      if (key_hit(KEY_SELECT)) {
+        showWindow = false;
+        REG_DISPCNT &= ~DCNT_BG0;
+      }
+
+      offset += bit_tribool(key_hit(-1), KI_RIGHT, KI_LEFT);
+      continue;
+    }
+
+    x += bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    y += bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+
+    obj_set_pos(sprite, x, y);
+
+    oam_copy(oam_mem, obj_buffer, 128);
+
+    if (key_hit(KEY_SELECT)) {
+      showWindow = !showWindow;
+      REG_DISPCNT |= DCNT_BG0;
+    }
+
+    if (key_hit(KEY_START))
+      break;
   }
 }
