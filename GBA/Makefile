@@ -18,16 +18,21 @@ example:
 	open libtonc-examples/${EXAMPLE}/game.gba
 
 .PHONY: run
+run: GAME?=mine
 run:
-	make GAME=mine game
-	open ./mine/game.gba
+	make GAME=$(GAME) game
+	open ./$(GAME)/game.gba
 
 copy-libs: CONTAINER=$(shell docker create --rm gba-dev)
 copy-libs:
-	mkdir ${PWD}/libraries || true
+	mkdir ${PWD}/libraries || rm -rf ${PWD}/libraries && mkdir ${PWD}/libraries
 	docker cp ${CONTAINER}:/opt/devkitpro/libtonc ${PWD}/libraries/libtonc
 	docker cp ${CONTAINER}:/opt/devkitpro/libgba ${PWD}/libraries/libgba
 	docker rm ${CONTAINER}
-	echo "Fixing this file"
+	echo "Fixing this file encoding"
 	vim --clean -E -s -c 'argdo set fileencoding=utf-8 nobomb | update' -c q -- ./libraries/libtonc/include/tonc_tte.h
 	vim --clean -E -s -c 'argdo set fileencoding=utf-8 nobomb | update' -c q -- ./libraries/libtonc/include/tonc_math.h
+	# To fix in macos
+	# clang: Argument to 'section' attribute is not valid for this target:
+	#   mach-o section specifier requires a segment and section separated by a comma
+	sh fix-macos-warning-in-tonc_types.sh
