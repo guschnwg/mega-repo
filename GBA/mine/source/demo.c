@@ -616,7 +616,7 @@ void level_eight() {
       txt_se_frame(2, 16, 10, 19, 0);
       // Other fun thing accessing the memory
       // The 2 is the palette, the 160 is the tile in hex that translates to
-      // decimal 352
+      // decimal 352, which is the tile index
       *((volatile short *)0x0600FC04) = 0x2160;
 
       txt_se_frame(12, 16, 21, 19, border_palette | actual_second_borders_font);
