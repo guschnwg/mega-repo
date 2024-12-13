@@ -10,6 +10,7 @@
 #include "demo.h"
 #include "kakariko.h"
 #include "player.h"
+#include "tonc_core.h"
 #include "tonc_memdef.h"
 #include "tonc_memmap.h"
 #include "tonc_oam.h"
@@ -498,6 +499,19 @@ void txt_se_frame(int l, int t, int r, int b, u16 se0) {
   }
 }
 
+int replace_zeros_with_eights(int value) {
+  // Chat GPT did this for me
+  int result = 0;
+  for (int i = 0; i < 8; i++) {
+    int nibble = (value >> (i * 4)) & 0xF; // Extract nibble
+    if (nibble == 0) {
+      nibble = 0x8; // Replace 0 with 8
+    }
+    result |= (nibble << (i * 4)); // Place back the nibble
+  }
+  return result;
+}
+
 void level_eight() {
 
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
@@ -516,12 +530,61 @@ void level_eight() {
   irq_init(NULL);
   irq_add(II_VBLANK, NULL);
   txt_init_std();
-  txt_init_se(0, BG_CBB(0) | BG_SBB(31), 0x1000, CLR_RED, 0x0E);
+
+  // Borders
   memcpy32(pal_bg_mem, borderPal, borderPalLen / 4);
   memcpy32(&tile_mem[0][96], borderTiles, borderTilesLen / 4);
   const u8 bdr_lut[9] = "/^\\[#]`_\'";
   for (int ii = 0; ii < 9; ii++)
     gptxt->chars[bdr_lut[ii]] = 96 + ii;
+
+  // Add more borders as tiles
+  int second_borders_font = 352;
+  int actual_second_borders_font = second_borders_font - 96;
+
+  // Other palette for the tiles
+  int other_palette = 0x20;
+  int border_palette = other_palette << 8;
+  // How can I change the transparent of this palette to a different color?
+  pal_bg_mem[other_palette + 1] = CLR_RED;
+  pal_bg_mem[other_palette + 2] = CLR_MAG;
+  pal_bg_mem[other_palette + 3] = CLR_GREEN;
+  pal_bg_mem[other_palette + 4] = CLR_BLUE;
+  pal_bg_mem[other_palette + 5] = CLR_PURPLE;
+  pal_bg_mem[other_palette + 6] = CLR_YELLOW;
+  pal_bg_mem[other_palette + 7] = CLR_LIME;
+  pal_bg_mem[other_palette + 8] = CLR_ORANGE;
+
+  // Add the font and adapt the background
+  // otherwise it would be 0, that is transparent
+  memcpy32(&tile_mem[0][second_borders_font], borderTiles, borderTilesLen / 4);
+  int *pwd2 = ((int *)0x06002C00);
+  // 8 parts of the tile
+  // 9 tiles
+  for (int i = 0; i < 8 * 9; i++) {
+      // Replacing with 8 because i want the background of this tile to be
+      // pal_bg_mem[other_palette + 8] = CLR_ORANGE;
+    *pwd2 = replace_zeros_with_eights(*pwd2);
+    pwd2++;
+  }
+
+  int first_palette = 0x1000;
+  txt_init_se(0, BG_CBB(0) | BG_SBB(31), first_palette, CLR_WHITE, 0x0E);
+
+  int second_font = 128;
+  int second_palette = 0x3000;
+  // 8 is the position of magenta in the palette
+  // E is the position of yellow in the palette
+  txt_init_se(0, BG_CBB(0) | BG_SBB(31), second_palette | second_font,
+              CLR_YELLOW | (CLR_MAG << 16), 0x8E);
+  u32 *pwd = (u32 *)&tile_mem[0][second_font];
+  for (int ii = 0; ii < 96 * 8; ii++)
+    *pwd++ |= quad8(0x88);
+
+  int third_font = 256;
+  int third_palette = 0x4000;
+  txt_init_se(0, BG_CBB(0) | BG_SBB(31), third_palette | third_font,
+              CLR_GREEN | (CLR_MAG << 16), 0xEE);
 
   bool showWindow = false;
   bool selected = true;
@@ -532,12 +595,44 @@ void level_eight() {
 
     if (showWindow) {
       txt_se_frame(0 + offset, 12 + offset, 30 - offset, 20 - offset, 0);
-      se_puts(10, 110, "frame 0:", 0);
-      se_puts(10, 130, "bank  0:\n  basic text,\n  transparent bg", 0);
+
+      se_puts(10, 110, "first", first_palette);
+      se_puts(10, 115, "second", second_palette | second_font);
+      se_puts(10, 120, "third", third_palette | third_font);
+
+      se_puts(100, 110, "/^^^^\\", 0);
+      se_puts(100, 115, "[####]", 0);
+      se_puts(100, 120, "`____'", 0);
+
+      se_puts(160, 110, "/^^^^\\", other_palette << 8);
+      se_puts(160, 115, "[####]", other_palette << 8);
+      se_puts(160, 120, "`____'", other_palette << 8);
+
+      // Funny thing
+      // for this i grabbed the memory address directly and changed the palette
+      // piece
+      *((volatile short *)0x0600FB58) = 0x2060;
+
+      txt_se_frame(2, 16, 10, 19, 0);
+      // Other fun thing accessing the memory
+      // The 2 is the palette, the 160 is the tile in hex that translates to
+      // decimal 352
+      *((volatile short *)0x0600FC04) = 0x2160;
+
+      txt_se_frame(12, 16, 21, 19, border_palette | actual_second_borders_font);
+      se_puts(180, 130, "/^^^^\\", border_palette | actual_second_borders_font);
+      se_puts(180, 140, "[####]", border_palette | actual_second_borders_font);
+      se_puts(180, 150, "`____'", border_palette | actual_second_borders_font);
 
       if (key_hit(KEY_SELECT)) {
         showWindow = false;
         REG_DISPCNT &= ~DCNT_BG0;
+      }
+
+      if (key_held(KEY_A)) {
+        pal_bg_mem[0] = borderPal[2];
+      } else {
+        pal_bg_mem[0] = borderPal[0];
       }
 
       offset += bit_tribool(key_hit(-1), KI_RIGHT, KI_LEFT);
