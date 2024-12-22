@@ -1,7 +1,5 @@
 // make GAME=demos/_base run
 
-#include <stdio.h>
-#include <string.h>
 #include <tonc.h>
 
 int main() {
