@@ -2,5 +2,5 @@ CompileFlags:
   Add:
    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libtonc/include"
    - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libgba/include"
-   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/tiles/build"
-   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/tiles/source"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/02_tiles/build"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/02_tiles/source"

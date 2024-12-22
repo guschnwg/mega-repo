@@ -2,5 +2,5 @@ CompileFlags:
   Add:
    - "-I/Users/giovanna/Projects/mega-repo/GBA/libraries/libtonc/include"
    - "-I/Users/giovanna/Projects/mega-repo/GBA/libraries/libgba/include"
-   - "-I/Users/giovanna/Projects/mega-repo/GBA/demos/_base/build"
-   - "-I/Users/giovanna/Projects/mega-repo/GBA/demos/_base/source"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/demos/01_movement/build"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/demos/01_movement/source"
