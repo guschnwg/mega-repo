@@ -1,4 +1,4 @@
-// make GAME=demos/_base run
+// make GAME=demos/04_affine run
 
 #include <tonc.h>
 
