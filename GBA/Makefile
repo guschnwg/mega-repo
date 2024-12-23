@@ -18,7 +18,7 @@ example:
 	open libtonc-examples/${EXAMPLE}/game.gba
 
 .PHONY: run
-run: GAME?=mine
+run: GAME?=game
 run:
 	make GAME=$(GAME) game
 	open ./$(GAME)/game.gba
