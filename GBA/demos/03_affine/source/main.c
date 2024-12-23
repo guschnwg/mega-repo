@@ -85,7 +85,7 @@ int main() {
         counter = 0;
       }
     } else if (step == 3) {
-        return 0;
+      return 0;
     }
 
     oam_copy(oam_mem, obj_buffer, 1);
