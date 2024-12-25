@@ -7,6 +7,7 @@
 #include "tonc_input.h"
 
 int main() {
+  // Why 1???
   int se_num = 1;
 
   REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
@@ -16,7 +17,7 @@ int main() {
 
   memcpy(pal_bg_mem, mapPal, mapPalLen);          // Palette
   memcpy(&tile_mem[0][0], mapTiles, mapTilesLen); // Tilemap
-  memcpy(&se_mem[1][0], mapMap, mapMapLen);  // Map, uses the tilemap
+  memcpy(&se_mem[1][0], mapMap, mapMapLen);       // Map, uses the tilemap
 
   int x = 0, y = 0;
   int rx = 0, ry = 0;
