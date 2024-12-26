@@ -1,5 +1,6 @@
 // make GAME=demos/07_background_3 run
 
+#include <stdio.h>
 #include <string.h>
 #include <tonc.h>
 
@@ -11,7 +12,7 @@ int main() {
   int se_num = 1;
 
   REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;
-  REG_BG0CNT = BG_CBB(0) | BG_SBB(se_num) | BG_4BPP | BG_REG_32x32;
+  REG_BG0CNT = BG_CBB(0) | BG_SBB(se_num) | BG_4BPP | BG_REG_64x64;
 
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
 
@@ -36,10 +37,7 @@ int main() {
     y += dy;
 
     x = clamp(x, 0, 512 - SCREEN_WIDTH);
-    y = clamp(y, 0, 1024 + SCREEN_HEIGHT);
-
-    map_x = x >> 3;
-    map_y = y >> 3;
+    y = clamp(y, 0, 512 - SCREEN_HEIGHT);
 
     REG_BG0HOFS = x;
     REG_BG0VOFS = y;
