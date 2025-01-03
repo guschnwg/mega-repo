@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/libraries/libtonc/include"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/libraries/libgba/include"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/demos/08_background_4/build"
+   - "-I/Users/giovanna/Projects/mega-repo/GBA/demos/08_background_4/source"
