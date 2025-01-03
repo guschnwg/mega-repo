@@ -36,3 +36,16 @@ copy-libs:
 	# clang: Argument to 'section' attribute is not valid for this target:
 	#   mach-o section specifier requires a segment and section separated by a comma
 	sh fix-macos-warning-in-tonc_types.sh
+
+libresprite:
+	curl -L0 \
+	   --output LibreSprite-macos-x86_64.zip \
+	   https://github.com/LibreSprite/LibreSprite/releases/download/v1.0/LibreSprite-macos-x86_64.zip
+
+	unzip LibreSprite-macos-x86_64.zip
+	chmod +x LibreSprite.app/Contents/MacOS/LibreSprite
+	mv LibreSprite.app /Applications
+
+	rm LibreSprite-macos-x86_64.zip
+
+	open /Applications/LibreSprite.app
