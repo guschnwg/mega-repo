@@ -62,10 +62,10 @@ int main() {
       speed = clamp(speed, -300, 300);
     } else {
       if (speed < 0) {
-        speed += 3 + speedDecrease * 2;
+        speed += 3 + speedDecrease;
         speed = clamp(speed, -300, 1);
       } else if (speed > 0) {
-        speed -= 3 + speedDecrease * 2;
+        speed -= 3 + speedDecrease;
         speed = clamp(speed, 0, 300);
       }
     }
