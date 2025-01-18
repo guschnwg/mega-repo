@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libtonc/include"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libgba/include"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/12_affine_by_hand/build"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/12_affine_by_hand/source"
