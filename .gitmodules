@@ -10,3 +10,6 @@
 [submodule "GBA/libtonc-examples"]
 	path = GBA/libtonc-examples
 	url = https://github.com/gbadev-org/libtonc-examples.git
+[submodule "GBA/raw2gba"]
+	path = GBA/raw2gba
+	url = https://github.com/IanFinlayson/raw2gba.git
