@@ -24,7 +24,7 @@ void note_play(int note, int octave) {
 
 bool sos() {
   static int inner_counter = 0;
-  int step = 4;
+  int step = 3;
 
   const u8 notes[12] = {0x02, 0x05, 0x12, 0x12, 0x12, 0x12,
                         0x02, 0x05, 0x12, 0x12, 0x12, 0x12};
@@ -38,6 +38,16 @@ bool sos() {
     inner_counter = 0;
 
   return !finished;
+}
+
+void sos_sync() {
+  const u8 lens[6] = {1, 1, 4, 1, 1, 4};
+  const u8 notes[6] = {0x02, 0x05, 0x12, 0x02, 0x05, 0x12};
+
+  for (int ii = 0; ii < 6; ii++) {
+    note_play(notes[ii] & 15, notes[ii] >> 4);
+    VBlankIntrDelay(8 * lens[ii]);
+  }
 }
 
 int main() {
@@ -64,6 +74,8 @@ int main() {
   char dot[2] = ".";
   int x = 0, y = 0;
   bool sos_play = false;
+
+  sos_sync();
 
   while (1) {
     vid_vsync();
