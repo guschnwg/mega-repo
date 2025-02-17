@@ -1,0 +1,278 @@
+<html>
+    <head>
+        <script src="lib.js"></script>
+    </head>
+    <style>
+        #container {
+            border: 1px solid red;
+        }
+    </style>
+    <body>
+        <div>
+            <label for="size">Size:</label>
+            <input type="number" id="size" />
+        </div>
+
+        <div>
+            <label for="color">Color:</label>
+            <button
+                onclick="--event.target.nextElementSibling.value; color.dispatchEvent(new Event('change'));"
+            >
+                ◀
+            </button>
+            <input type="range" id="color" min="0" max="16" />
+            <span></span>
+            <button
+                onclick="++event.target.previousElementSibling.previousElementSibling.value; color.dispatchEvent(new Event('change'));"
+            >
+                ➡
+            </button>
+        </div>
+
+        <div>
+            <label for="current-color">Current Color:</label>
+            <input type="color" id="current-color" />
+        </div>
+
+        <div>
+            <label for="palette">Palette:</label>
+            <button
+                onclick="--event.target.nextElementSibling.value; palette.dispatchEvent(new Event('change'));"
+            >
+                ◀
+            </button>
+            <input type="range" id="palette" min="0" max="16" />
+            <span></span>
+            <button
+                onclick="++event.target.previousElementSibling.previousElementSibling.value; palette.dispatchEvent(new Event('change'));"
+            >
+                ➡
+            </button>
+        </div>
+
+        <div>
+            Palettes:
+            <div id="palettes"></div>
+        </div>
+
+        <canvas id="preview-canvas" height="160" width="160"></canvas>
+        <canvas id="index-canvas" height="160" width="160"></canvas>
+
+        <img id="resulting-image" />
+    </body>
+    <script>
+        const preview = document.getElementById("preview-canvas");
+        const previewCtx = preview.getContext("2d");
+        const index = document.getElementById("index-canvas");
+        const indexCtx = index.getContext("2d");
+
+        const size = document.getElementById("size");
+        const color = document.getElementById("color");
+        const currentColor = document.getElementById("current-color");
+        const palette = document.getElementById("palette");
+        const paletteContainer = document.getElementById("palettes");
+        const result = document.getElementById("resulting-image");
+        let drawing = false;
+
+        let items = [
+            {
+                x: 0,
+                y: 0,
+                palette: 0,
+            },
+        ];
+        let palettes = Array.from({ length: 16 }, () =>
+            Array.from({ length: 16 }, () => "#000000"),
+        );
+
+        size.addEventListener("change", () => {
+            update();
+            draw();
+            save();
+        });
+        [color, palette].forEach((el) =>
+            el.addEventListener("change", () => {
+                update();
+                draw();
+                save();
+            }),
+        );
+        currentColor.onchange = () => {
+            palettes[palette.value][color.value] = currentColor.value;
+            update();
+            draw();
+            save();
+        };
+        [preview, index].forEach((el) =>
+            el.addEventListener("mousedown", () => (drawing = true)),
+        );
+        [preview, index].forEach((el) =>
+            el.addEventListener("mouseup", () => (drawing = false)),
+        );
+        [preview, index].forEach((el) =>
+            el.addEventListener("mousemove", (e) => {
+                if (!drawing) return;
+                putItem(Math.floor(e.offsetX / 10), Math.floor(e.offsetY / 10));
+            }),
+        );
+        [preview, index].forEach((el) =>
+            el.addEventListener("click", (e) => {
+                putItem(Math.floor(e.offsetX / 10), Math.floor(e.offsetY / 10));
+            }),
+        );
+
+        function putItem(x, y) {
+            const item = items.find((item) => item.x === x && item.y === y);
+            if (item) {
+                item.palette = color.value;
+            } else {
+                items.push({ x, y, palette: color.value });
+            }
+
+            update();
+            draw();
+            save();
+        }
+
+        function init() {
+            size.value = localStorage.getItem("size") || 16;
+            color.value = localStorage.getItem("color") || 0;
+            palette.value = localStorage.getItem("palette") || 0;
+            items = JSON.parse(localStorage.getItem("items")) || items;
+            palettes = JSON.parse(localStorage.getItem("palettes")) || palettes;
+        }
+        function save() {
+            localStorage.setItem("size", size.value);
+            localStorage.setItem("color", color.value);
+            localStorage.setItem("palette", palette.value);
+            localStorage.setItem("items", JSON.stringify(items));
+            localStorage.setItem("palettes", JSON.stringify(palettes));
+        }
+
+        function isTooDark(color) {
+            var r = parseInt(color.substr(1, 2), 16);
+            var g = parseInt(color.substr(3, 2), 16);
+            var b = parseInt(color.substr(4, 2), 16);
+            var yiq = (r * 299 + g * 587 + b * 114) / 1000;
+            return yiq < 120;
+        }
+
+        function draw() {
+            const background = palettes[palette.value][0];
+            preview.style.backgroundColor = background;
+            previewCtx.clearRect(0, 0, preview.width, preview.height);
+            index.style.backgroundColor = background;
+            indexCtx.clearRect(0, 0, index.width, index.height);
+
+            for (let item of items) {
+                previewCtx.fillStyle = palettes[palette.value][item.palette];
+                previewCtx.fillRect(item.x * 10, item.y * 10, 10, 10);
+
+                indexCtx.fillStyle = palettes[palette.value][item.palette];
+                indexCtx.strokeStyle = palettes[palette.value][item.palette];
+                indexCtx.strokeRect(item.x * 10, item.y * 10, 10, 10);
+
+                indexCtx.fillStyle = isTooDark(background) ? "white" : "black";
+                indexCtx.textAlign = "center";
+                indexCtx.textBaseline = "middle";
+                indexCtx.font = "8px serif";
+                indexCtx.fillText(
+                    item.palette,
+                    item.x * 10 + 5,
+                    item.y * 10 + 5,
+                );
+            }
+        }
+
+        function update() {
+            paletteContainer.innerHTML = "";
+            preview.width = preview.height = size.value * 10;
+            index.width = index.height = size.value * 10;
+
+            for (let idx in palettes) {
+                const pal = palettes[idx];
+                const holder = document.createElement("div");
+                if (idx === palette.value) {
+                    holder.style.border = "1px solid black";
+                }
+
+                for (let paletteColorIdx in pal) {
+                    const paletteColor = pal[paletteColorIdx];
+                    const div = document.createElement("div");
+
+                    div.style.margin = 1;
+                    div.style.backgroundColor = paletteColor;
+                    div.style.width = 15;
+                    div.style.height = 15;
+                    div.style.border = `1px solid ${idx === palette.value && paletteColorIdx == color.value ? "red" : "black"}`;
+                    div.style.display = "inline-block";
+                    div.style.boxShadow = "inset white 0 0 0px 2px";
+
+                    if (idx == palette.value) {
+                        div.onclick = () => {
+                            if (color.value === paletteColorIdx) {
+                                currentColor.click();
+                            } else {
+                                color.value = paletteColorIdx;
+                            }
+                            update();
+                            draw();
+                            save();
+                        };
+                    } else {
+                        div.style.opacity = 0.5;
+                        div.disabled = true;
+                    }
+
+                    holder.appendChild(div);
+                }
+
+                const randomize = document.createElement("button");
+                randomize.innerHTML = "Randomize";
+                randomize.onclick = () => {
+                    for (let i = 0; i < 16; i++) {
+                        const rand = Math.random() * 16777215;
+                        const hex = Math.floor(rand).toString(16);
+                        pal[i] = "#" + hex;
+                    }
+                    update();
+                    draw();
+                    save();
+                };
+                holder.appendChild(randomize);
+
+                paletteContainer.appendChild(holder);
+            }
+
+            palette.nextElementSibling.innerHTML = palette.value;
+            color.nextElementSibling.innerHTML = color.value;
+            currentColor.value = palettes[palette.value][color.value];
+
+            const firstColor = palettes[palette.value][0];
+            const image = new window._pnglibEs2(
+                Number(size.value),
+                Number(size.value),
+                256,
+                firstColor,
+            );
+            const imageColors = [0];
+            for (let color of palettes[palette.value].slice(1)) {
+                imageColors.push(image.createColor(color));
+            }
+            let idx = 0;
+            for (let item of items) {
+                image.setPixel(
+                    item.x,
+                    item.y,
+                    imageColors[Number(item.palette)],
+                );
+            }
+            result.src = image.getDataURL();
+            result.style.zoom = 10;
+        }
+
+        init();
+        update();
+        draw();
+    </script>
+</html>
