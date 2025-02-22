@@ -150,10 +150,6 @@
       }
       var PNGImage = (function () {
         function PNGImage(width, height, depth) {
-          var backgroundColor =
-            arguments.length <= 3 || arguments[3] === undefined
-              ? "transparent"
-              : arguments[3];
           _classCallCheck(this, PNGImage);
           this.width = width;
           this.height = height;
@@ -226,8 +222,6 @@
             _off = write2lsb(buffer, _off, size);
             write2lsb(buffer, _off, ~size);
           }
-
-          this.backgroundColor = this.createColor(backgroundColor);
         }
         _createClass(PNGImage, [
           {
@@ -241,24 +235,6 @@
           },
           {
             key: "color",
-            // value: function color(red, green, blue, alpha) {
-            //   alpha = alpha >= 0 ? alpha : 255;
-            //   var color = (((((alpha << 8) | red) << 8) | green) << 8) | blue;
-
-            //   if (this.palette[color] === undefined) {
-            //     if (this.pindex == this.depth) return 0;
-
-            //     var ndx = this.plte_offs + 8 + 3 * this.pindex;
-
-            //     this.buffer[ndx + 0] = red;
-            //     this.buffer[ndx + 1] = green;
-            //     this.buffer[ndx + 2] = blue;
-            //     this.buffer[this.trns_offs + 8 + this.pindex] = alpha;
-
-            //     this.palette[color] = this.pindex++;
-            //   }
-            //   return this.palette[color];
-            // },
             value: function color(red, green, blue, alpha) {
               alpha = alpha >= 0 ? alpha : 255;
               var color = (((((alpha << 8) | red) << 8) | green) << 8) | blue;

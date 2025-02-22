@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libtonc/include"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/libraries/libgba/include"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/16_from_spriter/build"
+   - "-I/Users/gigigi/Documents/Projects/mega-repo/GBA/demos/16_from_spriter/source"
