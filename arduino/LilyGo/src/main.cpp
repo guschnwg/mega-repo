@@ -11,7 +11,7 @@
 #include <Arduino.h>
 #include <ESPmDNS.h>
 #include <Wire.h>
-#include <WiFi.h>
+#include <WebServer.h>
 #include <touch.h>
 
 #include "firasans.h"
@@ -22,7 +22,7 @@ const char *ssid = "CAZINHA2G";
 const char *password = "Will2020Mu*";
 uint8_t *framebuffer = NULL;
 Rect_t area = epd_full_screen();
-WiFiServer server(80);
+WebServer server(80);
 
 void full_clear_screen()
 {
@@ -40,6 +40,46 @@ void full_clear_screen()
     delay(500);
   }
   epd_clear();
+}
+
+
+size_t position = 0;
+void handle_upload()
+{
+  HTTPUpload &upload = server.upload();
+  if (upload.status == UPLOAD_FILE_START)
+  {
+    position = 0;
+  }
+  else if (upload.status == UPLOAD_FILE_WRITE)
+  {
+    // Out upload will come as an file with hex values
+    char str[2];
+    for (size_t i = 0; i < upload.currentSize; i+=2) {
+      memcpy(str, &upload.buf[i], 2);
+      str[2] = '\0';
+      int y = position / EPD_WIDTH;
+      int x = position % EPD_WIDTH;
+      int color = (int)strtol(str, NULL, 16);
+      epd_draw_pixel(x, y, color, framebuffer);
+      position++;
+    }
+  }
+  else if (upload.status == UPLOAD_FILE_END)
+  {
+    epd_clear();
+    epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+    Serial.print("Upload: END, Size: ");
+    Serial.println(position);
+  }
+}
+
+void ok() {
+  server.send(200, "text/plain", "OK");
+}
+
+void draw() {
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
 }
 
 void setup()
@@ -71,6 +111,8 @@ void setup()
   {
     MDNS.addService("http", "tcp", 80);
   }
+  server.on("/", HTTP_POST, ok, handle_upload);
+  server.on("/draw", HTTP_GET, ok, draw);
   server.begin();
 
   epd_clear();
@@ -78,43 +120,6 @@ void setup()
   int cursor_y = 100;
   writeln((GFXfont *)&FiraSans, "HIII", &cursor_x, &cursor_y, framebuffer);
   epd_draw_grayscale_image(epd_full_screen(), framebuffer);
-}
-
-bool read_server()
-{
-  WiFiClient client = server.available();
-  if (!client)
-    return false;
-  while (client.connected() && !client.available()) delay(1);
-
-  int start_y = 0;
-  String req = client.readStringUntil('\r');
-  int addr_start = req.indexOf(' ');
-  int addr_end = req.indexOf(' ', addr_start + 1);
-  if (addr_start == -1 || addr_end == -1) {
-    start_y = 0;
-  } else {
-    start_y = req.substring(addr_start + 2, addr_end).toInt();
-  }
-
-  String dataString = client.readString();
-
-  int pixelIndex = EPD_WIDTH * start_y;
-  char *token = strtok((char *)dataString.c_str(), ",");
-  while (token != NULL && pixelIndex < EPD_HEIGHT * EPD_WIDTH) {
-    int y = pixelIndex / EPD_WIDTH;
-    int x = pixelIndex % EPD_WIDTH;
-    int color = (uint8_t)atoi(token);
-    epd_draw_pixel(x, y, color, framebuffer);
-
-    token = strtok(NULL, ",");
-    pixelIndex++;
-  }
-
-  client.print(":)");
-  client.stop();
-
-  return true;
 }
 
 void loop()
@@ -125,14 +130,10 @@ void loop()
     touch.getPoint(x, y, 0);
     y = EPD_HEIGHT - y;
     epd_draw_rect(x, y, 10, 10, 0, framebuffer);
-    epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+    draw();
   }
 
-  if (read_server())
-  {
-    epd_clear();
-    epd_draw_grayscale_image(epd_full_screen(), framebuffer);
-  }
+  server.handleClient();
 
   delay(10);
 }
