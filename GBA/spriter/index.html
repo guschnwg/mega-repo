@@ -1,6 +1,7 @@
 <html>
     <head>
         <script src="lib.js"></script>
+        <script src="utils.js"></script>
     </head>
     <style>
         #container {
@@ -342,10 +343,6 @@
             update();
             save();
             drawResultingImage();
-        }
-
-        function clamp(num, min, max) {
-            return num <= min ? min : num >= max ? max : num;
         }
 
         function drawResultingImage() {
