@@ -6,80 +6,163 @@
         #container {
             border: 1px solid red;
         }
+
+        body {
+            display: flex;
+        }
+
+        canvas {
+            border: 1px solid red;
+        }
+
+        #resulting-image {
+            object-fit: none;
+            align-self: start;
+            zoom: 3;
+        }
+
+        .preview {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            flex: 1;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        #palettes {
+            margin-bottom: 18px;
+        }
+
+        .color-slider {
+            display: flex;
+        }
+
+        .color-slider > input {
+            flex: 1;
+            margin-left: 9px;
+            margin-right: 48px;
+        }
+
+        #palettes > div {
+            display: flex;
+            gap: 1px;
+            padding: 3px;
+        }
+
+        #palettes > div > button {
+            margin-left: 10px;
+        }
+
+        .palette-chooser {
+            display: flex;
+        }
+
+        .palette-chooser > .palettes-slider {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .palette-chooser > .palettes-slider > input {
+            writing-mode: vertical-lr;
+            direction: ltr;
+            flex: 1;
+            margin-top: 27px;
+            margin-bottom: 27px;
+            margin-left: 5px;
+        }
     </style>
     <body>
-        <div>
-            <label for="size">Size:</label>
-            <input type="number" id="size" />
+        <div class="preview">
+            <div>
+                <canvas id="preview-canvas" height="160" width="160"></canvas>
+            </div>
+
+            <div id="sprites-container"></div>
         </div>
 
-        <div>
-            <label for="color">Color:</label>
-            <button
-                onclick="--event.target.nextElementSibling.value; color.dispatchEvent(new Event('change'));"
-            >
-                ◀
-            </button>
-            <input type="range" id="color" min="0" max="16" />
-            <span></span>
-            <button
-                onclick="++event.target.previousElementSibling.previousElementSibling.value; color.dispatchEvent(new Event('change'));"
-            >
-                ➡
-            </button>
+        <div class="menu">
+            <div>
+                <button onclick="reset()">Reset</button>
+            </div>
+            <div>
+                <input type="checkbox" id="view-indexes" />
+                <label for="view-indexes">View indexes</label>
+            </div>
+            <div>
+                <input type="checkbox" id="mirror-vertical" />
+                <label for="mirror-vertical">Mirror Vertical</label>
+            </div>
+            <div>
+                <input type="checkbox" id="mirror-horizontal" />
+                <label for="mirror-horizontal">Mirror Horizontal</label>
+            </div>
+            <div>
+                <label for="size">Size:</label>
+                <input type="number" id="size" />
+            </div>
+
+            <div>
+                <label for="sprite">Sprite:</label>
+                <button
+                    onclick="--event.target.nextElementSibling.value; spriteSelectedEl.dispatchEvent(new Event('change'));"
+                >
+                    ◀
+                </button>
+                <input type="range" id="sprite" min="0" max="999" />
+                <span></span>
+                <button
+                    onclick="++event.target.previousElementSibling.previousElementSibling.value; spriteSelectedEl.dispatchEvent(new Event('change'));"
+                >
+                    ➡
+                </button>
+                <button onclick="addSprite()">Add sprite</button>
+                <button onclick="randomizeSprite()">🎲</button>
+                <button onclick="fill()">🪣</button>
+            </div>
+
+            <div>
+                <label for="current-color">Current Color:</label>
+                <input type="color" id="current-color" />
+            </div>
+
+            <div class="palette-chooser">
+                <div>
+                    <div class="color-slider">
+                        <input type="range" id="color" min="0" max="15" />
+                    </div>
+                    <div id="palettes"></div>
+                </div>
+                <div class="palettes-slider">
+                    <input type="range" id="palette" min="0" max="15" />
+                </div>
+            </div>
+
+            <img id="resulting-image" />
         </div>
-
-        <div>
-            <label for="current-color">Current Color:</label>
-            <input type="color" id="current-color" />
-        </div>
-
-        <div>
-            <label for="palette">Palette:</label>
-            <button
-                onclick="--event.target.nextElementSibling.value; palette.dispatchEvent(new Event('change'));"
-            >
-                ◀
-            </button>
-            <input type="range" id="palette" min="0" max="16" />
-            <span></span>
-            <button
-                onclick="++event.target.previousElementSibling.previousElementSibling.value; palette.dispatchEvent(new Event('change'));"
-            >
-                ➡
-            </button>
-        </div>
-
-        <div>
-            Palettes:
-            <div id="palettes"></div>
-        </div>
-
-        <canvas id="preview-canvas" height="160" width="160"></canvas>
-        <canvas id="index-canvas" height="160" width="160"></canvas>
-
-        <img id="resulting-image" />
     </body>
     <script>
         const preview = document.getElementById("preview-canvas");
         const previewCtx = preview.getContext("2d");
-        const index = document.getElementById("index-canvas");
-        const indexCtx = index.getContext("2d");
 
-        const size = document.getElementById("size");
-        const color = document.getElementById("color");
-        const currentColor = document.getElementById("current-color");
-        const palette = document.getElementById("palette");
+        const viewIndexesEl = document.getElementById("view-indexes");
+        const mirrorHorizontalEl = document.getElementById("mirror-horizontal");
+        const mirrorVerticalEl = document.getElementById("mirror-vertical");
+        const sizeEl = document.getElementById("size");
+        const spriteSelectedEl = document.getElementById("sprite");
+        const colorPickerEl = document.getElementById("color");
+        const currentColorEl = document.getElementById("current-color");
+        const paletteEl = document.getElementById("palette");
         const paletteContainer = document.getElementById("palettes");
-        const result = document.getElementById("resulting-image");
+        const resultEl = document.getElementById("resulting-image");
+        const spritesContainerEl = document.getElementById("sprites-container");
         let drawing = false;
 
-        let items = [];
-        for (let x = 0; x < 16; x++) {
-            for (let y = 0; y < 16; y++) {
-                items.push({ x, y, palette: 0 });
-            }
-        }
+        let sprites = [newSprite()];
 
         let palettes = Array.from({ length: 16 }, () =>
             Array.from({ length: 16 }, () => "#000000"),
@@ -87,124 +170,219 @@
 
         size.addEventListener("change", () => {
             update();
-            draw();
             save();
         });
-        [color, palette].forEach((el) =>
-            el.addEventListener("change", () => {
+        [
+            colorPickerEl,
+            paletteEl,
+            spriteSelectedEl,
+            viewIndexesEl,
+            mirrorVerticalEl,
+            mirrorHorizontalEl,
+        ].forEach((el) =>
+            el.addEventListener("input", () => {
                 update();
-                draw();
                 save();
             }),
         );
-        currentColor.onchange = () => {
-            palettes[palette.value][color.value] = currentColor.value;
+        currentColorEl.addEventListener("input", () => {
+            palettes[paletteEl.value][colorPickerEl.value] =
+                currentColorEl.value;
             update();
-            draw();
             save();
-        };
-        [preview, index].forEach((el) =>
-            el.addEventListener("mousedown", () => (drawing = true)),
-        );
-        [preview, index].forEach((el) =>
-            el.addEventListener("mouseup", () => (drawing = false)),
-        );
-        [preview, index].forEach((el) =>
-            el.addEventListener("mousemove", (e) => {
-                if (!drawing) return;
-                putItem(Math.floor(e.offsetX / 10), Math.floor(e.offsetY / 10));
-            }),
-        );
-        [preview, index].forEach((el) =>
-            el.addEventListener("click", (e) => {
-                putItem(Math.floor(e.offsetX / 10), Math.floor(e.offsetY / 10));
-            }),
-        );
+        });
+        document.body.addEventListener("mousedown", () => {
+            drawing = true;
+        });
+        document.body.addEventListener("mouseup", () => {
+            drawing = false;
+            drawResultingImage();
+        });
 
-        function putItem(x, y) {
-            const item = items.find((item) => item.x === x && item.y === y);
+        function putItem(x, y, idx = null) {
+            const item = sprites[idx || spriteSelectedEl.value].find(
+                (item) => item.x === x && item.y === y,
+            );
             if (item) {
-                item.palette = color.value;
+                item.palette = colorPickerEl.value;
             } else {
-                items.push({ x, y, palette: color.value });
+                sprites[spriteSelectedEl.value].push({
+                    x,
+                    y,
+                    palette: colorPickerEl.value,
+                });
             }
 
             update();
-            draw();
             save();
         }
 
         function init() {
-            size.value = localStorage.getItem("size") || 16;
-            color.value = localStorage.getItem("color") || 0;
-            palette.value = localStorage.getItem("palette") || 0;
-            items = JSON.parse(localStorage.getItem("items")) || items;
+            viewIndexesEl.checked =
+                localStorage.getItem("view-indexes") === "true";
+            mirrorVerticalEl.checked =
+                localStorage.getItem("mirror-vertical") === "true";
+            mirrorHorizontalEl.checked =
+                localStorage.getItem("mirror-horizontal") === "true";
+            sizeEl.value = localStorage.getItem("size") || 16;
+            colorPickerEl.value = localStorage.getItem("color") || 0;
+            paletteEl.value = localStorage.getItem("palette") || 0;
+            spriteSelectedEl.value = localStorage.getItem("sprite") || 0;
+            sprites = JSON.parse(localStorage.getItem("sprites")) || sprites;
             palettes = JSON.parse(localStorage.getItem("palettes")) || palettes;
         }
         function save() {
-            localStorage.setItem("size", size.value);
-            localStorage.setItem("color", color.value);
-            localStorage.setItem("palette", palette.value);
-            localStorage.setItem("items", JSON.stringify(items));
+            localStorage.setItem("view-indexes", viewIndexesEl.checked);
+            localStorage.setItem("mirror-vertical", mirrorVerticalEl.checked);
+            localStorage.setItem(
+                "mirror-horizontal",
+                mirrorHorizontalEl.checked,
+            );
+            localStorage.setItem("size", sizeEl.value);
+            localStorage.setItem("color", colorPickerEl.value);
+            localStorage.setItem("palette", paletteEl.value);
+            localStorage.setItem("sprite", spriteSelectedEl.value);
+            localStorage.setItem("sprites", JSON.stringify(sprites));
             localStorage.setItem("palettes", JSON.stringify(palettes));
         }
+        function reset() {
+            localStorage.clear();
+            window.location.reload();
+        }
 
-        function isTooDark(color) {
-            var r = parseInt(color.substr(1, 2), 16);
-            var g = parseInt(color.substr(3, 2), 16);
-            var b = parseInt(color.substr(4, 2), 16);
+        function isTooDark(c) {
+            var r = parseInt(c.substr(1, 2), 16);
+            var g = parseInt(c.substr(3, 2), 16);
+            var b = parseInt(c.substr(4, 2), 16);
             var yiq = (r * 299 + g * 587 + b * 114) / 1000;
             return yiq < 120;
         }
 
-        function draw() {
-            const background = palettes[palette.value][0];
-            preview.style.backgroundColor = background;
-            previewCtx.clearRect(0, 0, preview.width, preview.height);
-            index.style.backgroundColor = background;
-            indexCtx.clearRect(0, 0, index.width, index.height);
+        function draw(
+            element = preview,
+            context = previewCtx,
+            sprite = sprites[spriteSelectedEl.value],
+        ) {
+            const background = palettes[paletteEl.value][0];
+            element.style.backgroundColor = background;
+            context.clearRect(0, 0, preview.width, preview.height);
 
-            for (let item of items) {
-                if (item.palette == 0) {
-                    // Draw transparent
-                    for (let x = 0; x < 2; x++) {
-                        for (let y = 0; y < 2; y++) {
-                            previewCtx.fillStyle =
-                                (x + y) % 2 === 0 ? "white" : "lightgray";
-                            previewCtx.fillRect(
-                                item.x * 10 + x * 5,
-                                item.y * 10 + y * 5,
-                                5,
-                                5,
-                            );
-                        }
-                    }
+            for (let item of sprite) {
+                if (viewIndexesEl.checked) {
+                    context.fillStyle = palettes[paletteEl.value][item.palette];
+                    context.strokeStyle =
+                        palettes[paletteEl.value][item.palette];
+                    context.strokeRect(item.x * 10, item.y * 10, 10, 10);
+
+                    context.fillStyle = isTooDark(background)
+                        ? "white"
+                        : "black";
+                    context.textAlign = "center";
+                    context.textBaseline = "middle";
+                    context.font = "8px serif";
+                    context.fillText(
+                        item.palette,
+                        item.x * 10 + 5,
+                        item.y * 10 + 5,
+                    );
                 } else {
-                    previewCtx.fillStyle =
-                        palettes[palette.value][item.palette];
-                    previewCtx.fillRect(item.x * 10, item.y * 10, 10, 10);
+                    if (item.palette == 0) {
+                        // Draw transparent
+                        for (let x = 0; x < 2; x++) {
+                            for (let y = 0; y < 2; y++) {
+                                context.fillStyle =
+                                    (x + y) % 2 === 0 ? "white" : "lightgray";
+                                context.fillRect(
+                                    item.x * 10 + x * 5,
+                                    item.y * 10 + y * 5,
+                                    5,
+                                    5,
+                                );
+                            }
+                        }
+                    } else {
+                        context.fillStyle =
+                            palettes[paletteEl.value][item.palette];
+                        context.fillRect(item.x * 10, item.y * 10, 10, 10);
+                    }
                 }
-
-                indexCtx.fillStyle = palettes[palette.value][item.palette];
-                indexCtx.strokeStyle = palettes[palette.value][item.palette];
-                indexCtx.strokeRect(item.x * 10, item.y * 10, 10, 10);
-
-                indexCtx.fillStyle = isTooDark(background) ? "white" : "black";
-                indexCtx.textAlign = "center";
-                indexCtx.textBaseline = "middle";
-                indexCtx.font = "8px serif";
-                indexCtx.fillText(
-                    item.palette,
-                    item.x * 10 + 5,
-                    item.y * 10 + 5,
-                );
             }
+        }
+
+        function newSprite() {
+            let items = [];
+            for (let x = 0; x < 16; x++) {
+                for (let y = 0; y < 16; y++) {
+                    items.push({ x, y, palette: 0 });
+                }
+            }
+            return items;
+        }
+
+        function addSprite() {
+            sprites.push(newSprite());
+            update();
+            save();
+            drawResultingImage();
+        }
+
+        function randomizeSprite() {
+            sprites[spriteSelectedEl.value].forEach((item) => {
+                item.palette = Math.floor(Math.random() * 16);
+            });
+            update();
+            save();
+            drawResultingImage();
+        }
+
+        function fill() {
+            sprites[spriteSelectedEl.value].forEach((item) => {
+                item.palette = colorPickerEl.value;
+            });
+            update();
+            save();
+            drawResultingImage();
+        }
+
+        function clamp(num, min, max) {
+            return num <= min ? min : num >= max ? max : num;
+        }
+
+        function drawResultingImage() {
+            const firstColor = palettes[palette.value][0];
+            // 6 per row
+            const image = new window._pnglibEs2(
+                sizeEl.valueAsNumber * clamp(sprites.length, 0, 6),
+                sizeEl.valueAsNumber * (parseInt((sprites.length - 1) / 6) + 1),
+                256,
+            );
+            palettes.forEach((p) => p.forEach((c) => image.createColor(c)));
+            sprites.forEach((sprite, idx) => {
+                sprite.forEach((item) => {
+                    if (
+                        item.x > sizeEl.valueAsNumber - 1 ||
+                        item.y > sizeEl.valueAsNumber - 1
+                    ) {
+                        return;
+                    }
+
+                    let xInc = (idx % 6) * sizeEl.valueAsNumber;
+                    let yInc =
+                        idx > 5 ? sizeEl.valueAsNumber * parseInt(idx / 6) : 0;
+                    image.setPixel(
+                        item.x + xInc,
+                        item.y + yInc,
+                        Number(item.palette),
+                    );
+                });
+            });
+            resultEl.src = image.getDataURL();
         }
 
         function update() {
             paletteContainer.innerHTML = "";
-            preview.width = preview.height = size.value * 10;
-            index.width = index.height = size.value * 10;
+            preview.width = preview.height = sizeEl.valueAsNumber * 10;
+            sprite.max = sprites.length - 1;
 
             for (let idx in palettes) {
                 const pal = palettes[idx];
@@ -219,21 +397,20 @@
 
                     div.style.margin = 1;
                     div.style.backgroundColor = paletteColor;
-                    div.style.width = 15;
-                    div.style.height = 15;
-                    div.style.border = `1px solid ${idx === palette.value && paletteColorIdx == color.value ? "red" : "black"}`;
+                    div.style.width = 20;
+                    div.style.height = 20;
+                    div.style.border = `2px solid ${idx === palette.value && paletteColorIdx == colorPickerEl.value ? "red" : "black"}`;
                     div.style.display = "inline-block";
                     div.style.boxShadow = "inset white 0 0 0px 2px";
 
                     if (idx == palette.value) {
                         div.onclick = () => {
-                            if (color.value === paletteColorIdx) {
-                                currentColor.click();
+                            if (colorPickerEl.value === paletteColorIdx) {
+                                currentColorEl.click();
                             } else {
-                                color.value = paletteColorIdx;
+                                colorPickerEl.value = paletteColorIdx;
                             }
                             update();
-                            draw();
                             save();
                         };
                     } else {
@@ -245,15 +422,14 @@
                 }
 
                 const randomize = document.createElement("button");
-                randomize.innerHTML = "Randomize";
+                randomize.innerHTML = "🎲";
                 randomize.onclick = () => {
                     for (let i = 0; i < 16; i++) {
                         const rand = Math.random() * 16777215;
                         const hex = Math.floor(rand).toString(16);
-                        pal[i] = "#" + hex;
+                        pal[i] = "#" + hex.padStart(6, "0");
                     }
                     update();
-                    draw();
                     save();
                 };
                 holder.appendChild(randomize);
@@ -261,26 +437,72 @@
                 paletteContainer.appendChild(holder);
             }
 
-            palette.nextElementSibling.innerHTML = palette.value;
-            color.nextElementSibling.innerHTML = color.value;
-            currentColor.value = palettes[palette.value][color.value];
+            spritesContainerEl.innerHTML = "";
+            for (let idx in sprites) {
+                let spriteCanvas = document.createElement("canvas");
+                spriteCanvas.width = spriteCanvas.height =
+                    sizeEl.valueAsNumber * 10;
+                let spriteCtx = spriteCanvas.getContext("2d");
 
-            const firstColor = palettes[palette.value][0];
-            const image = new window._pnglibEs2(
-                Number(size.value),
-                Number(size.value),
-                256,
-            );
-            palettes.forEach((p) => p.forEach((c) => image.createColor(c)));
-            items.forEach((item) =>
-                image.setPixel(item.x, item.y, Number(item.palette)),
-            );
-            result.src = image.getDataURL();
-            result.style.zoom = 10;
+                function addItemFromEvent(e) {
+                    putItem(
+                        Math.floor(e.offsetX / 10),
+                        Math.floor(e.offsetY / 10),
+                        idx,
+                    );
+                    if (mirrorHorizontalEl.checked) {
+                        putItem(
+                            sizeEl.valueAsNumber -
+                                Math.floor(e.offsetX / 10) -
+                                1,
+                            Math.floor(e.offsetY / 10),
+                            idx,
+                        );
+                    }
+                    if (mirrorVerticalEl.checked) {
+                        putItem(
+                            Math.floor(e.offsetX / 10),
+                            sizeEl.valueAsNumber -
+                                Math.floor(e.offsetY / 10) -
+                                1,
+                            idx,
+                        );
+                    }
+                }
+
+                spriteCanvas.addEventListener("mousemove", (e) => {
+                    if (drawing) {
+                        addItemFromEvent(e);
+                    } else {
+                        draw(spriteCanvas, spriteCtx, sprites[idx]);
+                    }
+                    spriteCtx.strokeStyle = "red";
+                    spriteCtx.strokeRect(
+                        parseInt(e.offsetX / 10) * 10,
+                        parseInt(e.offsetY / 10) * 10,
+                        10,
+                        10,
+                    );
+                });
+                spriteCanvas.addEventListener("mouseleave", () =>
+                    draw(spriteCanvas, spriteCtx, sprites[idx]),
+                );
+                spriteCanvas.addEventListener("click", addItemFromEvent);
+
+                draw(spriteCanvas, spriteCtx, sprites[idx]);
+
+                spritesContainerEl.appendChild(spriteCanvas);
+            }
+
+            // colorPickerEl.nextElementSibling.innerHTML = colorPickerEl.value;
+            sprite.nextElementSibling.innerHTML = `${spriteSelectedEl.value} (${sprites.length})`;
+            currentColorEl.value = palettes[palette.value][colorPickerEl.value];
+
+            draw();
         }
 
         init();
         update();
-        draw();
+        drawResultingImage();
     </script>
 </html>
