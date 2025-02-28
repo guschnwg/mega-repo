@@ -1,0 +1,79 @@
+html,
+body {
+    overscroll-behavior-x: none;
+}
+
+#container {
+    border: 1px solid red;
+}
+
+body {
+    display: flex;
+}
+
+canvas {
+    border: 1px solid red;
+}
+
+#resulting-image {
+    object-fit: none;
+    align-self: start;
+    zoom: 3;
+}
+
+.preview {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    flex: 1;
+    overflow: scroll;
+    padding: 50px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+#palettes {
+    margin-bottom: 18px;
+}
+
+.color-slider {
+    display: flex;
+}
+
+.color-slider > input {
+    flex: 1;
+    margin-left: 9px;
+    margin-right: 48px;
+}
+
+#palettes > div {
+    display: flex;
+    gap: 1px;
+    padding: 3px;
+}
+
+#palettes > div > button {
+    margin-left: 10px;
+}
+
+.palette-chooser {
+    display: flex;
+}
+
+.palette-chooser > .palettes-slider {
+    display: flex;
+    flex-direction: column;
+}
+
+.palette-chooser > .palettes-slider > input {
+    writing-mode: vertical-lr;
+    direction: ltr;
+    flex: 1;
+    margin-top: 27px;
+    margin-bottom: 27px;
+    margin-left: 5px;
+}

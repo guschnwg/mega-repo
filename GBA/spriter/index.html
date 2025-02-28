@@ -1,82 +1,8 @@
 <html>
     <head>
-        <script src="lib.js"></script>
-        <script src="utils.js"></script>
+        <link href="style.css" rel="stylesheet" />
     </head>
-    <style>
-        #container {
-            border: 1px solid red;
-        }
 
-        body {
-            display: flex;
-        }
-
-        canvas {
-            border: 1px solid red;
-        }
-
-        #resulting-image {
-            object-fit: none;
-            align-self: start;
-            zoom: 3;
-        }
-
-        .preview {
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            flex: 1;
-        }
-
-        .menu {
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-        }
-
-        #palettes {
-            margin-bottom: 18px;
-        }
-
-        .color-slider {
-            display: flex;
-        }
-
-        .color-slider > input {
-            flex: 1;
-            margin-left: 9px;
-            margin-right: 48px;
-        }
-
-        #palettes > div {
-            display: flex;
-            gap: 1px;
-            padding: 3px;
-        }
-
-        #palettes > div > button {
-            margin-left: 10px;
-        }
-
-        .palette-chooser {
-            display: flex;
-        }
-
-        .palette-chooser > .palettes-slider {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .palette-chooser > .palettes-slider > input {
-            writing-mode: vertical-lr;
-            direction: ltr;
-            flex: 1;
-            margin-top: 27px;
-            margin-bottom: 27px;
-            margin-left: 5px;
-        }
-    </style>
     <body>
         <div class="preview">
             <div>
@@ -101,6 +27,10 @@
             <div>
                 <input type="checkbox" id="mirror-horizontal" />
                 <label for="mirror-horizontal">Mirror Horizontal</label>
+            </div>
+            <div>
+                <input type="checkbox" id="mirror-diagonal" />
+                <label for="mirror-diagonal">Mirror Diagonal</label>
             </div>
             <div>
                 <label for="size">Size:</label>
@@ -146,29 +76,11 @@
             <img id="resulting-image" />
         </div>
     </body>
+
+    <script src="lib.js"></script>
+    <script src="utils.js"></script>
+
     <script>
-        const preview = document.getElementById("preview-canvas");
-        const previewCtx = preview.getContext("2d");
-
-        const viewIndexesEl = document.getElementById("view-indexes");
-        const mirrorHorizontalEl = document.getElementById("mirror-horizontal");
-        const mirrorVerticalEl = document.getElementById("mirror-vertical");
-        const sizeEl = document.getElementById("size");
-        const spriteSelectedEl = document.getElementById("sprite");
-        const colorPickerEl = document.getElementById("color");
-        const currentColorEl = document.getElementById("current-color");
-        const paletteEl = document.getElementById("palette");
-        const paletteContainer = document.getElementById("palettes");
-        const resultEl = document.getElementById("resulting-image");
-        const spritesContainerEl = document.getElementById("sprites-container");
-        let drawing = false;
-
-        let sprites = [newSprite()];
-
-        let palettes = Array.from({ length: 16 }, () =>
-            Array.from({ length: 16 }, () => "#000000"),
-        );
-
         size.addEventListener("change", () => {
             update();
             save();
@@ -201,9 +113,9 @@
         });
 
         function putItem(x, y, idx = null) {
-            const item = sprites[idx || spriteSelectedEl.value].find(
-                (item) => item.x === x && item.y === y,
-            );
+            const sprite = sprites[idx || spriteSelectedEl.value];
+            const item = sprite.find((item) => item.x === x && item.y === y);
+
             if (item) {
                 item.palette = colorPickerEl.value;
             } else {
@@ -214,49 +126,19 @@
                 });
             }
 
-            update();
             save();
         }
 
-        function init() {
-            viewIndexesEl.checked =
-                localStorage.getItem("view-indexes") === "true";
-            mirrorVerticalEl.checked =
-                localStorage.getItem("mirror-vertical") === "true";
-            mirrorHorizontalEl.checked =
-                localStorage.getItem("mirror-horizontal") === "true";
-            sizeEl.value = localStorage.getItem("size") || 16;
-            colorPickerEl.value = localStorage.getItem("color") || 0;
-            paletteEl.value = localStorage.getItem("palette") || 0;
-            spriteSelectedEl.value = localStorage.getItem("sprite") || 0;
-            sprites = JSON.parse(localStorage.getItem("sprites")) || sprites;
-            palettes = JSON.parse(localStorage.getItem("palettes")) || palettes;
-        }
-        function save() {
-            localStorage.setItem("view-indexes", viewIndexesEl.checked);
-            localStorage.setItem("mirror-vertical", mirrorVerticalEl.checked);
-            localStorage.setItem(
-                "mirror-horizontal",
-                mirrorHorizontalEl.checked,
-            );
-            localStorage.setItem("size", sizeEl.value);
-            localStorage.setItem("color", colorPickerEl.value);
-            localStorage.setItem("palette", paletteEl.value);
-            localStorage.setItem("sprite", spriteSelectedEl.value);
-            localStorage.setItem("sprites", JSON.stringify(sprites));
-            localStorage.setItem("palettes", JSON.stringify(palettes));
-        }
-        function reset() {
-            localStorage.clear();
-            window.location.reload();
-        }
+        function drawIndices(context, background, item) {
+            context.fillStyle = palettes[paletteEl.value][item.palette];
+            context.strokeStyle = palettes[paletteEl.value][item.palette];
+            context.strokeRect(item.x * 10, item.y * 10, 10, 10);
 
-        function isTooDark(c) {
-            var r = parseInt(c.substr(1, 2), 16);
-            var g = parseInt(c.substr(3, 2), 16);
-            var b = parseInt(c.substr(4, 2), 16);
-            var yiq = (r * 299 + g * 587 + b * 114) / 1000;
-            return yiq < 120;
+            context.fillStyle = isTooDark(background) ? "white" : "black";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.font = "8px serif";
+            context.fillText(item.palette, item.x * 10 + 5, item.y * 10 + 5);
         }
 
         function draw(
@@ -270,22 +152,7 @@
 
             for (let item of sprite) {
                 if (viewIndexesEl.checked) {
-                    context.fillStyle = palettes[paletteEl.value][item.palette];
-                    context.strokeStyle =
-                        palettes[paletteEl.value][item.palette];
-                    context.strokeRect(item.x * 10, item.y * 10, 10, 10);
-
-                    context.fillStyle = isTooDark(background)
-                        ? "white"
-                        : "black";
-                    context.textAlign = "center";
-                    context.textBaseline = "middle";
-                    context.font = "8px serif";
-                    context.fillText(
-                        item.palette,
-                        item.x * 10 + 5,
-                        item.y * 10 + 5,
-                    );
+                    drawIndices(context, background, item);
                 } else {
                     if (item.palette == 0) {
                         // Draw transparent
@@ -376,21 +243,43 @@
             resultEl.src = image.getDataURL();
         }
 
-        function update() {
-            paletteContainer.innerHTML = "";
-            preview.width = preview.height = sizeEl.valueAsNumber * 10;
-            sprite.max = sprites.length - 1;
+        function addItemFromEvent(idx, e) {
+            const x = Math.floor(e.offsetX / 10);
+            const y = Math.floor(e.offsetY / 10);
 
+            const mirrorX = sizeEl.valueAsNumber - x - 1;
+            const mirrorY = sizeEl.valueAsNumber - y - 1;
+
+            putItem(x, y, idx);
+            if (mirrorHorizontalEl.checked) {
+                putItem(mirrorX, y, idx);
+            }
+            if (mirrorVerticalEl.checked) {
+                putItem(x, mirrorY, idx);
+            }
+            if (mirrorDiagonalEl.checked) {
+                putItem(mirrorX, mirrorY, idx);
+            }
+            update();
+        }
+
+        function updatePalettes() {
             for (let idx in palettes) {
                 const pal = palettes[idx];
-                const holder = document.createElement("div");
+                const holder =
+                    paletteContainer.childNodes[idx] ||
+                    document.createElement("div");
+
                 if (idx === palette.value) {
                     holder.style.border = "1px solid black";
                 }
 
                 for (let paletteColorIdx in pal) {
                     const paletteColor = pal[paletteColorIdx];
-                    const div = document.createElement("div");
+
+                    const div =
+                        holder.childNodes[paletteColorIdx] ||
+                        document.createElement("div");
 
                     div.style.margin = 1;
                     div.style.backgroundColor = paletteColor;
@@ -399,9 +288,15 @@
                     div.style.border = `2px solid ${idx === palette.value && paletteColorIdx == colorPickerEl.value ? "red" : "black"}`;
                     div.style.display = "inline-block";
                     div.style.boxShadow = "inset white 0 0 0px 2px";
+                    if (idx != palette.value) {
+                        div.style.opacity = 0.5;
+                        div.disabled = true;
+                    }
 
-                    if (idx == palette.value) {
+                    if (!holder.contains(div)) {
                         div.onclick = () => {
+                            if (idx != palette.value) return;
+
                             if (colorPickerEl.value === paletteColorIdx) {
                                 currentColorEl.click();
                             } else {
@@ -410,90 +305,81 @@
                             update();
                             save();
                         };
-                    } else {
-                        div.style.opacity = 0.5;
-                        div.disabled = true;
-                    }
 
-                    holder.appendChild(div);
+                        holder.appendChild(div);
+                    }
                 }
 
-                const randomize = document.createElement("button");
-                randomize.innerHTML = "🎲";
-                randomize.onclick = () => {
-                    for (let i = 0; i < 16; i++) {
-                        const rand = Math.random() * 16777215;
-                        const hex = Math.floor(rand).toString(16);
-                        pal[i] = "#" + hex.padStart(6, "0");
-                    }
-                    update();
-                    save();
-                };
-                holder.appendChild(randomize);
+                if (!paletteContainer.contains(holder)) {
+                    const randomize = document.createElement("button");
+                    randomize.innerHTML = "🎲";
+                    randomize.onclick = () => {
+                        for (let i = 0; i < 16; i++) {
+                            const rand = Math.random() * 16777215;
+                            const hex = Math.floor(rand).toString(16);
+                            pal[i] = "#" + hex.padStart(6, "0");
+                        }
+                        update();
+                        save();
+                    };
+                    holder.appendChild(randomize);
 
-                paletteContainer.appendChild(holder);
+                    paletteContainer.appendChild(holder);
+                }
             }
+        }
 
-            spritesContainerEl.innerHTML = "";
+        function updateSprites() {
+            spritesContainerEl.style.width = `${(sizeEl.valueAsNumber * 10 + 2) * 6}px`;
             for (let idx in sprites) {
-                let spriteCanvas = document.createElement("canvas");
-                spriteCanvas.width = spriteCanvas.height =
-                    sizeEl.valueAsNumber * 10;
-                let spriteCtx = spriteCanvas.getContext("2d");
+                let spriteCanvas = spritesContainerEl.childNodes[idx];
+                if (!spriteCanvas) {
+                    spriteCanvas = document.createElement("canvas");
+                    spriteCanvas.addEventListener("mousemove", (e) => {
+                        if (drawing) {
+                            addItemFromEvent(idx, e);
+                        } else {
+                            draw(spriteCanvas, spriteCtx, sprites[idx]);
+                        }
 
-                function addItemFromEvent(e) {
-                    putItem(
-                        Math.floor(e.offsetX / 10),
-                        Math.floor(e.offsetY / 10),
-                        idx,
-                    );
-                    if (mirrorHorizontalEl.checked) {
-                        putItem(
-                            sizeEl.valueAsNumber -
-                                Math.floor(e.offsetX / 10) -
-                                1,
-                            Math.floor(e.offsetY / 10),
-                            idx,
+                        // The cursor
+                        spriteCtx.strokeStyle = "red";
+                        spriteCtx.strokeRect(
+                            parseInt(e.offsetX / 10) * 10,
+                            parseInt(e.offsetY / 10) * 10,
+                            10,
+                            10,
                         );
-                    }
-                    if (mirrorVerticalEl.checked) {
-                        putItem(
-                            Math.floor(e.offsetX / 10),
-                            sizeEl.valueAsNumber -
-                                Math.floor(e.offsetY / 10) -
-                                1,
-                            idx,
-                        );
-                    }
-                }
-
-                spriteCanvas.addEventListener("mousemove", (e) => {
-                    if (drawing) {
-                        addItemFromEvent(e);
-                    } else {
+                    });
+                    spriteCanvas.addEventListener("mouseleave", () => {
+                        update();
                         draw(spriteCanvas, spriteCtx, sprites[idx]);
-                    }
-                    spriteCtx.strokeStyle = "red";
-                    spriteCtx.strokeRect(
-                        parseInt(e.offsetX / 10) * 10,
-                        parseInt(e.offsetY / 10) * 10,
-                        10,
-                        10,
+                    });
+                    spriteCanvas.addEventListener("click", (e) =>
+                        addItemFromEvent(idx, e),
                     );
-                });
-                spriteCanvas.addEventListener("mouseleave", () =>
-                    draw(spriteCanvas, spriteCtx, sprites[idx]),
-                );
-                spriteCanvas.addEventListener("click", addItemFromEvent);
+                }
+                spriteCanvas.width = sizeEl.valueAsNumber * 10;
+                spriteCanvas.height = sizeEl.valueAsNumber * 10;
+
+                let spriteCtx = spriteCanvas.getContext("2d");
 
                 draw(spriteCanvas, spriteCtx, sprites[idx]);
 
-                spritesContainerEl.appendChild(spriteCanvas);
+                if (!spritesContainerEl.contains(spriteCanvas)) {
+                    spritesContainerEl.appendChild(spriteCanvas);
+                }
             }
+        }
 
-            // colorPickerEl.nextElementSibling.innerHTML = colorPickerEl.value;
+        function update() {
+            preview.width = preview.height = sizeEl.valueAsNumber * 10;
+            sprite.max = sprites.length - 1;
             sprite.nextElementSibling.innerHTML = `${spriteSelectedEl.value} (${sprites.length})`;
             currentColorEl.value = palettes[palette.value][colorPickerEl.value];
+
+            updatePalettes();
+            updateSprites();
 
             draw();
         }
