@@ -5,10 +5,6 @@
 
     <body>
         <div class="preview">
-            <div>
-                <canvas id="preview-canvas" height="160" width="160"></canvas>
-            </div>
-
             <div id="sprites-container"></div>
         </div>
 
@@ -83,6 +79,7 @@
     <script>
         size.addEventListener("change", () => {
             update();
+            drawAll();
             save();
         });
         [
@@ -95,43 +92,22 @@
         ].forEach((el) =>
             el.addEventListener("input", () => {
                 update();
+                drawAll();
                 save();
             }),
         );
         currentColorEl.addEventListener("input", () => {
-            palettes[paletteEl.value][colorPickerEl.value] =
-                currentColorEl.value;
+            getCurrentPalette()[getPaletteColorIdx()] = currentColorEl.value;
             update();
+            drawAll();
             save();
         });
-        document.body.addEventListener("mousedown", () => {
-            drawing = true;
-        });
-        document.body.addEventListener("mouseup", () => {
-            drawing = false;
-            drawResultingImage();
-        });
-
-        function putItem(x, y, idx = null) {
-            const sprite = sprites[idx || spriteSelectedEl.value];
-            const item = sprite.find((item) => item.x === x && item.y === y);
-
-            if (item) {
-                item.palette = colorPickerEl.value;
-            } else {
-                sprites[spriteSelectedEl.value].push({
-                    x,
-                    y,
-                    palette: colorPickerEl.value,
-                });
-            }
-
-            save();
-        }
+        document.body.addEventListener("mousedown", () => (drawing = true));
+        document.body.addEventListener("mouseup", () => (drawing = false));
 
         function drawIndices(context, background, item) {
-            context.fillStyle = palettes[paletteEl.value][item.palette];
-            context.strokeStyle = palettes[paletteEl.value][item.palette];
+            context.fillStyle = getCurrentPalette()[item.palette];
+            context.strokeStyle = getCurrentPalette()[item.palette];
             context.strokeRect(item.x * 10, item.y * 10, 10, 10);
 
             context.fillStyle = isTooDark(background) ? "white" : "black";
@@ -142,13 +118,13 @@
         }
 
         function draw(
-            element = preview,
-            context = previewCtx,
+            element,
+            context,
             sprite = sprites[spriteSelectedEl.value],
         ) {
-            const background = palettes[paletteEl.value][0];
+            const background = getCurrentPalette()[0];
             element.style.backgroundColor = background;
-            context.clearRect(0, 0, preview.width, preview.height);
+            context.clearRect(0, 0, getSpriteSize() * 10, getSpriteSize() * 10);
 
             for (let item of sprite) {
                 if (viewIndexesEl.checked) {
@@ -169,29 +145,26 @@
                             }
                         }
                     } else {
-                        context.fillStyle =
-                            palettes[paletteEl.value][item.palette];
+                        context.fillStyle = getCurrentPalette()[item.palette];
                         context.fillRect(item.x * 10, item.y * 10, 10, 10);
                     }
                 }
             }
+
+            drawResultingImage(resultEl, sprites, palettes);
         }
 
-        function newSprite() {
-            let items = [];
-            for (let x = 0; x < 16; x++) {
-                for (let y = 0; y < 16; y++) {
-                    items.push({ x, y, palette: 0 });
-                }
+        function drawAll() {
+            for (let idx in sprites) {
+                const el = spritesContainerEl.childNodes[idx];
+                draw(el, el.getContext("2d"), sprites[idx]);
             }
-            return items;
         }
 
         function addSprite() {
             sprites.push(newSprite());
             update();
             save();
-            drawResultingImage();
         }
 
         function randomizeSprite() {
@@ -200,192 +173,159 @@
             });
             update();
             save();
-            drawResultingImage();
         }
 
         function fill() {
             sprites[spriteSelectedEl.value].forEach((item) => {
-                item.palette = colorPickerEl.value;
+                item.palette = getPaletteColorIdx();
             });
             update();
             save();
-            drawResultingImage();
         }
 
-        function drawResultingImage() {
-            const firstColor = palettes[palette.value][0];
-            // 6 per row
-            const image = new window._pnglibEs2(
-                sizeEl.valueAsNumber * clamp(sprites.length, 0, 6),
-                sizeEl.valueAsNumber * (parseInt((sprites.length - 1) / 6) + 1),
-                256,
-            );
-            palettes.forEach((p) => p.forEach((c) => image.createColor(c)));
-            sprites.forEach((sprite, idx) => {
-                sprite.forEach((item) => {
-                    if (
-                        item.x > sizeEl.valueAsNumber - 1 ||
-                        item.y > sizeEl.valueAsNumber - 1
-                    ) {
-                        return;
-                    }
+        function upsertPaletteColor(
+            paletteColor,
+            paletteColorIdx,
+            holder,
+            paletteIdx,
+        ) {
+            const div =
+                holder.childNodes[paletteColorIdx] ||
+                document.createElement("div");
 
-                    let xInc = (idx % 6) * sizeEl.valueAsNumber;
-                    let yInc =
-                        idx > 5 ? sizeEl.valueAsNumber * parseInt(idx / 6) : 0;
-                    image.setPixel(
-                        item.x + xInc,
-                        item.y + yInc,
-                        Number(item.palette),
-                    );
-                });
+            div.style.margin = 1;
+            div.style.backgroundColor = paletteColor;
+            div.style.width = 20;
+            div.style.height = 20;
+            div.style.border = `2px solid ${paletteAndColorSelectedAre(paletteIdx, paletteColorIdx) ? "red" : "black"}`;
+            div.style.display = "inline-block";
+            div.style.boxShadow = "inset white 0 0 0px 2px";
+            if (paletteSelectedIs(paletteIdx)) {
+                div.style.opacity = 1;
+                div.disabled = false;
+            } else {
+                div.style.opacity = 0.5;
+                div.disabled = true;
+            }
+
+            if (holder.contains(div)) return;
+
+            div.onclick = () => {
+                if (!paletteSelectedIs(paletteIdx)) return;
+
+                if (paletteColorSelectedIs(paletteColorIdx)) {
+                    currentColorEl.click(); // Open color picker
+                } else {
+                    setPaletteColorIdx(paletteColorIdx);
+                }
+
+                update();
+                save();
+            };
+
+            holder.appendChild(div);
+        }
+
+        function upsertPalette(pal, idx) {
+            const holder =
+                paletteContainer.childNodes[idx] ||
+                document.createElement("div");
+
+            if (idx === getPaletteIdx()) {
+                holder.style.border = "1px solid black";
+            }
+
+            pal.forEach((paletteColor, paletteColorIdx) => {
+                upsertPaletteColor(paletteColor, paletteColorIdx, holder, idx);
             });
-            resultEl.src = image.getDataURL();
-        }
 
-        function addItemFromEvent(idx, e) {
-            const x = Math.floor(e.offsetX / 10);
-            const y = Math.floor(e.offsetY / 10);
+            if (paletteContainer.contains(holder)) return;
 
-            const mirrorX = sizeEl.valueAsNumber - x - 1;
-            const mirrorY = sizeEl.valueAsNumber - y - 1;
+            const randomize = document.createElement("button");
+            randomize.innerHTML = "🎲";
+            randomize.onclick = () => {
+                for (let i = 0; i < 16; i++) {
+                    const rand = Math.random() * 16777215;
+                    const hex = Math.floor(rand).toString(16);
+                    pal[i] = "#" + hex.padStart(6, "0");
+                }
+                update();
+                drawAll();
+                save();
+            };
+            holder.appendChild(randomize);
 
-            putItem(x, y, idx);
-            if (mirrorHorizontalEl.checked) {
-                putItem(mirrorX, y, idx);
-            }
-            if (mirrorVerticalEl.checked) {
-                putItem(x, mirrorY, idx);
-            }
-            if (mirrorDiagonalEl.checked) {
-                putItem(mirrorX, mirrorY, idx);
-            }
-            update();
+            paletteContainer.appendChild(holder);
         }
 
         function updatePalettes() {
-            for (let idx in palettes) {
-                const pal = palettes[idx];
-                const holder =
-                    paletteContainer.childNodes[idx] ||
-                    document.createElement("div");
+            palettes.forEach((pal, idx) => upsertPalette(pal, idx));
+        }
 
-                if (idx === palette.value) {
-                    holder.style.border = "1px solid black";
-                }
-
-                for (let paletteColorIdx in pal) {
-                    const paletteColor = pal[paletteColorIdx];
-
-                    const div =
-                        holder.childNodes[paletteColorIdx] ||
-                        document.createElement("div");
-
-                    div.style.margin = 1;
-                    div.style.backgroundColor = paletteColor;
-                    div.style.width = 20;
-                    div.style.height = 20;
-                    div.style.border = `2px solid ${idx === palette.value && paletteColorIdx == colorPickerEl.value ? "red" : "black"}`;
-                    div.style.display = "inline-block";
-                    div.style.boxShadow = "inset white 0 0 0px 2px";
-                    if (idx != palette.value) {
-                        div.style.opacity = 0.5;
-                        div.disabled = true;
-                    }
-
-                    if (!holder.contains(div)) {
-                        div.onclick = () => {
-                            if (idx != palette.value) return;
-
-                            if (colorPickerEl.value === paletteColorIdx) {
-                                currentColorEl.click();
-                            } else {
-                                colorPickerEl.value = paletteColorIdx;
-                            }
-                            update();
-                            save();
-                        };
-
-                        holder.appendChild(div);
-                    }
-                }
-
-                if (!paletteContainer.contains(holder)) {
-                    const randomize = document.createElement("button");
-                    randomize.innerHTML = "🎲";
-                    randomize.onclick = () => {
-                        for (let i = 0; i < 16; i++) {
-                            const rand = Math.random() * 16777215;
-                            const hex = Math.floor(rand).toString(16);
-                            pal[i] = "#" + hex.padStart(6, "0");
-                        }
-                        update();
-                        save();
-                    };
-                    holder.appendChild(randomize);
-
-                    paletteContainer.appendChild(holder);
-                }
+        function upsertSpriteCanvas(idx) {
+            let spriteCanvas = spritesContainerEl.childNodes[idx];
+            if (spriteCanvas) {
+                let spriteCtx = spriteCanvas.getContext("2d");
+                return { spriteCanvas, spriteCtx };
             }
+
+            spriteCanvas = document.createElement("canvas");
+            let spriteCtx = spriteCanvas.getContext("2d");
+            spriteCanvas.addEventListener("mousemove", (e) => {
+                if (drawing) {
+                    addItemFromEvent(sprites[idx], e);
+                }
+                draw(spriteCanvas, spriteCtx, sprites[idx]);
+
+                // The cursor
+                spriteCtx.strokeStyle = "red";
+                spriteCtx.strokeRect(
+                    parseInt(e.offsetX / 10) * 10,
+                    parseInt(e.offsetY / 10) * 10,
+                    10,
+                    10,
+                );
+            });
+            spriteCanvas.addEventListener("mouseleave", () => {
+                update();
+                draw(spriteCanvas, spriteCtx, sprites[idx]);
+            });
+            spriteCanvas.addEventListener("click", (e) => {
+                addItemFromEvent(sprites[idx], e);
+                draw(spriteCanvas, spriteCtx, sprites[idx]);
+                draw;
+            });
+
+            return { spriteCanvas, spriteCtx };
         }
 
         function updateSprites() {
-            spritesContainerEl.style.width = `${(sizeEl.valueAsNumber * 10 + 2) * 6}px`;
-            for (let idx in sprites) {
-                let spriteCanvas = spritesContainerEl.childNodes[idx];
-                if (!spriteCanvas) {
-                    spriteCanvas = document.createElement("canvas");
-                    spriteCanvas.addEventListener("mousemove", (e) => {
-                        if (drawing) {
-                            addItemFromEvent(idx, e);
-                        } else {
-                            draw(spriteCanvas, spriteCtx, sprites[idx]);
-                        }
+            spritesContainerEl.style.width = `${(getSpriteSize() * 10 + 2) * 6}px`;
+            sprites.forEach((sprite, idx) => {
+                let { spriteCanvas, spriteCtx } = upsertSpriteCanvas(idx);
 
-                        // The cursor
-                        spriteCtx.strokeStyle = "red";
-                        spriteCtx.strokeRect(
-                            parseInt(e.offsetX / 10) * 10,
-                            parseInt(e.offsetY / 10) * 10,
-                            10,
-                            10,
-                        );
-                    });
-                    spriteCanvas.addEventListener("mouseleave", () => {
-                        update();
-                        draw(spriteCanvas, spriteCtx, sprites[idx]);
-                    });
-                    spriteCanvas.addEventListener("click", (e) =>
-                        addItemFromEvent(idx, e),
-                    );
-                }
-                spriteCanvas.width = sizeEl.valueAsNumber * 10;
-                spriteCanvas.height = sizeEl.valueAsNumber * 10;
+                spriteCanvas.width = getSpriteSize() * 10;
+                spriteCanvas.height = getSpriteSize() * 10;
 
-                let spriteCtx = spriteCanvas.getContext("2d");
+                draw(spriteCanvas, spriteCtx, sprite);
 
-                draw(spriteCanvas, spriteCtx, sprites[idx]);
+                if (spritesContainerEl.contains(spriteCanvas)) return;
 
-                if (!spritesContainerEl.contains(spriteCanvas)) {
-                    spritesContainerEl.appendChild(spriteCanvas);
-                }
-            }
+                spritesContainerEl.appendChild(spriteCanvas);
+            });
         }
 
         function update() {
-            preview.width = preview.height = sizeEl.valueAsNumber * 10;
             sprite.max = sprites.length - 1;
             sprite.nextElementSibling.innerHTML = `${spriteSelectedEl.value} (${sprites.length})`;
-            currentColorEl.value = palettes[palette.value][colorPickerEl.value];
+            setCurrentColor(getCurrentPalette()[getPaletteColorIdx()]);
 
             updatePalettes();
             updateSprites();
-
-            draw();
         }
 
         init();
         update();
-        drawResultingImage();
+        drawAll();
     </script>
 </html>
