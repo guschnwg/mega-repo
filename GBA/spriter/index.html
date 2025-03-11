@@ -13,6 +13,63 @@
                 <button onclick="reset()">Reset</button>
             </div>
             <div>
+                <div>
+                    <div>
+                        <input
+                            type="radio"
+                            name="mode"
+                            id="mode-pencil"
+                            value="pencil"
+                            checked
+                        />
+                        <label for="mode-pencil">Pencil</label>
+                    </div>
+                    <div>
+                        <input
+                            type="radio"
+                            name="mode"
+                            id="mode-line"
+                            value="line"
+                        />
+                        <label for="mode-line">Line</label>
+                    </div>
+                    <div>
+                        <input
+                            type="radio"
+                            name="mode"
+                            id="mode-fill"
+                            value="fill"
+                        />
+                        <label for="mode-fill">Fill</label>
+                    </div>
+                    <div>
+                        <input
+                            type="radio"
+                            name="mode"
+                            id="mode-rect"
+                            value="rect"
+                        />
+                        <label for="mode-rect">Rectangle</label>
+                        :
+                        <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            id="rect-width"
+                            value="2"
+                        />
+                        x
+                        <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            id="rect-height"
+                            value="2"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div>
                 <input type="checkbox" id="view-indexes" />
                 <label for="view-indexes">View indexes</label>
             </div>
@@ -105,227 +162,12 @@
         document.body.addEventListener("mousedown", () => (drawing = true));
         document.body.addEventListener("mouseup", () => (drawing = false));
 
-        function drawIndices(context, background, item) {
-            context.fillStyle = getCurrentPalette()[item.palette];
-            context.strokeStyle = getCurrentPalette()[item.palette];
-            context.strokeRect(item.x * 10, item.y * 10, 10, 10);
-
-            context.fillStyle = isTooDark(background) ? "white" : "black";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            context.font = "8px serif";
-            context.fillText(item.palette, item.x * 10 + 5, item.y * 10 + 5);
-        }
-
-        function draw(
-            element,
-            context,
-            sprite = sprites[spriteSelectedEl.value],
-        ) {
-            const background = getCurrentPalette()[0];
-            element.style.backgroundColor = background;
-            context.clearRect(0, 0, getSpriteSize() * 10, getSpriteSize() * 10);
-
-            for (let item of sprite) {
-                if (viewIndexesEl.checked) {
-                    drawIndices(context, background, item);
-                } else {
-                    if (item.palette == 0) {
-                        // Draw transparent
-                        for (let x = 0; x < 2; x++) {
-                            for (let y = 0; y < 2; y++) {
-                                context.fillStyle =
-                                    (x + y) % 2 === 0 ? "white" : "lightgray";
-                                context.fillRect(
-                                    item.x * 10 + x * 5,
-                                    item.y * 10 + y * 5,
-                                    5,
-                                    5,
-                                );
-                            }
-                        }
-                    } else {
-                        context.fillStyle = getCurrentPalette()[item.palette];
-                        context.fillRect(item.x * 10, item.y * 10, 10, 10);
-                    }
-                }
-            }
-
-            drawResultingImage(resultEl, sprites, palettes);
-        }
-
-        function drawAll() {
-            for (let idx in sprites) {
-                const el = spritesContainerEl.childNodes[idx];
-                draw(el, el.getContext("2d"), sprites[idx]);
-            }
-        }
-
-        function addSprite() {
-            sprites.push(newSprite());
-            update();
-            save();
-        }
-
-        function randomizeSprite() {
-            sprites[spriteSelectedEl.value].forEach((item) => {
-                item.palette = Math.floor(Math.random() * 16);
-            });
-            update();
-            save();
-        }
-
-        function fill() {
-            sprites[spriteSelectedEl.value].forEach((item) => {
-                item.palette = getPaletteColorIdx();
-            });
-            update();
-            save();
-        }
-
-        function upsertPaletteColor(
-            paletteColor,
-            paletteColorIdx,
-            holder,
-            paletteIdx,
-        ) {
-            const div =
-                holder.childNodes[paletteColorIdx] ||
-                document.createElement("div");
-
-            div.style.margin = 1;
-            div.style.backgroundColor = paletteColor;
-            div.style.width = 20;
-            div.style.height = 20;
-            div.style.border = `2px solid ${paletteAndColorSelectedAre(paletteIdx, paletteColorIdx) ? "red" : "black"}`;
-            div.style.display = "inline-block";
-            div.style.boxShadow = "inset white 0 0 0px 2px";
-            if (paletteSelectedIs(paletteIdx)) {
-                div.style.opacity = 1;
-                div.disabled = false;
-            } else {
-                div.style.opacity = 0.5;
-                div.disabled = true;
-            }
-
-            if (holder.contains(div)) return;
-
-            div.onclick = () => {
-                if (!paletteSelectedIs(paletteIdx)) return;
-
-                if (paletteColorSelectedIs(paletteColorIdx)) {
-                    currentColorEl.click(); // Open color picker
-                } else {
-                    setPaletteColorIdx(paletteColorIdx);
-                }
-
-                update();
-                save();
-            };
-
-            holder.appendChild(div);
-        }
-
-        function upsertPalette(pal, idx) {
-            const holder =
-                paletteContainer.childNodes[idx] ||
-                document.createElement("div");
-
-            if (idx === getPaletteIdx()) {
-                holder.style.border = "1px solid black";
-            }
-
-            pal.forEach((paletteColor, paletteColorIdx) => {
-                upsertPaletteColor(paletteColor, paletteColorIdx, holder, idx);
-            });
-
-            if (paletteContainer.contains(holder)) return;
-
-            const randomize = document.createElement("button");
-            randomize.innerHTML = "🎲";
-            randomize.onclick = () => {
-                for (let i = 0; i < 16; i++) {
-                    const rand = Math.random() * 16777215;
-                    const hex = Math.floor(rand).toString(16);
-                    pal[i] = "#" + hex.padStart(6, "0");
-                }
-                update();
-                drawAll();
-                save();
-            };
-            holder.appendChild(randomize);
-
-            paletteContainer.appendChild(holder);
-        }
-
-        function updatePalettes() {
-            palettes.forEach((pal, idx) => upsertPalette(pal, idx));
-        }
-
-        function upsertSpriteCanvas(idx) {
-            let spriteCanvas = spritesContainerEl.childNodes[idx];
-            if (spriteCanvas) {
-                let spriteCtx = spriteCanvas.getContext("2d");
-                return { spriteCanvas, spriteCtx };
-            }
-
-            spriteCanvas = document.createElement("canvas");
-            let spriteCtx = spriteCanvas.getContext("2d");
-            spriteCanvas.addEventListener("mousemove", (e) => {
-                if (drawing) {
-                    addItemFromEvent(sprites[idx], e);
-                }
-                draw(spriteCanvas, spriteCtx, sprites[idx]);
-
-                // The cursor
-                spriteCtx.strokeStyle = "red";
-                spriteCtx.strokeRect(
-                    parseInt(e.offsetX / 10) * 10,
-                    parseInt(e.offsetY / 10) * 10,
-                    10,
-                    10,
-                );
-            });
-            spriteCanvas.addEventListener("mouseleave", () => {
-                update();
-                draw(spriteCanvas, spriteCtx, sprites[idx]);
-            });
-            spriteCanvas.addEventListener("click", (e) => {
-                addItemFromEvent(sprites[idx], e);
-                draw(spriteCanvas, spriteCtx, sprites[idx]);
-                draw;
-            });
-
-            return { spriteCanvas, spriteCtx };
-        }
-
-        function updateSprites() {
-            spritesContainerEl.style.width = `${(getSpriteSize() * 10 + 2) * 6}px`;
-            sprites.forEach((sprite, idx) => {
-                let { spriteCanvas, spriteCtx } = upsertSpriteCanvas(idx);
-
-                spriteCanvas.width = getSpriteSize() * 10;
-                spriteCanvas.height = getSpriteSize() * 10;
-
-                draw(spriteCanvas, spriteCtx, sprite);
-
-                if (spritesContainerEl.contains(spriteCanvas)) return;
-
-                spritesContainerEl.appendChild(spriteCanvas);
-            });
-        }
-
-        function update() {
-            sprite.max = sprites.length - 1;
-            sprite.nextElementSibling.innerHTML = `${spriteSelectedEl.value} (${sprites.length})`;
-            setCurrentColor(getCurrentPalette()[getPaletteColorIdx()]);
-
-            updatePalettes();
-            updateSprites();
-        }
-
         init();
         update();
         drawAll();
+
+        setInterval(() => {
+            save();
+        }, 5000);
     </script>
 </html>

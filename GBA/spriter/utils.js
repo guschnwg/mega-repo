@@ -10,6 +10,10 @@ const paletteEl = document.getElementById("palette");
 const paletteContainer = document.getElementById("palettes");
 const resultEl = document.getElementById("resulting-image");
 const spritesContainerEl = document.getElementById("sprites-container");
+const modeEls = document.getElementsByName("mode");
+const rectWidthEl = document.getElementById("rect-width");
+const rectHeightEl = document.getElementById("rect-height");
+
 let drawing = false;
 
 let sprites = [];
@@ -78,6 +82,10 @@ function getPaletteIdx() {
   return paletteEl.valueAsNumber;
 }
 
+function setPaletteIdx(idx) {
+  paletteEl.value = idx;
+}
+
 function paletteSelectedIs(idx) {
   return idx === getPaletteIdx();
 }
@@ -102,8 +110,27 @@ function paletteAndColorSelectedAre(paletteIdx, colorIdx) {
   return paletteSelectedIs(paletteIdx) && paletteColorSelectedIs(colorIdx);
 }
 
+function getCurrentColor() {
+  return currentColorEl.value;
+}
+
 function setCurrentColor(color) {
   currentColorEl.value = color;
+}
+
+function getSpriteSelectedIdx() {
+  return spriteSelectedEl.valueAsNumber;
+}
+
+function getMode() {
+  return Array.from(modeEls).find((el) => el.checked).value;
+}
+
+function getRectDimensions() {
+  return {
+    x: rectWidthEl.valueAsNumber,
+    y: rectHeightEl.valueAsNumber,
+  };
 }
 
 function putItem(sprite, x, y, color) {
@@ -118,8 +145,6 @@ function putItem(sprite, x, y, color) {
       palette: color,
     });
   }
-
-  save();
 }
 
 function drawResultingImage(el, sprites, palettes) {
@@ -180,9 +205,247 @@ function addItem(sprite, x, y) {
   }
 }
 
-function addItemFromEvent(sprite, e) {
-  const x = Math.floor(e.offsetX / 10);
-  const y = Math.floor(e.offsetY / 10);
+function processEvent(sprite, e) {
+  const mode = getMode();
 
-  addItem(sprite, x, y);
+  if (mode === "pencil") {
+    const x = Math.floor(e.offsetX / 10);
+    const y = Math.floor(e.offsetY / 10);
+
+    addItem(sprite, x, y);
+  } else if (mode === "line") {
+  } else if (mode === "fill") {
+    fill(sprite);
+  } else if (mode === "rect") {
+    const baseX = Math.floor(e.offsetX / 10);
+    const baseY = Math.floor(e.offsetY / 10);
+
+    const { x, y } = getRectDimensions();
+
+    for (let ix = 0; ix < x; ix++) {
+      for (let iy = 0; iy < y; iy++) {
+        addItem(sprite, baseX + ix, baseY + iy);
+      }
+    }
+  }
+}
+
+function drawIndices(context, background, item) {
+  context.fillStyle = getCurrentPalette()[item.palette];
+  context.strokeStyle = getCurrentPalette()[item.palette];
+  context.strokeRect(item.x * 10, item.y * 10, 10, 10);
+
+  context.fillStyle = isTooDark(background) ? "white" : "black";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = "8px serif";
+  context.fillText(item.palette, item.x * 10 + 5, item.y * 10 + 5);
+}
+
+function addSprite() {
+  sprites.push(newSprite());
+  update();
+}
+
+function upsertPalette(pal, idx) {
+  const holder =
+    paletteContainer.childNodes[idx] || document.createElement("div");
+
+  if (idx === getPaletteIdx()) {
+    holder.style.border = "1px solid black";
+  }
+
+  pal.forEach((paletteColor, paletteColorIdx) => {
+    upsertPaletteColor(paletteColor, paletteColorIdx, holder, idx);
+  });
+
+  if (paletteContainer.contains(holder)) return;
+
+  const randomize = document.createElement("button");
+  randomize.innerHTML = "🎲";
+  randomize.onclick = () => {
+    for (let i = 0; i < 16; i++) {
+      const rand = Math.random() * 16777215;
+      const hex = Math.floor(rand).toString(16);
+      pal[i] = "#" + hex.padStart(6, "0");
+    }
+    update();
+    drawAll();
+  };
+  holder.appendChild(randomize);
+
+  paletteContainer.appendChild(holder);
+}
+
+function upsertPaletteColor(paletteColor, paletteColorIdx, holder, paletteIdx) {
+  const div =
+    holder.childNodes[paletteColorIdx] || document.createElement("div");
+
+  div.style.margin = 1;
+  div.style.backgroundColor = paletteColor;
+  div.style.width = 20;
+  div.style.height = 20;
+  div.style.border = `2px solid ${paletteAndColorSelectedAre(paletteIdx, paletteColorIdx) ? "red" : "black"}`;
+  div.style.display = "inline-block";
+  div.style.boxShadow = "inset white 0 0 0px 2px";
+  div.style.opacity = paletteSelectedIs(paletteIdx) ? 1 : 0.5;
+
+  if (holder.contains(div)) return;
+
+  div.onclick = () => {
+    if (!paletteSelectedIs(paletteIdx)) {
+      setPaletteIdx(paletteIdx);
+    }
+
+    if (paletteColorSelectedIs(paletteColorIdx)) {
+      currentColorEl.click(); // Open color picker
+    } else {
+      setPaletteColorIdx(paletteColorIdx);
+    }
+
+    update();
+  };
+
+  holder.appendChild(div);
+}
+
+function updatePalettes() {
+  palettes.forEach((pal, idx) => upsertPalette(pal, idx));
+}
+
+function updateSprites() {
+  spritesContainerEl.style.width = `${(getSpriteSize() * 10 + 2) * 6}px`;
+  sprites.forEach((sprite, idx) => {
+    let { spriteCanvas, spriteCtx } = upsertSpriteCanvas(idx);
+
+    spriteCanvas.width = getSpriteSize() * 10;
+    spriteCanvas.height = getSpriteSize() * 10;
+
+    draw(spriteCanvas, spriteCtx, sprite);
+
+    if (spritesContainerEl.contains(spriteCanvas)) return;
+
+    spritesContainerEl.appendChild(spriteCanvas);
+  });
+}
+
+function drawCursor(spriteCanvas, spriteCtx, e) {
+  const mode = getMode();
+
+  if (mode === "pencil") {
+    spriteCtx.strokeStyle = getCurrentColor();
+    spriteCtx.strokeRect(
+      parseInt(e.offsetX / 10) * 10,
+      parseInt(e.offsetY / 10) * 10,
+      10,
+      10,
+    );
+  } else if (mode === "line") {
+    spriteCtx.strokeStyle = getCurrentColor();
+    spriteCtx.strokeRect(
+      parseInt(e.offsetX / 10) * 10,
+      parseInt(e.offsetY / 10) * 10,
+      10,
+      10,
+    );
+  } else if (mode === "fill") {
+    spriteCtx.strokeStyle = getCurrentColor();
+    spriteCtx.fillStyle = spriteCtx.strokeStyle + "AA";
+    spriteCtx.strokeRect(0, 0, spriteCanvas.width, spriteCanvas.height);
+    spriteCtx.fillRect(0, 0, spriteCanvas.width, spriteCanvas.height);
+  } else if (mode === "rect") {
+    const { x, y } = getRectDimensions();
+    spriteCtx.strokeStyle = getCurrentColor();
+    spriteCtx.strokeRect(
+      parseInt(e.offsetX / 10) * 10,
+      parseInt(e.offsetY / 10) * 10,
+      x * 10,
+      y * 10,
+    );
+  }
+}
+
+function upsertSpriteCanvas(idx) {
+  let spriteCanvas = spritesContainerEl.childNodes[idx];
+  if (spriteCanvas) {
+    let spriteCtx = spriteCanvas.getContext("2d");
+    return { spriteCanvas, spriteCtx };
+  }
+
+  spriteCanvas = document.createElement("canvas");
+  let spriteCtx = spriteCanvas.getContext("2d");
+  spriteCanvas.addEventListener("mousemove", (e) => {
+    if (drawing) {
+      processEvent(sprites[idx], e);
+    }
+    draw(spriteCanvas, spriteCtx, sprites[idx]);
+    drawCursor(spriteCanvas, spriteCtx, e);
+  });
+  spriteCanvas.addEventListener("mouseleave", () => {
+    update();
+    draw(spriteCanvas, spriteCtx, sprites[idx]);
+  });
+  spriteCanvas.addEventListener("click", (e) => {
+    processEvent(sprites[idx], e);
+    draw(spriteCanvas, spriteCtx, sprites[idx]);
+  });
+
+  return { spriteCanvas, spriteCtx };
+}
+
+function update() {
+  spriteSelectedEl.max = sprites.length - 1;
+  spriteSelectedEl.nextElementSibling.innerHTML = `${getSpriteSelectedIdx()} (${sprites.length})`;
+  setCurrentColor(getCurrentPalette()[getPaletteColorIdx()]);
+
+  updatePalettes();
+  updateSprites();
+}
+
+function draw(element, context, sprite = sprites[getSpriteSelectedIdx()]) {
+  const background = getCurrentPalette()[0];
+  element.style.backgroundColor = background;
+  context.clearRect(0, 0, getSpriteSize() * 10, getSpriteSize() * 10);
+
+  for (let item of sprite) {
+    if (viewIndexesEl.checked) {
+      drawIndices(context, background, item);
+    } else {
+      if (item.palette == 0) {
+        // Draw transparent
+        for (let x = 0; x < 2; x++) {
+          for (let y = 0; y < 2; y++) {
+            context.fillStyle = (x + y) % 2 === 0 ? "white" : "lightgray";
+            context.fillRect(item.x * 10 + x * 5, item.y * 10 + y * 5, 5, 5);
+          }
+        }
+      } else {
+        context.fillStyle = getCurrentPalette()[item.palette];
+        context.fillRect(item.x * 10, item.y * 10, 10, 10);
+      }
+    }
+  }
+
+  drawResultingImage(resultEl, sprites, palettes);
+}
+
+function drawAll() {
+  for (let idx in sprites) {
+    const el = spritesContainerEl.childNodes[idx];
+    draw(el, el.getContext("2d"), sprites[idx]);
+  }
+}
+
+function randomizeSprite() {
+  sprites[getSpriteSelectedIdx()].forEach((item) => {
+    item.palette = Math.floor(Math.random() * 16);
+  });
+  update();
+}
+
+function fill(sprite = sprites[getSpriteSelectedIdx()]) {
+  sprite.forEach((item) => {
+    item.palette = getPaletteColorIdx();
+  });
+  update();
 }
