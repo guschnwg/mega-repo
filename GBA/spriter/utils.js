@@ -2,7 +2,8 @@ const viewIndexesEl = document.getElementById("view-indexes");
 const mirrorHorizontalEl = document.getElementById("mirror-horizontal");
 const mirrorVerticalEl = document.getElementById("mirror-vertical");
 const mirrorDiagonalEl = document.getElementById("mirror-diagonal");
-const sizeEl = document.getElementById("size");
+const sizeWidthEl = document.getElementById("size-width");
+const sizeHeightEl = document.getElementById("size-height");
 const spriteSelectedEl = document.getElementById("sprite");
 const colorPickerEl = document.getElementById("color");
 const currentColorEl = document.getElementById("current-color");
@@ -13,8 +14,22 @@ const spritesContainerEl = document.getElementById("sprites-container");
 const modeEls = document.getElementsByName("mode");
 const rectWidthEl = document.getElementById("rect-width");
 const rectHeightEl = document.getElementById("rect-height");
+const backgroundEl = document.getElementById("background");
+const backgroundOpacityEl = document.getElementById("background-opacity");
+const scaleEl = document.getElementById("scale");
+const exampleEl = document.getElementById("example");
+const exampleContainerEl = document.getElementById("example-container");
+const backgroundConfigIncrementEl = document.getElementById(
+  "background-config-increment",
+);
 
 let drawing = false;
+let lineStart = {};
+let backgroundPositioning = {
+  x: 0,
+  y: 0,
+  zoom: 100,
+};
 
 let sprites = [];
 
@@ -28,12 +43,22 @@ function init() {
   mirrorDiagonalEl.checked = localStorage.getItem("mirror-diagonal") === "true";
   mirrorHorizontalEl.checked =
     localStorage.getItem("mirror-horizontal") === "true";
-  sizeEl.value = localStorage.getItem("size") || 16;
+  sizeWidthEl.value = localStorage.getItem("size-width") || 16;
+  sizeHeightEl.value = localStorage.getItem("size-height") || 16;
   colorPickerEl.value = localStorage.getItem("color") || 0;
   paletteEl.value = localStorage.getItem("palette") || 0;
   spriteSelectedEl.value = localStorage.getItem("sprite") || 0;
   sprites = JSON.parse(localStorage.getItem("sprites")) || sprites;
   palettes = JSON.parse(localStorage.getItem("palettes")) || palettes;
+  backgroundEl.pictureAsBase64 = localStorage.getItem("background") || "";
+  backgroundOpacityEl.checked =
+    localStorage.getItem("background-opacity") === "true";
+  backgroundPositioning =
+    JSON.parse(localStorage.getItem("background-position")) ||
+    backgroundPositioning;
+  backgroundConfigIncrementEl.value = Number(backgroundPositioning.incrementBy);
+  scaleEl.value = localStorage.getItem("scale") || 10;
+  exampleEl.value = localStorage.getItem("example") || "";
 }
 
 function save() {
@@ -41,17 +66,37 @@ function save() {
   localStorage.setItem("mirror-vertical", mirrorVerticalEl.checked);
   localStorage.setItem("mirror-horizontal", mirrorHorizontalEl.checked);
   localStorage.setItem("mirror-diagonal", mirrorDiagonalEl.checked);
-  localStorage.setItem("size", sizeEl.value);
+  localStorage.setItem("size-width", sizeWidthEl.value);
+  localStorage.setItem("size-height", sizeHeightEl.value);
   localStorage.setItem("color", colorPickerEl.value);
   localStorage.setItem("palette", paletteEl.value);
   localStorage.setItem("sprite", spriteSelectedEl.value);
   localStorage.setItem("sprites", JSON.stringify(sprites));
   localStorage.setItem("palettes", JSON.stringify(palettes));
+  localStorage.setItem("background", backgroundEl.pictureAsBase64);
+  localStorage.setItem("background-opacity", backgroundOpacityEl.checked);
+  localStorage.setItem(
+    "background-position",
+    JSON.stringify({
+      ...backgroundPositioning,
+      incrementBy: backgroundConfigIncrementEl.valueAsNumber,
+    }),
+  );
+  localStorage.setItem("scale", scaleEl.value);
+  localStorage.setItem("example", exampleEl.value);
 }
 
 function reset() {
   localStorage.clear();
   window.location.reload();
+}
+
+function backgroundRemove() {
+  backgroundEl.pictureAsBase64 = null;
+  backgroundOpacityEl.checked = false;
+  backgroundPosition("reset");
+  update();
+  save();
 }
 
 function clamp(num, min, max) {
@@ -67,7 +112,10 @@ function isTooDark(c) {
 }
 
 function getSpriteSize() {
-  return sizeEl.valueAsNumber;
+  return {
+    x: sizeWidthEl.valueAsNumber,
+    y: sizeHeightEl.valueAsNumber,
+  };
 }
 
 function getMirrorState() {
@@ -122,6 +170,10 @@ function getSpriteSelectedIdx() {
   return spriteSelectedEl.valueAsNumber;
 }
 
+function getCanvasOpacity() {
+  return backgroundOpacityEl.checked ? 0.5 : 1;
+}
+
 function getMode() {
   return Array.from(modeEls).find((el) => el.checked).value;
 }
@@ -131,6 +183,14 @@ function getRectDimensions() {
     x: rectWidthEl.valueAsNumber,
     y: rectHeightEl.valueAsNumber,
   };
+}
+
+function getScale() {
+  return scaleEl.valueAsNumber;
+}
+
+function getExample() {
+  return exampleEl.value;
 }
 
 function putItem(sprite, x, y, color) {
@@ -148,11 +208,11 @@ function putItem(sprite, x, y, color) {
 }
 
 function drawResultingImage(el, sprites, palettes) {
-  // 6 per row
+  const perRow = 6;
   const spriteSize = getSpriteSize();
   const image = new window._pnglibEs2(
-    spriteSize * clamp(sprites.length, 0, 6),
-    spriteSize * (parseInt((sprites.length - 1) / 6) + 1),
+    spriteSize.x * clamp(sprites.length, 0, perRow),
+    spriteSize.y * (parseInt((sprites.length - 1) / perRow) + 1),
     256,
   );
 
@@ -160,13 +220,18 @@ function drawResultingImage(el, sprites, palettes) {
 
   sprites.forEach((sprite, idx) => {
     sprite.forEach((item) => {
-      if (item.x > spriteSize - 1 || item.y > spriteSize - 1) {
+      if (
+        item.x < 0 ||
+        item.x > spriteSize.x ||
+        item.y < 0 ||
+        item.y > spriteSize.y
+      ) {
         // In case we had an image of 17x17 and we are trying to draw it in a 16x16 sprite
         return;
       }
 
-      let xInc = (idx % 6) * spriteSize;
-      let yInc = idx > 5 ? spriteSize * parseInt(idx / 6) : 0;
+      let xInc = (idx % perRow) * spriteSize.x;
+      let yInc = idx >= perRow ? spriteSize.y * parseInt(idx / perRow) : 0;
 
       image.setPixel(item.x + xInc, item.y + yInc, Number(item.palette));
     });
@@ -186,13 +251,13 @@ function newSprite() {
 
 function addItem(sprite, x, y) {
   const color = getPaletteColorIdx();
-
-  const mirrorX = getSpriteSize() - x - 1;
-  const mirrorY = getSpriteSize() - y - 1;
+  const spriteSize = getSpriteSize();
 
   putItem(sprite, x, y, color);
 
   const mirror = getMirrorState();
+  const mirrorX = spriteSize.x - x - 1;
+  const mirrorY = spriteSize.y - y - 1;
 
   if (mirror.horizontal) {
     putItem(sprite, mirrorX, y, color);
@@ -205,20 +270,33 @@ function addItem(sprite, x, y) {
   }
 }
 
-function processEvent(sprite, e) {
+function processEvent(sprite, e, type, canvas) {
   const mode = getMode();
+  const scale = getScale();
 
   if (mode === "pencil") {
-    const x = Math.floor(e.offsetX / 10);
-    const y = Math.floor(e.offsetY / 10);
+    const x = Math.floor(e.offsetX / scale);
+    const y = Math.floor(e.offsetY / scale);
 
     addItem(sprite, x, y);
   } else if (mode === "line") {
+    if (type === "mousemove") return;
+
+    const x = Math.floor(e.offsetX / scale);
+    const y = Math.floor(e.offsetY / scale);
+
+    if (!lineStart[canvas.id]) {
+      lineStart[canvas.id] = { x, y };
+    } else {
+      const segments = linePixels(lineStart[canvas.id], { x, y });
+      segments.forEach(({ x, y }) => addItem(sprite, x, y));
+      lineStart[canvas.id] = null;
+    }
   } else if (mode === "fill") {
     fill(sprite);
   } else if (mode === "rect") {
-    const baseX = Math.floor(e.offsetX / 10);
-    const baseY = Math.floor(e.offsetY / 10);
+    const baseX = Math.floor(e.offsetX / scale);
+    const baseY = Math.floor(e.offsetY / scale);
 
     const { x, y } = getRectDimensions();
 
@@ -227,19 +305,29 @@ function processEvent(sprite, e) {
         addItem(sprite, baseX + ix, baseY + iy);
       }
     }
+  } else if (mode === "dropper") {
+    const x = Math.floor(e.offsetX / scale);
+    const y = Math.floor(e.offsetY / scale);
+
+    const item = sprite.find((item) => item.x === x && item.y === y);
+    if (item) {
+      setPaletteColorIdx(item.palette);
+    }
   }
 }
 
 function drawIndices(context, background, item) {
+  const scale = getScale();
+
   context.fillStyle = getCurrentPalette()[item.palette];
   context.strokeStyle = getCurrentPalette()[item.palette];
-  context.strokeRect(item.x * 10, item.y * 10, 10, 10);
+  context.strokeRect(item.x * scale, item.y * scale, scale, scale);
 
   context.fillStyle = isTooDark(background) ? "white" : "black";
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.font = "8px serif";
-  context.fillText(item.palette, item.x * 10 + 5, item.y * 10 + 5);
+  context.fillText(item.palette, item.x * scale + 5, item.y * scale + 5);
 }
 
 function addSprite() {
@@ -270,7 +358,6 @@ function upsertPalette(pal, idx) {
       pal[i] = "#" + hex.padStart(6, "0");
     }
     update();
-    drawAll();
   };
   holder.appendChild(randomize);
 
@@ -313,41 +400,88 @@ function updatePalettes() {
   palettes.forEach((pal, idx) => upsertPalette(pal, idx));
 }
 
-function updateSprites() {
-  spritesContainerEl.style.width = `${(getSpriteSize() * 10 + 2) * 6}px`;
-  sprites.forEach((sprite, idx) => {
-    let { spriteCanvas, spriteCtx } = upsertSpriteCanvas(idx);
+function updateSprites(_sprites, container) {
+  const scale = getScale();
+  const spriteSize = getSpriteSize();
 
-    spriteCanvas.width = getSpriteSize() * 10;
-    spriteCanvas.height = getSpriteSize() * 10;
+  container.style.width = `${(spriteSize.x * scale + 2) * 6}px`;
+  _sprites.forEach((sprite, idx) => {
+    let { spriteCanvas, spriteCtx } = upsertSpriteCanvas(
+      idx,
+      container,
+      sprite,
+    );
+
+    spriteCanvas.style.opacity = getCanvasOpacity();
+    spriteCanvas.width = spriteSize.x * scale;
+    spriteCanvas.height = spriteSize.y * scale;
 
     draw(spriteCanvas, spriteCtx, sprite);
 
-    if (spritesContainerEl.contains(spriteCanvas)) return;
+    if (container.contains(spriteCanvas)) return;
 
-    spritesContainerEl.appendChild(spriteCanvas);
+    container.appendChild(spriteCanvas);
   });
+}
+
+function linePixels(start, end) {
+  const segments = [];
+
+  // That is the Bresenham's line algorithm
+  let x0 = start.x;
+  let y0 = start.y;
+  let x1 = end.x;
+  let y1 = end.y;
+  let dx = Math.abs(x1 - x0);
+  let dy = Math.abs(y1 - y0);
+  const sx = Math.sign(x1 - x0);
+  const sy = Math.sign(y1 - y0);
+
+  let err = dx - dy;
+  while (true) {
+    segments.push({ x: x0, y: y0 });
+
+    if (x0 === x1 && y0 === y1) break;
+
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x0 += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y0 += sy;
+    }
+  }
+
+  return segments;
 }
 
 function drawCursor(spriteCanvas, spriteCtx, e) {
   const mode = getMode();
+  const scale = getScale();
 
   if (mode === "pencil") {
     spriteCtx.strokeStyle = getCurrentColor();
     spriteCtx.strokeRect(
-      parseInt(e.offsetX / 10) * 10,
-      parseInt(e.offsetY / 10) * 10,
-      10,
-      10,
+      parseInt(e.offsetX / scale) * scale,
+      parseInt(e.offsetY / scale) * scale,
+      scale,
+      scale,
     );
   } else if (mode === "line") {
+    const x = parseInt(e.offsetX / scale);
+    const y = parseInt(e.offsetY / scale);
+
     spriteCtx.strokeStyle = getCurrentColor();
-    spriteCtx.strokeRect(
-      parseInt(e.offsetX / 10) * 10,
-      parseInt(e.offsetY / 10) * 10,
-      10,
-      10,
-    );
+    spriteCtx.strokeRect(x * scale, y * scale, scale, scale);
+    if (!lineStart[spriteCanvas.id]) return;
+
+    const segments = linePixels(lineStart[spriteCanvas.id], { x, y });
+    segments.forEach(({ x, y }) => {
+      spriteCtx.strokeStyle = getCurrentColor();
+      spriteCtx.strokeRect(x * scale, y * scale, scale, scale);
+    });
   } else if (mode === "fill") {
     spriteCtx.strokeStyle = getCurrentColor();
     spriteCtx.fillStyle = spriteCtx.strokeStyle + "AA";
@@ -357,37 +491,40 @@ function drawCursor(spriteCanvas, spriteCtx, e) {
     const { x, y } = getRectDimensions();
     spriteCtx.strokeStyle = getCurrentColor();
     spriteCtx.strokeRect(
-      parseInt(e.offsetX / 10) * 10,
-      parseInt(e.offsetY / 10) * 10,
-      x * 10,
-      y * 10,
+      parseInt(e.offsetX / scale) * scale,
+      parseInt(e.offsetY / scale) * scale,
+      x * scale,
+      y * scale,
     );
   }
 }
 
-function upsertSpriteCanvas(idx) {
-  let spriteCanvas = spritesContainerEl.childNodes[idx];
+function upsertSpriteCanvas(idx, container, sprite) {
+  let spriteCanvas = container.childNodes[idx];
   if (spriteCanvas) {
     let spriteCtx = spriteCanvas.getContext("2d");
     return { spriteCanvas, spriteCtx };
   }
 
   spriteCanvas = document.createElement("canvas");
+  spriteCanvas.attributes.idx = idx;
   let spriteCtx = spriteCanvas.getContext("2d");
   spriteCanvas.addEventListener("mousemove", (e) => {
     if (drawing) {
-      processEvent(sprites[idx], e);
+      processEvent(sprite, e, "mousemove", spriteCanvas);
     }
-    draw(spriteCanvas, spriteCtx, sprites[idx]);
+    update();
+    // draw(spriteCanvas, spriteCtx, sprite);
     drawCursor(spriteCanvas, spriteCtx, e);
   });
   spriteCanvas.addEventListener("mouseleave", () => {
     update();
-    draw(spriteCanvas, spriteCtx, sprites[idx]);
+    // draw(spriteCanvas, spriteCtx, sprite);
   });
   spriteCanvas.addEventListener("click", (e) => {
-    processEvent(sprites[idx], e);
-    draw(spriteCanvas, spriteCtx, sprites[idx]);
+    processEvent(sprite, e, "click", spriteCanvas);
+    update();
+    // draw(spriteCanvas, spriteCtx, sprite);
   });
 
   return { spriteCanvas, spriteCtx };
@@ -399,13 +536,35 @@ function update() {
   setCurrentColor(getCurrentPalette()[getPaletteColorIdx()]);
 
   updatePalettes();
-  updateSprites();
+  updateSprites(sprites, spritesContainerEl);
+
+  [spritesContainerEl, exampleContainerEl].forEach((el) => {
+    if (backgroundEl.pictureAsBase64) {
+      el.style.background = `url(${backgroundEl.pictureAsBase64})`;
+      el.style.backgroundSize = "contain";
+      el.style.backgroundRepeat = "no-repeat";
+      el.style.backgroundPositionX = backgroundPositioning.x + "px";
+      el.style.backgroundPositionY = backgroundPositioning.y + "px";
+      el.style.backgroundSize = backgroundPositioning.zoom + "%";
+    } else {
+      el.style.background = "none";
+    }
+  });
+
+  updateExample();
+
+  backgroundConfigIncrementEl.value = Number(backgroundPositioning.incrementBy);
 }
 
-function draw(element, context, sprite = sprites[getSpriteSelectedIdx()]) {
+function draw(element, context, sprite) {
+  if (!sprite) return;
+
+  const scale = getScale();
+
   const background = getCurrentPalette()[0];
   element.style.backgroundColor = background;
-  context.clearRect(0, 0, getSpriteSize() * 10, getSpriteSize() * 10);
+  const spriteSize = getSpriteSize();
+  context.clearRect(0, 0, spriteSize.x * scale, spriteSize.y * scale);
 
   for (let item of sprite) {
     if (viewIndexesEl.checked) {
@@ -416,12 +575,17 @@ function draw(element, context, sprite = sprites[getSpriteSelectedIdx()]) {
         for (let x = 0; x < 2; x++) {
           for (let y = 0; y < 2; y++) {
             context.fillStyle = (x + y) % 2 === 0 ? "white" : "lightgray";
-            context.fillRect(item.x * 10 + x * 5, item.y * 10 + y * 5, 5, 5);
+            context.fillRect(
+              item.x * scale + (x * scale) / 2,
+              item.y * scale + (y * scale) / 2,
+              scale / 2,
+              scale / 2,
+            );
           }
         }
       } else {
         context.fillStyle = getCurrentPalette()[item.palette];
-        context.fillRect(item.x * 10, item.y * 10, 10, 10);
+        context.fillRect(item.x * scale, item.y * scale, scale, scale);
       }
     }
   }
@@ -429,11 +593,55 @@ function draw(element, context, sprite = sprites[getSpriteSelectedIdx()]) {
   drawResultingImage(resultEl, sprites, palettes);
 }
 
-function drawAll() {
-  for (let idx in sprites) {
-    const el = spritesContainerEl.childNodes[idx];
-    draw(el, el.getContext("2d"), sprites[idx]);
-  }
+function updateExample() {
+  const example = getExample();
+  if (!example) return;
+
+  example
+    .trim()
+    .split("\n\n")
+    .forEach((frame, frameIdx) => {
+      const frameHolder =
+        exampleContainerEl.children[frameIdx] || document.createElement("div");
+
+      frame
+        .trim()
+        .split("\n")
+        .forEach((line, lineIdx) => {
+          const holder =
+            frameHolder.children[lineIdx] || document.createElement("div");
+
+          const exampleSprites = [];
+          const mirrorIdx = [];
+          line
+            .trim()
+            .split(",")
+            .forEach((spriteIndex, colIdx) => {
+              if (!line) return;
+
+              const spriteIdx = parseInt(spriteIndex.trim());
+              exampleSprites.push(sprites[Math.abs(spriteIdx)]);
+
+              // If negative, we should mirror it somehow
+              if (spriteIdx < 0) {
+                mirrorIdx.push(colIdx);
+              }
+            });
+          updateSprites(exampleSprites, holder);
+          holder.style.width = `${exampleSprites.length * getSpriteSize().x * getScale()}px`;
+          mirrorIdx.forEach((idx) => {
+            holder.children[idx].style.transform = "scaleX(-1)";
+          });
+
+          if (frameHolder.contains(holder)) return;
+
+          frameHolder.appendChild(holder);
+        });
+
+      if (exampleContainerEl.contains(frameHolder)) return;
+
+      exampleContainerEl.appendChild(frameHolder);
+    });
 }
 
 function randomizeSprite() {
@@ -443,9 +651,42 @@ function randomizeSprite() {
   update();
 }
 
+function copy(fromSpriteIdx) {
+  if (!fromSpriteIdx) return;
+
+  const _fromSpriteIdx = parseInt(fromSpriteIdx);
+  if (_fromSpriteIdx < 0 || _fromSpriteIdx >= sprites.length) return;
+
+  const fromSprite = sprites[_fromSpriteIdx];
+  const toSprite = sprites[getSpriteSelectedIdx()];
+
+  fromSprite.forEach((item, idx) => {
+    toSprite[idx].palette = item.palette;
+    toSprite[idx].x = item.x;
+  });
+
+  update();
+  save();
+}
+
 function fill(sprite = sprites[getSpriteSelectedIdx()]) {
   sprite.forEach((item) => {
     item.palette = getPaletteColorIdx();
   });
+  update();
+}
+
+function backgroundPosition(action) {
+  const increment = backgroundPositioning.incrementBy;
+  const defValue = { x: 0, y: 0, zoom: 100, incrementBy: 1 };
+
+  if (action === "left") backgroundPositioning.x -= increment;
+  else if (action === "right") backgroundPositioning.x += increment;
+  else if (action === "up") backgroundPositioning.y -= increment;
+  else if (action === "down") backgroundPositioning.y += increment;
+  else if (action === "zoom-in") backgroundPositioning.zoom += increment;
+  else if (action === "zoom-out") backgroundPositioning.zoom -= increment;
+  else if (action === "reset") backgroundPositioning = defValue;
+
   update();
 }

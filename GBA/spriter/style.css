@@ -27,7 +27,15 @@ canvas {
     padding: 10px;
     flex: 1;
     overflow: scroll;
-    padding: 50px;
+    padding: 20px;
+}
+
+#sprites-container {
+    margin-bottom: 50px;
+}
+
+#example-container {
+    display: flex;
 }
 
 .menu {
@@ -77,3 +85,9 @@ canvas {
     margin-bottom: 27px;
     margin-left: 5px;
 }
+
+.mirror-config, .background-config, .draw-config {
+    display: flex;
+    justify-content: space-between;
+}
+

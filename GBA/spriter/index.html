@@ -5,15 +5,47 @@
 
     <body>
         <div class="preview">
+            <h4>Sprites</h4>
             <div id="sprites-container"></div>
+
+            <h4>Combination Preview</h4>
+            <div id="example-container"></div>
         </div>
 
         <div class="menu">
             <div>
                 <button onclick="reset()">Reset</button>
             </div>
-            <div>
+            <div class="background-config">
+                <input type="file" id="background" />
                 <div>
+                    <input type="checkbox" id="background-opacity" />
+                    <label for="background-opacity">Semi-transparent</label>
+                </div>
+                <button onclick="backgroundRemove()">Remove</button>
+            </div>
+            <div class="background-config">
+                <button onclick="backgroundPosition('left')">⬅</button>
+                <button onclick="backgroundPosition('up')">⬆️</button>
+                <button onclick="backgroundPosition('down')">⬇️</button>
+                <button onclick="backgroundPosition('right')">➡</button>
+                <button onclick="backgroundPosition('zoom-in')">➕</button>
+                <button onclick="backgroundPosition('zoom-out')">➖</button>
+                <button onclick="backgroundPosition('reset')">Reset</button>
+                Increment by:
+                <input type="number" id="background-config-increment" step=0.1 value=1 onchange="save();" />
+            </div>
+            <div>
+                <div class="draw-config">
+                    <div>
+                        <input
+                            type="radio"
+                            name="mode"
+                            id="mode-dropper"
+                            value="dropper"
+                        />
+                        <label for="mode-dropper">💧</label>
+                    </div>
                     <div>
                         <input
                             type="radio"
@@ -22,7 +54,7 @@
                             value="pencil"
                             checked
                         />
-                        <label for="mode-pencil">Pencil</label>
+                        <label for="mode-pencil">✏️</label>
                     </div>
                     <div>
                         <input
@@ -31,7 +63,7 @@
                             id="mode-line"
                             value="line"
                         />
-                        <label for="mode-line">Line</label>
+                        <label for="mode-line">📉</label>
                     </div>
                     <div>
                         <input
@@ -40,7 +72,7 @@
                             id="mode-fill"
                             value="fill"
                         />
-                        <label for="mode-fill">Fill</label>
+                        <label for="mode-fill">🪣</label>
                     </div>
                     <div>
                         <input
@@ -49,7 +81,7 @@
                             id="mode-rect"
                             value="rect"
                         />
-                        <label for="mode-rect">Rectangle</label>
+                        <label for="mode-rect">🟥</label>
                         :
                         <input
                             type="number"
@@ -73,21 +105,29 @@
                 <input type="checkbox" id="view-indexes" />
                 <label for="view-indexes">View indexes</label>
             </div>
-            <div>
-                <input type="checkbox" id="mirror-vertical" />
-                <label for="mirror-vertical">Mirror Vertical</label>
-            </div>
-            <div>
-                <input type="checkbox" id="mirror-horizontal" />
-                <label for="mirror-horizontal">Mirror Horizontal</label>
-            </div>
-            <div>
-                <input type="checkbox" id="mirror-diagonal" />
-                <label for="mirror-diagonal">Mirror Diagonal</label>
+            <div class="mirror-config">
+                <div>
+                    <input type="checkbox" id="mirror-vertical" />
+                    <label for="mirror-vertical">Mirror Vertical</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="mirror-horizontal" />
+                    <label for="mirror-horizontal">Mirror Horizontal</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="mirror-diagonal" />
+                    <label for="mirror-diagonal">Mirror Diagonal</label>
+                </div>
             </div>
             <div>
                 <label for="size">Size:</label>
-                <input type="number" id="size" />
+                <input type="number" id="size-width" />
+                x
+                <input type="number" id="size-height" />
+            </div>
+            <div>
+                <label for="scale">Scale:</label>
+                <input type="number" id="scale" value="10" />
             </div>
 
             <div>
@@ -107,6 +147,9 @@
                 <button onclick="addSprite()">Add sprite</button>
                 <button onclick="randomizeSprite()">🎲</button>
                 <button onclick="fill()">🪣</button>
+                <button onclick="copy(prompt('Copy from which sprite?'))">
+                    🍝
+                </button>
             </div>
 
             <div>
@@ -126,6 +169,13 @@
                 </div>
             </div>
 
+            <div>
+                <textarea rows="10" cols="20" id="example"></textarea>
+                <button onclick="exampleContainerEl.innerHTML = ''; update();">
+                    Update
+                </button>
+            </div>
+
             <img id="resulting-image" />
         </div>
     </body>
@@ -134,10 +184,22 @@
     <script src="utils.js"></script>
 
     <script>
-        size.addEventListener("change", () => {
-            update();
-            drawAll();
-            save();
+        [sizeWidthEl, sizeHeightEl].forEach((el) =>
+            el.addEventListener("change", () => {
+                update();
+                save();
+            }),
+        );
+        backgroundEl.addEventListener("change", () => {
+            const file = backgroundEl.files[0];
+            const reader = new FileReader();
+            reader.addEventListener("load", () => {
+                backgroundEl.pictureAsBase64 = reader.result;
+                backgroundOpacityEl.checked = true;
+                update();
+                save();
+            });
+            if (file) reader.readAsDataURL(file);
         });
         [
             colorPickerEl,
@@ -146,17 +208,18 @@
             viewIndexesEl,
             mirrorVerticalEl,
             mirrorHorizontalEl,
+            backgroundOpacityEl,
+            scaleEl,
+            exampleEl,
         ].forEach((el) =>
             el.addEventListener("input", () => {
                 update();
-                drawAll();
                 save();
             }),
         );
         currentColorEl.addEventListener("input", () => {
             getCurrentPalette()[getPaletteColorIdx()] = currentColorEl.value;
             update();
-            drawAll();
             save();
         });
         document.body.addEventListener("mousedown", () => (drawing = true));
@@ -164,7 +227,6 @@
 
         init();
         update();
-        drawAll();
 
         setInterval(() => {
             save();
