@@ -61,6 +61,15 @@ function init() {
   exampleEl.value = localStorage.getItem("example") || "";
 }
 
+function loadFromDefaults() {
+  Object.entries(defaultValues).forEach(([key, value]) =>
+    window.localStorage.setItem(
+      key,
+      typeof value === "object" ? JSON.stringify(value) : value,
+    ),
+  );
+}
+
 function save() {
   localStorage.setItem("view-indexes", viewIndexesEl.checked);
   localStorage.setItem("mirror-vertical", mirrorVerticalEl.checked);
@@ -222,9 +231,9 @@ function drawResultingImage(el, sprites, palettes) {
     sprite.forEach((item) => {
       if (
         item.x < 0 ||
-        item.x > spriteSize.x ||
+        item.x >= spriteSize.x ||
         item.y < 0 ||
-        item.y > spriteSize.y
+        item.y >= spriteSize.y
       ) {
         // In case we had an image of 17x17 and we are trying to draw it in a 16x16 sprite
         return;
@@ -531,6 +540,13 @@ function upsertSpriteCanvas(idx, container, sprite) {
 }
 
 function update() {
+  if (drawing) {
+    document.body.style.cursor = "crosshair";
+    document.body.style.backgroundColor = "#EFEFEF";
+  } else {
+    document.body.style.cursor = "default";
+    document.body.style.backgroundColor = "white";
+  }
   spriteSelectedEl.max = sprites.length - 1;
   spriteSelectedEl.nextElementSibling.innerHTML = `${getSpriteSelectedIdx()} (${sprites.length})`;
   setCurrentColor(getCurrentPalette()[getPaletteColorIdx()]);

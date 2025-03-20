@@ -15,6 +15,7 @@
         <div class="menu">
             <div>
                 <button onclick="reset()">Reset</button>
+                <button onclick="loadFromDefaults()">LoadFromDefaults</button>
             </div>
             <div class="background-config">
                 <input type="file" id="background" />
@@ -33,7 +34,13 @@
                 <button onclick="backgroundPosition('zoom-out')">➖</button>
                 <button onclick="backgroundPosition('reset')">Reset</button>
                 Increment by:
-                <input type="number" id="background-config-increment" step=0.1 value=1 onchange="save();" />
+                <input
+                    type="number"
+                    id="background-config-increment"
+                    step="0.1"
+                    value="1"
+                    onchange="save();"
+                />
             </div>
             <div>
                 <div class="draw-config">
@@ -181,10 +188,11 @@
     </body>
 
     <script src="lib.js"></script>
+    <script src="default.js"></script>
     <script src="utils.js"></script>
 
     <script>
-        [sizeWidthEl, sizeHeightEl].forEach((el) =>
+        [(sizeWidthEl, sizeHeightEl)].forEach((el) =>
             el.addEventListener("change", () => {
                 update();
                 save();

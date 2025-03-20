@@ -7,8 +7,10 @@
 OBJ_ATTR obj_buffer[128];
 
 int main() {
-  REG_DISPCNT = DCNT_MODE0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
+  REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D;
   REG_KEYCNT = KCNT_IRQ | KCNT_OR;
+
+  pal_bg_mem[0] = RGB15(0, 31, 0);
 
   oam_init(obj_buffer, 128);
 
@@ -17,21 +19,38 @@ int main() {
   memcpy16(pal_obj_mem, spritePal, spritePalLen / sizeof(u16));
 
   // Define image
-  OBJ_ATTR *image = &obj_buffer[0];
-  obj_set_attr(image, ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_BUILD(0, 0, 0));
-  obj_set_pos(image, 112, 72);
+  OBJ_ATTR *front = &obj_buffer[0];
+  obj_set_attr(front, ATTR0_SQUARE, ATTR1_SIZE_16, 0);
+  obj_set_pos(front, 112, 72);
 
-  int i = 0;
+  OBJ_ATTR *rear = &obj_buffer[1];
+  obj_set_attr(rear, ATTR0_SQUARE, ATTR1_SIZE_16, 4);
+  obj_set_pos(rear, 112, 72 + 16);
+
+  int dx = 0;
+  int y = 72;
   while (1) {
     vid_vsync();
     key_poll();
 
-    i += bit_tribool(key_hit(-1), KI_RIGHT, KI_LEFT);
-    i = i % 16;
+    dx = bit_tribool(key_held(-1), KI_RIGHT, KI_LEFT);
+    if (dx != 0) {
+      front->attr2 = 8;
 
-    image->attr2 = ATTR2_BUILD(0, i, 0);
+      if (dx > 0 && (front->attr1 & ATTR1_HFLIP) != 0) {
+        front->attr1 ^= ATTR1_HFLIP;
+      } else if (dx < 0 && (front->attr1 & ATTR1_HFLIP) == 0) {
+        front->attr1 ^= ATTR1_HFLIP;
+      }
+    } else {
+      front->attr2 = 0;
+    }
 
-    oam_copy(oam_mem, obj_buffer, 1);
+    y += bit_tribool(key_held(-1), KI_DOWN, KI_UP);
+    BFN_SET(front->attr0, y, ATTR0_Y);
+    BFN_SET(rear->attr0, y + 16, ATTR0_Y);
+
+    oam_copy(oam_mem, obj_buffer, 2);
   }
 
   return 0;
