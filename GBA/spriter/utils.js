@@ -42,6 +42,12 @@ let palettes = Array.from({ length: 16 }, () =>
   Array.from({ length: 16 }, () => "#000000"),
 );
 
+let loaderSpriteSelectedArea = { x: 0, y: 0, width: 0, height: 0 };
+let loaderData = {
+  sprites: [],
+  palettes: {}, // Map color -> integer
+};
+
 function init() {
   viewIndexesEl.checked = localStorage.getItem("view-indexes") === "true";
   mirrorVerticalEl.checked = localStorage.getItem("mirror-vertical") === "true";
@@ -79,7 +85,6 @@ function loadFromDefaults() {
   );
   init();
   update();
-  draw();
 }
 
 function save() {
@@ -295,18 +300,15 @@ function addItem(sprite, x, y) {
 
 function processEvent(sprite, e, type, canvas) {
   const mode = getMode();
-  const scale = getScale();
 
   if (mode === "pencil") {
-    const x = Math.floor(e.offsetX / scale);
-    const y = Math.floor(e.offsetY / scale);
+    const { x, y } = eventActualXandY(e)
 
     addItem(sprite, x, y);
   } else if (mode === "line") {
     if (type === "mousemove") return;
 
-    const x = Math.floor(e.offsetX / scale);
-    const y = Math.floor(e.offsetY / scale);
+    const { x, y } = eventActualXandY(e)
 
     if (!lineStart[canvas.id]) {
       lineStart[canvas.id] = { x, y };
@@ -318,8 +320,7 @@ function processEvent(sprite, e, type, canvas) {
   } else if (mode === "fill") {
     fill(sprite);
   } else if (mode === "rect") {
-    const baseX = Math.floor(e.offsetX / scale);
-    const baseY = Math.floor(e.offsetY / scale);
+    const { x: baseX, y: baseY } = eventActualXandY(e)
 
     const { x, y } = getRectDimensions();
 
@@ -329,8 +330,7 @@ function processEvent(sprite, e, type, canvas) {
       }
     }
   } else if (mode === "dropper") {
-    const x = Math.floor(e.offsetX / scale);
-    const y = Math.floor(e.offsetY / scale);
+    const { x, y } = eventActualXandY(e)
 
     const item = sprite.find((item) => item.x === x && item.y === y);
     if (item) {
@@ -419,7 +419,6 @@ function updateSprites(_sprites, container) {
   const scale = getScale();
   const spriteSize = getSpriteSize();
 
-  container.style.width = `${(spriteSize.x * scale + 2) * 6}px`;
   _sprites.forEach((sprite, idx) => {
     let { spriteCanvas, spriteCtx } = upsertSpriteCanvas(
       idx,
@@ -574,6 +573,7 @@ function update() {
   });
 
   updateExample();
+  updateLoader();
 
   backgroundConfigIncrementEl.value = Number(backgroundPositioning.incrementBy);
 }
@@ -625,11 +625,14 @@ function updateExample() {
   frames.forEach((frame, frameIdx) => {
     const frameHolder =
       exampleContainerEl.children[frameIdx] || document.createElement("div");
+    frameHolder.style.display = 'inline-flex';
+    frameHolder.style.flexDirection = 'column';
 
     const lines = frame.trim().split("\n");
     lines.forEach((line, lineIdx) => {
       const holder =
         frameHolder.children[lineIdx] || document.createElement("div");
+      holder.style.display = 'inline-flex';
 
       const exampleSprites = [];
       const mirrorIdx = [];
@@ -648,7 +651,6 @@ function updateExample() {
           }
         });
       updateSprites(exampleSprites, holder);
-      holder.style.width = `${exampleSprites.length * getSpriteSize().x * getScale()}px`;
       mirrorIdx.forEach((idx) => {
         holder.children[idx].style.transform = "scaleX(-1)";
       });
@@ -721,6 +723,13 @@ function fill(sprite = sprites[getSpriteSelectedIdx()]) {
     item.palette = getPaletteColorIdx();
   });
   update();
+}
+
+function erase() {
+  sprites.splice(getSpriteSelectedIdx(), 1);
+  spritesContainerEl.children[getSpriteSelectedIdx()].remove();
+  update();
+  save();
 }
 
 function backgroundPosition(action, value) {

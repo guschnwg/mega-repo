@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <html>
     <head>
         <link href="style.css" rel="stylesheet" />
@@ -24,6 +26,7 @@
                     <input type="checkbox" id="view-indexes" />
                     <label for="view-indexes">View indexes</label>
                 </span>
+                <button onclick="createFromImage()">Create from image</button>
             </div>
             <div class="divider"></div>
             <div class="background-config">
@@ -191,10 +194,11 @@
                     <button onclick="addSprite()">Add sprite</button>
                     <button onclick="randomizeSprite()">🎲</button>
                     <button onclick="fill()">🪣</button>
+                    <button onclick="erase()">🗑️</button>
                     <button onclick="copy(prompt('Copy from which sprite?'))">
                         🍝
                     </button>
-                </div>
+                    </div
             </div>
             <div class="divider"></div>
             <div>
@@ -223,11 +227,30 @@
             <div class="divider"></div>
             <img id="resulting-image" />
         </div>
+
+        <div id="loader">
+            <div>
+                <input type="file" id="loader-file" />
+
+                <input type="number" id="loader-x" onchange="updateLoader();" />
+                <input type="number" id="loader-y" onchange="updateLoader();" />
+                <input type="number" id="loader-scale-x" value="1" step="0.1" min="0" onchange="updateLoader();" />
+                <input type="number" id="loader-scale-y" value="1" step="0.1" min="0" onchange="updateLoader();" />
+            </div>
+            <div class="loader-canvas-container">
+                <canvas id="loader-canvas"></canvas>
+            </div>
+            <canvas id="loader-canvas-scaled"></canvas>
+            <div id="loader-sprites-container"></div>
+            <div id="loader-palettes-container"></div>
+            <button onclick="loaderConfirm()">Confirm</button>
+        </div>
     </body>
 
     <script src="lib.js"></script>
     <script src="default.js"></script>
     <script src="utils.js"></script>
+    <script src="loader.js"></script>
 
     <script>
         [(sizeWidthEl, sizeHeightEl)].forEach((el) =>
@@ -274,6 +297,30 @@
           }
         });
         document.body.addEventListener("mouseup", () => (drawing = false));
+
+        loaderFileEl.addEventListener("change", () => {
+            const file = loaderFileEl.files[0];
+            const reader = new FileReader();
+            reader.addEventListener("load", () => {
+                loaderFileEl.pictureAsBase64 = reader.result;
+                loaderFileEl.image = new Image();
+                loaderFileEl.image.src = reader.result;
+                loaderFileEl.image.onload = () => {
+                  update();
+                  save();
+                };
+            });
+            if (file) reader.readAsDataURL(file);
+        });
+        loaderCanvasEl.addEventListener("mousedown", handleLoaderCanvasEvent('mousedown'));
+        loaderCanvasEl.addEventListener("mousemove", handleLoaderCanvasEvent('mousemove'));
+        loaderCanvasEl.addEventListener("mouseup", handleLoaderCanvasEvent('mouseup'));
+        loaderCanvasEl.addEventListener("click", handleLoaderCanvasEvent('click'));
+
+        document.body.addEventListener('mousemove', e => {
+          loaderCanvasScaledEl.style.top = (e.clientY + 10) / 10 + 'px';
+          loaderCanvasScaledEl.style.left = (e.clientX + 10) / 10 + 'px';
+        })
 
         init();
         update();

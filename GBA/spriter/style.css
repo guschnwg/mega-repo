@@ -32,6 +32,8 @@ canvas {
 
 #sprites-container {
     margin-bottom: 50px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 #example-container {
@@ -61,17 +63,17 @@ canvas {
     display: flex;
 }
 
-.color-slider > input {
+.color-slider>input {
     flex: 1;
     margin-left: 5px;
     margin-right: 40px;
 }
 
-#palettes > div {
+#palettes>div {
     display: flex;
 }
 
-#palettes > div > button {
+#palettes>div>button {
     margin-left: 10px;
     height: 24px;
     line-height: 24px;
@@ -83,12 +85,12 @@ canvas {
     display: flex;
 }
 
-.palette-chooser > .palettes-slider {
+.palette-chooser>.palettes-slider {
     display: flex;
     flex-direction: column;
 }
 
-.palette-chooser > .palettes-slider > input {
+.palette-chooser>.palettes-slider>input {
     writing-mode: vertical-lr;
     direction: ltr;
     flex: 1;
@@ -97,7 +99,9 @@ canvas {
     margin-left: 5px;
 }
 
-.mirror-config, .background-config, .draw-config {
+.mirror-config,
+.background-config,
+.draw-config {
     display: flex;
     justify-content: space-between;
 }
@@ -106,7 +110,7 @@ canvas {
     flex-direction: column;
 }
 
-.background-config > div {
+.background-config>div {
     display: flex;
     justify-content: space-between;
 }
@@ -121,4 +125,34 @@ canvas {
 
 input[type="number"] {
     width: 70px;
+}
+
+#loader {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: white;
+    padding: 20px;
+    overflow: auto;
+}
+
+#loader-canvas,
+#resulting-image {
+    image-rendering: crisp-edges;
+}
+
+#loader-canvas-scaled {
+    background: white;
+    border: 1px solid black;
+    position: fixed;
+}
+
+.loader-canvas-container {
+    max-height: 400px;
+    max-width: 400px;
+    overflow: auto;
 }

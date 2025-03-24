@@ -986,6 +986,8 @@
           return hex.join("");
         }
 
+        tinycolor.rgbaToHex = rgbaToHex;
+
         // `rgbaToArgbHex`
         // Converts an RGBA color to an ARGB Hex8 string
         // Rarely used, but required for "toFilter()"
@@ -1689,6 +1691,7 @@
         else {
           window.tinycolor = tinycolor;
         }
+        window.tinycolor = tinycolor;
       })(Math);
 
       /***/
