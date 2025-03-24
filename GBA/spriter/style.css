@@ -36,12 +36,21 @@ canvas {
 
 #example-container {
     display: flex;
+    position: relative;
 }
 
 .menu {
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    border-left: 1px solid lightblue;
+    padding-left: 5px;
+    overflow: scroll;
+}
+
+.divider {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid lightblue;
 }
 
 #palettes {
@@ -54,18 +63,20 @@ canvas {
 
 .color-slider > input {
     flex: 1;
-    margin-left: 9px;
-    margin-right: 48px;
+    margin-left: 5px;
+    margin-right: 40px;
 }
 
 #palettes > div {
     display: flex;
-    gap: 1px;
-    padding: 3px;
 }
 
 #palettes > div > button {
     margin-left: 10px;
+    height: 24px;
+    line-height: 24px;
+    padding: unset;
+    width: 24px;
 }
 
 .palette-chooser {
@@ -81,8 +92,8 @@ canvas {
     writing-mode: vertical-lr;
     direction: ltr;
     flex: 1;
-    margin-top: 27px;
-    margin-bottom: 27px;
+    margin-top: 25px;
+    margin-bottom: 25px;
     margin-left: 5px;
 }
 
@@ -91,3 +102,23 @@ canvas {
     justify-content: space-between;
 }
 
+.background-config {
+    flex-direction: column;
+}
+
+.background-config > div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.palette-color {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    box-shadow: inset white 0 0 0px 1px;
+    border: 1px solid black;
+}
+
+input[type="number"] {
+    width: 70px;
+}

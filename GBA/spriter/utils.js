@@ -22,13 +22,18 @@ const exampleContainerEl = document.getElementById("example-container");
 const backgroundConfigIncrementEl = document.getElementById(
   "background-config-increment",
 );
+const backgroundConfigIncrementIntervalEl = document.getElementById(
+  "background-config-increment-interval",
+);
+const exampleSelectedEl = document.getElementById("example-selected");
 
 let drawing = false;
 let lineStart = {};
 let backgroundPositioning = {
   x: 0,
   y: 0,
-  zoom: 100,
+  zoomX: 100,
+  zoomY: 100,
 };
 
 let sprites = [];
@@ -57,8 +62,12 @@ function init() {
     JSON.parse(localStorage.getItem("background-position")) ||
     backgroundPositioning;
   backgroundConfigIncrementEl.value = Number(backgroundPositioning.incrementBy);
+  backgroundConfigIncrementIntervalEl.value = Number(
+    backgroundPositioning.interval,
+  );
   scaleEl.value = localStorage.getItem("scale") || 10;
   exampleEl.value = localStorage.getItem("example") || "";
+  exampleSelectedEl.value = Number(localStorage.getItem("example-selected") || -1);
 }
 
 function loadFromDefaults() {
@@ -68,6 +77,9 @@ function loadFromDefaults() {
       typeof value === "object" ? JSON.stringify(value) : value,
     ),
   );
+  init();
+  update();
+  draw();
 }
 
 function save() {
@@ -89,10 +101,12 @@ function save() {
     JSON.stringify({
       ...backgroundPositioning,
       incrementBy: backgroundConfigIncrementEl.valueAsNumber,
+      interval: backgroundConfigIncrementIntervalEl.valueAsNumber,
     }),
   );
   localStorage.setItem("scale", scaleEl.value);
   localStorage.setItem("example", exampleEl.value);
+  localStorage.setItem("example-selected", exampleSelectedEl.valueAsNumber);
 }
 
 function reset() {
@@ -348,10 +362,6 @@ function upsertPalette(pal, idx) {
   const holder =
     paletteContainer.childNodes[idx] || document.createElement("div");
 
-  if (idx === getPaletteIdx()) {
-    holder.style.border = "1px solid black";
-  }
-
   pal.forEach((paletteColor, paletteColorIdx) => {
     upsertPaletteColor(paletteColor, paletteColorIdx, holder, idx);
   });
@@ -377,14 +387,10 @@ function upsertPaletteColor(paletteColor, paletteColorIdx, holder, paletteIdx) {
   const div =
     holder.childNodes[paletteColorIdx] || document.createElement("div");
 
-  div.style.margin = 1;
+  div.classList.add("palette-color");
   div.style.backgroundColor = paletteColor;
-  div.style.width = 20;
-  div.style.height = 20;
-  div.style.border = `2px solid ${paletteAndColorSelectedAre(paletteIdx, paletteColorIdx) ? "red" : "black"}`;
-  div.style.display = "inline-block";
-  div.style.boxShadow = "inset white 0 0 0px 2px";
-  div.style.opacity = paletteSelectedIs(paletteIdx) ? 1 : 0.5;
+  div.style.borderColor = paletteAndColorSelectedAre(paletteIdx, paletteColorIdx) ? "red" : "black";
+  div.style.opacity = paletteSelectedIs(paletteIdx) ? 1 : 0.3;
 
   if (holder.contains(div)) return;
 
@@ -561,7 +567,7 @@ function update() {
       el.style.backgroundRepeat = "no-repeat";
       el.style.backgroundPositionX = backgroundPositioning.x + "px";
       el.style.backgroundPositionY = backgroundPositioning.y + "px";
-      el.style.backgroundSize = backgroundPositioning.zoom + "%";
+      el.style.backgroundSize = backgroundPositioning.sizeX + "px" + " " + backgroundPositioning.sizeY + "px";
     } else {
       el.style.background = "none";
     }
@@ -613,51 +619,76 @@ function updateExample() {
   const example = getExample();
   if (!example) return;
 
-  example
-    .trim()
-    .split("\n\n")
-    .forEach((frame, frameIdx) => {
-      const frameHolder =
-        exampleContainerEl.children[frameIdx] || document.createElement("div");
+  const frames = example.trim().split("\n\n");
+  let maxFrameHeight = 0;
 
-      frame
+  frames.forEach((frame, frameIdx) => {
+    const frameHolder =
+      exampleContainerEl.children[frameIdx] || document.createElement("div");
+
+    const lines = frame.trim().split("\n");
+    lines.forEach((line, lineIdx) => {
+      const holder =
+        frameHolder.children[lineIdx] || document.createElement("div");
+
+      const exampleSprites = [];
+      const mirrorIdx = [];
+      line
         .trim()
-        .split("\n")
-        .forEach((line, lineIdx) => {
-          const holder =
-            frameHolder.children[lineIdx] || document.createElement("div");
+        .split(",")
+        .forEach((spriteIndex, colIdx) => {
+          if (!line) return;
 
-          const exampleSprites = [];
-          const mirrorIdx = [];
-          line
-            .trim()
-            .split(",")
-            .forEach((spriteIndex, colIdx) => {
-              if (!line) return;
+          const spriteIdx = parseInt(spriteIndex.trim());
+          exampleSprites.push(sprites[Math.abs(spriteIdx)]);
 
-              const spriteIdx = parseInt(spriteIndex.trim());
-              exampleSprites.push(sprites[Math.abs(spriteIdx)]);
-
-              // If negative, we should mirror it somehow
-              if (spriteIdx < 0) {
-                mirrorIdx.push(colIdx);
-              }
-            });
-          updateSprites(exampleSprites, holder);
-          holder.style.width = `${exampleSprites.length * getSpriteSize().x * getScale()}px`;
-          mirrorIdx.forEach((idx) => {
-            holder.children[idx].style.transform = "scaleX(-1)";
-          });
-
-          if (frameHolder.contains(holder)) return;
-
-          frameHolder.appendChild(holder);
+          // If negative, we should mirror it somehow
+          if (spriteIdx < 0) {
+            mirrorIdx.push(colIdx);
+          }
         });
+      updateSprites(exampleSprites, holder);
+      holder.style.width = `${exampleSprites.length * getSpriteSize().x * getScale()}px`;
+      mirrorIdx.forEach((idx) => {
+        holder.children[idx].style.transform = "scaleX(-1)";
+      });
 
-      if (exampleContainerEl.contains(frameHolder)) return;
+      if (frameHolder.contains(holder)) return;
 
-      exampleContainerEl.appendChild(frameHolder);
+      frameHolder.appendChild(holder);
     });
+
+    if (lines.length > maxFrameHeight) {
+      maxFrameHeight = lines.length;
+    }
+
+    if (exampleSelectedEl.valueAsNumber === -1) {
+      frameHolder.style.opacity = 1;
+      frameHolder.style.pointerEvents = "all";
+      frameHolder.style.position = "relative";
+    } else {
+      frameHolder.style.position = "absolute";
+      if (exampleSelectedEl.valueAsNumber === frameIdx) {
+        frameHolder.style.opacity = 1;
+        frameHolder.style.pointerEvents = "all";
+        frameHolder.style.zIndex = frames.length + 1;
+      } else {
+        frameHolder.style.opacity = 0.3;
+        frameHolder.style.pointerEvents = "none";
+        frameHolder.style.zIndex = frameIdx;
+      }
+    }
+
+    exampleContainerEl.style.minHeight = `${maxFrameHeight * (getSpriteSize().y * getScale() + 2)}px`;
+
+    if (exampleContainerEl.contains(frameHolder)) return;
+
+    exampleContainerEl.appendChild(frameHolder);
+  });
+
+  exampleSelectedEl.min = -1;
+  exampleSelectedEl.max = frames.length - 1;
+  exampleSelectedEl.nextElementSibling.innerHTML = exampleSelectedEl.value;
 }
 
 function randomizeSprite() {
@@ -692,7 +723,7 @@ function fill(sprite = sprites[getSpriteSelectedIdx()]) {
   update();
 }
 
-function backgroundPosition(action) {
+function backgroundPosition(action, value) {
   const increment = backgroundPositioning.incrementBy;
   const defValue = { x: 0, y: 0, zoom: 100, incrementBy: 1 };
 
@@ -700,9 +731,26 @@ function backgroundPosition(action) {
   else if (action === "right") backgroundPositioning.x += increment;
   else if (action === "up") backgroundPositioning.y -= increment;
   else if (action === "down") backgroundPositioning.y += increment;
-  else if (action === "zoom-in") backgroundPositioning.zoom += increment;
-  else if (action === "zoom-out") backgroundPositioning.zoom -= increment;
+  else if (action === "size-x-in") backgroundPositioning.sizeX += increment;
+  else if (action === "size-x-out") backgroundPositioning.sizeX -= increment;
+  else if (action === "size-y-in") backgroundPositioning.sizeY += increment;
+  else if (action === "size-y-out") backgroundPositioning.sizeY -= increment;
   else if (action === "reset") backgroundPositioning = defValue;
+  else if (action === "increment") backgroundPositioning.incrementBy = value;
+  else if (action === "interval") backgroundPositioning.interval = value;
 
   update();
+  save();
+}
+
+function clickAndHold(e) {
+  e.preventDefault();
+  const interval = setInterval(() => e.target.click(), backgroundPositioning.interval);
+  const listener = () => {
+    clearInterval(interval);
+    e.target.removeEventListener("mouseup", listener);
+    e.target.removeEventListener("mouseleave", listener);
+  };
+  e.target.addEventListener("mouseup", listener);
+  e.target.addEventListener("mouseleave", listener);
 }

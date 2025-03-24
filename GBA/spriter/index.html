@@ -10,38 +10,75 @@
 
             <h4>Combination Preview</h4>
             <div id="example-container"></div>
+            <div>
+                <input type="range" id="example-selected" min="-1" max="100" oninput="update(); save();" />
+                <span></span>
+            </div>
         </div>
 
         <div class="menu">
             <div>
                 <button onclick="reset()">Reset</button>
-                <button onclick="loadFromDefaults()">LoadFromDefaults</button>
+                <button onclick="loadFromDefaults()">Load from default</button>
+                <span>
+                    <input type="checkbox" id="view-indexes" />
+                    <label for="view-indexes">View indexes</label>
+                </span>
             </div>
+            <div class="divider"></div>
             <div class="background-config">
-                <input type="file" id="background" />
                 <div>
-                    <input type="checkbox" id="background-opacity" />
-                    <label for="background-opacity">Semi-transparent</label>
+                    <input type="file" id="background" />
                 </div>
-                <button onclick="backgroundRemove()">Remove</button>
+                <div>
+                    <div>
+                        <input type="checkbox" id="background-opacity" />
+                        <label for="background-opacity">Semi-transparent</label>
+                    </div>
+                    <button onclick="backgroundRemove()">Remove</button>
+                </div>
             </div>
+            <div class="divider"></div>
             <div class="background-config">
-                <button onclick="backgroundPosition('left')">⬅</button>
-                <button onclick="backgroundPosition('up')">⬆️</button>
-                <button onclick="backgroundPosition('down')">⬇️</button>
-                <button onclick="backgroundPosition('right')">➡</button>
-                <button onclick="backgroundPosition('zoom-in')">➕</button>
-                <button onclick="backgroundPosition('zoom-out')">➖</button>
-                <button onclick="backgroundPosition('reset')">Reset</button>
-                Increment by:
-                <input
-                    type="number"
-                    id="background-config-increment"
-                    step="0.1"
-                    value="1"
-                    onchange="save();"
-                />
+                <div>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('left')">⬅</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('up')">⬆️</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('down')">⬇️</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('right')">➡</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('size-x-in')">➕x</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('size-x-out')">➖x</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('size-y-in')">➕y</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('size-y-out')">➖y</button>
+                    <button onmousedown="clickAndHold(event)" onclick="backgroundPosition('reset')">Reset</button>
+                </div>
+                <div>
+                    Increment by:
+                    <input
+                        type="number"
+                        id="background-config-increment"
+                        step="0.1"
+                        value="1"
+                        onchange="backgroundPosition('increment', event.target.valueAsNumber);"
+                    />
+                    Interval:
+                    <input
+                        type="number"
+                        id="background-config-increment-interval"
+                        min="10"
+                        max="1000"
+                        step="1"
+                        value="10"
+                        onchange="backgroundPosition('interval', event.target.valueAsNumber);"
+                    />
+                    <button
+                        onclick="backgroundPosition('interval', 1000);"
+                    >Step</button>
+                    <button
+                        onclick="backgroundPosition('interval', 10);"
+                    >Long</button>
+                </div>
             </div>
+            <div class="divider"></div>
             <div>
                 <div class="draw-config">
                     <div>
@@ -108,62 +145,63 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <input type="checkbox" id="view-indexes" />
-                <label for="view-indexes">View indexes</label>
-            </div>
+            <div class="divider"></div>
             <div class="mirror-config">
+                Mirror:
                 <div>
                     <input type="checkbox" id="mirror-vertical" />
-                    <label for="mirror-vertical">Mirror Vertical</label>
+                    <label for="mirror-vertical">Vertical</label>
                 </div>
                 <div>
                     <input type="checkbox" id="mirror-horizontal" />
-                    <label for="mirror-horizontal">Mirror Horizontal</label>
+                    <label for="mirror-horizontal">Horizontal</label>
                 </div>
                 <div>
                     <input type="checkbox" id="mirror-diagonal" />
-                    <label for="mirror-diagonal">Mirror Diagonal</label>
+                    <label for="mirror-diagonal">Diagonal</label>
                 </div>
             </div>
+            <div class="divider"></div>
             <div>
                 <label for="size">Size:</label>
                 <input type="number" id="size-width" />
                 x
                 <input type="number" id="size-height" />
-            </div>
-            <div>
                 <label for="scale">Scale:</label>
                 <input type="number" id="scale" value="10" />
             </div>
-
+            <div class="divider"></div>
             <div>
-                <label for="sprite">Sprite:</label>
-                <button
-                    onclick="--event.target.nextElementSibling.value; spriteSelectedEl.dispatchEvent(new Event('change'));"
-                >
-                    ◀
-                </button>
-                <input type="range" id="sprite" min="0" max="999" />
-                <span></span>
-                <button
-                    onclick="++event.target.previousElementSibling.previousElementSibling.value; spriteSelectedEl.dispatchEvent(new Event('change'));"
-                >
-                    ➡
-                </button>
-                <button onclick="addSprite()">Add sprite</button>
-                <button onclick="randomizeSprite()">🎲</button>
-                <button onclick="fill()">🪣</button>
-                <button onclick="copy(prompt('Copy from which sprite?'))">
-                    🍝
-                </button>
+                <div>
+                    <label for="sprite">Sprite:</label>
+                    <button
+                        onclick="--event.target.nextElementSibling.value; spriteSelectedEl.dispatchEvent(new Event('change'));"
+                    >
+                        ◀
+                    </button>
+                    <input type="range" id="sprite" min="0" max="999" />
+                    <span></span>
+                    <button
+                        onclick="++event.target.previousElementSibling.previousElementSibling.value; spriteSelectedEl.dispatchEvent(new Event('change'));"
+                    >
+                        ➡
+                    </button>
+                </div>
+                <div>
+                    <button onclick="addSprite()">Add sprite</button>
+                    <button onclick="randomizeSprite()">🎲</button>
+                    <button onclick="fill()">🪣</button>
+                    <button onclick="copy(prompt('Copy from which sprite?'))">
+                        🍝
+                    </button>
+                </div>
             </div>
-
+            <div class="divider"></div>
             <div>
                 <label for="current-color">Current Color:</label>
                 <input type="color" id="current-color" />
             </div>
-
+            <div class="divider"></div>
             <div class="palette-chooser">
                 <div>
                     <div class="color-slider">
@@ -175,14 +213,14 @@
                     <input type="range" id="palette" min="0" max="15" />
                 </div>
             </div>
-
+            <div class="divider"></div>
             <div>
                 <textarea rows="10" cols="20" id="example"></textarea>
                 <button onclick="exampleContainerEl.innerHTML = ''; update();">
                     Update
                 </button>
             </div>
-
+            <div class="divider"></div>
             <img id="resulting-image" />
         </div>
     </body>
@@ -230,7 +268,11 @@
             update();
             save();
         });
-        document.body.addEventListener("mousedown", () => (drawing = true));
+        document.body.addEventListener("mousedown", e => {
+          if (e.target.tagName === 'CANVAS') {
+            drawing = true;
+          }
+        });
         document.body.addEventListener("mouseup", () => (drawing = false));
 
         init();
