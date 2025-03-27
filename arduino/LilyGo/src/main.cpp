@@ -42,6 +42,13 @@ GFXfont *font = (GFXfont *)&FiraSans;
 
 ///
 
+void draw() {
+  epd_clear();
+  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+}
+
+///
+
 int battery_voltage = -100;
 int vref = 1100; // Don't know why it's 1100
 void setup_battery_voltage() {
@@ -108,6 +115,8 @@ void full_clear_screen() {
   epd_clear();
 }
 
+///
+
 void handle_upload() {
   static size_t position = 0;
 
@@ -142,10 +151,23 @@ void handle_battery() {
 
 void ok() { server.send(200, "text/plain", "OK"); }
 
-void draw() {
-  epd_clear();
-  epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+void setup_wifi() {
+  WiFi.begin(ssid, password);
+  int tries = 10;
+  while (WiFi.status() != WL_CONNECTED && tries > 0) {
+    delay(500);
+    tries -= 1;
+  }
+  if (MDNS.begin("lilygo")) {
+    MDNS.addService("http", "tcp", 80);
+  }
+  server.on("/", HTTP_POST, ok, handle_upload);
+  server.on("/draw", HTTP_GET, ok, draw);
+  server.on("/battery", HTTP_GET, handle_battery);
+  server.begin();
 }
+
+///
 
 void button_pressed(Button2 &b) {
   epd_clear();
@@ -161,8 +183,17 @@ void handle_touch() {
   draw();
 }
 
+///
+
 void setup() {
   Serial.begin(115200);
+
+  setup_battery_voltage();
+  update_battery_voltage(false);
+  if (battery_voltage < (MIN_VOLTAGE + 0.2)) {
+    Serial.println("Turn it off, lowest battery");
+    epd_poweroff_all();
+  }
 
   framebuffer =
       (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
@@ -173,41 +204,11 @@ void setup() {
   delay(10);
   epd_clear();
 
-  setup_battery_voltage();
-
-  // full_clear_screen();
-
   pinMode(TOUCH_INT, INPUT_PULLUP);
   Wire.begin(BOARD_SDA, BOARD_SCL);
   touch.begin();
 
-  WiFi.begin(ssid, password);
-  int tries = 10;
-  while (WiFi.status() != WL_CONNECTED && tries > 0) {
-    delay(500);
-    tries -= 1;
-  }
-  if (MDNS.begin("lilygo")) {
-    MDNS.addService("http", "tcp", 80);
-  }
-  server.on("/", HTTP_POST, ok, handle_upload);
-  server.on("/draw", HTTP_GET, ok, draw);
-  server.on("/battery", HTTP_GET, handle_battery);
-  server.begin();
-
-  epd_clear();
-  int cursor_x = 100;
-  int cursor_y = 100;
-  writeln(font, "HIII", &cursor_x, &cursor_y, framebuffer);
-
-  update_battery_voltage(false);
-
   btn.setPressedHandler(button_pressed);
-
-  if (battery_voltage < (MIN_VOLTAGE + 0.2)) {
-    Serial.println("Turn it off, lowest battery");
-    epd_poweroff_all();
-  }
 
   draw();
 }
