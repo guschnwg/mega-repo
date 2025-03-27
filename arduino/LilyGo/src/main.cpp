@@ -19,6 +19,7 @@
 #include <Arduino.h>
 #include <ESPmDNS.h>
 #include <WebServer.h>
+#include <WiFi.h>
 #include <Wire.h>
 #include <esp_adc_cal.h>
 #include <touch.h>
@@ -54,10 +55,7 @@ int vref = 1100; // Don't know why it's 1100
 void setup_battery_voltage() {
   esp_adc_cal_characteristics_t adc_chars;
   esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-      ADC_UNIT_2,
-      // Should be ADC_ATTEN_DB_12 tho
-      // https://docs.espressif.com/projects/esp-idf/en/v5.4/esp32/api-reference/peripherals/adc_oneshot.html?highlight=adc_atten_db_11#_CPPv4N11adc_atten_t15ADC_ATTEN_DB_11E
-      ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+      ADC_UNIT_2, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, 1100, &adc_chars);
 
   if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
     Serial.printf("eFuse Vref: %umV\r\n", adc_chars.vref);
