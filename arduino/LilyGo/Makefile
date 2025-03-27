@@ -1,7 +1,8 @@
 setup:
 	rm -rf .pio
 	which platformio || brew install platformio
-	platformio pkg install
+	pio project init
+	pio pkg install
 	pio run -t idedata
 	sh zed.sh
 

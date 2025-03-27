@@ -14,3 +14,4 @@ godot/Godot.app
 __pycache__
 vitasdk-m1/out/
 something_something/youtube-dl/download
+arduino/LilyGo/.clangd
