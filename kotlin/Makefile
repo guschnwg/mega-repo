@@ -12,6 +12,9 @@ setup:
 
 build:
 	$(GRADLE) gradle build
+.PHONY: build
 
 run:
-	$(GRADLE) java -jar build/libs/$(JAR_NAME).jar
+	java -jar build/libs/$(JAR_NAME).jar
+	# $(GRADLE) java -jar build/libs/$(JAR_NAME).jar
+.PHONY: run

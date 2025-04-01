@@ -1,5 +1,18 @@
 package com.giovanna.stuff
 
-fun main(args : Array<String>) {
-    println("Hello, Gradle and Kotlin!")
+import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.chrome.ChromeDriver
+
+fun main(args: Array<String>) {
+    var options = ChromeOptions()
+
+    options.addArguments("--headless=new")
+
+    val driver = ChromeDriver(options)
+
+    driver.get("https://selenium.dev")
+
+    println(driver.title)
+
+    driver.quit()
 }

@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.seleniumhq.selenium:selenium-java:4.30.0")
 }
 
 application {
