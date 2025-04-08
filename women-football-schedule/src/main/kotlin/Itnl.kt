@@ -1,10 +1,13 @@
 package com.giovanna.stuff
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
+import kotlin.collections.listOf
+import kotlin.collections.emptySet
 
 private fun parseMatch(event: JsonObject): Match {
     val dateTime = event.get("date").toString().replace("\"", "")
@@ -32,20 +35,32 @@ private fun parseMatch(event: JsonObject): Match {
     )
 }
 
-public fun getItnlMatches(): List<Match> {
-    var date = "20250401"
-    var result =
-            getObject(
-                    "https://www.espn.co.uk/football/fixtures/_/date/$date/league/fifa.friendly.w?_xhr=pageContent"
-            )
+private fun getIntlMatchesForDate(date: LocalDate): List<Match> {
+    val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+    var dateString = formatter.format(date)
+    var result = getObject(
+            "https://www.espn.co.uk/football/fixtures/_/date/$dateString/league/fifa.friendly.w?_xhr=pageContent"
+    )
     var events = result.get("events")!!.jsonObject
     var matches: List<Match> = emptyList()
 
     events.entries.forEach { entry ->
         var matchesInDay = entry.value.jsonArray
-
         matches = matches + matchesInDay.map { event -> parseMatch(event.jsonObject) }
     }
-
     return matches
+}
+
+public fun getItnlMatches(): List<Match> {
+    var matches: Set<Match> = emptySet()
+
+    var today = LocalDate.now()
+    var lastWeek = today.plusDays(-7)
+    var nextWeek = today.plusDays(7)
+
+    matches = matches + getIntlMatchesForDate(today)
+    matches = matches + getIntlMatchesForDate(nextWeek)
+    matches = matches + getIntlMatchesForDate(lastWeek)
+
+    return matches.toList()
 }

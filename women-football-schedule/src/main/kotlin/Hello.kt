@@ -7,7 +7,12 @@ import java.net.InetSocketAddress
 import kotlin.io.println
 
 fun getAllMatches(): List<Match> {
-    var matches = getNWSLMatches() + getWSLMatches() + getUWCLMatches() + getItnlMatches()
+    var matches =
+            getNWSLMatches() +
+                    getWSLMatches() +
+                    getUWCLMatches() +
+                    getItnlMatches() +
+                    getBrasileiraoMatches()
     matches = matches.sortedBy { it.date }
     return matches
 }
