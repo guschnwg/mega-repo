@@ -30,7 +30,7 @@ private fun getIntlMatchesForRound(round: Int): List<Match> {
                         .get("nome_popular")
                         .toString()
                         .replace("\"", ""),
-                localDateTime.toInstant(ZoneOffset.UTC),
+                localDateTime.toInstant(ZoneOffset.ofHours(-3)),
                 home,
                 away,
                 "Brasileirão",
