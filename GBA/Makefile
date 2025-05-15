@@ -49,3 +49,6 @@ libresprite:
 	rm LibreSprite-macos-x86_64.zip
 
 	open /Applications/LibreSprite.app
+
+pong:
+	make GAME=games/00_pong run
