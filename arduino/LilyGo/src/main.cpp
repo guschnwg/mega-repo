@@ -10,7 +10,7 @@
 // https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-vscode/vsextensions/cpptools/1.24.3/vspackage
 //
 // Zed
-// make init-vim
+// make setup
 
 #ifndef BOARD_HAS_PSRAM
 #error "Please enable PSRAM, Arduino IDE -> tools -> PSRAM -> OPI !!!"
