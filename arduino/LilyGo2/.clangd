@@ -1,20 +1,18 @@
 CompileFlags:
     Add:
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/FS/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit MLX90614 Library
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit NeoMatrix
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit NeoPixel
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit GFX Library
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit BusIO
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/LilyGo-EPD47/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/SensorLib/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/AceButton/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit SSD1306
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit MLX90614 Library
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit NeoMatrix
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit NeoPixel
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit GFX Library
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit BusIO
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/LilyGo-EPD47/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/SensorLib/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Button2/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/PCF8563_Library/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Button2/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/PCF8563_Library/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include
@@ -210,26 +208,24 @@ CompileFlags:
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/cores/esp32
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/variants/esp32s3
 
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit BusIO
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit GFX Library
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit MLX90614 Library
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit NeoMatrix
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Adafruit NeoPixel
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Button2/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/LilyGo-EPD47/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/SensorLib/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/AceButton/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit BusIO
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit GFX Library
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit MLX90614 Library
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit NeoMatrix
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit NeoPixel
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Adafruit SSD1306
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Button2/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/LilyGo-EPD47/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/SensorLib/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/Button2/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/PCF8563_Library/src
-        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo/.pio/libdeps/t5-47-plus/SensorLib/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/Button2/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/PCF8563_Library/src
+        - -I/Users/gigigi/Documents/Projects/mega-repo/arduino/LilyGo2/.pio/libdeps/t5-47-plus/SensorLib/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/FS/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src
-        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src
@@ -238,8 +234,10 @@ CompileFlags:
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/DNSServer/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/EEPROM/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/ESP32/src
+        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Ethernet/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/FFat/src
+        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/FS/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/HTTPClient/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/HTTPUpdate/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/HTTPUpdateServer/src
@@ -256,6 +254,8 @@ CompileFlags:
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Ticker/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/USB/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/Update/src
+        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src
+        - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src
         - -I/Users/gigigi/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src
 
