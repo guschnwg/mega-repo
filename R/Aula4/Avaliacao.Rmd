@@ -1,0 +1,339 @@
+---
+title: "Avaliação"
+output: html_document
+---
+
+▪ Dados: qualidade do sono e estilo de vida
+
+▪ Atividade 3 (individual): considere que os dados utilizados nessa aula são
+referentes a uma pesquisa realizada pela área de recursos humanos (RH) de uma
+empresa com uma amostra de seus colaboradores. O objetivo da empresa é
+entender como está a qualidade do sono e estilo de vida de seus colaboradores e,
+a partir disso, criar estratégias que promovam a saúde mental. Utilizando apenas o
+conteúdo abordado até agora, que recomendações/sugestões você daria à área
+de RH?
+
+
+# Resumo
+
+*Gerado com IA com base na análise*
+
+A análise dos dados revelou que 41% dos colaboradores apresentam algum tipo de desordem do sono, sendo divididos igualmente entre Apneia do Sono (78 casos) e Insônia (77 casos). Esse dado demonstra um sinal de alerta em relação à qualidade do descanso da equipe.
+
+Em relação ao estresse, observa-se que a maioria dos colaboradores apresenta níveis moderados a altos de estresse, com metade deles posicionados entre os níveis 4 e 7. Por outro lado, não foram identificados casos críticos próximos ao burnout.
+
+A análise por áreas revelou cenários distintos:
+
+Saúde: concentra 57% dos casos de alto estresse da empresa, distribuídos igualmente entre Médicos e Enfermeiros.
+
+Vendas: apresenta um quadro preocupante, onde 100% dos colaboradores estão com alto nível de estresse, embora representem menos de 30% dos casos gerais.
+
+Engenharia: se destaca como a área com o melhor equilíbrio emocional, apresentando maioria dos colaboradores com baixo nível de estresse.
+
+Quanto à qualidade do sono, há uma variação relevante entre as ocupações. Profissionais das áreas de vendas, ciência e enfermagem apresentam as menores médias de horas de sono. Apesar de pertencerem à mesma área, observa-se uma diferença significativa nas horas de sono entre Médicos e Enfermeiros, o que sugere rotinas e demandas distintas.
+
+Além disso, ficou evidente que colaboradores com níveis mais altos de estresse dormem, em média, até 2 horas a menos por dia, quando comparados a colegas com baixo estresse.
+
+Por fim, ao observar a relação com pressão arterial, destaca-se que colaboradores classificados como "Hipertensão Nível 2" têm as menores médias de sono, enquanto aqueles nos grupos "Normal" e "Elevado" apresentam uma maior consistência, dormindo entre 7 e 8 horas, faixa recomendada pela Organização Mundial da Saúde (OMS).
+
+
+# Análise
+
+
+```{r include = FALSE}
+project_root_path <- paste0(getwd(), "/")
+source(paste0(project_root_path, "/definitions.R"))
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+source(paste0(project_root_path, "/install_load_packages.R"), encoding = encoding)
+
+dados <- read.csv('dados_exercio.csv')
+```
+
+```{r include = FALSE}
+# Ajustando as categorias para melhor visualização
+dados <- dados %>%
+  dplyr::mutate(
+    Age.Adj = dplyr::case_when(
+      Age < 34 ~ 'Grupo 1',
+      Age < 44 ~ 'Grupo 2',
+      Age < 54 ~ 'Grupo 3',
+      TRUE ~ 'Grupo 4'
+    ),
+    Occupation.Sector.Adj = dplyr::case_when(
+      Occupation %in% c('Sales Representative', 'Salesperson') ~ 'Sales',
+      Occupation %in% c('Software Engineer', 'Engineer') ~ 'Engineering',
+      Occupation %in% c('Doctor', 'Nurse') ~ 'Health',
+      TRUE ~ Occupation
+    ),
+    Occupation.Adj = dplyr::case_when(
+      Occupation %in% c('Sales Representative', 'Salesperson') ~ 'Sales',
+      Occupation %in% c('Software Engineer', 'Engineer') ~ 'Engineer',
+      TRUE ~ Occupation
+    ),
+    Sleep.Duration.Adj = factor(
+      dplyr::case_when(
+        Sleep.Duration <= 6 ~ "Pouca",
+        Sleep.Duration <= 8 ~ "OK",
+        TRUE ~ "Muita"
+      ),
+      levels = c("Pouca", "OK", "Muita"),
+      ordered = TRUE
+    ),
+    Quality.of.Sleep.Adj = factor(
+      dplyr::case_when(
+        Quality.of.Sleep <= 4 ~ "Baixo",
+        Quality.of.Sleep <= 7 ~ "Médio",
+        TRUE ~ "Bom"
+      ),
+      levels = c("Baixo", "Médio", "Bom"),
+      ordered = TRUE
+    ),
+    Physical.Activity.Level.Adj = factor(
+      dplyr::case_when(
+        Physical.Activity.Level <= 20 ~ "Pouco",
+        Physical.Activity.Level <= 40 ~ "Médio",
+        Physical.Activity.Level <= 60 ~ "OK",
+        TRUE ~ "Bom"
+      ),
+      levels = c("Pouco", "Médio", "OK", "Bom"),
+      ordered = TRUE
+    ),
+    BMI.Category.Adj = factor(
+      dplyr::case_when(
+        BMI.Category == "Normal Weight" ~ "Normal",
+        TRUE ~ BMI.Category
+      ),
+      levels = c("Normal", "Overweight", "Obese"),
+      ordered = TRUE
+    ),
+    Stress.Level.Adj = factor(
+      dplyr::case_when(
+        Stress.Level <= 1 ~ "Baixíssimo",
+        Stress.Level <= 3 ~ "Baixo",
+        Stress.Level <= 6 ~ "Médio",
+        Stress.Level <= 8 ~ "Alto",
+        TRUE ~ "Horrível"
+      ),
+      levels = c("Baixíssimo", "Baixo", "Médio", "Alto", "Horrível"),
+      ordered = TRUE
+    ),
+    Blood.Pressure.Systolic = as.integer(sapply(strsplit(Blood.Pressure, "/"), `[`, 1)),
+    Blood.Pressure.Diastolic = as.integer(sapply(strsplit(Blood.Pressure, "/"), `[`, 2)),
+    Blood.Pressure.Adj = factor(
+      dplyr::case_when(
+        Blood.Pressure.Systolic >= 140 | Blood.Pressure.Diastolic >= 90 ~ "Hipertensão 2",
+        Blood.Pressure.Systolic >= 130 | Blood.Pressure.Diastolic >= 80 ~ "Hipertensão 1",
+        Blood.Pressure.Systolic >= 120 & Blood.Pressure.Diastolic < 80 ~ "Elevada",
+        TRUE ~ "Normal"
+      ),
+      levels = c("Normal", "Elevada", "Hipertensão 1", "Hipertensão 2"),
+      ordered = TRUE
+    ),
+    Heart.Rate.Adj = factor(
+      dplyr::case_when(
+        Heart.Rate <= 60 ~ "Atleta",
+        Heart.Rate <= 70 ~ "Excelente",
+        Heart.Rate <= 80 ~ "Saudável",
+        Heart.Rate <= 90 ~ "Acima do ideal",
+        TRUE ~ "Alta"
+      ),
+      levels = c("Alta", "Acima do ideal", "Saudável", "Excelente", "Atleta"),
+      ordered = TRUE
+    ),
+    Daily.Steps.Adj = factor(
+      dplyr::case_when(
+        Daily.Steps <= 5000 ~ "Muito Pouco",
+        Daily.Steps <= 7500 ~ "Pouco",
+        Daily.Steps <= 10000 ~ "OK",
+        TRUE ~ "Muito"
+      ),
+      levels = c("Muito Pouco", "Pouco", "OK", "Muito"),
+      ordered = TRUE
+    ),
+    Sleep.Disorder.Adj = factor(
+      dplyr::case_when(TRUE ~ Sleep.Disorder),
+      levels = c("None", "Sleep Apnea", "Insomnia"),
+      ordered = TRUE
+    ),
+    Sleep.Disorder.Have = factor(
+      dplyr::case_when(
+        Sleep.Disorder == "None" ~ "Não",
+        TRUE ~ "Sim"
+      ),
+      levels = c("Não", "Sim"),
+      ordered = TRUE
+    )
+  )
+```
+
+
+```{r include = FALSE}
+# Visualização de frequências relativas para cada categoria criada
+prop.table(table(dados$Gender))
+prop.table(table(dados$Age.Adj))
+prop.table(table(dados$Occupation.Adj))
+prop.table(table(dados$Occupation.Sector.Adj))
+prop.table(table(dados$Sleep.Duration.Adj))
+prop.table(table(dados$Quality.of.Sleep.Adj))
+prop.table(table(dados$Physical.Activity.Level.Adj))
+prop.table(table(dados$Stress.Level.Adj))
+prop.table(table(dados$Blood.Pressure.Adj))
+prop.table(table(dados$BMI.Category.Adj))
+prop.table(table(dados$Heart.Rate.Adj))
+prop.table(table(dados$Daily.Steps.Adj))
+prop.table(table(dados$Sleep.Disorder.Adj))
+prop.table(table(dados$Sleep.Disorder.Have))
+```
+
+### 1. Quali
+
+**Desordem do sono**
+
+```{r echo = FALSE}
+pie(table(dados$Sleep.Disorder.Adj), col=rainbow(3))
+
+have_count <- table(dados$Sleep.Disorder.Have)
+have_rel <- round(prop.table(have_count) * 100)
+
+have_detail_count <- table(dados[dados$Sleep.Disorder.Adj != 'None',]$Sleep.Disorder.Adj)
+have_detail_without_none_count <- have_detail_count[-1]
+have_detail_without_none_rel <- round(prop.table(have_detail_without_none_count) * 100)
+
+knitr::kables(
+  list(
+    knitr::kable(have_count, col.names = c("Tem desordem do sono?", "Quantidade")),
+    knitr::kable(data.frame(Coluna = c(" ", " ")), col.names = " "),
+    knitr::kable(have_rel, col.names = c("Tem desordem do sono?", "%")),
+    knitr::kable(data.frame(Coluna = c(" ", " ")), col.names = " "),
+    knitr::kable(have_detail_without_none_count, col.names = c("Qual desordem?", "Quantidade")),
+    knitr::kable(data.frame(Coluna = c(" ", " ")), col.names = " "),
+    knitr::kable(have_detail_without_none_rel, col.names = c("Qual desordem?", "%"))
+  ),
+  format = 'markdown'
+)
+```
+
+Com base na contagem de frequências de desordens do sono, foi possível verificar que mais da metade dos colaboradores possuem algum tipo de desordem do sono **(41% - 155 colaboradores)**. Dentre as condições compartilhadas, temos uma distribuição de 50% para Apneia do Sono e 50% para Insônia, sendo 78 e 77 colaboradores respectivamente.
+
+### 2. Quanti
+
+**Horas de sono**
+
+```{r echo=FALSE}
+boxplot(dados$Stress.Level)
+
+summary_val <- summary(dados$Stress.Level)
+knitr::kable(
+  data.frame(
+    Statistic = c(names(summary_val), "SD"),
+    Value = round(c(as.numeric(summary_val), sd(dados$Stress.Level)), 2)
+  )
+)
+# knitr::kable(as.data.frame(sd(dados$Stress.Level)))
+```
+
+Analisando o nível de estresse reportado pelos colaboradores, é possível perceber que há um nível de estresse de moderado a alto dentro da empresa. Sendo que temos metade dos colaboradores reportando nível de estresse entre 4 e 7, considerados médios. Com base nesta pesquisa, não temos colaboradores que estejam próximos de burnout.
+
+### 3. Quali x Quali
+
+**Profissão** x **Nível de Estresse**
+
+```{r echo = FALSE}
+# table(dados$Occupation.Adj, dados$Blood.Pressure.Adj)
+knitr::kable(
+  table(dados$Occupation.Sector.Adj, dados$Stress.Level.Adj)
+)
+
+knitr::kable(
+  round(
+    prop.table(
+      table(dados$Occupation.Sector.Adj, dados$Stress.Level.Adj),
+      margin = 1
+    ) * 100
+  )
+)
+
+knitr::kable(
+  round(
+    prop.table(
+      table(dados$Occupation.Sector.Adj, dados$Stress.Level.Adj),
+      margin = 2
+    ) * 100
+  )
+)
+
+knitr::kable(
+  round(
+    table(dados$Occupation.Adj, dados$Stress.Level.Adj)
+  )
+)
+```
+
+Com base na pesquisa feita com os colaboradores, temos que as áreas de Saúde e Vendas têm os níveis mais alarmantes de estresse entre os seus integrantes. Dentro da área da saúde, temos 57% das pessoas com alto nível de estresse da empresa, sendo metade sendo de Médicos e metade sendo de Enfermeiros. Dentro da área de vendas, apesar de termos pouco menos de 30% da quantidade total de pessoas com alto nível de estresse, dentro desta área possuímos apenas colaboradores com alto nível de estresse. A área de engenharia tem a melhor distribuição de nível de estresse, tendo mais da maioria de seus integrantes com um nível baixo de estresse.
+
+### 4. Quali x Quanti
+
+**Ocupação** x **Duração do Sono**
+
+```{r echo = FALSE, out.width='100%'}
+boxplot(
+  dados$Sleep.Duration ~ reorder(dados$Occupation, dados$Sleep.Duration, median),
+  ylab = "Sleep Duration",
+  xlab = "Occupation",
+  las = 2,
+  cex.axis = 0.4
+)
+knitr::kable(
+  dados %>%
+    group_by(Occupation) %>%
+    summarize(Median = median(Sleep.Duration)) %>%
+    arrange(Median)
+)
+```
+Temos uma grande variação de horas de sono entre as profissões, temos que as profissões relacionadas à área de vendas, ciência e enfermaria tendem a ter menos horas de sono se comparadas com as demais profissões. Apesar de fazerem parte da mesma área, Médicos e Enfermeiros tem um diferença significativa em suas horas de sono.
+
+```{r out.width='100%'}
+boxplot(
+  dados$Sleep.Duration ~ reorder(dados$Stress.Level.Adj, dados$Sleep.Duration, median),
+  ylab = "Sleep Duration",
+  xlab = "Occupation",
+  las = 2,
+  cex.axis = 0.7
+)
+knitr::kable(
+  dados %>%
+    group_by(Stress.Level.Adj) %>%
+    summarize(Median = median(Sleep.Duration)) %>%
+    arrange(Median)
+)
+```
+Temos também que pessoas mais estressadas, têm até 2h a menos de sono diariamente, se comparadas a pessoas com um nível de estresse baixo.
+
+```{r echo = FALSE, out.width='100%'}
+boxplot(
+  dados$Sleep.Duration ~ reorder(dados$Blood.Pressure.Adj, dados$Sleep.Duration, median),
+  ylab = "Sleep Duration",
+  xlab = "Occupation",
+  las = 2,
+  cex.axis = 0.7
+)
+knitr::kable(
+  dados %>%
+    group_by(Blood.Pressure.Adj) %>%
+    summarize(Median = median(Sleep.Duration)) %>%
+    arrange(Median)
+)
+```
+Temos também que colaboradores que, segundo o American College of Cardiology, estão no nível de Hipertensão Nível 2, dormem menos do que os outros grupos. Temos também que pessoas nos grupos "Normal" e "Elevado" têm mais consistência de horas de sono dormidas, estando entre as 7 e 8 horas estabelecidas pela OMS.
+
+```{r include = FALSE}
+# library(tidyr)
+# dados %>%
+#   group_by(Blood.Pressure.Adj, BMI.Category.Adj) %>%
+#   summarise(mean_sleep = median(Sleep.Duration, na.rm = TRUE)) %>%
+#   pivot_wider(
+#     names_from = BMI.Category.Adj,
+#     values_from = mean_sleep
+#   )
+```
+
