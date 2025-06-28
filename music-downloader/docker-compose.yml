@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  youtube-dl:
+    container_name: youtube-dl
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9998:8080"
+    volumes:
+      - ./:/code:rw
+    stdin_open: true
+    tty: true
+    restart: always
