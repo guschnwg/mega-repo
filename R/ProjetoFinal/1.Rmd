@@ -1,0 +1,550 @@
+---
+title: "Ponte do Brooklyn"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r echo=FALSE, include=FALSE}
+project_root_path <- getwd()
+source(paste0(project_root_path, "/_definitions.R"))
+source(paste0(project_root_path, "/_install_load_packages.R"), encoding = encoding)
+
+# https://www.kaggle.com/datasets/aadimator/nyc-brooklyn-bridge-automated-pedestrian-counts
+# hour_beginning Date and time of hourly count
+# location Name of site where count was obtained
+# Pedestrians Total count (sum of directions)
+# Towards Manhattan Pedestrians crossing towards Manhattan
+# Towards Brooklyn Pedestrian crossing towards Brooklyn
+# weather_summary Overall daily weather (cloudy, clear, rain, etc.)
+# temperature Hourly temperature, in Fahrenheit degrees
+# precipitation Hourly precipitation, in inches
+# lat latitude
+# long longitude
+
+dados <- read.csv('Dados/brooklyn-bridge.csv')
+```
+
+O Departamento de Trânsito de NY utilizou formas automatizadas de contar pedestres na Brooklyn Bridge. Para isso, implantou uma câmera no lado de Manhattan da ponte, fazendo a contagem de pedestres no sentido Manhattan, no sentido Brooklyn.
+Temos também dados de temperatura, chuva, horário e uma coluna de categorização do clima do dia.
+
+```{r echo=FALSE}
+# Adicionar colunas para manipulação de dia e hora.
+# Adicionar colunas para categorização de período do dia e estação do ano.
+dados <- dados %>%
+  dplyr::mutate(datetime = lubridate::mdy_hms(dados$hour_beginning)) %>%
+  dplyr::arrange(datetime) %>%
+  dplyr::mutate(
+    data = lubridate::as_date(datetime),
+    dia = lubridate::day(data),
+    mes = lubridate::month(data),
+    hora = lubridate::hour(datetime),
+    periodo = factor(
+      dplyr::case_when(
+        hora >= 00 & hora <= 05 ~ "Madrugada",
+        hora >= 06 & hora <= 11 ~ "Manhã",
+        hora >= 12 & hora <= 17 ~ "Tarde",
+        hora >= 18 & hora <= 23 ~ "Noite",
+      ),
+      levels = c("Madrugada", "Manhã", "Tarde", "Noite")
+    ),
+    estacao = factor(
+      dplyr::case_when(
+        (mes == 3 & dia >= 20) | (mes %in% 4:5) | (mes == 6 & dia <= 20) ~ "Primavera",
+        (mes == 6 & dia >= 21) | (mes %in% 7:8) | (mes == 9 & dia <= 22) ~ "Verão",
+        (mes == 9 & dia >= 23) | (mes %in% 10:11) | (mes == 12 & dia <= 20) ~ "Outono",
+        TRUE ~ "Inverno"
+      ),
+      levels = c("Primavera", "Verão", "Outono", "Inverno")
+    )
+  )
+```
+
+```{r echo=FALSE}
+# Adiciona correção de temperaturas faltantes, adiciona agrupamento de temperaturas.
+# Adiciona categorias de temperatura.
+# Corrije também resumo de clima faltantes.
+# Corrije chuva faltante.
+dados <- dados %>%
+  dplyr::mutate(
+    temperature_fixed = dplyr::if_else(
+      is.na(temperature),
+      floor((lag(temperature) + lead(temperature)) / 2),
+      temperature
+    ),
+    temperature_grouped = cut(temperature_fixed,
+      breaks = seq(floor(min(temperature_fixed)),
+        ceiling(max(temperature_fixed)),
+        by = 5
+      ),
+      include.lowest = TRUE,
+      right = FALSE
+    ),
+    temperature_categoria = factor(
+      dplyr::case_when(
+        temperature_fixed < 40 ~ "Muito Frio",
+        temperature_fixed >= 40 & temperature_fixed < 60 ~ "Frio",
+        temperature_fixed >= 60 & temperature_fixed < 75 ~ "Normal",
+        temperature_fixed >= 75 & temperature_fixed < 90 ~ "Calor",
+        temperature_fixed >= 90 ~ "Muito calor",
+      ),
+      levels = c('Muito Frio', 'Frio', 'Normal', 'Calor', 'Muito calor')
+    ),
+    weather_summary_fixed = dplyr::if_else(
+      is.na(weather_summary) | weather_summary == '',
+      lag(weather_summary),
+      weather_summary
+    ),
+    precipitation_fixed = dplyr::if_else(
+      is.na(precipitation),
+      (lag(precipitation) + lead(precipitation)) / 2,
+      precipitation
+    ),
+  )
+```
+
+```{r echo=FALSE}
+# Adiciona categorização de dia com e sem feriado.
+# Adiciona categorização de dia da semana e fim de semana.
+# Adiciona categorização de dia com e sem chuva.
+dados <- dados %>%
+  dplyr::mutate(
+    algum_evento = dplyr::case_when(
+      events != "" ~ TRUE,
+      TRUE ~ FALSE,
+    ),
+    dia_tipo = dplyr::if_else(
+      lubridate::wday(datetime, label = TRUE) %in% c('Sat', 'Sun'),
+      "Final de Semana",
+      "Dia de Semana"
+    ),
+    com_chuva = dplyr::if_else(
+      precipitation_fixed == 0,
+      FALSE,
+      TRUE
+    ),
+  )
+```
+
+
+```{r echo=FALSE, include=FALSE}
+sum_pedestrians <- sum(dados$Pedestrians)
+days_counted <- length(unique(dados$data))
+plot(dados$Pedestrians ~ dados$data)
+sort(unique(dados$data))
+
+brooklyin <- sum(dados$Towards.Brooklyn)
+manhattan <- sum(dados$Towards.Manhattan)
+
+mean(dados$Pedestrians)
+median(dados$Pedestrians)
+max(dados$Pedestrians)
+min(dados$Pedestrians)
+```
+
+```{r echo=FALSE, include=FALSE}
+summary(dados$Pedestrians)
+grouped_by_day <- dados %>%
+  dplyr::group_by(data) %>%
+  dplyr::summarise(sum = sum(Pedestrians)) %>%
+  dplyr::ungroup() %>%
+  dplyr::arrange(data)
+summary(dplyr::select(grouped_by_day, sum))
+```
+
+
+
+
+Foi contabilizado um total de 11.032.866 pedestres, em um total de 669 dias, em dois períodos:
+- 2017-10-01 a 2018-07-31
+- 2019-01-01 a 2019-12-31
+
+Tivemos 5.656.670 no sentido Brooklyn.
+Tivemos 5.375.441 no sentido Manhattan.
+
+Tivemos uma média de 687 pessoas por hora, uma mediana de 227 pessoas por hora, demonstrando que temos horas em que há uma concentração muito mais alta do que o normal, como por exemplo na hora com mais pedestres, com 4330 no total dos dois sentidos. Tivemos horas também com fluxo zero.
+
+Tivemos uma média de 16.492 pessoas por dia, uma mediana de 16.104 pessoas por dia, demonstrando que temos uma distribuição levemente assimétrica. Temos alguns dias com valores extremos, e dias com nenhum fluxo também, em dias de inverno rigoroso.
+
+Em relação aos resumos dos dias, temos predominância de dias limpos ou nublados, sem chuva ou neve. Tivemos 1.115 horas de clima não agradável para turismo externo, somando quase 22% do total.
+
+```{r echo=FALSE, include=FALSE}
+weather_summary_fixed_table <- sort(table(dados$weather_summary_fixed), decreasing = TRUE)
+weather_summary_fixed_table
+prop.table(weather_summary_fixed_table)
+```
+
+
+```{r echo=FALSE}
+barplot(
+  weather_summary_fixed_table,
+  horiz=TRUE,
+  las = 1,
+  legend=TRUE,
+  args.legend = list(y = 14),
+  col=rainbow(length(weather_summary_fixed_table))
+)
+```
+
+```{r echo=FALSE, include=FALSE}
+temperature_categoria_table <- sort(table(dados$temperature_categoria), decreasing = TRUE)
+temperature_categoria_table
+prop.table(temperature_categoria_table)
+
+summary(dados$temperature_fixed)
+# -16...4...12...20...36
+```
+
+Em relação ao clima, tivemos uma predominância de horas frias e muito frias, somando um total de mais de 60%. Sendo que dias de clima ameno somam 25%. Dias de calor não são comuns em NY. Temos uma temperatura média de 11 graus celsius. A mínima no período apurado foi de -17 graus, e a máxima de 36 graus.
+
+```{r echo=FALSE}
+barplot(
+  temperature_categoria_table,
+  horiz=TRUE,
+  las = 1,
+  legend=TRUE,
+  args.legend = list(y = 7),
+  col=rainbow(length(temperature_categoria_table))
+)
+```
+
+
+```{r echo=FALSE, include=FALSE}
+unique(dados$events)
+algum_evento_table <- sort(table(dados$algum_evento), decreasing = TRUE)
+prop.table(algum_evento_table)
+
+pedestrians_per_algum_evento <- dados %>%
+  dplyr::group_by(algum_evento) %>%
+  dplyr::summarise(
+    sum = sum(Pedestrians),
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    min = min(Pedestrians),
+    max = max(Pedestrians)
+  )
+pedestrians_per_algum_evento
+
+prop.table(pedestrians_per_algum_evento %>% with(setNames(sum, algum_evento)))
+```
+
+Tivemos 25 datas comemorativas dentro do período análisado. Sendo apenas 7% do total de dias. Não há diferença significativa entre pedestres e dias com ou sem feriado, pois a porcentagem total de pedestres dentro do período analisado para feriados também foi de 7%. Comparando os valores de mediana, 229 para dias sem feriado, e 184 para dias com feriado, mostra que quando tem feriado temos uma concentração menor de pessoas na ponte, tendo alguns picos menos frequentes do que dias normais.
+
+```{r echo=FALSE}
+pie(algum_evento_table, labels=c('Dia normal', 'Feriado'), col=rainbow(2))
+```
+
+```{r echo=FALSE, include=FALSE}
+pedestrians_per_dia_tipo <- dados %>%
+  dplyr::group_by(dia_tipo) %>%
+  dplyr::summarise(
+    sum = sum(Pedestrians),
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    min = min(Pedestrians),
+    max = max(Pedestrians)
+  )
+
+prop.table(with(pedestrians_per_dia_tipo, setNames(sum, dia_tipo)))
+prop.table(sort(table(dados$dia_tipo), decreasing = TRUE))
+```
+
+Em relação a finais de semana e dias úteis, temos uma média muito maior nos finais de semana, e com a mediana sendo praticamente igual, temos que os picos de pessoas nos finais de semana são muito mais acentuados do que nos dias de semana.
+
+
+## Testes de Hipóteses
+
+
+### Teste 1: A presença de chuva afeta significativamente o número de pedestres?
+
+H0: Com chuva == Sem Chuva
+
+H1: Com chuva != Sem Chuva
+
+```{r echo=FALSE, include=FALSE}
+com_chuva <- dados[dados$com_chuva,]
+dim(com_chuva)
+hist(com_chuva$Pedestrians)
+ad.test(com_chuva$Pedestrians)$p.value < 0.05
+# Não é normal
+
+sem_chuva <- dados[!dados$com_chuva,]
+dim(sem_chuva)
+hist(sem_chuva$Pedestrians)
+ad.test(sem_chuva$Pedestrians)$p.value < 0.05
+# Não é normal
+```
+
+Nenhuma das distribuições é normal, então usaremos um teste não paramétrico para 2 distribuições. Para isso usaremos o teste de Wilcoxon.
+
+```{r echo=FALSE}
+wilcox.test(Pedestrians ~ com_chuva, data = dados)
+# Rejeitamos H0, logo temos uma diferença signoficativa entre dias com chuva e sem chuva
+```
+
+Como temos `p-value` < 0.05, rejeitamos H0, demonstrando que temos diferença significativa entre dias de chuva e dias sem chuva.
+
+
+### Teste 2: A quantidade média de pedestres varia entre estações do ano?
+
+H0: Primavera == Verão == Outono == Inverno
+
+H1: Alguma diferença entre as estações
+
+```{r echo=FALSE, include=FALSE}
+primavera <- dados[dados$estacao == 'Primavera',]
+hist(primavera$Pedestrians)
+verao <- dados[dados$estacao == 'Verão',]
+hist(verao$Pedestrians)
+outono <- dados[dados$estacao == 'Outono',]
+hist(outono$Pedestrians)
+inverno <- dados[dados$estacao == 'Inverno',]
+hist(inverno$Pedestrians)
+
+boxplot(dados$Pedestrians ~ dados$estacao)
+```
+
+Nenhuma das distribuições é normal, então usaremos um teste não paramétrico para 4 distribuições. Para isso usaremos o teste de Kruskal-Wallis, seguido do teste complementar.
+
+```{r echo=FALSE}
+kruskal.test(Pedestrians ~ estacao, data = dados)
+# Há diferença significativa
+dunn.test(dados$Pedestrians, dados$estacao, method = "bonferroni")
+# Há diferença significativa entre todas as estações
+```
+
+Como temos `p-value` < 0.05, rejeitamos H0, demonstrando que temos diferença significativa.
+Com o teste complementar, temos uma confirmação de que nenhuma estação tem comparação entre si.
+
+
+
+### Teste 3: Correlação entre a quantidade de pessoas indo sentido Brooklyn e indo a Manhattan?
+
+H0: Não há correlação
+
+H1: Há correlação
+
+
+Como estamos lidando com distribuições que não são normais, usaremos o método de `spearman`.
+
+
+```{r echo=FALSE}
+cor.test(dados$Towards.Brooklyn, dados$Towards.Manhattan, method='spearman')
+```
+
+Como temos `p-value` < 0.05, rejeitaremos H0, demonstrando que há correlação entre os fluxos.
+
+### Teste 4: Existe correlação entre temperatura e número de pedestres?
+
+Como estamos lidando com distribuições que não são normais, usaremos o método de `spearman`.
+
+```{r echo=FALSE, include=FALSE}
+hist(dados$temperature)
+ad.test(dados$temperature)$p.value < 0.05
+# Não é normal
+
+hist(dados$Pedestrians)
+ad.test(dados$Pedestrians)$p.value < 0.05
+# Não é normal
+```
+
+
+```{r echo=FALSE}
+cor.test(dados$temperature, dados$Pedestrians, method = "spearman")
+# Correlação estatisticamente significativa, de força moderada
+```
+Como temos `p-value` < 0.05, rejeitaremos H0, demonstrando que há correlação entre temperatura e fluxo.
+
+
+### Teste 5: Há diferença significativa entre dias normais e dias com feriados?
+
+H0: Dias normais == Com feriados
+
+H1: Dias normais != Com feriados
+
+```{r echo=FALSE, include=FALSE}
+com_feriado <- dados[dados$algum_evento,]
+dim(com_feriado)
+hist(com_feriado$Pedestrians)
+ad.test(com_feriado$Pedestrians)$p.value < 0.05
+# Não é normal
+
+sem_feriado <- dados[!dados$algum_evento,]
+dim(sem_feriado)
+hist(sem_feriado$Pedestrians)
+ad.test(sem_feriado$Pedestrians)$p.value < 0.05
+# Não é normal
+```
+
+Nenhuma das distribuições é normal, então usaremos um teste não paramétrico para 2 distribuições. Para isso usaremos o teste de Wilcoxon.
+
+```{r echo=FALSE}
+wilcox.test(Pedestrians ~ algum_evento, data = dados)
+# p-value = 0.4235, aceitamos H0
+```
+
+Como temos `p-value` > 0.05, aceitamos H0 indicando que não há diferença significativa entre dias com feriados e dias sem feriados.
+
+
+
+### Teste 6: Há diferença significativa entre dias úteis e finais de semana?
+
+H0: Dias úteis == FDS
+
+H1: Dias úteis != FDS
+
+```{r echo=FALSE, include=FALSE}
+uteis <- dados[dados$dia_tipo == 'Dia de Semana',]
+dim(uteis)
+hist(uteis$Pedestrians)
+ad.test(uteis$Pedestrians)$p.value < 0.05
+# Não é normal
+
+fds <- dados[dados$dia_tipo == 'Final de Semana',]
+dim(fds)
+hist(fds$Pedestrians)
+ad.test(fds$Pedestrians)$p.value < 0.05
+# Não é normal
+```
+
+Nenhuma das distribuições é normal, então usaremos um teste não paramétrico para 2 distribuições. Para isso usaremos o teste de Wilcoxon.
+
+```{r echo=FALSE}
+wilcox.test(Pedestrians ~ dia_tipo, data = dados)
+# Rejeitamos H0, logo temos uma diferença signoficativa entre dias úteis e finais de semana
+```
+
+Como temos `p-value` < 0.05, rejeitaremos H0, demonstrando que há diferença significativa entre dias úteis e fins de semana.
+
+
+### Teste 7: Quantidade de pessoas indo sentido Brooklyn diferente de indo a Manhattan?
+
+H0: Sentido Brooklyn == Sentido Manhattan
+
+H1: Sentido Brooklyn != Sentido Manhattan
+
+
+Como estamos lidando com distribuições que não são normais, usaremos o teste pareado de Wilcoxon.
+
+
+```{r echo=FALSE}
+wilcox.test(dados$Towards.Brooklyn, dados$Towards.Manhattan, paired = TRUE)
+```
+
+Como temos `p-value` < 0.05, rejeitaremos H0, demonstrando que há diferença entre a diferença de sentidos.
+
+
+
+```{r echo=FALSE, include=FALSE}
+boxplot(dados$Pedestrians ~ dados$estacao)
+
+pedestrians_per_season <- tapply(dados$Pedestrians, dados$estacao, sum)
+prop.table(pedestrians_per_season)
+barplot(pedestrians_per_season)
+
+boxplot(dados$Towards.Manhattan ~ dados$estacao)
+boxplot(dados$Towards.Brooklyn ~ dados$estacao)
+
+barplot(
+  rbind(
+    ToManhattan = tapply(dados$Towards.Manhattan, dados$estacao, sum),
+    ToBrooklyn = tapply(dados$Towards.Brooklyn, dados$estacao, sum)
+  ),
+  beside = TRUE,
+  legend.text = TRUE
+)
+
+barplot(
+  rbind(
+    ToManhattan = tapply(dados$Towards.Manhattan, dados$temperature_categoria, sum),
+    ToBrooklyn = tapply(dados$Towards.Brooklyn, dados$temperature_categoria, sum)
+  ),
+  beside = TRUE,
+  legend.text = TRUE
+)
+
+barplot(tapply(dados$Pedestrians, dados$temperature_fixed, sum))
+
+dados %>%
+  group_by(algum_evento) %>%
+  summarise(
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    total = sum(Pedestrians),
+    max = max(Pedestrians),
+    min = min(Pedestrians),
+    count = n()
+  )
+
+dados %>%
+  group_by(dia_tipo) %>%
+  summarise(
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    total = sum(Pedestrians),
+    max = max(Pedestrians),
+    min = min(Pedestrians),
+    count = n()
+  )
+boxplot(dados$Pedestrians ~ dados$dia_tipo, outline=FALSE)
+
+dados %>%
+  group_by(data) %>%
+  summarise(
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    total = sum(Pedestrians),
+    max = max(Pedestrians),
+    min = min(Pedestrians),
+    count = n()
+  )
+boxplot(dados$Pedestrians ~ dados$algum_evento, outline=FALSE)
+
+dados %>%
+  group_by(data, com_chuva) %>%
+  summarise(
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    total = sum(Pedestrians),
+    max = max(Pedestrians),
+    min = min(Pedestrians),
+    count = n()
+  )
+
+dados %>%
+  group_by(com_chuva) %>%
+  summarise(
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    total = sum(Pedestrians),
+    max = max(Pedestrians),
+    min = min(Pedestrians),
+    count = n()
+  )
+
+boxplot(dados$Pedestrians ~ dados$com_chuva, outline=FALSE)
+
+par(mar = c(4, 9, 1, 1))
+boxplot(dados$Pedestrians ~ dados$weather_summary, outline=FALSE, horizontal = TRUE, las = 1)
+
+par(mar = c(5, 4, 4, 2) + 0.1) # reset
+boxplot(dados$Pedestrians ~ dados$com_chuva, outline=FALSE)
+
+
+dados %>%
+  group_by(periodo) %>%
+  summarise(
+    mean = mean(Pedestrians),
+    median = median(Pedestrians),
+    total = sum(Pedestrians),
+    max = max(Pedestrians),
+    min = min(Pedestrians),
+    count = n()
+  )
+boxplot(dados$Pedestrians ~ dados$periodo, outline=FALSE)
+
+
+barplot(tapply(dados$Pedestrians, dados$hora, sum))
+
+colnames(dados)
+```

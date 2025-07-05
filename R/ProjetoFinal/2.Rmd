@@ -1,0 +1,75 @@
+---
+title: "Giovanna"
+output: html_document
+---
+
+```{r}
+project_root_path <- getwd()
+source(paste0(project_root_path, "/_definitions.R"))
+source(paste0(project_root_path, "/_install_load_packages.R"), encoding = encoding)
+```
+
+```{r}
+dados <- read.csv("Dados/camara_municipal_sp_sessoes_12_20.csv")
+dados <- dados[dados$tipo_votacao == 'Nominal',]
+dados <- dados[dados$resultado != 'Eleito Marco A Cunha (PSD)',]
+dados <- dados[dados$materia != 'SUSPENSÃO DOS TRABALHOS (RETIRADO)',]
+dados <- dados[dados$materia != 'Encerramento da Sessão',]
+dados <- dados[dados$resultado != 'Eleito',]
+# Remover votação de Presidente da Mesa, Vice, e algumas inválidas
+dados <- dados[dados$voto %in% c('Sim', 'Não', 'Abstenção'),]
+dados <- dados[!grepl('inversão do item', dados$materia),]
+dados <- dados[!grepl('Inversão do Item', dados$materia),]
+dados <- dados[!grepl('Substitutivo do autor', dados$materia),]
+dados <- dados[!grepl('Adiamento do', dados$materia),]
+dados <- dados[!grepl('Suspensão dos trabalhos', dados$materia),]
+dados <- dados[dados$resultado != '',]
+
+dados <- dados %>%
+  dplyr::mutate(
+    resultado = dplyr::case_when(
+      resultado %in% c('Aprovado', 'APROVADO') ~ 'Aprovado',
+      resultado %in% c('Pendente de Votação', 'PENDENTE DE VOTAÇÃO') ~ 'Pendente',
+      resultado %in% c(
+        'Falta de Quórum',
+        'PREJUDICADO POR FALTA DE QUÓRU',
+        'Prejudicado- Falta de Quórum',
+        'Prejudicado - falta de quorum',
+        'PREJUDICADO POR FALTA QUÓRUM'
+      ) ~ 'Pendente',
+      resultado %in% c('Reprovado', 'Rejeitado', 'Retirado') ~ 'Reprovado',
+      TRUE ~ resultado
+    ),
+    espectro = dplyr::case_when(
+      partido %in% c('PSOL') ~ 'Extrema Esquerda',
+      partido %in% c('PT', 'PC DO B') ~ 'Esquerda',
+      partido %in% c('PDT', 'PV', 'PSB', 'REDE') ~ 'Centro-Esquerda',
+      partido %in% c('PSDB', 'PMDB', 'PPS', 'PSD', 'PROS', 'MDB', 'CIDADANIA') ~ 'Centro',
+      partido %in% c('PR', 'PP', 'DEMOCRATAS', 'PHS', 'DEM', 'PODE', 'REPUBLICANOS') ~ 'Centro-Direita',
+      partido %in% c('PRB', 'PSL', 'NOVO', 'PSC') ~ 'Direita',
+      partido %in% c('PTB', 'PL', 'PATRIOTA') ~ 'Extrema-Direita',
+      TRUE ~ 'Centro',
+    )
+  )
+
+dados <- dados %>%
+  dplyr::mutate(
+    
+  )
+View(dados)
+
+unique(dados$partido)
+
+dados %>%
+  dplyr::count(id_votacao, voto) %>%
+  tidyr::pivot_wider(names_from = voto, values_from = n, values_fill = 0) %>%
+  dplyr::mutate(
+    total = Sim + Não + Abstenção,
+    yes_pct = Sim / total * 100,
+    no_pct = Não / total * 100,
+    abs_pct = Abstenção / total * 100,
+  )
+
+table(dados$espectro)
+```
+

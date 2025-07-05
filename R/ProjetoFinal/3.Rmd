@@ -1,0 +1,827 @@
+---
+title: "Brazil Highway Traffic Accidents"
+output: html_document
+---
+
+```{r echo=FALSE, include=FALSE}
+project_root_path <- getwd()
+source(paste0(project_root_path, "/_definitions.R"))
+source(paste0(project_root_path, "/_install_load_packages.R"), encoding = encoding)
+
+dados <- read.csv(
+  "Dados/datatran2020.csv",
+  sep=';',
+  fileEncoding = "iso-8859-1"
+)
+```
+
+A Polícia Rodoviária Federal mapeou os acidentes em rodovias no ano de 2020.
+Temos dados de vítimas envolvidas, qual a rodovia, data, horário, km, causa do acidente, tipo, classificação, tipo de pista, e a quantidade de veículos envolvidos.
+
+```{r echo=FALSE, include=FALSE}
+dados <- dados %>%
+  dplyr::mutate(
+    date = lubridate::ymd(dados$data_inversa),
+    hour = lubridate::hms(dados$horario),
+    mes = month(date),
+    dia = day(date)
+  ) %>%
+  dplyr::arrange(date, hour) %>%
+  dplyr::mutate(
+    tipo_br = case_when(
+      br %/% 100 == 0 ~ 'Radial',
+      br %/% 100 == 1 ~ 'Longitudinal',
+      br %/% 100 == 2 ~ 'Transversal',
+      br %/% 100 == 3 ~ 'Diagonal',
+      br %/% 100 == 4 ~ 'Ligação',
+    ),
+    regiao = case_when(
+      uf %in% c('AC', 'AM', 'RR', 'RO', 'AP', 'PA', 'TO') ~ 'Norte',
+      uf %in% c('RS', 'SC', 'PR') ~ 'Sul',
+      uf %in% c('MA', 'PI', 'RN', 'PB', 'PE', 'BA', 'AL', 'SE', 'CE') ~ 'Nordeste',
+      uf %in% c('SP', 'RJ', 'ES', 'MG') ~ 'Sudeste',
+      uf %in% c('MS', 'MT', 'GO', 'DF') ~ 'Centro-Oeste',
+    ),
+    dia_semana_adj = case_when(
+      dia_semana %in% c('segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira') ~ 'Dia de semana',
+      TRUE ~ 'Fim de semana'
+    ),
+    mortos_e_feridos = mortos + feridos,
+    estacao = case_when(
+      (mes == 12 & dia >= 21) | (mes %in% c(1, 2)) | (mes == 3 & dia < 21) ~ "Verão",
+      (mes == 3 & dia >= 21) | (mes %in% c(4, 5)) | (mes == 6 & dia < 21) ~ "Outono",
+      (mes == 6 & dia >= 21) | (mes %in% c(7, 8)) | (mes == 9 & dia < 23) ~ "Inverno",
+      (mes == 9 & dia >= 23) | (mes %in% c(10, 11)) | (mes == 12 & dia < 21) ~ "Primavera",
+      TRUE ~ NA_character_
+    )
+  )
+```
+
+```{r echo=FALSE, include=FALSE}
+total <- dim(dados)[1]
+por_dia <- total / length(unique(dados$date))
+
+dados %>%
+  dplyr::group_by(date) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+```
+
+Tivemos um total de 63548 acidentes em rodovias contabilizados no ano de 2020, sendo uma média de 174 por dia. Tivemos um máximo de 289 em 2020-12-19, e um mínimo de 70 em 2020-03-23.
+
+```{r echo=FALSE, include=FALSE}
+por_mes <- dados %>%
+  dplyr::group_by(mes) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+por_estacao <- dados %>%
+  dplyr::group_by(estacao) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+```
+
+Tivemos mais de 6 mil acidentes nos meses de dezembro e outubro, e o mês de abril registrou a menor quantidade de acidentes, com 3883. Dentro das estações do ano, temos que a Primavera é a que concentra a maior quantidade de acidentes, e o Outono tem a menor quantidade, tendo uma diferença de 5 mil acidentes entre elas. Verão e Inverno estão praticamente empatadas na segunda colocação com pouco menos de mil acidentes a menos que na Primavera.
+
+```{r echo=FALSE}
+barplot(
+  por_mes$count,
+  names.arg = por_mes$mes,
+  col = terrain.colors(dim(por_mes)[1] + 1)
+)
+
+barplot(
+  por_estacao$count,
+  names.arg = por_estacao$estacao,
+  col = terrain.colors(dim(por_estacao)[1] + 1)
+)
+```
+
+
+```{r echo=FALSE, include=FALSE}
+total <- dim(dados)[1]
+
+sum(dados$mortos_e_feridos)
+sum(dados$mortos)
+max(dados$mortos)
+dados[dados$mortos == 13,]
+sem_vitimas <- dim(dados[dados$mortos == 0,])[1]
+sem_vitimas / total
+
+sum(dados$feridos)
+max(dados$feridos)
+dados[dados$feridos == 44,]
+dim(dados[dados$feridos == 0,])[1]
+sum(dados$feridos) / dim(dados)[1]
+sem_feridos <- dim(dados[dados$feridos == 0,])[1]
+sem_feridos / total
+```
+
+Tivemos um total de 5291 vítimas fatais, sendo o acidente com a maior quantidade de fatalidades totalizando 13, no dia 2020-12-04.
+Também um total de 71480 feridos, com o acidente acontecendo no dia 2020-04-15 tendo a maior quantidade de vítimas, com 44.
+
+Tivemos 59025 (93%) acidentes sem vítimas fatais, e 14439 (22.7%) sem pessoas feridas.
+
+```{r echo=FALSE}
+vitimas_feridos <- matrix(
+  c(
+    total - sem_vitimas,
+    sem_vitimas,
+    total - sem_feridos,
+    sem_feridos
+  ),
+  nrow=2,
+  byrow=FALSE,
+  dimnames = list(c("com", "sem"), c("vitimas", "feridos"))
+)
+barplot(
+  vitimas_feridos,
+  col = c("red", "green"),
+  legend.text = TRUE
+)
+```
+
+```{r echo=FALSE, include=FALSE}
+tipo_pista <- dados %>%
+  dplyr::group_by(tipo_pista) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+```
+
+A maior quantidade de acidentes ocorreu em pista simples, com 32 mil, seguido de acidentes em pista dupla, com 26 mil. Acidentes em pista com mais de três pistas somam 50 mil.
+
+```{r echo=FALSE}
+barplot(
+  tipo_pista$count,
+  names.arg = tipo_pista$tipo_pista,
+  col=topo.colors(3),
+)
+```
+
+```{r echo=FALSE, include=FALSE}
+fase_dia <- dados %>%
+  dplyr::group_by(fase_dia) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+```
+
+Acidentes de dia são mais frequentes, com quase 35 mil das ocorrências, seguindo de acidentes a noite, com 23 mil.
+Acidentes ao amanhecer e anoitecer somam pouco mais de 6 mil.
+
+```{r echo=FALSE}
+barplot(
+  fase_dia$count,
+  names.arg = fase_dia$fase_dia,
+  col=topo.colors(4)
+)
+```
+
+
+```{r echo=FALSE, include=FALSE}
+por_estado <- dados %>%
+  dplyr::group_by(uf, regiao) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+por_regiao <- dados %>%
+  dplyr::group_by(regiao) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+dados %>%
+  dplyr::group_by(municipio) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+por_condicao_metereologica <- dados %>%
+  dplyr::group_by(condicao_metereologica) %>%
+  summarise(count = n(), sum(mortos_e_feridos)) %>%
+  arrange(desc(count))
+
+cores_regiao <- c(
+  "Sudeste" = "blue",
+  "Sul" = "green",
+  "Nordeste" = "red",
+  "Centro-Oeste" = "orange",
+  "Norte" = "purple"
+)
+```
+
+O estado com mais acidentes é Minas Gerais, com 8.3 mil. Os estados do Acre, Roraima, Amapá e Amazonas têm menos de 300 acidentes cada.
+A região Sudeste lidera com 19 mil acidentes, seguida pela região Sul com 18.5 mil. A região Norte soma menos de 4 mil acidentes.
+A cidade de Brasília soma mais de mil acidentes, seguida de Curitiba com 950.
+
+```{r echo=FALSE}
+grafico_estado <- barplot(
+  por_estado$count,
+  names.arg = NA,
+  col=cores_regiao[por_estado$regiao],
+  horiz=TRUE,
+  las = 1,
+)
+text(
+  x = 0,
+  y = grafico_estado,
+  labels = por_estado$uf,
+  cex = 0.6,
+  pos = 2,
+  xpd = TRUE
+)
+legend(
+  "topright",                  # posição da legenda no gráfico
+  legend = names(cores_regiao),# nomes das regiões
+  fill = cores_regiao,         # cores correspondentes
+  title = "Região",            # título da legenda
+  cex = 0.8                   # tamanho do texto na legenda (opcional)
+)
+```
+
+```{r echo=FALSE}
+cores_regiao <- c(
+  "Sudeste" = "blue",
+  "Sul" = "green",
+  "Nordeste" = "red",
+  "Centro-Oeste" = "orange",
+  "Norte" = "purple"
+)
+text(
+  x = 250,
+  y = barplot(
+    por_regiao$count,
+    names.arg = NA,
+    col=cores_regiao[por_regiao$regiao],
+    horiz=TRUE,
+    las = 1,
+  ),
+  labels = por_regiao$regiao,
+  cex = 0.8,
+  pos = 2,
+  xpd = TRUE
+)
+```
+
+
+### Vítimas em acidentes varia entre os tipos de pista?
+
+**Hipótese nula**: Simples = Dupla = Múltipla
+
+**Hipótese alternativa**: Algum diferente
+
+```{r echo=FALSE, include=FALSE}
+unique(dados$tipo_pista)
+
+simples <- dados[dados$tipo_pista == 'Simples',]
+hist(simples$mortos_e_feridos)
+summary(simples$mortos_e_feridos)
+ad.test(simples$mortos_e_feridos)$p.value < 0.05
+# Não é normal
+
+dupla <- dados[dados$tipo_pista == 'Dupla',]
+hist(dupla$mortos_e_feridos)
+summary(dupla$mortos_e_feridos)
+ad.test(dupla$mortos_e_feridos)$p.value < 0.05
+# Não é normal
+
+multipla <- dados[dados$tipo_pista == 'Múltipla',]
+hist(multipla$mortos_e_feridos)
+summary(multipla$mortos_e_feridos)
+ad.test(multipla$mortos_e_feridos)$p.value < 0.05
+# Não é normal
+```
+
+Nenhuma das distribuições é normal.
+
+```{r echo=FALSE}
+kruskal.test(mortos_e_feridos ~ tipo_pista, data = dados)
+# Há diferença significativa
+dunn.test(dados$mortos_e_feridos, dados$tipo_pista, method = "bonferroni")
+# Há diferença significativa entre simples e dupla e simples e múltipla
+```
+
+Há diferença significativa entre Simples e Dupla, e Simples e Múltipla.
+Não há diferença significative entre Dupla e Múltipla.
+
+
+### A proporção de acidentes com vítimas é maior aos finais de semana do que em dias úteis?
+
+**Hipótese nula**: Final de Semana igual Dias Úteis
+
+**Hipótese alternativa**: Final de Semana diferente Dias Úteis
+
+```{r echo=FALSE, include=FALSE}
+util <- dados[dados$dia_semana_adj == 'Dia de semana',]
+hist(util$mortos_e_feridos)
+summary(util$mortos_e_feridos)
+ad.test(util$mortos_e_feridos)$p.value < 0.05
+# Não é normal
+
+fds <- dados[dados$dia_semana_adj == 'Fim de semana',]
+hist(fds$mortos_e_feridos)
+summary(fds$mortos_e_feridos)
+ad.test(fds$mortos_e_feridos)$p.value < 0.05
+```
+
+Nenhuma das distribuições é normal.
+
+```{r echo=FALSE}
+wilcox.test(mortos_e_feridos ~ dia_semana_adj, data = dados)
+# Há diferença significativa
+
+boxplot(
+  dados$mortos_e_feridos ~ dados$dia_semana_adj,
+  outline = FALSE
+)
+```
+
+Há diferença significativa entre fim de semana e dia útil.
+
+### A fase do dia influencia o número de vítimas?
+
+**Hipótese nula**: Pleno dia == Pleno noite == Amanhecer == Anoitecer
+
+**Hipótese alternativa**: Algum diferente
+
+```{r echo=FALSE, include=FALSE}
+pleno_dia <- dados[dados$fase_dia == 'Pleno dia',]
+hist(pleno_dia$mortos_e_feridos)
+summary(pleno_dia$mortos_e_feridos)
+ad.test(pleno_dia$mortos_e_feridos)$p.value < 0.05
+
+plena_noite <- dados[dados$fase_dia == 'Plena Noite',]
+hist(plena_noite$mortos_e_feridos)
+summary(plena_noite$mortos_e_feridos)
+ad.test(plena_noite$mortos_e_feridos)$p.value < 0.05
+
+anoitecer <- dados[dados$fase_dia == 'Anoitecer',]
+hist(anoitecer$mortos_e_feridos)
+summary(anoitecer$mortos_e_feridos)
+ad.test(anoitecer$mortos_e_feridos)$p.value < 0.05
+
+amanhecer <- dados[dados$fase_dia == 'Amanhecer',]
+hist(amanhecer$mortos_e_feridos)
+summary(amanhecer$mortos_e_feridos)
+ad.test(amanhecer$mortos_e_feridos)$p.value < 0.05
+```
+
+Nenhuma das distribuições é normal.
+
+
+```{r echo=FALSE}
+kruskal.test(mortos_e_feridos ~ fase_dia, data = dados)
+# Há diferença significativa
+dunn.test(dados$mortos_e_feridos, dados$fase_dia, method = "bonferroni")
+# Há diferença significativa entre anoitecer e pleno dia, e entre plena noite e amanhecer
+
+boxplot(
+  dados$mortos_e_feridos ~ dados$fase_dia,
+  outline = FALSE
+)
+```
+
+Há diferença significativa entre:
+
+  - Anoitecer e Amanhecer
+
+  - Anoitecer e Plena Noite
+
+  - Pleno Dia e Amanhecer
+
+  - Pleno Dia e Plena Noite
+
+Não há diferença significative entre:
+
+  - Amanhecer e Plena Noite
+
+  - Anoitecer e Pleno Dia
+
+```{r echo=FALSE}
+resumo_mf <- dados %>%
+  group_by(fase_dia) %>%
+  summarise(
+    # sum_mortos = sum(mortos),
+    # mean_mortos = mean(mortos),
+    # median_mortos = median(mortos),
+    # sum_feridos = sum(feridos),
+    # mean_feridos = mean(feridos),
+    # median_feridos = median(feridos),
+    sum_mf = sum(mortos_e_feridos),
+    mean_mf = mean(mortos_e_feridos),
+    median_mf = median(mortos_e_feridos),
+    count = n()
+  ) %>%
+  arrange(desc(mean_mf))
+
+
+text(
+  x = barplot(
+    resumo_mf$mean_mf,
+    names.arg = resumo_mf$fase_dia,
+    ylim = c(0, max(resumo_mf$mean_mf) + 0.3),
+    col = terrain.colors(dim(resumo_mf)[1] + 1),
+  ),
+  y = resumo_mf$mean_mf + 0.1,
+  labels = round(resumo_mf$mean_mf, 2)
+)
+```
+
+
+### Existe alguma correlação entre mortos e feridos
+
+**Hipótese nula**: Variáveis são independentes
+
+**Hipótese alternativa**: Variáveis são dependentes
+
+```{r echo=FALSE, include=FALSE}
+hist(dados$feridos)
+ad.test(dados$feridos)$p.value < 0.05
+# Não é normal
+
+hist(dados$mortos)
+ad.test(dados$mortos)$p.value < 0.05
+# Não é normal
+```
+
+Nenhuma distribuição é normal.
+
+```{r echo=FALSE}
+cor(dados$feridos, dados$mortos)
+cor.test(dados$mortos, dados$feridos, method='spearman')
+```
+
+Correlação muito fraca, e estatisticamente significativa.
+
+```{r echo=FALSE}
+plot(dados$feridos, dados$mortos)
+abline(lm(dados$mortos ~ dados$feridos), col="red", lwd=2)
+```
+
+
+### Verificar proporção entre mortos em conduta do pedestre e outras causas
+
+**Hipótese nula**: Proporção mortos em conduta do pedestre == Proporção mortos em outros
+
+**Hipótese alternativa**: Proporção mortos em conduta do pedestre != Proporção mortos em outros
+
+Para este teste, foi utilizado o Chat GPT para agrupar a causa do acidente entre as seguintes categorias:
+
+- Conduta do Condutor
+
+- Conduta do Pedestre
+
+- Condições da Via
+
+- Falhas no Veículo
+
+- Fatores Naturais
+
+- Imprevistos Externos
+
+- Problemas Médicos
+
+```{r echo=FALSE, include=FALSE}
+dados <- dados %>%
+  dplyr::mutate(
+    grupo_causa = case_when(
+      causa_acidente %in% c("Falta de Atenção à Condução",
+                            "Desobediência às normas de trânsito pelo condutor",
+                            "Velocidade Incompatível",
+                            "Ingestão de Álcool",
+                            "Condutor Dormindo",
+                            "Ultrapassagem Indevida",
+                            "Reação tardia ou ineficiente do condutor",
+                            "Manobra de mudança de faixa",
+                            "Ausência de reação do condutor",
+                            "Condutor deixou de manter distância do veículo da frente",
+                            "Transitar na contramão",
+                            "Acessar a via sem observar a presença dos outros veículos",
+                            "Conversão proibida",
+                            "Ingestão de álcool pelo condutor",
+                            "Condutor desrespeitou a iluminação vermelha do semáforo",
+                            "Condutor usando celular",
+                            "Frear bruscamente",
+                            "Ingestão de Substâncias Psicoativas",
+                            "Não guardar distância de segurança",
+                            "Desrespeitar a preferência no cruzamento",
+                            "Trafegar com motocicleta (ou similar) entre as faixas",
+                            "Estacionar ou parar em local proibido") ~ "Conduta do Condutor",
+    
+      causa_acidente %in% c("Falta de Atenção do Pedestre",
+                            "Desobediência às normas de trânsito pelo pedestre",
+                            "Ingestão de álcool e/ou substâncias psicoativas pelo pedestre",
+                            "Entrada inopinada do pedestre",
+                            "Pedestre andava na pista",
+                            "Ingestão de álcool ou de substâncias psicoativas pelo pedestre",
+                            "Pedestre cruzava a pista fora da faixa") ~ "Conduta do Pedestre",
+    
+      causa_acidente %in% c("Pista Escorregadia",
+                            "Defeito na Via",
+                            "Objeto estático sobre o leito carroçável",
+                            "Sinalização da via insuficiente ou inadequada",
+                            "Ausência de sinalização",
+                            "Demais falhas na via",
+                            "Falta de acostamento",
+                            "Acesso irregular",
+                            "Transitar no acostamento",
+                            "Acumulo de água sobre o pavimento",
+                            "Acumulo de areia ou detritos sobre o pavimento",
+                            "Afundamento ou ondulação no pavimento",
+                            "Pista esburacada",
+                            "Acostamento em desnível",
+                            "Acumulo de óleo sobre o pavimento",
+                            "Iluminação deficiente") ~ "Condições da Via",
+    
+      causa_acidente %in% c("Defeito Mecânico no Veículo",
+                            "Avarias e/ou desgaste excessivo no pneu",
+                            "Deficiência ou não Acionamento do Sistema de Iluminação/Sinalização do Veículo",
+                            "Demais falhas mecânicas ou elétricas",
+                            "Carga excessiva e/ou mal acondicionada") ~ "Falhas no Veículo",
+    
+      causa_acidente %in% c("Fenômenos da Natureza", "Chuva", "Restrição de Visibilidade", "Fumaça", "Curva acentuada") ~ "Fatores Naturais",
+    
+      causa_acidente %in% c("Animais na Pista", "Agressão Externa", "Objeto estático sobre o leito carroçável") ~ "Imprevistos Externos",
+    
+      causa_acidente %in% c("Mal Súbito", "Mal súbito do condutor") ~ "Problemas Médicos",
+    
+      TRUE ~ "Outros/Indefinidos"
+    )
+  )
+```
+
+
+```{r echo=FALSE}
+dados %>%
+  group_by(grupo_causa) %>%
+  summarise(
+    soma = sum(mortos_e_feridos, na.rm = TRUE),
+    mortos = sum(mortos, na.rm = TRUE),
+    feridos = sum(feridos, na.rm = TRUE),
+    count = n()
+  ) %>%
+  arrange(desc(soma))
+```
+
+```{r echo=FALSE, include=FALSE}
+tabela <- aggregate(cbind(mortos, feridos, mortos_e_feridos) ~ grupo_causa, data = dados, sum)
+total_mortos <- sum(tabela$mortos)
+total_feridos <- sum(tabela$feridos)
+total_mef <- sum(tabela$mortos_e_feridos)
+
+# Adicionar colunas de porcentagem
+tabela$perc_mortos <- paste0(round(100 * tabela$mortos / total_mortos, 2), '%')
+tabela$perc_feridos <- paste0(round(100 * tabela$feridos / total_feridos, 2), '%')
+tabela$perc_mef <- paste0(round(100 * tabela$mortos_e_feridos / total_mef, 2), '%')
+
+contagem <- as.data.frame(table(dados$grupo_causa))
+names(contagem) <- c("grupo_causa", "quantidade")
+tabela <- merge(tabela, contagem, by = "grupo_causa")
+total_quantidade <- sum(tabela$quantidade)
+tabela$perc_quantidade <- paste0(round(100 * tabela$quantidade / total_quantidade), '%')
+```
+```{r echo=FALSE}
+tabela
+```
+
+Temos que apenas 4% dos acidentes foi causado por Conduta do Pedestre, mas soma 13% das mortes.
+
+```{r echo=FALSE}
+# Número de mortos em conduta do pedestre
+erro_pedestre <- dados[dados$grupo_causa == 'Conduta do Pedestre',]
+x1 <- nrow(erro_pedestre[erro_pedestre$mortos >= 1,])
+n1 <- nrow(erro_pedestre)
+
+# Número de mortos nos outros grupos
+outros <- dados[dados$grupo_causa != 'Conduta do Pedestre',]
+x2 <- nrow(outros[outros$mortos >= 1,])
+n2 <- nrow(outros)
+
+prop_resultado <- prop.test(x = c(x1, x2), n = c(n1, n2))
+prop_resultado
+```
+
+A diferença é significante, sendo a proporção causada pelo erro do pedestre **maior**. Sendo a diferença também estatisticamente significativa.
+
+```{r echo=FALSE}
+# Adiciona os valores nas barras
+text(
+  x = barplot(
+    setNames(prop_resultado$estimate,  c("Conduta do Pedestre", "Outras Causas")),
+    col = c("red", "purple"),
+    ylim = c(0, max(prop_resultado$estimate) + 0.1)
+  ), 
+  y = prop_resultado$estimate + 0.02,
+  labels = paste0(round(prop_resultado$estimate * 100, 1), "%")
+)
+```
+
+
+
+```{r echo=FALSE, include=FALSE}
+g <- dados %>%
+  mutate(so_hora = hour$hour) %>%
+  group_by(so_hora) %>%
+  summarise(total = sum(mortos_e_feridos, na.rm = TRUE))
+  
+barplot(total ~ so_hora, data=g)
+```
+
+
+```{r echo=FALSE, include=FALSE}
+Q1 <- quantile(dados$mortos_e_feridos, 0.25, na.rm = TRUE)
+Q3 <- quantile(dados$mortos_e_feridos, 0.75, na.rm = TRUE)
+IQR_value <- Q3 - Q1
+
+# Define bounds
+lower <- Q1 - 1.5 * IQR_value
+upper <- Q3 + 1.5 * IQR_value
+data_wo_outliers <- dados[dados$mortos_e_feridos >= lower & dados$mortos_e_feridos <= upper, ]
+
+g_wo_outliers <- data_wo_outliers %>%
+  mutate(so_hora = hour$hour) %>%
+  group_by(so_hora) %>%
+  summarise(total = sum(mortos_e_feridos, na.rm = TRUE))
+  
+barplot(total ~ so_hora, data=g_wo_outliers)
+```
+
+
+
+```{r echo=FALSE, include=FALSE}
+table(dados$classificacao_acidente)
+unique(dados$tipo_acidente)
+unique(dados$causa_acidente)
+table(dados$fase_dia)
+table(dados$condicao_metereologica)
+table(dados$tipo_pista)
+table(dados$tracado_via)
+table(dados$veiculos)
+sort(table(dados$uf))
+sort(table(dados$regiao))
+sort(table(dados$br))
+sort(table(dados$tipo_br))
+sort(table(dados$municipio), decreasing=TRUE)
+sort(table(dados$dia_semana))
+sort(table(dados$dia_semana_adj))
+
+dados %>%
+  group_by(fase_dia) %>%
+  summarise(
+    sum_mortos = sum(mortos),
+    mean_mortos = mean(mortos),
+    sum_feridos = sum(feridos),
+    mean_feridos = mean(feridos),
+    count = n()
+  )
+
+dados %>%
+  group_by(dia_semana_adj) %>%
+  summarise(
+    sum_mortos = sum(mortos),
+    mean_mortos = mean(mortos),
+    sum_feridos = sum(feridos),
+    mean_feridos = mean(feridos),
+    count = n()
+  )
+
+dados %>%
+  group_by(dia_semana) %>%
+  summarise(
+    sum_mortos = sum(mortos),
+    mean_mortos = mean(mortos),
+    sum_feridos = sum(feridos),
+    mean_feridos = mean(feridos),
+    count = n()
+  )
+
+dados %>%
+  group_by(tipo_pista) %>%
+  summarise(
+    sum_mortos = sum(mortos),
+    mean_mortos = mean(mortos),
+    sum_feridos = sum(feridos),
+    mean_feridos = mean(feridos),
+    count = n()
+  )
+
+dados %>%
+  group_by(tipo_acidente) %>%
+  summarise(
+    sum_mortos = sum(mortos),
+    mean_mortos = mean(mortos),
+    sum_feridos = sum(feridos),
+    mean_feridos = mean(feridos),
+    count = n()
+  )
+
+dados %>%
+  group_by(uf) %>%
+  summarise(
+    sum_mortos = sum(mortos),
+    mean_mortos = mean(mortos),
+    sum_feridos = sum(feridos),
+    mean_feridos = mean(feridos),
+    count = n()
+  ) %>%
+  arrange(desc(mean_mortos), desc(mean_feridos))
+
+dados %>%
+  group_by(causa_acidente) %>%
+  summarise(total = sum(mortos_e_feridos, na.rm = TRUE)) %>%
+  arrange(desc(total))
+
+dados <- dados %>%
+  dplyr::mutate(
+    grupo_causa = case_when(
+      causa_acidente %in% c("Falta de Atenção à Condução",
+                            "Desobediência às normas de trânsito pelo condutor",
+                            "Velocidade Incompatível",
+                            "Ingestão de Álcool",
+                            "Condutor Dormindo",
+                            "Ultrapassagem Indevida",
+                            "Reação tardia ou ineficiente do condutor",
+                            "Manobra de mudança de faixa",
+                            "Ausência de reação do condutor",
+                            "Condutor deixou de manter distância do veículo da frente",
+                            "Transitar na contramão",
+                            "Acessar a via sem observar a presença dos outros veículos",
+                            "Conversão proibida",
+                            "Ingestão de álcool pelo condutor",
+                            "Condutor desrespeitou a iluminação vermelha do semáforo",
+                            "Condutor usando celular",
+                            "Frear bruscamente",
+                            "Ingestão de Substâncias Psicoativas") ~ "Conduta do Condutor",
+    
+      causa_acidente %in% c("Falta de Atenção do Pedestre",
+                            "Desobediência às normas de trânsito pelo pedestre",
+                            "Ingestão de álcool e/ou substâncias psicoativas pelo pedestre",
+                            "Entrada inopinada do pedestre",
+                            "Pedestre andava na pista",
+                            "Ingestão de álcool ou de substâncias psicoativas pelo pedestre",
+                            "Pedestre cruzava a pista fora da faixa") ~ "Conduta do Pedestre",
+    
+      causa_acidente %in% c("Pista Escorregadia",
+                            "Defeito na Via",
+                            "Objeto estático sobre o leito carroçável",
+                            "Sinalização da via insuficiente ou inadequada",
+                            "Ausência de sinalização",
+                            "Demais falhas na via",
+                            "Falta de acostamento",
+                            "Acesso irregular",
+                            "Transitar no acostamento",
+                            "Acumulo de água sobre o pavimento",
+                            "Acumulo de areia ou detritos sobre o pavimento",
+                            "Afundamento ou ondulação no pavimento",
+                            "Pista esburacada",
+                            "Acostamento em desnível",
+                            "Acumulo de óleo sobre o pavimento",
+                            "Iluminação deficiente") ~ "Condições da Via",
+    
+      causa_acidente %in% c("Defeito Mecânico no Veículo",
+                            "Avarias e/ou desgaste excessivo no pneu",
+                            "Deficiência ou não Acionamento do Sistema de Iluminação/Sinalização do Veículo",
+                            "Demais falhas mecânicas ou elétricas",
+                            "Carga excessiva e/ou mal acondicionada") ~ "Falhas no Veículo",
+    
+      causa_acidente %in% c("Fenômenos da Natureza", "Chuva", "Restrição de Visibilidade", "Fumaça", "Curva acentuada") ~ "Fatores Naturais",
+    
+      causa_acidente %in% c("Animais na Pista", "Agressão Externa", "Objeto estático sobre o leito carroçável") ~ "Imprevistos Externos",
+    
+      causa_acidente %in% c("Mal Súbito", "Mal súbito do condutor") ~ "Problemas Médicos",
+    
+      causa_acidente %in% c("Não guardar distância de segurança",
+                            "Desrespeitar a preferência no cruzamento",
+                            "Trafegar com motocicleta (ou similar) entre as faixas",
+                            "Estacionar ou parar em local proibido") ~ "Outros Erros de Condução",
+    
+      TRUE ~ "Outros/Indefinidos"
+    )
+  )
+
+
+dados %>%
+  group_by(grupo_causa) %>%
+  summarise(
+    total = sum(mortos_e_feridos, na.rm = TRUE),
+    mortos = sum(mortos, na.rm = TRUE),
+    feridos = sum(feridos, na.rm = TRUE),
+    count = n()
+  ) %>%
+  arrange(desc(total))
+
+tabela <- aggregate(cbind(mortos, feridos, mortos_e_feridos) ~ grupo_causa, data = dados, sum)
+total_mortos <- sum(tabela$mortos)
+total_feridos <- sum(tabela$feridos)
+total_mef <- sum(tabela$mortos_e_feridos)
+
+# Adicionar colunas de porcentagem
+tabela$perc_mortos <- paste0(round(100 * tabela$mortos / total_mortos, 2), '%')
+tabela$perc_feridos <- paste0(round(100 * tabela$feridos / total_feridos, 2), '%')
+tabela$perc_mef <- paste0(round(100 * tabela$mortos_e_feridos / total_mef, 2), '%')
+
+contagem <- as.data.frame(table(dados$grupo_causa))
+names(contagem) <- c("grupo_causa", "quantidade")
+tabela <- merge(tabela, contagem, by = "grupo_causa")
+total_quantidade <- sum(tabela$quantidade)
+tabela$perc_quantidade <- paste0(round(100 * tabela$quantidade / total_quantidade), '%')
+
+tabela
+```
