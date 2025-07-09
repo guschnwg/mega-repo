@@ -42,17 +42,14 @@ def print_dir_structure(dir, indent=-4):
         if 'Children' in dir and isinstance(dir["Children"], list):
             print_dir_structure(dir["Children"], indent=indent + 4)
 
-def get_data(f, position, per_sector):
+def get_data(f, position, sector_size, data_per_sector):
     f.seek(position)
-    return f.read(per_sector)
+    return f.read(data_per_sector)
 
-def get_sector_data(f, sector, per_sector):
-    return get_data(f, sector * per_sector + 24, per_sector)
+def get_sector_data(f, sector, per_sector, data_per_sector):
+    return get_data(f, sector * per_sector + 24, per_sector, data_per_sector)
 
-def parse_dir(data, per_sector):
-    if len(data) < 33:
-        return None
-
+def parse_dir(data, per_sector, data_per_sector):
     item = {
         "Length": data[0],
         "Extended Attribute Record Length": data[1],
@@ -79,13 +76,12 @@ def parse_dir(data, per_sector):
         # Is file
         return item
 
-    item["Children"] = get_children(f, item["Location LE"], per_sector)
+    item["Children"] = get_children(f, item["Location LE"], per_sector, data_per_sector)
 
     return item
 
-def get_children(f, offset, per_sector):
-    f.seek(offset * per_sector + 24)
-    data = f.read(per_sector)
+def get_children(f, offset, per_sector, data_per_sector):
+    data = get_sector_data(f, offset, per_sector, data_per_sector)
 
     offset = 0
     root_dir_children = []
@@ -95,8 +91,7 @@ def get_children(f, offset, per_sector):
             break
 
         file_data = data[offset:offset + length]
-        if child := parse_dir(file_data, per_sector):
-            root_dir_children.append(child)
+        root_dir_children.append(parse_dir(file_data, per_sector, data_per_sector))
 
         offset += length
 
@@ -112,9 +107,10 @@ def main(f):
     position = int(offset / 2)
     print(f"Offset of 'CD001': {position}.\n")
 
-    per_sector = 2352 # Got from the CUE
+    per_sector = 2352 # Got from the CUE, MODE2/2352
+    valid_data_in_sector = 2048 # But the valid data in sector is 2048 bytes
 
-    data = get_data(f, position, per_sector)
+    data = get_data(f, position, per_sector, valid_data_in_sector)
 
     root_directory_data = data[156:156+34]
 
@@ -134,14 +130,14 @@ def main(f):
         "Optional Type L Path Table Location": unpack("<I", data[144:148])[0],
         "Type M Path Table Location": unpack(">I", data[148:152])[0],
         "Optional Type M Path Table Location": unpack(">I", data[152:156])[0],
-        "Directory entry for the root directory": parse_dir(root_directory_data, per_sector)
+        "Directory entry for the root directory": parse_dir(root_directory_data, per_sector, valid_data_in_sector)
     }
 
     print("PVD")
     print_dict(pvd)
     print("")
 
-    data = get_sector_data(f, pvd["Type L Path Table Location"], per_sector)
+    data = get_sector_data(f, pvd["Type L Path Table Location"], per_sector, valid_data_in_sector)
 
     offset = 0
     directories = []
@@ -168,7 +164,12 @@ def main(f):
     print_dict(directories)
     print("")
 
-    root_dir_children = get_children(f, pvd["Directory entry for the root directory"]["Location LE"], per_sector)
+    root_dir_children = get_children(
+        f,
+        pvd["Directory entry for the root directory"]["Location LE"],
+        per_sector,
+        valid_data_in_sector,
+    )
 
     print("Root Directory")
     print_dict(root_dir_children)
