@@ -18,10 +18,13 @@ open-game:
 		/Users/gigigi/Documents/Projects/mega-repo/we2002/BACKUP.bin
 
 setup-venv:
-	python3 -m venv we2002
-	sh ./we2002/bin/activate
+	python3 -m venv we2002 || true
+	source ./we2002/bin/activate
 	pip install pycdlib
 
 run:
-	sh ./we2002/bin/activate
+	source ./we2002/bin/activate
 	python main.py
+
+page:
+	open https://www.soccerdonna.de/en/
