@@ -1,5 +1,5 @@
 run:
-	docker kill jupyter
+	docker kill jupyter || true
 
 	docker run \
 		-d \
@@ -8,7 +8,7 @@ run:
 		-p 8888:8888 \
 		-v $(shell PWD)/work:/home/jovyan/work \
 		-v $(shell PWD)/config:/home/jovyan/.jupyter \
-		-e NOTEBOOK_ARGS="--NotebookApp.token=''" \
+		-e NOTEBOOK_ARGS="--NotebookApp.token='' --NotebookApp.ip='*'" \
 		jupyter/tensorflow-notebook
 
 open:
