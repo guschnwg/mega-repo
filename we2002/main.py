@@ -63,27 +63,33 @@ def parse_dir(data, per_sector, data_per_sector):
         # Is file
         return item
 
-    item["Children"] = get_children(f, item["Location LE"], per_sector, data_per_sector)
+    item["Children"] = get_children(
+        f,
+        item,
+        per_sector,
+        data_per_sector,
+    )
 
     return item
 
-def get_children(f, offset, per_sector, data_per_sector):
-    data = get_sector_data(f, offset, per_sector, data_per_sector)
-    data = data[24:]
+def get_children(f, file, per_sector, data_per_sector):
+    _, data = split_sectors(get_file_data(f, file), per_sector, 24, data_per_sector, 280)
 
     offset = 0
-    root_dir_children = []
+    children = []
+
     while offset < len(data):
         length = data[offset]
         if length == 0:
-            break
+            offset += 2
+            continue
 
         file_data = data[offset:offset + length]
-        root_dir_children.append(parse_dir(file_data, per_sector, data_per_sector))
+        children.append(parse_dir(file_data, per_sector, data_per_sector))
 
         offset += length
 
-    return root_dir_children
+    return children
 
 def get_file_data(f, file):
     beginning = file['Location LE'] * 2352
@@ -368,7 +374,7 @@ def main(f, sector_size, header_size, valid_data_in_sector_size, garbage_size):
 
     root_dir_children = get_children(
         f,
-        pvd["Directory entry for the root directory"]["Location LE"],
+        pvd["Directory entry for the root directory"],
         sector_size,
         valid_data_in_sector_size,
     )
