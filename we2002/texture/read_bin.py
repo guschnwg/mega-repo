@@ -5,8 +5,21 @@
 
 import sys
 import binascii
+import shutil
+import os
 
-def read(offset):
+available = [0, 8, 16, 24, 32, 41, 49, 57, 65, 74, 82, 90, 98, 106, 115, 123, 131, 139, 148, 156, 164, 172, 180, 189, 197, 205, 213, 222, 230, 238, 246, 255]
+
+def to_hex(integer):
+    return hex(integer).replace('0x', '').zfill(2)
+
+def read(f, offset):
+    """
+    sector:
+    final_location:
+    header:
+    data:
+    """
     f.seek(offset)
     data = f.read(2)
     location = int.from_bytes(data, 'little')
@@ -36,19 +49,13 @@ def read(offset):
 
     return response
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: python decompress.py <file_path>")
-        sys.exit(1)
-
-    f = open(sys.argv[1], 'rb')
-
+def read_segments(f):
     segments = []
 
     offset = 0
     while True:
         try:
-            segments.extend(read(offset))
+            segments.extend(read(f, offset))
         except:
             pass
 
@@ -56,12 +63,22 @@ if __name__ == '__main__':
         if offset in [seg[0] for seg in segments]:
             break
 
+    return segments
+
+def read_bin(bin_path):
+    f = open(bin_path, 'rb')
+
+    segments = read_segments(f)
+
+    images = []
+    palettes = []
     print("TYPE     START    END   WIDTH  HEIGHT  VRAM_X   VRAM_Y  HEADER")
     for seg in segments:
         vram_x = int.from_bytes(seg[2][2:4], 'little')
         vram_y = int.from_bytes(seg[2][4:6], 'little')
 
-        width = int.from_bytes(seg[2][6:8], 'little') * 2 # Don't know why the *2 tho
+        # Each byte in the width contains 2 pixels
+        width = int.from_bytes(seg[2][6:8], 'little') * 2
         height = int.from_bytes(seg[2][8:10], 'little')
 
         is_palette = seg[2][0] == 0x09
@@ -79,12 +96,39 @@ if __name__ == '__main__':
 
         if is_palette:
             palette = binascii.hexlify(seg[3])
+            fixed = bytearray()
             for i in range(len(palette) // 4):
                 color = palette[i*4:i*4+4]
                 fixed_color = color[2:4] + color[0:2]
                 bin_color = bin(int(fixed_color, 16)).lstrip('0b').zfill(16)
-                r = bin_color[11:16]
-                g = bin_color[6:11]
-                b = bin_color[1:6]
-                print(f"R({int(r, 2) * 8})G({int(g, 2) * 8})B({int(b, 2) * 8})", end=" | ")
-            print()
+                r = available[int(bin_color[11:16], 2)]
+                g = available[int(bin_color[6:11], 2)]
+                b = available[int(bin_color[1:6], 2)]
+                a = available[0]
+                fixed.extend(bytearray.fromhex(f"{to_hex(b)}{to_hex(g)}{to_hex(r)}{to_hex(a)}".upper()))
+
+            palettes.append((seg[0], seg[1], seg[2], seg[3], fixed))
+        else:
+            images.append((seg[0], seg[1], seg[2], seg[3], (width, height)))
+
+    return images, palettes
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Usage: python read_bin.py <file_path>")
+        sys.exit(1)
+
+    shutil.rmtree('./images', ignore_errors=True)
+    os.makedirs('./images')
+
+    images, palettes = read_bin(sys.argv[1])
+
+    for idx, image in enumerate(images):
+        to_decompress = open(f'./images/image_{idx}.bin', 'wb')
+        to_decompress.write(image[3])
+        to_decompress.close()
+
+    for idx, palette in enumerate(palettes):
+        to_decompress = open(f'./images/palette_{idx}.bin', 'wb')
+        to_decompress.write(palette[4])
+        to_decompress.close()
