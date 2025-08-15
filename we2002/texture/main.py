@@ -4,6 +4,7 @@
 # ✅
 
 import sys
+import ctypes
 
 from read_bin import read_bin
 from view_tim import get_image_with_palette
@@ -69,5 +70,5 @@ if __name__ == '__main__':
             im = get_image_with_palette(width * multiplier, height, result_bytes, palette[4])
             generated_images.append(im)
 
-    new_image = image_grid(generated_images, len(palettes), len(images))
+    new_image = image_grid(generated_images, len(images), len(palettes))
     new_image.show()
