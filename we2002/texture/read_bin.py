@@ -2,6 +2,8 @@
 # ✅
 # python decompress.py World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/BIN/TITLE.BIN
 # ✅
+# python decompress.py World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/BIN/DAT2D.BIN
+# ✅
 
 import sys
 import binascii
@@ -24,6 +26,14 @@ def read(f, offset):
     data = f.read(2)
     location = int.from_bytes(data, 'little')
 
+    # E4FF0F80 -> E4FF0 -> 0FFE4
+    # 242C1080 -> 242C1 -> 12C24
+
+    # 🤮 this is to make it work for the second case above
+    new_data = f.read(1)
+    plus_location = (int.from_bytes(new_data, 'little') & 10000) << 12
+    location = location + plus_location
+
     sectors = []
     header_offset = 0
     while True:
@@ -31,10 +41,11 @@ def read(f, offset):
 
         header = f.read(16)
         if header[0] == 0xFF:
+            header_offset += 16
             break
 
         start_location = int.from_bytes(header[12:14], 'little')
-        sectors.append((header, start_location))
+        sectors.append((header, start_location + plus_location))
 
         header_offset += 16
 
@@ -47,7 +58,7 @@ def read(f, offset):
 
         response.append((sector, final_location, header, data))
 
-    return response
+    return response, location, header_offset
 
 def read_segments(f):
     segments = []
@@ -55,13 +66,18 @@ def read_segments(f):
     offset = 0
     while True:
         try:
-            segments.extend(read(f, offset))
+            new_segments, location, header_offset = read(f, offset)
+            segments.extend(new_segments)
         except:
             pass
 
         offset += 4
         if offset in [seg[0] for seg in segments]:
             break
+
+    f.seek(0)
+    if (location + header_offset) != len(f.read()):
+        print("Warning: Segment data does not match file size")
 
     return segments
 
