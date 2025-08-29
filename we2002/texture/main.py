@@ -72,3 +72,5 @@ if __name__ == '__main__':
 
     new_image = image_grid(generated_images, len(images), len(palettes))
     new_image.show()
+
+    new_image.save("output.png")

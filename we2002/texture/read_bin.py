@@ -76,7 +76,7 @@ def read_segments(f):
             break
 
     f.seek(0)
-    if (location + header_offset) != len(f.read()):
+    if (location + header_offset) != len(f.read()):  # pyright: ignore
         print("Warning: Segment data does not match file size")
 
     return segments
@@ -94,7 +94,8 @@ def read_bin(bin_path):
         vram_y = int.from_bytes(seg[2][4:6], 'little')
 
         # Each byte in the width contains 2 pixels
-        width = int.from_bytes(seg[2][6:8], 'little') * 2
+        actual_width = int.from_bytes(seg[2][6:8], 'little')
+        width = actual_width * 2
         height = int.from_bytes(seg[2][8:10], 'little')
 
         is_palette = seg[2][0] == 0x09
@@ -103,7 +104,7 @@ def read_bin(bin_path):
             "PALETTE" if is_palette else "IMAGE  ",
             f"{seg[0]:-6}",
             f"{seg[1]:-6}",
-            f"{width:-6}",
+            f"{actual_width:-6}",
             f"{height:-7}",
             f"{vram_x:-8}",
             f"{vram_y:-8}",
