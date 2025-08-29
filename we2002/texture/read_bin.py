@@ -1,9 +1,11 @@
-# python decompress.py World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/BIN/TEX_61.BIN
+# /BIN/TEX_61.BIN
 # ✅
-# python decompress.py World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/BIN/TITLE.BIN
+# /BIN/TITLE.BIN
 # ✅
-# python decompress.py World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/World\ Soccer\ Winning\ Eleven\ 2002\ \(Japan\)/BIN/DAT2D.BIN
+# /BIN/DAT2D.BIN
 # ✅
+# /BIN/DATSEL.BIN
+# 🚨
 
 import sys
 import binascii
@@ -34,12 +36,16 @@ def read(f, offset):
     plus_location = (int.from_bytes(new_data, 'little') & 10000) << 12
     location = location + plus_location
 
+    print(f"Segment start: {location}")
+    import pdb; pdb.set_trace()
+
     sectors = []
     header_offset = 0
     while True:
         f.seek(location + header_offset)
 
         header = f.read(16)
+        print(f"    Header: {header}")
         if header[0] == 0xFF:
             header_offset += 16
             break
@@ -85,6 +91,7 @@ def read_bin(bin_path):
     f = open(bin_path, 'rb')
 
     segments = read_segments(f)
+    segments.sort(key=lambda x: x[0])
 
     images = []
     palettes = []
