@@ -17,14 +17,23 @@ def print_dict(obj, indent=0):
     else:
         print(f"{' ' * indent}{obj}")
 
-def print_dir_structure(dir, indent=-4):
+def print_dir_structure(dir, sector_size, indent=-4):
     if isinstance(dir, list):
         for item in dir:
-            print_dir_structure(item, indent=indent + 4)
+            print_dir_structure(item, sector_size, indent=indent + 4)
     else:
-        print(f"{' ' * indent}{dir['File Identifier']}")
+        file_name = dir['File Identifier'].decode('utf-8').strip()
+        if file_name not in ['\x00', '\x01']:
+            if file_name.endswith(';1'):
+                # File
+                file_start = sector_size * dir['Location LE']
+                file_end = file_start + sector_size + dir['Lenght LE']
+                print(f"{' ' * indent}{file_name}: {file_start} ~ {file_end}")
+            else:
+                # Folder
+                print(f"{' ' * indent}{file_name}")
         if 'Children' in dir and isinstance(dir["Children"], list):
-            print_dir_structure(dir["Children"], indent=indent + 4)
+            print_dir_structure(dir["Children"], sector_size, indent=indent + 4)
 
 def get_data(f_or_d, position, sector_size, data_per_sector):
     if isinstance(f_or_d, bytes):
@@ -193,7 +202,7 @@ def get_dirs_from_file(f, sector_size, header_size, valid_data_in_sector_size, g
     print("")
 
     print("Dir Structure")
-    print_dir_structure(root_dir_children)
+    print_dir_structure(root_dir_children, sector_size)
     print("")
 
     return root_dir_children
@@ -209,11 +218,4 @@ if __name__ == '__main__':
     valid_data_in_sector_size = 2048 # But the valid data in sector is 2048 bytes
     garbage_size = 280
 
-    dirs = get_dirs_from_file(f, sector_size, header_size, valid_data_in_sector_size, garbage_size)
-    if not dirs:
-        print("No dirs found")
-        sys.exit(1)
-
-    f.seek(0)
-    content = f.read()
-    f.close()
+    get_dirs_from_file(f, sector_size, header_size, valid_data_in_sector_size, garbage_size)
