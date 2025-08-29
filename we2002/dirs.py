@@ -125,7 +125,13 @@ def split_sectors(data, per_sector, header_size, valid_data_in_sector_size, garb
 
     return sectors, joined_data
 
-def get_dirs_from_file(f, sector_size, header_size, valid_data_in_sector_size, garbage_size):
+def get_dirs_from_file(f):
+    # Got from the CUE, MODE2/2352
+    sector_size = 2352
+    header_size = 24
+    valid_data_in_sector_size = 2048 # But the valid data in sector is 2048 bytes
+    garbage_size = 280
+
     hexdata = binascii.hexlify(f.read())
 
     offset = hexdata.find(b'01434430')
@@ -213,9 +219,4 @@ if __name__ == '__main__':
         sys.exit(1)
 
     f = open(sys.argv[1], 'rb')
-    sector_size = 2352 # Got from the CUE, MODE2/2352
-    header_size = 24
-    valid_data_in_sector_size = 2048 # But the valid data in sector is 2048 bytes
-    garbage_size = 280
-
-    get_dirs_from_file(f, sector_size, header_size, valid_data_in_sector_size, garbage_size)
+    get_dirs_from_file(f)

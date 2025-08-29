@@ -195,18 +195,18 @@ def get_player_attributes(current_attributes):
 
     return bytearray.fromhex(hex(int(other_bin + the_binary, 2)).replace('0x', ''))
 
-def change_stuff(content, dirs):
+def change_stuff(content, slpm_file, select_file):
+    sector_size = 2352 # Got from the CUE, MODE2/2352
+    header_size = 24
+    valid_data_in_sector_size = 2048 # But the valid data in sector is 2048 bytes
+    garbage_size = 280
+
     destination_file = open('output.bin', 'wb')
     destination_file.write(content)
 
-    slpm_file = [d for d in dirs if d['File Identifier'] == b'SLPM_870.56;1']
-    if not slpm_file:
-        print("No SLPM file found")
-        sys.exit(1)
-
     # Handle countries players names
 
-    file_data = get_file_data(content, slpm_file[0])
+    file_data = get_file_data(content, slpm_file)
     sectors, data = split_sectors(file_data, sector_size, header_size, valid_data_in_sector_size, garbage_size)
 
     sector_in_file = 140
@@ -218,7 +218,7 @@ def change_stuff(content, dirs):
     num_of_teams = 63
     while len(players) < player_per_team * num_of_teams:
         current_player_pos = first_player_pos + len(players) * 10
-        print(f"Reading from {int(current_player_pos / 2048) * 2352 + current_player_pos % 2048 + slpm_file[0]['Location LE'] * 2352 + 24}")
+        print(f"Reading from {int(current_player_pos / 2048) * 2352 + current_player_pos % 2048 + slpm_file['Location LE'] * 2352 + 24}")
 
         player_name = data[current_player_pos:current_player_pos+10]
         shift_jis = player_name.decode('shift-jis')
@@ -229,16 +229,11 @@ def change_stuff(content, dirs):
         data[current_player_pos:current_player_pos+10] = bytes(new_player_name, 'utf-8') + (10 - len(new_player_name)) * b'\x00'
 
     joined_sector = join_sector(sectors, data, valid_data_in_sector_size)
-    write_to_file(destination_file, slpm_file[0], joined_sector)
+    write_to_file(destination_file, slpm_file, joined_sector)
 
     # Handle countries players attributes
 
-    select_file = [d for d in dirs if d['File Identifier'] == b'SELECT.BIN;1']
-    if not select_file:
-        print("No select file found")
-        sys.exit(1)
-
-    file_data = get_file_data(content, select_file[0])
+    file_data = get_file_data(content, select_file)
     sectors, data = split_sectors(file_data, sector_size, header_size, valid_data_in_sector_size, garbage_size)
 
     sector_in_file = 76
@@ -258,28 +253,34 @@ def change_stuff(content, dirs):
         idx += 1
 
     joined_sector = join_sector(sectors, data, valid_data_in_sector_size)
-    write_to_file(destination_file, select_file[0], joined_sector)
+    write_to_file(destination_file, select_file, joined_sector)
 
     destination_file.close()
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: python main.py <file_path>")
+        print("Usage: python countries_players.py <file_path>")
         sys.exit(1)
 
     f = open(sys.argv[1], 'rb')
-    sector_size = 2352 # Got from the CUE, MODE2/2352
-    header_size = 24
-    valid_data_in_sector_size = 2048 # But the valid data in sector is 2048 bytes
-    garbage_size = 280
 
-    dirs = get_dirs_from_file(f, sector_size, header_size, valid_data_in_sector_size, garbage_size)
+    dirs = get_dirs_from_file(f)
     if not dirs:
         print("No dirs found")
+        sys.exit(1)
+
+    slpm_file = next(d for d in dirs if d['File Identifier'] == b'SLPM_870.56;1')
+    if not slpm_file:
+        print("No SLPM file found")
+        sys.exit(1)
+
+    select_file = next(d for d in dirs if d['File Identifier'] == b'SELECT.BIN;1')
+    if not select_file:
+        print("No select file found")
         sys.exit(1)
 
     f.seek(0)
     content = f.read()
     f.close()
 
-    change_stuff(content, dirs)
+    change_stuff(content, slpm_file, select_file)
