@@ -83,7 +83,6 @@ def read(f, offset):
             break
 
         start_location = int.from_bytes(header[12:14], 'little')
-        print(f"Adding {start_location} {plus_location} {start_location + plus_location}")
         sectors.append((header, start_location + plus_location))
 
         header_offset += 16
