@@ -1,11 +1,26 @@
-# /BIN/TEX_61.BIN
-# ✅
-# /BIN/TITLE.BIN
-# ✅
-# /BIN/DAT2D.BIN
-# ✅
-# /BIN/DATSEL.BIN
-# 🚨
+# /BIN/TEX_61.BIN ✅
+# # Segment start: 5208 - 0        - from 58140F80
+# # Segment start: 9792 - 0        - from 40260F80
+# # Segment start: 15400 - 0       - from 283C0F80
+# # Segment start: 19972 - 0       - from 044E0F80
+# # Segment start: 10336 - 0       - from 60280F80
+# # Segment start: 20516 - 0       - from 24500F80
+# # Segment start: 23808 - 0       - from 005D0F80
+# # Segment start: 24352 - 0       - from 205F0F80
+# # Segment start: 9248 - 0        - from 20240F80
+# # Segment start: 19428 - 0       - from E44B0F80
+# # Segment start: 29904 - 0       - from D0740F80
+# /BIN/TITLE.BIN ✅
+# # Segment start: 7908 - 0        - from E41E0F80
+# # Segment start: 8068 - 0        - from 841F0F80
+# /BIN/DAT2D.BIN ✅
+# # Segment start: 65508 - 0       - from E4FF0F80
+# # Segment start: 76836 - 65536   - from 242C1080
+# /BIN/DATSEL.BIN ✅
+# # Segment start: 220584 - 0      - from A85D1280
+# # Segment start: 221464 - 0      - from 18611280
+# # Segment start: 222432 - 0      - from E0641280
+# # Segment start: 223464 - 0      - from E8681280
 
 import sys
 import binascii
@@ -24,20 +39,33 @@ def read(f, offset):
     header:
     data:
     """
+
     f.seek(offset)
     data = f.read(2)
-    location = int.from_bytes(data, 'little')
+    og_location = int.from_bytes(data, 'little')
 
-    # E4FF0F80 -> E4FF0 -> 0FFE4
-    # 242C1080 -> 242C1 -> 12C24
+    plus_data = f.read(1)
+    actual_plus_data = bytes([plus_data[0] & 0xF0])
+    plus_location = int.from_bytes(actual_plus_data, 'little') << 12
 
-    # 🤮 this is to make it work for the second case above
-    new_data = f.read(1)
-    plus_location = (int.from_bytes(new_data, 'little') & 10000) << 12
-    location = location + plus_location
+    location = og_location + plus_location
 
-    print(f"Segment start: {location}")
-    import pdb; pdb.set_trace()
+    if plus_location != 0:
+        # We need to know if there is actually a bigger jump
+        even_more_data = bytes([0x00, 0x00, plus_data[0] & 0x0F])
+        even_more_location = int.from_bytes(even_more_data, 'little')
+        location = location + even_more_location
+        if even_more_location != 0:
+            plus_location = 0 # This is for the jump in L68
+
+    flag = f.read(1)
+    if flag == b'\x00':
+        return [], location, 0
+    if flag != b'\x80':
+        raise ValueError(f"Invalid flag: {flag}")
+
+    # print(f"From header: {bytes([data[0], data[1], plus_data[0], flag[0]])}")
+    print(f"Segment start: {location} - {plus_location}")
 
     sectors = []
     header_offset = 0
@@ -45,7 +73,7 @@ def read(f, offset):
         f.seek(location + header_offset)
 
         header = f.read(16)
-        print(f"    Header: {header}")
+        # print(f"    Header: {header}")
         if header[0] == 0xFF:
             header_offset += 16
             break
@@ -56,6 +84,7 @@ def read(f, offset):
         header_offset += 16
 
     response = []
+    sectors.sort(key=lambda x: x[1])
     for index, (header, sector) in enumerate(sectors):
         f.seek(sector)
         final_location = location if len(sectors) == index + 1 else sectors[index + 1][1]
@@ -71,11 +100,8 @@ def read_segments(f):
 
     offset = 0
     while True:
-        try:
-            new_segments, location, header_offset = read(f, offset)
-            segments.extend(new_segments)
-        except:
-            pass
+        new_segments, location, header_offset = read(f, offset)
+        segments.extend(new_segments)
 
         offset += 4
         if offset in [seg[0] for seg in segments]:
