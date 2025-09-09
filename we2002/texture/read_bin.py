@@ -21,6 +21,7 @@
 # # Segment start: 221464 - 0      - from 18611280
 # # Segment start: 222432 - 0      - from E0641280
 # # Segment start: 223464 - 0      - from E8681280
+# # /BIN/DATSEL2.BIN ✅
 
 import sys
 import binascii
@@ -28,6 +29,9 @@ import shutil
 import os
 
 available = [0, 8, 16, 24, 32, 41, 49, 57, 65, 74, 82, 90, 98, 106, 115, 123, 131, 139, 148, 156, 164, 172, 180, 189, 197, 205, 213, 222, 230, 238, 246, 255]
+
+class InvalidFlagException(Exception):
+    pass
 
 def to_hex(integer):
     return hex(integer).replace('0x', '').zfill(2)
@@ -62,7 +66,7 @@ def read(f, offset):
     if flag == b'\x00':
         return [], location, 0
     if flag != b'\x80':
-        raise ValueError(f"Invalid flag: {flag}")
+        raise InvalidFlagException(f"Invalid flag: {flag}")
 
     # print(f"From header: {bytes([data[0], data[1], plus_data[0], flag[0]])}")
     print(f"Segment start: {location} - {plus_location}")
@@ -79,6 +83,7 @@ def read(f, offset):
             break
 
         start_location = int.from_bytes(header[12:14], 'little')
+        print(f"Adding {start_location} {plus_location} {start_location + plus_location}")
         sectors.append((header, start_location + plus_location))
 
         header_offset += 16
@@ -86,12 +91,24 @@ def read(f, offset):
     response = []
     sectors.sort(key=lambda x: x[1])
     for index, (header, sector) in enumerate(sectors):
-        f.seek(sector)
-        final_location = location if len(sectors) == index + 1 else sectors[index + 1][1]
+        f.seek(sector - plus_location)
+        final_location = location + plus_location if len(sectors) == index + 1 else sectors[index + 1][1]
         length = final_location - sector
+
+        # It was:
+        # f.seek(sector)
+        # final_location = location if len(sectors) == index + 1 else sectors[index + 1][1]
+        # length = final_location - sector
+        # But without this:
+        # if length < 0:
+        #     # Workaround
+        #     f.seek(sector - plus_location)
+        #     final_location = location + plus_location if len(sectors) == index + 1 else sectors[index + 1][1]
+        #     length = final_location - sector
+
         data = f.read(length)
 
-        response.append((sector, final_location, header, data))
+        response.append((sector - plus_location, final_location - plus_location, header, data))
 
     return response, location, header_offset
 
@@ -100,12 +117,14 @@ def read_segments(f):
 
     offset = 0
     while True:
-        new_segments, location, header_offset = read(f, offset)
+        try:
+            new_segments, location, header_offset = read(f, offset)
+        except InvalidFlagException as e:
+            break
+
         segments.extend(new_segments)
 
         offset += 4
-        if offset in [seg[0] for seg in segments]:
-            break
 
     f.seek(0)
     if (location + header_offset) != len(f.read()):  # pyright: ignore
@@ -117,11 +136,10 @@ def read_bin(bin_path):
     f = open(bin_path, 'rb')
 
     segments = read_segments(f)
-    segments.sort(key=lambda x: x[0])
 
     images = []
     palettes = []
-    print("TYPE     START    END   WIDTH  HEIGHT  VRAM_X   VRAM_Y  HEADER")
+    print("TYPE     START    END     LENGTH  WIDTH  HEIGHT  VRAM_X   VRAM_Y  HEADER")
     for seg in segments:
         vram_x = int.from_bytes(seg[2][2:4], 'little')
         vram_y = int.from_bytes(seg[2][4:6], 'little')
@@ -137,6 +155,7 @@ def read_bin(bin_path):
             "PALETTE" if is_palette else "IMAGE  ",
             f"{seg[0]:-6}",
             f"{seg[1]:-6}",
+            f"{seg[1]-seg[0]:-10}",
             f"{actual_width:-6}",
             f"{height:-7}",
             f"{vram_x:-8}",
