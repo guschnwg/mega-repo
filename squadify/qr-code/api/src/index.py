@@ -18,13 +18,13 @@ def verify_password(candidate: str, actual: str) -> bool:
 #
 
 users = [
-    {"id": 1, "email": "john.doe@example.com", "password": hash_password("password1"), "roles": ["admin"], "deleted": False},
-    {"id": 2, "email": "jane.doe@example.com", "password": hash_password("password2"), "roles": ["user"], "deleted": False},
-    {"id": 3, "email": "bob.smith@example.com", "password": hash_password("password3"), "roles": ["user"], "deleted": False},
-    {"id": 4, "email": "alice.johnson@example.com", "password": hash_password("password4"), "roles": ["user"], "deleted": True},
-    {"id": 5, "email": "charlie.brown@example.com", "password": hash_password("password5"), "roles": ["user"], "deleted": False},
-    {"id": 6, "email": "david.lee@example.com", "password": hash_password("password6"), "roles": ["user"], "deleted": False},
-    {"id": 7, "email": "david.lee.2@example.com", "password": hash_password("password6"), "roles": ["user"], "deleted": False},
+    {"id": 1, "email": "john.doe@example.com", "password": hash_password("password1"), "roles": ["admin"], "active": True},
+    {"id": 2, "email": "jane.doe@example.com", "password": hash_password("password2"), "roles": ["user"], "active": True},
+    {"id": 3, "email": "bob.smith@example.com", "password": hash_password("password3"), "roles": ["user"], "active": True},
+    {"id": 4, "email": "alice.johnson@example.com", "password": hash_password("password4"), "roles": ["user"], "active": False},
+    {"id": 5, "email": "charlie.brown@example.com", "password": hash_password("password5"), "roles": ["user"], "active": True},
+    {"id": 6, "email": "david.lee@example.com", "password": hash_password("password6"), "roles": ["user"], "active": True},
+    {"id": 7, "email": "david.lee.2@example.com", "password": hash_password("password6"), "roles": ["user"], "active": True},
 ]
 
 sessions = [
@@ -68,7 +68,7 @@ def login(data):
         (u for u in users if u["email"] == data["email"]),
         None
     )
-    if not possible_user or possible_user["deleted"]:
+    if not possible_user or not possible_user["active"]:
        return None
 
     if not verify_password(data["password"], possible_user["password"]):
@@ -85,7 +85,7 @@ def create_user(user, data):
         "email": data["email"],
         "password": hash_password(data["password"]),
         "roles": data.get("roles") or ["user"],
-        "deleted": False,
+        "active": True,
     }
     users.append(new_user)
 
@@ -98,16 +98,15 @@ def update_user(user, data):
     if "admin" not in user["roles"]:
         return 403, {"error": "Unauthorized"}
 
-    updated_user = {
-        "id": user["id"],
-        "email": data.get("email", user["email"]),
-        "password": hash_password(data.get("password", user["password"])),
-        "roles": data.get("roles", user["roles"]),
-        "deleted": data.get("deleted", user["deleted"])
-    }
-    users[user["id"] - 1] = updated_user
+    user_to_update = next((u for u in users if u["id"] == data["id"]), None)
+    if not user_to_update:
+        return 404, {"error": "User not found"}
 
-    response = copy.deepcopy(updated_user)
+    for item in data:
+        if item in user_to_update:
+            user_to_update[item] = data[item]
+
+    response = copy.deepcopy(user_to_update)
     del response["password"]
 
     return 200, response
@@ -138,7 +137,7 @@ def get_user_from_token(cookie):
     if not user:
        return None
 
-    if user["deleted"]:
+    if not user["active"]:
         return None
 
     return user
@@ -196,7 +195,8 @@ class Handler(BaseHTTPRequestHandler):
                         content_type='application/json',
                         data=json.dumps(response_data),
                     )
-                except:
+                except Exception as e:
+                    print(f"Unexpected error: {e}")
                     return self._set_response(
                         code=500,
                         content_type='application/json',
@@ -249,7 +249,8 @@ class Handler(BaseHTTPRequestHandler):
                         content_type='application/json',
                         data=json.dumps(response),
                     )
-                except:
+                except Exception as e:
+                    print(f"Unexpected error: {e}")
                     return self._set_response(
                         code=500,
                         content_type='application/json',

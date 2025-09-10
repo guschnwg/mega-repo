@@ -1,29 +1,34 @@
 import React from "react";
-import { listUsers } from "./api";
+import { listUsers, updateUser } from "./api";
 
 const Users = () => {
   const [users, setUsers] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
 
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const userData = await listUsers();
+      setUsers(userData);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      setError('Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   React.useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const userData = await listUsers();
-        setUsers(userData);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-        setError('Failed to fetch users');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
+
+  const triggerState = (id, active) => {
+    updateUser({ id, active });
+    fetchUsers();
+  };
 
   if (loading) {
     return (
@@ -51,6 +56,13 @@ const Users = () => {
           <li key={index}>
             <div>Email: {user.email}</div>
             <div>Roles: {user.roles}</div>
+            <div>Active: {user.active ? 'Sim' : 'Não'}</div>
+
+            <div>
+              <button onClick={() => triggerState(user.id, !user.active)}>
+                {user.active ? 'Deactivate' : 'Activate'}
+              </button>
+            </div>
           </li>
         ))}
       </ul>

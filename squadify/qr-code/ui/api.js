@@ -32,8 +32,24 @@ const listUsers = async () => {
   return data;
 }
 
+const updateUser = async inputData => {
+  const response = await _fetch(
+    '/api/update_user',
+    {
+      method: 'post',
+      body: JSON.stringify(inputData),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }
+  );
+  const data = await response.json();
+  return data;
+}
+
 export {
   me,
   login,
   listUsers,
+  updateUser,
 };
