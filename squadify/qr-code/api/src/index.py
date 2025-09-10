@@ -48,7 +48,7 @@ def me(user, data):
 
 def list_users(user, data):
     if "admin" not in user["roles"]:
-        return 401, {"error": "Unauthorized"}
+        return 403, {"error": "Unauthorized"}
 
     response = copy.deepcopy(users)
     for user in response:
@@ -78,7 +78,7 @@ def login(data):
 
 def create_user(user, data):
     if "admin" not in user["roles"]:
-        return 401, {"error": "Unauthorized"}
+        return 403, {"error": "Unauthorized"}
 
     new_user = {
         "id": len(users) + 1,
@@ -96,7 +96,7 @@ def create_user(user, data):
 
 def update_user(user, data):
     if "admin" not in user["roles"]:
-        return 401, {"error": "Unauthorized"}
+        return 403, {"error": "Unauthorized"}
 
     updated_user = {
         "id": user["id"],
