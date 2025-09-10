@@ -3,8 +3,13 @@ import { createRoot } from "react-dom/client";
 
 import { Auth } from "./Auth";
 import { Reader } from "./Reader";
+import { Login } from "./Login";
 
 const App = () => {
+  if (window.location.pathname == '/login') {
+    return <Login />;
+  }
+
   return (
     <Auth>
       <Reader />
