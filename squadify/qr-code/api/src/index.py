@@ -4,6 +4,7 @@ import json
 import secrets
 
 import bcrypt
+import copy
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
@@ -16,17 +17,17 @@ def verify_password(candidate: str, actual: str) -> bool:
 #
 
 users = [
-    {"id": 1, "email": "john.doe@example.com", "password": hash_password("password1")},
-    {"id": 2, "email": "jane.doe@example.com", "password": hash_password("password2")},
-    {"id": 3, "email": "bob.smith@example.com", "password": hash_password("password3")},
-    {"id": 4, "email": "alice.johnson@example.com", "password": hash_password("password4")},
-    {"id": 5, "email": "charlie.brown@example.com", "password": hash_password("password5")},
-    {"id": 6, "email": "david.lee@example.com", "password": hash_password("password6")},
-    {"id": 7, "email": "david.lee.2@example.com", "password": hash_password("password6")},
+    {"id": 1, "email": "john.doe@example.com", "password": hash_password("password1"), "roles": ["admin"], "deleted": False},
+    {"id": 2, "email": "jane.doe@example.com", "password": hash_password("password2"), "roles": ["user"], "deleted": False},
+    {"id": 3, "email": "bob.smith@example.com", "password": hash_password("password3"), "roles": ["user"], "deleted": False},
+    {"id": 4, "email": "alice.johnson@example.com", "password": hash_password("password4"), "roles": ["user"], "deleted": True},
+    {"id": 5, "email": "charlie.brown@example.com", "password": hash_password("password5"), "roles": ["user"], "deleted": False},
+    {"id": 6, "email": "david.lee@example.com", "password": hash_password("password6"), "roles": ["user"], "deleted": False},
+    {"id": 7, "email": "david.lee.2@example.com", "password": hash_password("password6"), "roles": ["user"], "deleted": False},
 ]
 
 sessions = [
-    {"user_id": 1, "token": "token1", "refresh_token": "refresh_token1", "valid_until": datetime.now() + timedelta(days=365)}
+    {"user_id": 1, "token": "token1", "valid_until": datetime.now() + timedelta(days=365)}
 ]
 
 kids = [
@@ -60,13 +61,6 @@ beeps = [
     {"user_id": 6, "place_id": 6, "kid_id": 6, "timestamp": "2023-01-01T12:00:00Z"},
 ]
 
-tables = {
-    "users": users,
-    "places": places,
-    "kids": kids,
-    "beeps": beeps
-}
-
 #
 
 def generate_session(user_id):
@@ -75,17 +69,83 @@ def generate_session(user_id):
     sessions.append(session)
     return session
 
+#
+
+def me(user, data):
+    response = copy.deepcopy(user)
+    del response["password"]
+    return 200, response
+
+def list_users(user, data):
+    if "admin" not in user["roles"]:
+        return 401, {"error": "Unauthorized"}
+
+    response = copy.deepcopy(users)
+    for user in response:
+        del user["password"]
+
+    return 200, response
+
+get_endpoints = {
+    "me": me,
+    "list_users": list_users
+}
+
+#
+
 def login(data):
     possible_user = next(
         (u for u in users if u["email"] == data["email"]),
         None
     )
-    if possible_user and verify_password(data["password"], possible_user["password"]):
-        return generate_session(possible_user["id"])
+    if not possible_user or possible_user["deleted"]:
+       return None
 
-    return None
+    if not verify_password(data["password"], possible_user["password"]):
+        return None
 
-post_endpoints = {}
+    return generate_session(possible_user["id"])
+
+def create_user(user, data):
+    if "admin" not in user["roles"]:
+        return 401, {"error": "Unauthorized"}
+
+    new_user = {
+        "id": len(users) + 1,
+        "email": data["email"],
+        "password": hash_password(data["password"]),
+        "roles": data.get("roles") or ["user"],
+        "deleted": False,
+    }
+    users.append(new_user)
+
+    response = copy.deepcopy(new_user)
+    del response["password"]
+
+    return 201, response
+
+def update_user(user, data):
+    if "admin" not in user["roles"]:
+        return 401, {"error": "Unauthorized"}
+
+    updated_user = {
+        "id": user["id"],
+        "email": data.get("email", user["email"]),
+        "password": hash_password(data.get("password", user["password"])),
+        "roles": data.get("roles", user["roles"]),
+        "deleted": data.get("deleted", user["deleted"])
+    }
+    users[user["id"] - 1] = updated_user
+
+    response = copy.deepcopy(updated_user)
+    del response["password"]
+
+    return 200, response
+
+post_endpoints = {
+    "create_user": create_user,
+    "update_user": update_user,
+}
 
 #
 
@@ -104,7 +164,14 @@ def get_user_from_token(cookie):
     if session["valid_until"] < datetime.now():
         return None
 
-    return next((u for u in users if u["id"] == session["user_id"]), None)
+    user = next((u for u in users if u["id"] == session["user_id"]), None)
+    if not user:
+       return None
+
+    if user["deleted"]:
+        return None
+
+    return user
 
 #
 
@@ -144,11 +211,20 @@ class Handler(BaseHTTPRequestHandler):
                 )
 
             endpoint = self.path.replace("/api/", "")
-            if endpoint in tables:
-                return self._set_response(
-                    content_type='application/json',
-                    data=json.dumps({"endpoint": endpoint, "data": tables[endpoint]}),
-                )
+            if endpoint in get_endpoints:
+                try:
+                    response_code, response_data = get_endpoints[endpoint](user, {})
+                    return self._set_response(
+                        code=response_code,
+                        content_type='application/json',
+                        data=json.dumps(response_data),
+                    )
+                except:
+                    return self._set_response(
+                        code=500,
+                        content_type='application/json',
+                        data=json.dumps({"error": "Unexpected error"}),
+                    )
 
             return self._set_response(
                 content_type='application/json',
@@ -196,11 +272,18 @@ class Handler(BaseHTTPRequestHandler):
 
             endpoint = self.path.replace("/api/", "")
             if endpoint in post_endpoints:
-                response = post_endpoints[endpoint](user, self._get_json())
-                return self._set_response(
-                    content_type='application/json',
-                    data=json.dumps(response),
-                )
+                try:
+                    response = post_endpoints[endpoint](user, self._get_json())
+                    return self._set_response(
+                        content_type='application/json',
+                        data=json.dumps(response),
+                    )
+                except:
+                    return self._set_response(
+                        code=500,
+                        content_type='application/json',
+                        data=json.dumps({"error": "Unexpected error"}),
+                    )
 
             return self._set_response(
                 content_type='application/json',
