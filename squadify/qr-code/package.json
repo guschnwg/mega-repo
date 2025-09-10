@@ -3,17 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "qrcode": "^1.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.27.1",
     "babel-loader": "^10.0.0",
+    "html5-qrcode": "^2.3.8",
     "webpack": "5.101.3",
     "webpack-cli": "6.0.1"
   },
   "scripts": {
-    "start": "webpack-cli build"
+    "start": "find ui -name \"*.js*\" | entr -d webpack-cli build"
   },
   "eslintConfig": {
     "extends": [

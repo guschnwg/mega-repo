@@ -9,6 +9,7 @@ services:
     volumes:
       - ../index.html:/app/index.html:ro
       - ../dist:/app/dist/:ro
+      - ./src:/app/src
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
@@ -18,3 +19,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    develop:
+      watch:
+        - action: rebuild
+          path: .
+          target: /app

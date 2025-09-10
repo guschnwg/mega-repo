@@ -1,11 +1,13 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import Auth from "./Auth";
+
+import { Auth } from "./Auth";
+import { Reader } from "./Reader";
 
 const App = () => {
   return (
     <Auth>
-      <h1>QR Code</h1>
+      <Reader />
     </Auth>
   );
 };
@@ -13,7 +15,7 @@ const App = () => {
 const root = createRoot(document.getElementById("root"));
 
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  // <React.StrictMode>
+  <App />
+  // </React.StrictMode>,
 );

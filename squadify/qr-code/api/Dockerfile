@@ -1,5 +1,5 @@
-FROM python:3.9-slim
+FROM python:3.11.7-slim
 
-COPY . /app
+RUN pip install bcrypt
 
-CMD ["python", "/app/index.py"]
+CMD ["python", "/app/src/index.py"]
