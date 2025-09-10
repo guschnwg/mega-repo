@@ -25,8 +25,8 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  const triggerState = (id, active) => {
-    updateUser({ id, active });
+  const updateThisUser = (id, data) => {
+    updateUser({ id, ...data });
     fetchUsers();
   };
 
@@ -77,7 +77,16 @@ const Users = () => {
             <div>Active: {user.active ? 'Sim' : 'Não'}</div>
 
             <div>
-              <button onClick={() => triggerState(user.id, !user.active)}>
+              <button onClick={() => {
+                const password = prompt("Password?");
+                if (!password) return;
+                updateThisUser(user.id, { password })
+              }}>
+                Update Password
+              </button>
+            </div>
+            <div>
+              <button onClick={() => updateThisUser(user.id, { active: !user.active })}>
                 {user.active ? 'Deactivate' : 'Activate'}
               </button>
             </div>
