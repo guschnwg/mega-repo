@@ -80,6 +80,13 @@ def create_user(user, data):
     if "admin" not in user["roles"]:
         return 403, {"error": "Unauthorized"}
 
+    existing_user = next(
+        (u for u in users if u["email"] == data["email"]),
+        None
+    )
+    if existing_user:
+        return 409, {"error": "Email already exists"}
+
     new_user = {
         "id": len(users) + 1,
         "email": data["email"],
@@ -244,8 +251,9 @@ class Handler(BaseHTTPRequestHandler):
             endpoint = self.path.replace("/api/", "")
             if endpoint in post_endpoints:
                 try:
-                    response = post_endpoints[endpoint](user, self._get_input_data())
+                    code, response = post_endpoints[endpoint](user, self._get_input_data())
                     return self._set_response(
+                        code=code,
                         content_type='application/json',
                         data=json.dumps(response),
                     )

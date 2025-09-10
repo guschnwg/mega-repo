@@ -47,9 +47,25 @@ const updateUser = async inputData => {
   return data;
 }
 
+const createUser = async inputData => {
+  const response = await _fetch(
+    '/api/create_user',
+    {
+      method: 'post',
+      body: JSON.stringify(inputData),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }
+  );
+  const data = await response.json();
+  return data;
+}
+
 export {
   me,
   login,
   listUsers,
   updateUser,
+  createUser,
 };

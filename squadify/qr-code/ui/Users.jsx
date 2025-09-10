@@ -1,5 +1,5 @@
 import React from "react";
-import { listUsers, updateUser } from "./api";
+import { createUser, listUsers, updateUser } from "./api";
 
 const Users = () => {
   const [users, setUsers] = React.useState([]);
@@ -30,6 +30,17 @@ const Users = () => {
     fetchUsers();
   };
 
+  const createNewUser = () => {
+    const email = prompt("Email?");
+    const password = prompt("Password?");
+    if (!email || !password) {
+      return;
+    }
+
+    createUser({ email, password });
+    fetchUsers();
+  }
+
   if (loading) {
     return (
       <div>
@@ -51,6 +62,13 @@ const Users = () => {
   return (
     <div>
       <h2>Users</h2>
+
+      <div>
+        <button onClick={createNewUser}>
+          New User
+        </button>
+      </div>
+
       <ul>
         {users.map((user, index) => (
           <li key={index}>
