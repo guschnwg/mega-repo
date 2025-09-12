@@ -35,7 +35,7 @@ const Login = () => {
   }
 
   return (
-    <form action="/api/login" method="post">
+    <form action="/login" method="post">
       <input
         type="email"
         name="email"

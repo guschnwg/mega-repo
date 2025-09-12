@@ -19,11 +19,16 @@ def dict_factory(cursor, row):
     return d
 
 class Db:
-    def __init__(self):
-        self.con = sqlite3.connect(":memory:")
+    def __init__(self, database=":memory:"):
+        self.con = sqlite3.connect(database)
         self.con.row_factory = dict_factory
         self.cur = self.con.cursor()
+
+    def migrate(self):
         self.cur.execute("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, roles JSON NOT NULL, active BOOLEAN NOT NULL)")
+        self.cur.execute("CREATE TABLE sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, token TEXT NOT NULL, valid_until DATETIME NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id))")
+
+    def seed(self):
         self.create_user("john.doe@example.com", hash_password("password1"), ["admin"], True)
         self.create_user("jane.doe@example.com", hash_password("password2"), ["user"], True)
         self.create_user("bob.smith@example.com", hash_password("password3"), ["user"], True)
@@ -31,8 +36,6 @@ class Db:
         self.create_user("charlie.brown@example.com", hash_password("password5"), ["user"], True)
         self.create_user("david.lee@example.com", hash_password("password6"), ["user"], True)
         self.create_user("david.lee.2@example.com", hash_password("password6"), ["user"], True)
-
-        self.cur.execute("CREATE TABLE sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, token TEXT NOT NULL, valid_until DATETIME NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id))")
 
     def get_users(self):
         self.cur.execute("SELECT id, email, roles, active FROM users")
@@ -81,6 +84,3 @@ class Db:
 
     def delete_session(self, session_id):
         self.cur.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
-
-
-db = Db()
