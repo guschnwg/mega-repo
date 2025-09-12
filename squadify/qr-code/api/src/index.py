@@ -5,31 +5,10 @@ import secrets
 import copy
 from urllib.parse import parse_qsl
 
-import bcrypt
-
-def hash_password(password: str) -> str:
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode(), salt)
-    return hashed.decode()
-
-def verify_password(candidate: str, actual: str) -> bool:
-    return bcrypt.checkpw(candidate.encode(), actual.encode())
+from utils import hash_password, verify_password
+from db import db
 
 #
-
-users = [
-    {"id": 1, "email": "john.doe@example.com", "password": hash_password("password1"), "roles": ["admin"], "active": True},
-    {"id": 2, "email": "jane.doe@example.com", "password": hash_password("password2"), "roles": ["user"], "active": True},
-    {"id": 3, "email": "bob.smith@example.com", "password": hash_password("password3"), "roles": ["user"], "active": True},
-    {"id": 4, "email": "alice.johnson@example.com", "password": hash_password("password4"), "roles": ["user"], "active": False},
-    {"id": 5, "email": "charlie.brown@example.com", "password": hash_password("password5"), "roles": ["user"], "active": True},
-    {"id": 6, "email": "david.lee@example.com", "password": hash_password("password6"), "roles": ["user"], "active": True},
-    {"id": 7, "email": "david.lee.2@example.com", "password": hash_password("password6"), "roles": ["user"], "active": True},
-]
-
-sessions = [
-    {"user_id": 1, "token": "token1", "valid_until": datetime.now() + timedelta(days=365)}
-]
 
 people = [
     {"id": 1, "name": "John Doe", "qr_code": hash_password("John Doe")},
@@ -65,27 +44,18 @@ beeps = [
 #
 
 def generate_session(user_id):
-    token = secrets.token_urlsafe(16)
-    session = {"token": token, "user_id": user_id, "valid_until": datetime.now() + timedelta(hours=1)}
-    sessions.append(session)
-    return session
+    return
 
 #
 
 def me(user, data):
-    response = copy.deepcopy(user)
-    del response["password"]
-    return 200, response
+    return 200, user
 
 def list_users(user, data):
     if "admin" not in user["roles"]:
         return 403, {"error": "Unauthorized"}
 
-    response = copy.deepcopy(users)
-    for user in response:
-        del user["password"]
-
-    return 200, response
+    return 200, db.get_users()
 
 def list_beeps(user, data):
     if "admin" not in user["roles"]:
@@ -106,62 +76,44 @@ get_endpoints = {
 #
 
 def login(data):
-    possible_user = next(
-        (u for u in users if u["email"] == data["email"]),
-        None
-    )
+    possible_user = db.get_user_by_email_with_password(data["email"])
     if not possible_user or not possible_user["active"]:
-       return None
+        return None
 
     if not verify_password(data["password"], possible_user["password"]):
         return None
 
-    return generate_session(possible_user["id"])
+    return db.create_session(possible_user["id"], secrets.token_urlsafe(16), datetime.now() + timedelta(hours=1))
 
 def create_user(user, data):
     if "admin" not in user["roles"]:
         return 403, {"error": "Unauthorized"}
 
-    existing_user = next(
-        (u for u in users if u["email"] == data["email"]),
-        None
-    )
+    existing_user = db.get_user_by_email(data["email"])
     if existing_user:
         return 409, {"error": "Email already exists"}
 
-    new_user = {
-        "id": len(users) + 1,
-        "email": data["email"],
-        "password": hash_password(data["password"]),
-        "roles": data.get("roles") or ["user"],
-        "active": True,
-    }
-    users.append(new_user)
-
-    response = copy.deepcopy(new_user)
-    del response["password"]
-
-    return 201, response
+    return 201, db.create_user(data["email"], hash_password(data["password"]), data.get("roles") or ["user"], True)
 
 def update_user(user, data):
     if "admin" not in user["roles"]:
         return 403, {"error": "Unauthorized"}
 
-    user_to_update = next((u for u in users if u["id"] == data["id"]), None)
+    user_to_update = db.get_user_with_password(data["id"])
     if not user_to_update:
         return 404, {"error": "User not found"}
 
-    for item in data:
-        if item in user_to_update:
-            if item == "password":
-                user_to_update["password"] = hash_password(data["password"])
-            else:
-                user_to_update[item] = data[item]
+    print(data)
 
-    response = copy.deepcopy(user_to_update)
-    del response["password"]
+    updated_user = db.update_user(
+        data["id"],
+        data["email"] if "email" in data else user_to_update["email"],
+        hash_password(data["password"]) if "password" in data else user_to_update["password"],
+        data["roles"] if "roles" in data else user_to_update["roles"],
+        data["active"] if "active" in data else user_to_update["active"]
+    )
 
-    return 200, response
+    return 200, updated_user
 
 post_endpoints = {
     "create_user": create_user,
@@ -178,14 +130,14 @@ def get_user_from_token(cookie):
     if not token:
         return None
 
-    session = next((sess for sess in sessions if sess["token"] == token), None)
+    session = db.get_session_by_token(token)
     if not session:
         return None
 
     if session["valid_until"] < datetime.now():
         return None
 
-    user = next((u for u in users if u["id"] == session["user_id"]), None)
+    user = db.get_user(session["user_id"])
     if not user:
        return None
 
@@ -221,11 +173,17 @@ class Handler(BaseHTTPRequestHandler):
         self,
         code=200,
         content_type='text/html',
-        data: str | bytes = "",
+        data: str | dict | bytes = "",
     ):
         self.send_response(code)
         self.send_header('Content-type', content_type)
         self.end_headers()
+        if not data:
+           return
+
+        if isinstance(data, dict) or isinstance(data, list) :
+            return self.wfile.write(json.dumps(data).encode('utf-8'))
+
         self.wfile.write(data.encode('utf-8') if isinstance(data, str) else data)
 
     def do_GET(self):
@@ -235,29 +193,30 @@ class Handler(BaseHTTPRequestHandler):
                 return self._set_response(
                     code=401,
                     content_type='application/json',
-                    data=json.dumps({"error": "Invalid token"}),
+                    data={"error": "Invalid token"},
                 )
 
             endpoint = self.path.replace("/api/", "")
             if endpoint in get_endpoints:
                 try:
                     response_code, response_data = get_endpoints[endpoint](user, {})
+                    print(response_code, response_data)
                     return self._set_response(
                         code=response_code,
                         content_type='application/json',
-                        data=json.dumps(response_data),
+                        data=response_data,
                     )
                 except Exception as e:
                     print(f"Unexpected error: {e}")
                     return self._set_response(
                         code=500,
                         content_type='application/json',
-                        data=json.dumps({"error": "Unexpected error"}),
+                        data={"error": "Unexpected error"},
                     )
 
             return self._set_response(
                 content_type='application/json',
-                data=json.dumps({"error": "Endpoint not found"}),
+                data={"error": "Endpoint not found"},
             )
 
         if self.path.startswith("/dist"):
@@ -290,7 +249,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._set_response(
                     code=401,
                     content_type='application/json',
-                    data=json.dumps({"error": "Invalid token"}),
+                    data={"error": "Invalid token"},
                 )
 
             endpoint = self.path.replace("/api/", "")
@@ -300,19 +259,19 @@ class Handler(BaseHTTPRequestHandler):
                     return self._set_response(
                         code=code,
                         content_type='application/json',
-                        data=json.dumps(response),
+                        data=response,
                     )
                 except Exception as e:
                     print(f"Unexpected error: {e}")
                     return self._set_response(
                         code=500,
                         content_type='application/json',
-                        data=json.dumps({"error": "Unexpected error"}),
+                        data={"error": "Unexpected error"},
                     )
 
             return self._set_response(
                 content_type='application/json',
-                data=json.dumps({"echo": self._get_data()}),
+                data={"echo": self._get_data()},
             )
 
 httpd = HTTPServer(('', 8000), Handler)
