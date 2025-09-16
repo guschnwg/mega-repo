@@ -1,31 +1,71 @@
 import React, { useEffect, useRef, useState } from "react";
-
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 
 const Reader = () => {
   const ref = useRef();
+
+  const [ready, setReady] = useState(null);
+  const [error, setError] = useState(null);
+  const [decodedText, setDecodedText] = useState(null);
   const [scanner, setScanner] = useState(null);
 
   useEffect(() => {
-    if (ref && ref.current && !scanner) {
-      function onScanSuccess(decodedText, decodedResult) {
-        console.log(`Code matched = ${decodedText}`, decodedResult);
-      }
-
-      function onScanFailure(error) { }
-
-      let html5QrcodeScanner = new Html5QrcodeScanner(
-        ref.current.id,
+    if (ready && ref && ref.current && !scanner) {
+      let html5QrcodeScanner = new Html5Qrcode(ref.current.id);
+      html5QrcodeScanner.start(
+        { facingMode: "environment" },
         { fps: 10 },
-        false
+        (decodedText, decodedResult) => {
+          setDecodedText(decodedText);
+        },
+        (error) => { },
       );
-
-      html5QrcodeScanner.render(onScanSuccess, onScanFailure);
       setScanner(html5QrcodeScanner);
     }
-  }, [ref, scanner]);
+  }, [ref, scanner, ready]);
 
-  return <div id="reader" ref={ref} />;
+  const start = async () => {
+    let devices = null;
+    try {
+      devices = await Html5Qrcode.getCameras()
+    } catch {
+      setError("Not accepted!");
+      setReady(false);
+      return;
+    }
+
+    if (!devices) {
+      setError("No cameras!");
+      setReady(false);
+      return;
+    }
+
+    setReady(true);
+    setError(null);
+  }
+
+  if (error !== null) {
+    return <pre>{JSON.stringify(error)}</pre>;
+  }
+
+  if (!ready) {
+    return (
+      <button
+        className="request-permission-button"
+        onClick={start}
+      >
+        START
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <div id="reader" ref={ref} />
+
+      {decodedText}
+    </>
+  );
 };
 
 export { Reader };

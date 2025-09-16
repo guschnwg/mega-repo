@@ -82,5 +82,8 @@ class Db:
         self.cur.execute("SELECT * FROM sessions WHERE token = ?", (token,))
         return self.cur.fetchone()
 
+    def delete_session_by_token(self, token):
+        self.cur.execute("DELETE FROM sessions WHERE token = ?", (token,))
+
     def delete_session(self, session_id):
         self.cur.execute("DELETE FROM sessions WHERE id = ?", (session_id,))

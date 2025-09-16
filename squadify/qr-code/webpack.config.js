@@ -23,6 +23,10 @@ module.exports = [
           },
           exclude: [/node_modules/, /public/],
         },
+        {
+          test: /\.css$/i,
+          use: ["style-loader", "css-loader"],
+        },
       ],
     },
   },

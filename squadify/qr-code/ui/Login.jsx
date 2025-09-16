@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { me } from "./api";
 
 const Login = () => {
@@ -35,7 +36,7 @@ const Login = () => {
   }
 
   return (
-    <form action="/login" method="post">
+    <form id="login-form" action="/login" method="post">
       <input
         type="email"
         name="email"

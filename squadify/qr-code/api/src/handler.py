@@ -3,6 +3,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import secrets
 from urllib.parse import parse_qsl
+import mimetypes
 
 from utils import hash_password, verify_password
 from db import Db
@@ -59,11 +60,18 @@ class BaseHandler(BaseHTTPRequestHandler):
 
         return self.db.create_session(possible_user["id"], secrets.token_urlsafe(16), datetime.now() + timedelta(hours=1))
 
-    def _get_user_from_token(self, cookie):
+    def _get_token(self, cookie):
         if not cookie or "session=" not in cookie:
             return None
 
         token = cookie.split("session=")[1].split(";")[0]
+        if not token:
+            return None
+
+        return token
+
+    def _get_user_from_token(self, cookie):
+        token = self._get_token(cookie)
         if not token:
             return None
 
@@ -83,6 +91,12 @@ class BaseHandler(BaseHTTPRequestHandler):
 
         return user
 
+    def _delete_session(self, cookie):
+        token = self._get_token(cookie)
+        if not token:
+            return
+
+        self.db.delete_session_by_token(token)
     #
 
     def GET_me(self, user, data):
@@ -127,6 +141,12 @@ class BaseHandler(BaseHTTPRequestHandler):
     #
 
     def do_GET(self):
+        if self.path == "/logout":
+            self._delete_session(self.headers.get('Cookie'))
+            self.send_response(302)
+            self.send_header("Location", "/")
+            return self.end_headers()
+
         if self.path.startswith("/api"):
             user = self._get_user_from_token(self.headers.get('Cookie'))
             if not user:
@@ -160,7 +180,9 @@ class BaseHandler(BaseHTTPRequestHandler):
 
         if self.path.startswith("/dist"):
             with open(f'/app{self.path}', 'rb') as file:
-                return self._set_response(data=file.read())
+                mime_type, _ = mimetypes.guess_type(self.path)
+                mime_type = mime_type or "text/plain"
+                return self._set_response(data=file.read(), content_type=mime_type)
 
         with open('/app/index.html', 'rb') as file:
             return self._set_response(data=file.read())

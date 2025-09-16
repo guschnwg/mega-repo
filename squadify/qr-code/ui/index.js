@@ -1,28 +1,15 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import './styles.css';
+
 import { Auth, useAuth } from "./Auth";
 import { Reader } from "./Reader";
 import { Login } from "./Login";
 import { Users } from "./Users";
+import { Dash } from "./Dash";
 
 const NotFound = () => <span>Not found!</span>;
-
-const Root = () => {
-  const { user } = useAuth();
-
-  return (
-    <div>
-      <span>Hello {user.email}!</span>
-
-      <div>
-        <a href="/reader">Reader</a>
-
-        {user.roles.includes("admin") && <a href="/users">Users</a>}
-      </div>
-    </div>
-  );
-}
 
 const App = () => {
   if (window.location.pathname == '/login') {
@@ -30,7 +17,7 @@ const App = () => {
   }
 
   const routes = {
-    "/": Root,
+    "/": Dash,
     "/reader": Reader,
     "/users": Users,
   };

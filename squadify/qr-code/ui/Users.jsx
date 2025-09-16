@@ -1,4 +1,6 @@
 import React from "react";
+
+import { Menu } from './Menu';
 import { createUser, listUsers, updateUser } from "./api";
 
 const Users = () => {
@@ -60,40 +62,41 @@ const Users = () => {
   }
 
   return (
-    <div>
-      <h2>Users</h2>
+    <>
+      <Menu />
+      <div id="users">
+        <h2>
+          Users
 
-      <div>
-        <button onClick={createNewUser}>
-          New User
-        </button>
+          <button onClick={createNewUser}>
+            New User
+          </button>
+        </h2>
+
+        <ul>
+          {users.map((user, index) => (
+            <li key={index}>
+              <div>Email: {user.email}</div>
+              <div>Roles: {user.roles}</div>
+              <div>Active: {user.active ? 'Sim' : 'Não'}</div>
+
+              <div>
+                <button onClick={() => {
+                  const password = prompt("Password?");
+                  if (!password) return;
+                  updateThisUser(user.id, { password })
+                }}>
+                  Update Password
+                </button>
+                <button onClick={() => updateThisUser(user.id, { active: !user.active })}>
+                  {user.active ? 'Deactivate' : 'Activate'}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-
-      <ul>
-        {users.map((user, index) => (
-          <li key={index}>
-            <div>Email: {user.email}</div>
-            <div>Roles: {user.roles}</div>
-            <div>Active: {user.active ? 'Sim' : 'Não'}</div>
-
-            <div>
-              <button onClick={() => {
-                const password = prompt("Password?");
-                if (!password) return;
-                updateThisUser(user.id, { password })
-              }}>
-                Update Password
-              </button>
-            </div>
-            <div>
-              <button onClick={() => updateThisUser(user.id, { active: !user.active })}>
-                {user.active ? 'Deactivate' : 'Activate'}
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+    </>
   );
 };
 
