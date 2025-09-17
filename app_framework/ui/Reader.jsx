@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Html5QrcodeScanner, Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 
 const Reader = () => {
   const ref = useRef();
@@ -14,23 +14,33 @@ const Reader = () => {
 
     await html5QrcodeScanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
+      { fps: 10 },
       (decodedText, decodedResult) => {
-        console.log({ decodedText, decodedResult });
         setDecodedText(decodedText);
+        html5QrcodeScanner.pause(true);
       },
       (error) => { },
     );
     setScanner(html5QrcodeScanner);
   }
 
+  const resumeScan = () => {
+    setDecodedText(null);
+    scanner.resume();
+  }
+
   useEffect(() => {
     if (ready && ref && ref.current && !scanner) {
       startScan();
     }
+    return () => {
+      if (scanner) {
+        scanner.stop();
+      }
+    }
   }, [ref, scanner, ready]);
 
-  const start = async () => {
+  const requestPermission = async () => {
     let devices = null;
     try {
       devices = await Html5Qrcode.getCameras()
@@ -58,7 +68,7 @@ const Reader = () => {
     return (
       <button
         className="request-permission-button"
-        onClick={start}
+        onClick={requestPermission}
       >
         START
       </button>
@@ -66,10 +76,17 @@ const Reader = () => {
   }
 
   return (
-    <div>
+    <div className="reader">
       <div id="reader" ref={ref} />
 
-      {decodedText}
+      {decodedText && (
+        <div className="decoded-text">
+          <div className="backdrop" />
+          <div className="content" onClick={resumeScan}>
+            <span>{decodedText}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
