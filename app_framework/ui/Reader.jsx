@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5Qrcode } from "html5-qrcode";
 
 const Reader = () => {
   const ref = useRef();
@@ -9,18 +9,24 @@ const Reader = () => {
   const [decodedText, setDecodedText] = useState(null);
   const [scanner, setScanner] = useState(null);
 
+  const startScan = async () => {
+    let html5QrcodeScanner = new Html5Qrcode(ref.current.id);
+
+    await html5QrcodeScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText, decodedResult) => {
+        console.log({ decodedText, decodedResult });
+        setDecodedText(decodedText);
+      },
+      (error) => { },
+    );
+    setScanner(html5QrcodeScanner);
+  }
+
   useEffect(() => {
     if (ready && ref && ref.current && !scanner) {
-      let html5QrcodeScanner = new Html5Qrcode(ref.current.id);
-      html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        { fps: 10 },
-        (decodedText, decodedResult) => {
-          setDecodedText(decodedText);
-        },
-        (error) => { },
-      );
-      setScanner(html5QrcodeScanner);
+      startScan();
     }
   }, [ref, scanner, ready]);
 
@@ -60,11 +66,11 @@ const Reader = () => {
   }
 
   return (
-    <>
+    <div>
       <div id="reader" ref={ref} />
 
       {decodedText}
-    </>
+    </div>
   );
 };
 

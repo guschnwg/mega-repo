@@ -27,20 +27,20 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  const updateThisUser = (id, data) => {
-    updateUser({ id, ...data });
-    fetchUsers();
+  const updateThisUser = async (id, data) => {
+    await updateUser({ id, ...data });
+    await fetchUsers();
   };
 
-  const createNewUser = () => {
+  const createNewUser = async () => {
     const email = prompt("Email?");
     const password = prompt("Password?");
     if (!email || !password) {
       return;
     }
 
-    createUser({ email, password });
-    fetchUsers();
+    await createUser({ email, password });
+    await fetchUsers();
   }
 
   if (loading) {
