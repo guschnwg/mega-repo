@@ -14,7 +14,7 @@ const Reader = () => {
 
     await html5QrcodeScanner.start(
       { facingMode: "environment" },
-      { fps: 10 },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
       (decodedText, decodedResult) => {
         setDecodedText(decodedText);
         html5QrcodeScanner.pause(true);
