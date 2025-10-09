@@ -1,89 +1,146 @@
+# pyright: reportAny=false
+# pyright: reportExplicitAny=false
+# pyright: reportUnusedCallResult=false
+
 from datetime import datetime
 import json
-
+from dataclasses import dataclass
 import sqlite3
+from typing import get_origin, TypeVar, Any, get_args
 
 from utils import hash_password
 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        value = row[idx]
-        if col[0] == 'roles':
-            value = json.loads(value)
-        elif col[0] == 'active':
-            value = bool(value)
-        elif col[0] == 'valid_until':
-            value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
-        d[col[0]] = value
-    return d
+@dataclass
+class BaseClass:
+    def __post_init__(self):
+        for key, field in self.__dataclass_fields__.items():
+            # list -> list
+            # list[str] -> list
+            # list | None -> list
+            t = [
+                get_origin(a) or a
+                for a in (get_args(field.type) or [field.type])
+                if a is not type(None)
+            ]
+            val = getattr(self, key)
+            if not val:
+                continue
+
+            if list in t or dict in t:
+                setattr(self, key, json.loads(val))
+            elif datetime in t:
+                setattr(self, key, datetime.strptime(val, "%Y-%m-%d %H:%M:%S.%f"))
+            elif bool in t:
+                setattr(self, key, bool(val))
+
+    def __bool__(self):
+        return True
+
+    @classmethod
+    def parse(cls, fields: list[str], data: Any):
+        if not data:
+            return None
+
+        return cls(**dict(zip(fields, data)))
+
+    @classmethod
+    def parse_many(cls, fields: list[str], data: Any):
+        if not data:
+            data = []
+
+        return [cls(**dict(zip(fields, d))) for d in data]
+
+
+T = TypeVar('T', bound=BaseClass)
+
+@dataclass
+class User(BaseClass):
+    id: int
+    email: str
+    roles: list[str] | None = None
+    active: bool | None = None
+    password: str | None = None
+
+@dataclass
+class Session(BaseClass):
+    id: int
+    user_id: int
+    valid_until: datetime
+    token: str | None = None
+
 
 class Db:
-    def __init__(self, database=":memory:"):
-        self.con = sqlite3.connect(database)
-        self.con.row_factory = dict_factory
-        self.cur = self.con.cursor()
+    cur: sqlite3.Cursor
+
+    def __init__(self, database: str = ":memory:"):
+        con = sqlite3.connect(database)
+        self.cur = con.cursor()
+
+    def _fields(self, cursor: sqlite3.Cursor):
+        return [c[0] for c in cursor.description]
+
+    def _fetch_all(self, klass: type[T], sql: str, params: Any = ()) -> list[T]:
+        cursor = self.cur.execute(sql, params)
+        return klass.parse_many(self._fields(cursor), cursor.fetchall())
+
+    def _fetch_one(self, klass: type[T], sql: str, params: Any = ()) -> T | None:
+        cursor = self.cur.execute(sql, params)
+        return klass.parse(self._fields(cursor), cursor.fetchone())
 
     def migrate(self):
         self.cur.execute("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, password TEXT NOT NULL, roles JSON NOT NULL, active BOOLEAN NOT NULL)")
         self.cur.execute("CREATE TABLE sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, token TEXT NOT NULL, valid_until DATETIME NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id))")
 
     def seed(self):
-        self.create_user("john.doe@example.com", hash_password("password1"), ["admin"], True)
-        self.create_user("jane.doe@example.com", hash_password("password2"), ["user"], True)
-        self.create_user("bob.smith@example.com", hash_password("password3"), ["user"], True)
-        self.create_user("alice.johnson@example.com", hash_password("password4"), ["user"], False)
-        self.create_user("charlie.brown@example.com", hash_password("password5"), ["user"], True)
-        self.create_user("david.lee@example.com", hash_password("password6"), ["user"], True)
-        self.create_user("david.lee.2@example.com", hash_password("password6"), ["user"], True)
+        self.create_user("admin@example.com", hash_password("password1"), ["admin"], True)
+        self.create_user("user@example.com", hash_password("password2"), ["user"], True)
+        self.create_user("inactive@example.com", hash_password("password4"), ["user"], False)
 
     def get_users(self):
-        self.cur.execute("SELECT id, email, roles, active FROM users")
-        return self.cur.fetchall()
+        return self._fetch_all(User, "SELECT id, email, roles, active FROM users")
 
-    def get_user(self, user_id):
-        self.cur.execute("SELECT id, email, roles, active FROM users WHERE id = ?", (user_id,))
-        return self.cur.fetchone()
+    def get_user(self, user_id: int):
+        return self._fetch_one(User, "SELECT id, email, roles, active FROM users WHERE id = ?", (user_id,))
 
-    def get_user_with_password(self, user_id):
-        self.cur.execute("SELECT id, email, roles, active, password FROM users WHERE id = ?", (user_id,))
-        return self.cur.fetchone()
+    def get_user_with_password(self, user_id: int):
+        return self._fetch_one(User, "SELECT id, email, roles, active, password FROM users WHERE id = ?", (user_id,))
 
-    def get_user_by_email(self, email):
-        self.cur.execute("SELECT id, email, roles, active FROM users WHERE email = ?", (email,))
-        return self.cur.fetchone()
+    def get_user_by_email(self, email: str):
+        return self._fetch_one(User, "SELECT id, email, roles, active FROM users WHERE email = ?", (email,))
 
-    def get_user_by_email_with_password(self, email):
-        self.cur.execute("SELECT id, email, roles, active, password FROM users WHERE email = ?", (email,))
-        return self.cur.fetchone()
+    def get_user_by_email_with_password(self, email: str):
+        return self._fetch_one(User, "SELECT id, email, roles, active, password FROM users WHERE email = ?", (email,))
 
-    def create_user(self, email, password, roles, active):
-        self.cur.execute(
+    def create_user(self, email: str, password: str, roles: list[str], active: bool):
+        return self._fetch_one(
+            User,
             "INSERT INTO users (email, password, roles, active) VALUES (?, ?, ?, ?) RETURNING id, email, roles, active",
             (email, password, json.dumps(roles), active)
         )
-        return self.cur.fetchone()
 
-    def update_user(self, user_id, email, password, roles, active):
-        self.cur.execute(
+    def update_user(self, user_id: int, email: str, password: str, roles: list[str], active: bool):
+        return self._fetch_one(
+            User,
             "UPDATE users SET email = ?, password = ?, roles = ?, active = ? WHERE id = ? RETURNING id, email, roles, active",
             (email, password, json.dumps(roles), active, user_id)
         )
-        return self.cur.fetchone()
 
-    def create_session(self, user_id, token, valid_until):
-        self.cur.execute(
-            "INSERT INTO sessions (user_id, token, valid_until) VALUES (?, ?, ?) RETURNING user_id, token, valid_until",
+    def create_session(self, user_id: int, token: str, valid_until: datetime):
+        return self._fetch_one(
+            Session,
+            "INSERT INTO sessions (user_id, token, valid_until) VALUES (?, ?, ?) RETURNING id, user_id, token, valid_until",
             (user_id, token, valid_until)
         )
-        return self.cur.fetchone()
 
-    def get_session_by_token(self, token):
-        self.cur.execute("SELECT * FROM sessions WHERE token = ?", (token,))
-        return self.cur.fetchone()
+    def get_session_by_token(self, token: str):
+        return self._fetch_one(
+            Session,
+            "SELECT id, user_id, valid_until FROM sessions WHERE token = ?",
+            (token,)
+        )
 
-    def delete_session_by_token(self, token):
-        self.cur.execute("DELETE FROM sessions WHERE token = ?", (token,))
+    def delete_session_by_token(self, token: str):
+        _ = self.cur.execute("DELETE FROM sessions WHERE token = ?", (token,))
 
-    def delete_session(self, session_id):
-        self.cur.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
+    def delete_session(self, session_id: int):
+        _ = self.cur.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
