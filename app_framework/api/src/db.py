@@ -6,52 +6,9 @@ from datetime import datetime
 import json
 from dataclasses import dataclass
 import sqlite3
-from typing import get_origin, TypeVar, Any, get_args
+from typing import Any
 
-from utils import hash_password
-
-@dataclass
-class BaseClass:
-    def __post_init__(self):
-        for key, field in self.__dataclass_fields__.items():
-            # list -> list
-            # list[str] -> list
-            # list | None -> list
-            t = [
-                get_origin(a) or a
-                for a in (get_args(field.type) or [field.type])
-                if a is not type(None)
-            ]
-            val = getattr(self, key)
-            if not val:
-                continue
-
-            if list in t or dict in t:
-                setattr(self, key, json.loads(val))
-            elif datetime in t:
-                setattr(self, key, datetime.strptime(val, "%Y-%m-%d %H:%M:%S.%f"))
-            elif bool in t:
-                setattr(self, key, bool(val))
-
-    def __bool__(self):
-        return True
-
-    @classmethod
-    def parse(cls, fields: list[str], data: Any):
-        if not data:
-            return None
-
-        return cls(**dict(zip(fields, data)))
-
-    @classmethod
-    def parse_many(cls, fields: list[str], data: Any):
-        if not data:
-            data = []
-
-        return [cls(**dict(zip(fields, d))) for d in data]
-
-
-T = TypeVar('T', bound=BaseClass)
+from utils import hash_password, BaseClass, BaseClassType
 
 @dataclass
 class User(BaseClass):
@@ -60,6 +17,14 @@ class User(BaseClass):
     roles: list[str] | None = None
     active: bool | None = None
     password: str | None = None
+
+@dataclass
+class UserWithPassword(BaseClass):
+    id: int
+    email: str
+    password: str
+    roles: list[str] | None = None
+    active: bool | None = None
 
 @dataclass
 class Session(BaseClass):
@@ -79,11 +44,11 @@ class Db:
     def _fields(self, cursor: sqlite3.Cursor):
         return [c[0] for c in cursor.description]
 
-    def _fetch_all(self, klass: type[T], sql: str, params: Any = ()) -> list[T]:
+    def _fetch_all(self, klass: type[BaseClassType], sql: str, params: Any = ()) -> list[BaseClassType]:
         cursor = self.cur.execute(sql, params)
         return klass.parse_many(self._fields(cursor), cursor.fetchall())
 
-    def _fetch_one(self, klass: type[T], sql: str, params: Any = ()) -> T | None:
+    def _fetch_one(self, klass: type[BaseClassType], sql: str, params: Any = ()) -> BaseClassType | None:
         cursor = self.cur.execute(sql, params)
         return klass.parse(self._fields(cursor), cursor.fetchone())
 
@@ -103,26 +68,26 @@ class Db:
         return self._fetch_one(User, "SELECT id, email, roles, active FROM users WHERE id = ?", (user_id,))
 
     def get_user_with_password(self, user_id: int):
-        return self._fetch_one(User, "SELECT id, email, roles, active, password FROM users WHERE id = ?", (user_id,))
+        return self._fetch_one(UserWithPassword, "SELECT id, email, roles, active, password FROM users WHERE id = ?", (user_id,))
 
     def get_user_by_email(self, email: str):
         return self._fetch_one(User, "SELECT id, email, roles, active FROM users WHERE email = ?", (email,))
 
     def get_user_by_email_with_password(self, email: str):
-        return self._fetch_one(User, "SELECT id, email, roles, active, password FROM users WHERE email = ?", (email,))
+        return self._fetch_one(UserWithPassword, "SELECT id, email, roles, active, password FROM users WHERE email = ?", (email,))
 
-    def create_user(self, email: str, password: str, roles: list[str], active: bool):
+    def create_user(self, email: str, password: str, roles: list[str] | None, active: bool):
         return self._fetch_one(
             User,
             "INSERT INTO users (email, password, roles, active) VALUES (?, ?, ?, ?) RETURNING id, email, roles, active",
-            (email, password, json.dumps(roles), active)
+            (email, password, json.dumps(roles) if roles is not None else [], active)
         )
 
-    def update_user(self, user_id: int, email: str, password: str, roles: list[str], active: bool):
+    def update_user(self, user_id: int, email: str, password: str, roles: list[str] | None, active: bool):
         return self._fetch_one(
             User,
             "UPDATE users SET email = ?, password = ?, roles = ?, active = ? WHERE id = ? RETURNING id, email, roles, active",
-            (email, password, json.dumps(roles), active, user_id)
+            (email, password, json.dumps(roles) if roles is not None else [], active, user_id)
         )
 
     def create_session(self, user_id: int, token: str, valid_until: datetime):

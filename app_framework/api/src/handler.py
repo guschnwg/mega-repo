@@ -5,7 +5,7 @@
 # pyright: reportUnknownMemberType=false
 # pyright: reportUnusedCallResult=false
 
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler
 import json
@@ -14,8 +14,8 @@ from urllib.parse import parse_qsl
 import mimetypes
 from typing import Any, final, override
 
-from utils import hash_password, verify_password
-from db import BaseClass, Db, User
+from utils import hash_password, verify_password, BaseClass, BaseClassType
+from db import Db, User
 
 @final
 class HandlerException(Exception):
@@ -31,6 +31,27 @@ class EnhancedJSONEncoder(json.JSONEncoder):
             return asdict(o)
         return super().default(o)
 
+@dataclass
+class LoginPayload(BaseClass):
+    email: str
+    password: str
+
+@dataclass
+class UserUpdatePayload(BaseClass):
+    id: int
+    email: str | None = None
+    password: str | None = None
+    roles: list[str] | None = None
+    active: bool | None = None
+
+@dataclass
+class UserCreatePayload(BaseClass):
+    id: int
+    email: str
+    password: str
+    roles: list[str]
+    active: bool
+
 class BaseHandler(BaseHTTPRequestHandler):
     db: Db  # pyright: ignore[reportUninitializedInstanceVariable]
 
@@ -38,17 +59,17 @@ class BaseHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get('Content-Length', 0))
         return self.rfile.read(content_length).decode('utf-8')
 
-    def _get_input_data(self):
+    def _get_input_data(self, klass: type[BaseClassType]) -> BaseClassType | None:
         raw_input = self._get_data()
         if self.headers.get('Content-Type') == 'application/json':
             try:
-                return json.loads(raw_input)
+                return klass(**json.loads(raw_input))
             except json.JSONDecodeError:
                 raise HandlerException(400, {"error": "Invalid JSON"})
 
         if self.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
             try:
-                return dict(parse_qsl(raw_input))
+                return klass(**dict(parse_qsl(raw_input)))
             except ValueError:
                 raise HandlerException(400, {"error": "Invalid URL-encoded data"})
 
@@ -118,6 +139,11 @@ class BaseHandler(BaseHTTPRequestHandler):
             data=data,
         )
 
+    def _to_login(self):
+        self.send_response(302)
+        self.send_header("Location", "/login")
+        return self.end_headers()
+
     #
 
     def GET__logout(self):
@@ -139,22 +165,20 @@ class BaseHandler(BaseHTTPRequestHandler):
     #
 
     def POST__login(self):
-        data = self._get_input_data()
+        data = self._get_input_data(LoginPayload)
         if not data:
-            raise HandlerException(400, {"error": "Invalid request"})
+            return self._to_login()
 
-        possible_user = self.db.get_user_by_email_with_password(data["email"])
+        possible_user = self.db.get_user_by_email_with_password(data.email)
         if not possible_user or not possible_user.active:
-            return None
+            return self._to_login()
 
-        if not verify_password(data["password"], possible_user.password):
-            return None
+        if not verify_password(data.password, possible_user.password):
+            return self._to_login()
 
         session = self.db.create_session(possible_user.id, secrets.token_urlsafe(16), datetime.now() + timedelta(hours=1))
         if not session:
-            self.send_response(302)
-            self.send_header("Location", "/login")
-            return self.end_headers()
+            return self._to_login()
 
         self.send_response(302)
         self.send_header('Set-Cookie', f"session={session.token}; HttpOnly; Secure; SameSite=Strict; Path=/")
@@ -166,19 +190,16 @@ class BaseHandler(BaseHTTPRequestHandler):
         if not user or not user.roles or "admin" not in user.roles:
             raise HandlerException(403, {"error": "Unauthorized"})
 
-        data = self._get_input_data()
+        data = self._get_input_data(UserCreatePayload)
         if not data:
             raise HandlerException(400, {"error": "Invalid request"})
 
-        existing_user = self.db.get_user_by_email(data["email"])
+        existing_user = self.db.get_user_by_email(data.email)
         if existing_user:
             raise HandlerException(409, {"error": "Email already exists"})
 
         new_user = self.db.create_user(
-            data["email"],
-            hash_password(data["password"]),
-            data.get("roles") or ["user"],
-            True
+            data.email, hash_password(data.password), data.roles or ["user"], True
         )
         return self._json(201, new_user)
 
@@ -187,20 +208,20 @@ class BaseHandler(BaseHTTPRequestHandler):
         if not user or not user.roles or "admin" not in user.roles:
             raise HandlerException(403, {"error": "Unauthorized"})
 
-        data = self._get_input_data()
+        data = self._get_input_data(UserUpdatePayload)
         if not data:
             raise HandlerException(400, {"error": "Invalid request"})
 
-        user_to_update = self.db.get_user_with_password(data["id"])
+        user_to_update = self.db.get_user_with_password(data.id)
         if not user_to_update:
             raise HandlerException(404, {"error": "User not found"})
 
         updated_user = self.db.update_user(
-            data["id"],
-            data["email"] if "email" in data else user_to_update.email,
-            hash_password(data["password"]) if "password" in data else user_to_update.password,
-            data["roles"] if "roles" in data else user_to_update.roles,
-            data["active"] if "active" in data else user_to_update.active
+            data.id,
+            data.email if data.email is not None else user_to_update.email,
+            hash_password(data.password) if data.password is not None else user_to_update.password,
+            data.roles if data.roles is not None else user_to_update.roles,
+            bool(data.active if data.active is not None else user_to_update.active)
         )
 
         return self._json(200, updated_user)
