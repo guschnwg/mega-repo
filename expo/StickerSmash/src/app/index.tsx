@@ -1,18 +1,28 @@
 import React, { useState } from "react";
 import { Button, Text, View } from "react-native";
-import { Clock } from "../components/Clock";
-import { Countdown } from "../components/Countdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { Clock } from "../components/Clock";
+import { Countdown } from "../components/Countdown";
+
+interface CounterType {
+  value: number
+  history: number[]
+}
 interface TimerType {
+  counter: CounterType
   prev: number
   crr: number
   key: number | null
 }
 
-const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, clockMax?: number, onEnd: () => void, onStop: () => void }>) => {
+const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, clockMax?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
   const begin = (crr: number): TimerType => {
     return {
+      counter: {
+        value: 0,
+        history: [],
+      },
       prev: Date.now(),
       crr,
       key: setInterval(() => {
@@ -22,11 +32,10 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
           let key = crr.key;
           if (next >= endTime * 1000) {
             clearInterval(crr.key!);
-            setTimeout(onEnd, 100);
+            setTimeout(() => onEnd(crr.counter), 100);
             key = null;
           }
-          onProgress(next);
-          return { prev: time, crr: next, key: key };
+          return { counter: crr.counter, prev: time, crr: next, key: key };
         })
       }, 10),
     }
@@ -52,38 +61,64 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: 'row',
         gap: 20,
       }}
     >
-      <Clock current={seconds} max={clockMax || endTime}>
-        <Text style={{ fontSize: 48 }}>
-          {String(Math.floor(minutes)).padStart(2, '0')}
-          :
-          {String(Math.floor(seconds)).padStart(2, '0')}
-        </Text>
-      </Clock>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: 'row',
+          gap: 20,
+        }}
+      >
+        <Clock current={seconds} max={clockMax || endTime}>
+          <Text style={{ fontSize: 48 }}>
+            {String(Math.floor(minutes)).padStart(2, '0')}
+            :
+            {String(Math.floor(seconds)).padStart(2, '0')}
+          </Text>
+        </Clock>
+
+        <View
+          style={{ gap: 20 }}
+        >
+          <Button
+            title={timer.key ? "Pausar" : "Continuar"}
+            onPress={timer.key ? pause : resume}
+          />
+
+          <Button
+            title="Stop"
+            onPress={onStop}
+          />
+        </View>
+      </View>
 
       <View
-        style={{ gap: 20 }}
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        onTouchEnd={() => {
+          setTimer(crr => ({
+            ...crr,
+            counter: {
+              value: crr.counter.value + 1,
+              history: [...crr.counter.history, crr.crr],
+            }
+          }))
+        }}
       >
-        <Button
-          title={timer.key ? "Pausar" : "Continuar"}
-          onPress={timer.key ? pause : resume}
-        />
-
-        <Button
-          title="Stop"
-          onPress={onStop}
-        />
+        <Text style={{ fontSize: 128 }}>{timer.counter.value}</Text>
       </View>
     </View>
   );
 }
 
-const TimerWithCountdown = ({ startTime, endTime, countdownSeconds, onStart, onEnd, onStop, children }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onStart: () => void, onEnd: () => void, onStop: () => void }>) => {
+const TimerWithCountdown = ({ startTime, endTime, countdownSeconds, onStart, onEnd, onStop, children }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onStart: () => void, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
   const [gettingReady, setGettingReady] = useState(true);
 
   if (countdownSeconds && gettingReady) {
@@ -107,22 +142,18 @@ const TimerWithCountdown = ({ startTime, endTime, countdownSeconds, onStart, onE
   }
 
   return (
-    <>
-      <Timer
-        startTime={startTime}
-        endTime={endTime}
-        onEnd={() => onEnd()}
-        onStop={() => onStop()}
-      />
-
-      {children}
-    </>
+    <Timer
+      startTime={startTime}
+      endTime={endTime}
+      onEnd={onEnd}
+      onStop={onStop}
+    />
   )
 }
 
-const TimerAndCounter = ({ startTime, endTime, countdownSeconds, onEnd }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onEnd: (counter: number) => void }>) => {
-  const [counter, setCounter] = useState(0);
+const TimerScreen = ({ startTime, endTime, countdownSeconds, onEnd }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onEnd: (counter: CounterType) => void }>) => {
   const [ended, setEnded] = useState(false);
+  const [counter, setCounter] = useState<CounterType>({ value: 0, history: [] });
 
   if (ended) {
     setTimeout(() => onEnd(counter));
@@ -142,7 +173,7 @@ const TimerAndCounter = ({ startTime, endTime, countdownSeconds, onEnd }: React.
             fontSize: 128,
           }}
         >
-          {counter}
+          {counter.value}
         </Text>
       </View>
     );
@@ -159,20 +190,12 @@ const TimerAndCounter = ({ startTime, endTime, countdownSeconds, onEnd }: React.
         endTime={endTime}
         countdownSeconds={countdownSeconds}
         onStart={() => { }}
-        onEnd={() => setEnded(true)}
+        onEnd={counter => {
+          setEnded(true)
+          setCounter(counter);
+        }}
         onStop={() => { }}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          onTouchEnd={() => setCounter(prev => prev + 1)}
-        >
-          <Text style={{ fontSize: 128 }}>{counter}</Text>
-        </View>
-      </TimerWithCountdown>
+      />
     </View>
   );
 }
@@ -180,9 +203,9 @@ const TimerAndCounter = ({ startTime, endTime, countdownSeconds, onEnd }: React.
 export default function Index() {
   const [index, setIndex] = useState(-1);
   const [steps, setSteps] = useState([
-    { endTime: 5, countdownSeconds: 3, counter: 0 },
-    { endTime: 4, counter: 0 },
-    { endTime: 3, counter: 0 },
+    { endTime: 5, countdownSeconds: 3, counter: { value: 0, history: [] as number[] } },
+    { endTime: 4, counter: { value: 0, history: [] as number[] } },
+    { endTime: 3, counter: { value: 0, history: [] as number[] } },
   ]);
 
   return (
@@ -207,7 +230,7 @@ export default function Index() {
             {JSON.stringify(steps, null, 2)}
           </Text>
         ) : (
-          <TimerAndCounter
+          <TimerScreen
             key={index}
             endTime={steps[index].endTime}
             countdownSeconds={steps[index].countdownSeconds}
