@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Text, View } from "react-native";
+import { Button, ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { Clock } from "../components/Clock";
@@ -226,9 +226,32 @@ export default function Index() {
         </View>
       ) : (
         index >= steps.length ? (
-          <Text style={{ padding: 50 }}>
-            {JSON.stringify(steps, null, 2)}
-          </Text>
+          <ScrollView
+            style={{
+              flex: 1,
+              backgroundColor: 'red',
+            }}
+            contentContainerStyle={{
+              justifyContent: "center",
+              paddingBlock: 20,
+              // alignItems: "center",
+            }}
+          >
+            <Button
+              title="Reset"
+              onPress={() => {
+                setIndex(-1);
+                setSteps([
+                  { endTime: 5, countdownSeconds: 3, counter: { value: 0, history: [] as number[] } },
+                  { endTime: 4, counter: { value: 0, history: [] as number[] } },
+                  { endTime: 3, counter: { value: 0, history: [] as number[] } },
+                ]);
+              }}
+            />
+            <Text>
+              {JSON.stringify(steps, null, 2)}
+            </Text>
+          </ScrollView>
         ) : (
           <TimerScreen
             key={index}
