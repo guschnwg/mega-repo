@@ -25,8 +25,8 @@ export function Countdown({ time, onFinish }: { time: number; onFinish: () => vo
   const secondsLeft = timeLeft.left / 1000;
   const msLeft = timeLeft.left % 1000;
   return (
-    <Clock current={secondsLeft} max={time}>
-      <Text>
+    <Clock size={300} tickness={12} current={secondsLeft} max={time}>
+      <Text style={{ fontSize: 48 }}>
         00:
         {String(Math.floor(secondsLeft)).padStart(2, '0')}
         .
