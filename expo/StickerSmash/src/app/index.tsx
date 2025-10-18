@@ -1,32 +1,126 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, Ref, RefObject } from "react";
 import { Button, ScrollView, Text, useWindowDimensions, View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as ScreenOrientation from "expo-screen-orientation"
 
 import { Clock } from "../components/Clock";
 import { Countdown } from "../components/Countdown";
 
-interface CounterType {
-  value: number
-  history: number[]
-}
-interface TimerType {
-  counter: CounterType
-  prev: number
-  crr: number
-  key: number | null
-}
-interface StepType {
-  countdownSeconds?: number
-  startTime?: number
-  endTime: number
-  counter: CounterType
+const LayoutAware = ({ height, children }: { height: number, children: ({ ready, height, width }: { ready: boolean, height: number, width: number }) => React.ReactNode }) => {
+  const dimensions = useWindowDimensions();
+  const ref = useRef<View>(null);
+  const [layout, setDimensions] = useState({
+    ready: false,
+    width: 0,
+    height: 0,
+  });
+
+  useLayoutEffect(() => {
+    // Give some time because sometimes it bugs
+    setTimeout(() => {
+      ref.current?.measureInWindow((x, y, width, height) => {
+        setDimensions({ ready: true, width, height });
+      });
+    }, 100);
+  }, [dimensions]);
+
+  return (
+    <View
+      ref={ref}
+      style={{
+        height,
+        alignSelf: 'stretch'
+      }}
+    >
+      {children(layout)}
+    </View>
+  )
 }
 
+const Chart = ({ height, width, counter, currentTime, endTime }: { counter: CounterType, currentTime: number, endTime: number, height: number, width: number }) => {
+  const maxHeight = (counter.value < 30 ? 40 : counter.value + Math.round(counter.value / 5));
+  const stepSize = counter.value > 80 ? 20 : counter.value > 40 ? 10 : 8;
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        borderBlockColor: 'green',
+        borderTopWidth: 2,
+        borderBottomWidth: 2,
+      }}
+    >
+      {[...Array(10).keys()].map((k, i) => (
+        <View
+          key={k}
+          style={{
+            width: i === 0 || i === 9 ? 2 : 1,
+            backgroundColor: 'green',
+          }}
+        />
+      ))}
+
+      {[...Array(Math.ceil(maxHeight / stepSize)).keys()].map(i => (
+        <View
+          key={i}
+          style={{
+            position: 'absolute',
+            bottom: height * i * stepSize / maxHeight - 1,
+            left: 0,
+            height: 1,
+            opacity: .3,
+            width,
+            backgroundColor: 'gray',
+          }}
+        >
+          <Text
+            style={{
+              color: 'dark',
+              position: 'absolute',
+              top: (height * i * stepSize / maxHeight - 1) > height - 10 ? -2 : -9,
+              left: 2,
+              fontSize: 8,
+            }}
+          >
+            {i * stepSize}
+          </Text>
+        </View>
+      ))}
+
+      {counter.history.map((h, i) => (
+        <View
+          key={`${h}-${i}`}
+          style={{
+            position: 'absolute',
+            height: 2,
+            width: 2,
+            borderRadius: 1,
+            bottom: height * i / maxHeight + 1,
+            left: width * h / (endTime * 1000) - 1,
+            backgroundColor: 'purple'
+          }}
+        />
+      ))}
+
+      <View
+        style={{
+          position: 'absolute',
+          height: height - 4,
+          left: width * currentTime / (endTime * 1000),
+          width: 1,
+          backgroundColor: 'blue',
+        }}
+      />
+    </View>
+  )
+}
 
 const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, clockMax?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
-  const begin = (crr: number): TimerType => {
+  const begin = (crr: number, counter?: CounterType): TimerType => {
     return {
-      counter: {
+      counter: counter || {
         value: 0,
         history: [],
       },
@@ -49,6 +143,7 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
   }
 
   const [timer, setTimer] = useState<TimerType>(() => begin((startTime || 0) * 1000));
+  const dimensions = useWindowDimensions();
 
   const pause = () => {
     setTimer(crr => {
@@ -58,7 +153,7 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
   }
 
   const resume = () => {
-    setTimer(prev => begin(prev.crr));
+    setTimer(prev => begin(prev.crr, prev.counter));
   }
 
   const minutes = timer.crr / 1000 / 60;
@@ -71,6 +166,7 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
         flex: 1,
         gap: 20,
         backgroundColor: timeLeft < 5 ? `rgba(255, 0, 0, ${timeLeft % 1})` : 'transparent',
+        flexDirection: dimensions.height > dimensions.width ? 'column' : 'row',
       }}
     >
       <View
@@ -78,7 +174,7 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          flexDirection: 'row',
+          flexDirection: dimensions.height > dimensions.width ? 'row' : 'column',
           gap: 20,
         }}
       >
@@ -91,7 +187,10 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
         </Clock>
 
         <View
-          style={{ gap: 20 }}
+          style={{
+            gap: 20,
+            flexDirection: dimensions.height > dimensions.width ? 'column' : 'row',
+          }}
         >
           <Button
             title={timer.key ? "Pausar" : "Continuar"}
@@ -112,6 +211,8 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
           alignItems: 'center',
         }}
         onTouchEnd={() => {
+          if (!timer.key) return;
+
           setTimer(crr => ({
             ...crr,
             counter: {
@@ -121,7 +222,28 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
           }))
         }}
       >
-        <Text style={{ fontSize: 128 }}>{timer.counter.value}</Text>
+        <Text
+          style={{
+            fontSize: 128,
+            marginBlock: 'auto',
+          }}
+        >
+          {timer.counter.value}
+        </Text>
+
+        <LayoutAware height={100}>
+          {({ ready, width, height }) => (
+            ready && (
+              <Chart
+                height={height}
+                width={width}
+                counter={timer.counter}
+                currentTime={timer.crr}
+                endTime={endTime}
+              />
+            )
+          )}
+        </LayoutAware>
       </View>
     </View>
   );
@@ -334,22 +456,63 @@ const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (ste
   );
 }
 
+const EndGame = ({ steps, onReset }: { steps: StepType[], onReset: () => void }) => (
+  <ScrollView
+    style={{
+      flex: 1,
+    }}
+    contentContainerStyle={{
+      flexDirection: 'column',
+      gap: 10,
+      paddingInline: 50,
+      paddingBlock: 20,
+    }}
+  >
+    <Button
+      title="Reset"
+      onPress={onReset}
+    />
+
+    {steps.map((s, i) => (
+      <>
+        <Text>{s.counter.value} reps in {s.endTime} seconds</Text>
+        <LayoutAware key={i} height={100}>
+          {({ ready, ...rest }) => ready && (
+            <Chart
+              {...rest}
+              counter={s.counter}
+              currentTime={s.endTime}
+              endTime={s.endTime}
+            />
+          )}
+        </LayoutAware>
+      </>
+    ))}
+  </ScrollView>
+);
+
 export default function Index() {
   const [index, setIndex] = useState(-1);
   const [steps, setSteps] = useState<StepType[]>([
-    { countdownSeconds: 3, endTime: 29, counter: { value: 0, history: [] } },
+    { countdownSeconds: 3, endTime: 30, counter: { value: 0, history: [] } },
     { endTime: 30, counter: { value: 0, history: [] } },
-    { endTime: 31, counter: { value: 0, history: [] } },
+    { endTime: 30, counter: { value: 0, history: [] } },
   ]);
 
+  useEffect(() => {
+    const unlockScreenOerientation = async () => {
+      await ScreenOrientation.unlockAsync()
+    }
+    unlockScreenOerientation()
+  }, []);
+
   return (
-    <SafeAreaProvider>
+    <SafeAreaView style={{ flex: 1 }}>
       {index === -1 ? (
         <View
           style={{
             flex: 1,
             justifyContent: "center",
-            backgroundColor: 'red',
             padding: 10,
             gap: 10,
           }}
@@ -366,25 +529,7 @@ export default function Index() {
         </View>
       ) : (
         index >= steps.length ? (
-          <ScrollView
-            style={{
-              flex: 1,
-              backgroundColor: 'red',
-            }}
-            contentContainerStyle={{
-              justifyContent: "center",
-              paddingBlock: 20,
-            }}
-          >
-            <Button
-              title="Reset"
-              onPress={() => setIndex(-1)}
-            />
-
-            <Text>
-              {JSON.stringify(steps, null, 2)}
-            </Text>
-          </ScrollView>
+          <EndGame steps={steps} onReset={() => setIndex(-1)} />
         ) : (
           <TimerScreen
             key={index}
@@ -401,6 +546,6 @@ export default function Index() {
           />
         )
       )}
-    </SafeAreaProvider>
+    </SafeAreaView>
   );
 }
