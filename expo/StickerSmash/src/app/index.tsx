@@ -1,10 +1,13 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, Ref, RefObject } from "react";
-import { Button, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ScreenOrientation from "expo-screen-orientation"
 
 import { Clock } from "../components/Clock";
 import { Countdown } from "../components/Countdown";
+import { styles } from '../styles';
+import { OurButton } from "../components/OurButton";
+import { Slidable } from "../components/Slidable";
 
 const LayoutAware = ({ height, children }: { height: number, children: ({ ready, height, width }: { ready: boolean, height: number, width: number }) => React.ReactNode }) => {
   const dimensions = useWindowDimensions();
@@ -179,7 +182,7 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
         }}
       >
         <Clock current={seconds} max={clockMax || endTime}>
-          <Text style={{ fontSize: 48 }}>
+          <Text style={{ fontSize: 48, color: styles.textDark }}>
             {String(Math.floor(minutes)).padStart(2, '0')}
             :
             {String(Math.floor(seconds)).padStart(2, '0')}
@@ -192,12 +195,12 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
             flexDirection: dimensions.height > dimensions.width ? 'column' : 'row',
           }}
         >
-          <Button
+          <OurButton
             title={timer.key ? "Pausar" : "Continuar"}
             onPress={timer.key ? pause : resume}
           />
 
-          <Button
+          <OurButton
             title="Stop"
             onPress={onStop}
           />
@@ -226,6 +229,7 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
           style={{
             fontSize: 128,
             marginBlock: 'auto',
+            color: styles.textDark,
           }}
         >
           {timer.counter.value}
@@ -282,7 +286,7 @@ const TimerWithCountdown = ({ startTime, endTime, countdownSeconds, onStart, onE
   )
 }
 
-const TimerScreen = ({ startTime, endTime, countdownSeconds, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
+const Wod = ({ startTime, endTime, countdownSeconds, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
   const [ended, setEnded] = useState(false);
   const [counter, setCounter] = useState<CounterType>({ value: 0, history: [] });
 
@@ -314,6 +318,7 @@ const TimerScreen = ({ startTime, endTime, countdownSeconds, onEnd, onStop }: Re
     <View
       style={{
         flex: 1,
+        backgroundColor: styles.background,
       }}
     >
       <TimerWithCountdown
@@ -331,90 +336,72 @@ const TimerScreen = ({ startTime, endTime, countdownSeconds, onEnd, onStop }: Re
   );
 }
 
-const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType, canRemove: boolean, onUpdate: (step: StepType) => void, onRemove: () => void }) => {
-  const [value, setValue] = useState({
-    time: 0,
-    start: 0,
-    offset: 0,
-    shouldRemove: false,
-  });
-  const removed = useRef(false);
-  const { width } = useWindowDimensions();
-
-  if (value.shouldRemove) {
-    setTimeout(() => {
-      if (!removed.current) onRemove();
-      removed.current = true;
-    }, 100);
-    return null;
-  }
-
-  const padding = 10;
+const ConfigureAMRAP = ({ step, onUpdate }: { step: StepType, onUpdate: (step: StepType) => void }) => {
+  const minutes = Math.floor(step.endTime / 60);
+  const seconds = Math.floor(step.endTime % 60).toString().padStart(2, '0');
 
   return (
-    <View
+    <>
+      <OurButton
+        title="-"
+        style={{ width: 60, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderWidth: 0 }}
+        onPress={() => {
+          step.endTime -= 15;
+          onUpdate(step);
+        }}
+      />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: styles.fontSize,
+            color: styles.textDark,
+          }}
+        >
+          As many reps as possible in
+        </Text>
+        <Text
+          style={{
+            fontSize: styles.fontSize + 4
+          }}
+        >
+          {minutes === 0 ? `${seconds} seconds` : `${minutes}:${seconds} minutes`}
+        </Text>
+      </View>
+      <OurButton
+        title="+"
+        style={{ width: 60, borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderWidth: 0 }}
+        onPress={() => {
+          step.endTime += 15;
+          onUpdate(step);
+        }}
+      />
+    </>
+  );
+}
+
+const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType, canRemove: boolean, onUpdate: (step: StepType) => void, onRemove: () => void }) => {
+  return (
+    <Slidable
       style={{
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'center',
-        gap: 10,
-        backgroundColor: 'green',
-        padding,
-        left: value.offset,
-        opacity: 1 - value.offset / (width - value.start),
+        borderRadius: styles.radius,
+        borderWidth: 1,
+        borderColor: styles.secondary,
+        height: 80,
       }}
-      onTouchStart={event => {
-        event.persist();
-        setValue({
-          time: Date.now(),
-          start: event.nativeEvent.pageX - padding,
-          offset: 0,
-          shouldRemove: false,
-        })
-      }}
-      onTouchMove={event => {
-        event.persist();
-        setValue(crr => {
-          const newValue = event.nativeEvent.pageX - padding;
-          const newTime = Date.now();
-          const newOffset = newValue - crr.start;
-          const changeOffset = Math.abs(newOffset - crr.offset);
-          const velocity = changeOffset / (newTime - crr.time);
-
-          const thirdWidth = width / 3;
-          const tooFastAndOverThreshold = (newOffset > thirdWidth && velocity > 3);
-          const kindaOutOfBounds = crr.start < 2 * thirdWidth && newValue > width - 50;
-          const shouldRemove = tooFastAndOverThreshold || kindaOutOfBounds;
-
-          const theNewOne = {
-            time: newTime,
-            start: crr.start,
-            offset: newOffset,
-            shouldRemove: canRemove && shouldRemove,
-          };
-          return theNewOne;
-        })
-      }}
-      onTouchEnd={() => setValue({ time: 0, start: 0, offset: 0, shouldRemove: false })}
+      canSlide={canRemove}
+      onSlide={onRemove}
     >
-      <Button
-        title="-"
-        onPress={() => {
-          step.endTime--;
-          onUpdate(step);
-        }}
-      />
-      <Text>
-        Time: {step.endTime}s
-      </Text>
-      <Button
-        title="+"
-        onPress={() => {
-          step.endTime++;
-          onUpdate(step);
-        }}
-      />
-    </View>
+      {step.type === 'AMRAP' && <ConfigureAMRAP step={step} onUpdate={onUpdate} />}
+    </Slidable>
   );
 }
 
@@ -445,13 +432,36 @@ const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (ste
         />
       ))}
 
-      <Button
-        title="Add"
-        onPress={() => {
-          onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
-          setKey(crr => crr + 1);
+      <View
+        style={{
+          flexDirection: 'row',
         }}
-      />
+      >
+        <OurButton
+          title="+ AMRAP"
+          style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+          onPress={() => {
+            onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
+            setKey(crr => crr + 1);
+          }}
+        />
+        <OurButton
+          title="+ AMRAP"
+          style={{ flex: 1, borderRadius: 0 }}
+          onPress={() => {
+            onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
+            setKey(crr => crr + 1);
+          }}
+        />
+        <OurButton
+          title="+ AMRAP"
+          style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+          onPress={() => {
+            onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
+            setKey(crr => crr + 1);
+          }}
+        />
+      </View>
     </View>
   );
 }
@@ -468,7 +478,7 @@ const EndGame = ({ steps, onReset }: { steps: StepType[], onReset: () => void })
       paddingBlock: 20,
     }}
   >
-    <Button
+    <OurButton
       title="Reset"
       onPress={onReset}
     />
@@ -506,15 +516,31 @@ export default function Index() {
     unlockScreenOerientation()
   }, []);
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {index === -1 ? (
+  let content = null;
+  if (index === -1) {
+    content = (
+      <>
+        <View style={{
+          height: 200,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <Text
+            style={{
+              fontSize: 48,
+              color: styles.textLight,
+            }}
+          >
+            WOD
+          </Text>
+        </View>
+
         <View
           style={{
             flex: 1,
-            justifyContent: "center",
             padding: 10,
             gap: 10,
+            backgroundColor: styles.background,
           }}
         >
           <ConfigureSteps
@@ -522,30 +548,47 @@ export default function Index() {
             onUpdate={setSteps}
           />
 
-          <Button
-            title="Start timer"
-            onPress={() => setIndex(crr => crr + 1)}
-          />
-        </View>
-      ) : (
-        index >= steps.length ? (
-          <EndGame steps={steps} onReset={() => setIndex(-1)} />
-        ) : (
-          <TimerScreen
-            key={index}
-            endTime={steps[index].endTime}
-            countdownSeconds={steps[index].countdownSeconds}
-            onEnd={counter => {
-              setSteps(crrSteps => {
-                crrSteps[index].counter = counter;
-                return crrSteps;
-              })
-              setIndex(crr => crr + 1)
+          <OurButton
+            style={{
+              marginTop: 'auto',
+              height: 100,
             }}
-            onStop={() => setIndex(-1)}
-          />
-        )
-      )}
+            onPress={() => setIndex(crr => crr + 1)}
+          >
+            <Text
+              style={{
+                fontSize: 36,
+              }}
+            >
+              START!
+            </Text>
+          </OurButton>
+        </View>
+      </>
+    );
+  } else if (index >= steps.length) {
+    content = <EndGame steps={steps} onReset={() => setIndex(-1)} />
+  } else {
+    content = (
+      <Wod
+        key={index}
+        endTime={steps[index].endTime}
+        countdownSeconds={steps[index].countdownSeconds}
+        onEnd={counter => {
+          setSteps(crrSteps => {
+            crrSteps[index].counter = counter;
+            return crrSteps;
+          })
+          setIndex(crr => crr + 1)
+        }}
+        onStop={() => setIndex(-1)}
+      />
+    );
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: styles.primary }}>
+      {content}
     </SafeAreaView>
   );
 }

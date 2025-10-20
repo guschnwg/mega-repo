@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text } from "react-native";
 
 import { Clock } from "./Clock";
+import { styles } from "../styles";
 
 export function Countdown({ time, onFinish }: { time: number; onFinish: () => void; }) {
   const [timeLeft, setTimeLeft] = useState({ start: Date.now(), left: time * 1000 });
@@ -26,7 +27,7 @@ export function Countdown({ time, onFinish }: { time: number; onFinish: () => vo
   const msLeft = timeLeft.left % 1000;
   return (
     <Clock size={300} tickness={12} current={secondsLeft} max={time}>
-      <Text style={{ fontSize: 48 }}>
+      <Text style={{ fontSize: 48, color: styles.textDark }}>
         00:
         {String(Math.floor(secondsLeft)).padStart(2, '0')}
         .

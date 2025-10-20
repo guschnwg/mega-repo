@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+import { styles } from "../styles";
 
 export function Clock({ current, size = 200, tickness = 4, max, children }: React.PropsWithChildren<{ current: number, size?: number, tickness?: number, max: number }>) {
   const percentage = current / max;
@@ -29,7 +30,7 @@ export function Clock({ current, size = 200, tickness = 4, max, children }: Reac
             left: halfSize + (halfSize - halfTickness) * Math.cos(radFromDeg(i)) - halfTickness,
             height: stepSize,
             width: tickness,
-            backgroundColor: i / 360 < percentage ? 'blue' : 'white',
+            backgroundColor: i / 360 < percentage ? styles.secondary : styles.primary,
             transform: [{ rotate: `${i}deg` }]
           }}
         />
@@ -42,7 +43,7 @@ export function Clock({ current, size = 200, tickness = 4, max, children }: Reac
           left: halfSize + (halfSize - halfTickness) * Math.cos(percentageAngle) - halfTickness,
           height: stepSize,
           width: tickness,
-          backgroundColor: 'purple',
+          backgroundColor: styles.secondaryDark,
           transform: [{ rotate: `${percentageAngle}rad` }]
         }}
       />
