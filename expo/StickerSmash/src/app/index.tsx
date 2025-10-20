@@ -494,9 +494,9 @@ const EndGame = ({ steps, onReset }: { steps: StepType[], onReset: () => void })
 export default function Index() {
   const [index, setIndex] = useState(-1);
   const [steps, setSteps] = useState<StepType[]>([
-    { countdownSeconds: 3, endTime: 30, counter: { value: 0, history: [] } },
-    { endTime: 30, counter: { value: 0, history: [] } },
-    { endTime: 30, counter: { value: 0, history: [] } },
+    { type: 'AMRAP', countdownSeconds: 3, endTime: 30, counter: { value: 0, history: [] } },
+    { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } },
+    { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } },
   ]);
 
   useEffect(() => {

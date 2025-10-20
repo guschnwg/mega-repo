@@ -11,6 +11,7 @@ interface TimerType {
 }
 
 interface StepType {
+  type: 'AMRAP'
   countdownSeconds?: number
   startTime?: number
   endTime: number
