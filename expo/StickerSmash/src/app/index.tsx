@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, BackHandler, Alert } from "react-native";
+import { Text, View, BackHandler, Alert, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ScreenOrientation from "expo-screen-orientation"
 
@@ -43,16 +43,21 @@ const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType
   );
 }
 
-const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (steps: StepType[] | ((prev: StepType[]) => StepType[])) => void }) => {
+const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { countdown: number, steps: StepType[], onUpdateCountdown: React.Dispatch<React.SetStateAction<number>>, onUpdate: (steps: StepType[] | ((prev: StepType[]) => StepType[])) => void }) => {
   const [key, setKey] = useState(0);
 
   return (
-    <View
+    <ScrollView
       key={key}
-      style={{
+      contentContainerStyle={{
+        backgroundColor: styles.background,
         gap: 10,
       }}
     >
+      <ConfigureCountdown
+        countdown={countdown}
+        onUpdate={onUpdateCountdown}
+      />
       {steps.map((step, i) => (
         <ConfigureStep
           key={i}
@@ -109,7 +114,7 @@ const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (ste
           }}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -207,13 +212,10 @@ export default function Index() {
             backgroundColor: styles.background,
           }}
         >
-          <ConfigureCountdown
-            countdown={countdown}
-            onUpdate={setCountdown}
-          />
-
           <ConfigureSteps
             steps={steps}
+            countdown={countdown}
+            onUpdateCountdown={setCountdown}
             onUpdate={setSteps}
           />
 

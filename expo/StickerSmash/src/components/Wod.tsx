@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import React from "react";
+import { View } from "react-native";
 
 import { Amrap } from "./wod/AMRAP";
 import { styles } from '../styles';
