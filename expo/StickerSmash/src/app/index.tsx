@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ScreenOrientation from "expo-screen-orientation"
@@ -8,117 +8,8 @@ import { Countdown } from "../components/Countdown";
 import { styles } from '../styles';
 import { OurButton } from "../components/OurButton";
 import { Slidable } from "../components/Slidable";
-
-const LayoutAware = ({ height, children }: { height: number, children: ({ ready, height, width }: { ready: boolean, height: number, width: number }) => React.ReactNode }) => {
-  const dimensions = useWindowDimensions();
-  const ref = useRef<View>(null);
-  const [layout, setDimensions] = useState({
-    ready: false,
-    width: 0,
-    height: 0,
-  });
-
-  useLayoutEffect(() => {
-    // Give some time because sometimes it bugs
-    setTimeout(() => {
-      ref.current?.measureInWindow((x, y, width, height) => {
-        setDimensions({ ready: true, width, height });
-      });
-    }, 100);
-  }, [dimensions]);
-
-  return (
-    <View
-      ref={ref}
-      style={{
-        height,
-        alignSelf: 'stretch'
-      }}
-    >
-      {children(layout)}
-    </View>
-  )
-}
-
-const Chart = ({ height, width, counter, currentTime, endTime }: { counter: CounterType, currentTime: number, endTime: number, height: number, width: number }) => {
-  const maxHeight = (counter.value < 30 ? 40 : counter.value + Math.round(counter.value / 5));
-  const stepSize = counter.value > 80 ? 20 : counter.value > 40 ? 10 : 8;
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        borderBlockColor: 'green',
-        borderTopWidth: 2,
-        borderBottomWidth: 2,
-      }}
-    >
-      {[...Array(10).keys()].map((k, i) => (
-        <View
-          key={k}
-          style={{
-            width: i === 0 || i === 9 ? 2 : 1,
-            backgroundColor: 'green',
-          }}
-        />
-      ))}
-
-      {[...Array(Math.ceil(maxHeight / stepSize)).keys()].map(i => (
-        <View
-          key={i}
-          style={{
-            position: 'absolute',
-            bottom: height * i * stepSize / maxHeight - 1,
-            left: 0,
-            height: 1,
-            opacity: .3,
-            width,
-            backgroundColor: 'gray',
-          }}
-        >
-          <Text
-            style={{
-              color: 'dark',
-              position: 'absolute',
-              top: (height * i * stepSize / maxHeight - 1) > height - 10 ? -2 : -9,
-              left: 2,
-              fontSize: 8,
-            }}
-          >
-            {i * stepSize}
-          </Text>
-        </View>
-      ))}
-
-      {counter.history.map((h, i) => (
-        <View
-          key={`${h}-${i}`}
-          style={{
-            position: 'absolute',
-            height: 2,
-            width: 2,
-            borderRadius: 1,
-            bottom: height * i / maxHeight + 1,
-            left: width * h / (endTime * 1000) - 1,
-            backgroundColor: 'purple'
-          }}
-        />
-      ))}
-
-      <View
-        style={{
-          position: 'absolute',
-          height: height - 4,
-          left: width * currentTime / (endTime * 1000),
-          width: 1,
-          backgroundColor: 'blue',
-        }}
-      />
-    </View>
-  )
-}
+import { LayoutAware } from "../components/LayoutAware";
+import { Chart } from "../components/Chart";
 
 const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, clockMax?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
   const begin = (crr: number, counter?: CounterType): TimerType => {
@@ -174,6 +65,28 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
     >
       <View
         style={{
+          position: 'absolute',
+          top: 20,
+          left: 20,
+          right: 20,
+          flex: 1,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <OurButton
+          title="Stop"
+          onPress={onStop}
+        />
+
+        <OurButton
+          title={timer.key ? "Pause" : "Continue"}
+          onPress={timer.key ? pause : resume}
+        />
+      </View>
+
+      <View
+        style={{
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
@@ -188,23 +101,6 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
             {String(Math.floor(seconds)).padStart(2, '0')}
           </Text>
         </Clock>
-
-        <View
-          style={{
-            gap: 20,
-            flexDirection: dimensions.height > dimensions.width ? 'column' : 'row',
-          }}
-        >
-          <OurButton
-            title={timer.key ? "Pausar" : "Continuar"}
-            onPress={timer.key ? pause : resume}
-          />
-
-          <OurButton
-            title="Stop"
-            onPress={onStop}
-          />
-        </View>
       </View>
 
       <View
@@ -230,24 +126,57 @@ const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithC
             fontSize: 128,
             marginBlock: 'auto',
             color: styles.textDark,
+            opacity: timer.key ? 1 : 0.1,
           }}
         >
           {timer.counter.value}
         </Text>
 
-        <LayoutAware height={100}>
-          {({ ready, width, height }) => (
-            ready && (
-              <Chart
-                height={height}
-                width={width}
-                counter={timer.counter}
-                currentTime={timer.crr}
-                endTime={endTime}
-              />
-            )
-          )}
-        </LayoutAware>
+        <View
+          style={{
+            padding: 10,
+            alignSelf: 'stretch',
+            opacity: timer.key ? 1 : 0.1,
+          }}
+        >
+          <LayoutAware height={100}>
+            {({ ready, width, height }) => (
+              ready && (
+                <Chart
+                  height={height}
+                  width={width}
+                  counter={timer.counter}
+                  currentTime={timer.crr}
+                  endTime={endTime}
+                />
+              )
+            )}
+          </LayoutAware>
+        </View>
+
+        {!timer.key && (
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              height: '100%',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onTouchEnd={resume}
+          >
+            <Text
+              style={{
+                fontSize: 48,
+                color: styles.textDark,
+              }}
+            >
+              Paused
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
