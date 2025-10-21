@@ -1,318 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Text, View, BackHandler, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ScreenOrientation from "expo-screen-orientation"
 
-import { Clock } from "../components/Clock";
-import { Countdown } from "../components/Countdown";
 import { styles } from '../styles';
 import { OurButton } from "../components/OurButton";
 import { Slidable } from "../components/Slidable";
-import { LayoutAware } from "../components/LayoutAware";
-import { Chart } from "../components/Chart";
-
-const Timer = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, clockMax?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
-  const begin = (crr: number, counter?: CounterType): TimerType => {
-    return {
-      counter: counter || {
-        value: 0,
-        history: [],
-      },
-      prev: Date.now(),
-      crr,
-      key: setInterval(() => {
-        setTimer(crr => {
-          const time = Date.now();
-          const next = crr.crr + (time - crr.prev);
-          let key = crr.key;
-          if (next >= endTime * 1000) {
-            clearInterval(crr.key!);
-            setTimeout(() => onEnd(crr.counter), 100);
-            key = null;
-          }
-          return { counter: crr.counter, prev: time, crr: next, key: key };
-        })
-      }, 10),
-    }
-  }
-
-  const [timer, setTimer] = useState<TimerType>(() => begin((startTime || 0) * 1000));
-  const dimensions = useWindowDimensions();
-
-  const pause = () => {
-    setTimer(crr => {
-      clearInterval(crr.key!);
-      return { ...crr, key: null };
-    })
-  }
-
-  const resume = () => {
-    setTimer(prev => begin(prev.crr, prev.counter));
-  }
-
-  const minutes = timer.crr / 1000 / 60;
-  const seconds = (timer.crr / 1000) % 60;
-
-  const timeLeft = endTime - timer.crr / 1000;
-  return (
-    <View
-      style={{
-        flex: 1,
-        gap: 20,
-        backgroundColor: timeLeft < 5 ? `rgba(255, 0, 0, ${timeLeft % 1})` : 'transparent',
-        flexDirection: dimensions.height > dimensions.width ? 'column' : 'row',
-      }}
-    >
-      <View
-        style={{
-          position: 'absolute',
-          top: 20,
-          left: 20,
-          right: 20,
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        }}
-      >
-        <OurButton
-          title="Stop"
-          onPress={onStop}
-        />
-
-        <OurButton
-          title={timer.key ? "Pause" : "Continue"}
-          onPress={timer.key ? pause : resume}
-        />
-      </View>
-
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: dimensions.height > dimensions.width ? 'row' : 'column',
-          gap: 20,
-        }}
-      >
-        <Clock current={seconds} max={clockMax || endTime}>
-          <Text style={{ fontSize: 48, color: styles.textDark }}>
-            {String(Math.floor(minutes)).padStart(2, '0')}
-            :
-            {String(Math.floor(seconds)).padStart(2, '0')}
-          </Text>
-        </Clock>
-      </View>
-
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        onTouchEnd={() => {
-          if (!timer.key) return;
-
-          setTimer(crr => ({
-            ...crr,
-            counter: {
-              value: crr.counter.value + 1,
-              history: [...crr.counter.history, crr.crr],
-            }
-          }))
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 128,
-            marginBlock: 'auto',
-            color: styles.textDark,
-            opacity: timer.key ? 1 : 0.1,
-          }}
-        >
-          {timer.counter.value}
-        </Text>
-
-        <View
-          style={{
-            padding: 10,
-            alignSelf: 'stretch',
-            opacity: timer.key ? 1 : 0.1,
-          }}
-        >
-          <LayoutAware height={100}>
-            {({ ready, width, height }) => (
-              ready && (
-                <Chart
-                  height={height}
-                  width={width}
-                  counter={timer.counter}
-                  currentTime={timer.crr}
-                  endTime={endTime}
-                />
-              )
-            )}
-          </LayoutAware>
-        </View>
-
-        {!timer.key && (
-          <View
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              height: '100%',
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onTouchEnd={resume}
-          >
-            <Text
-              style={{
-                fontSize: 48,
-                color: styles.textDark,
-              }}
-            >
-              Paused
-            </Text>
-          </View>
-        )}
-      </View>
-    </View>
-  );
-}
-
-const TimerWithCountdown = ({ startTime, endTime, countdownSeconds, onStart, onEnd, onStop, children }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onStart: () => void, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
-  const [gettingReady, setGettingReady] = useState(true);
-
-  if (countdownSeconds && gettingReady) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Countdown
-          time={countdownSeconds}
-          onFinish={() => {
-            setGettingReady(false);
-            onStart();
-          }}
-        />
-      </View>
-    );
-  }
-
-  return (
-    <Timer
-      startTime={startTime}
-      endTime={endTime}
-      onEnd={onEnd}
-      onStop={onStop}
-    />
-  )
-}
-
-const Wod = ({ startTime, endTime, countdownSeconds, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, countdownSeconds?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
-  const [ended, setEnded] = useState(false);
-  const [counter, setCounter] = useState<CounterType>({ value: 0, history: [] });
-
-  if (ended) {
-    setTimeout(() => onEnd(counter));
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'green',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        onTouchEnd={() => onEnd(counter)}
-      >
-        <Text
-          style={{
-            color: 'white',
-            fontSize: 128,
-          }}
-        >
-          {counter.value}
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: styles.background,
-      }}
-    >
-      <TimerWithCountdown
-        startTime={startTime}
-        endTime={endTime}
-        countdownSeconds={countdownSeconds}
-        onStart={() => { }}
-        onEnd={counter => {
-          setEnded(true)
-          setCounter(counter);
-        }}
-        onStop={onStop}
-      />
-    </View>
-  );
-}
-
-const ConfigureAMRAP = ({ step, onUpdate }: { step: StepType, onUpdate: (step: StepType) => void }) => {
-  const minutes = Math.floor(step.endTime / 60);
-  const seconds = Math.floor(step.endTime % 60).toString().padStart(2, '0');
-
-  return (
-    <>
-      <OurButton
-        title="-"
-        style={{ width: 60, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderWidth: 0 }}
-        onPress={() => {
-          step.endTime -= 15;
-          onUpdate(step);
-        }}
-      />
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: styles.fontSize,
-            color: styles.textDark,
-          }}
-        >
-          As many reps as possible in
-        </Text>
-        <Text
-          style={{
-            fontSize: styles.fontSize + 4
-          }}
-        >
-          {minutes === 0 ? `${seconds} seconds` : `${minutes}:${seconds} minutes`}
-        </Text>
-      </View>
-      <OurButton
-        title="+"
-        style={{ width: 60, borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderWidth: 0 }}
-        onPress={() => {
-          step.endTime += 15;
-          onUpdate(step);
-        }}
-      />
-    </>
-  );
-}
+import { ConfigureAMRAP } from "../components/configure/AMRAP";
+import { ConfigureRest } from "../components/configure/Rest";
+import { Countdown } from "../components/Countdown";
+import { PlusMinus } from "../components/PlusMinus";
+import { Wod } from "../components/Wod";
+import { EndWod } from "../components/EndWod";
 
 const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType, canRemove: boolean, onUpdate: (step: StepType) => void, onRemove: () => void }) => {
   return (
@@ -330,11 +29,21 @@ const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType
       onSlide={onRemove}
     >
       {step.type === 'AMRAP' && <ConfigureAMRAP step={step} onUpdate={onUpdate} />}
+      {step.type === 'Rest' && <ConfigureRest step={step} onUpdate={onUpdate} />}
+      {step.type === 'Wait' && (
+        <Text
+          style={{
+            fontSize: 18,
+            textAlign: 'center',
+            textAlignVertical: 'center'
+          }}
+        >Wait for input</Text>
+      )}
     </Slidable>
   );
 }
 
-const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (steps: StepType[]) => void }) => {
+const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (steps: StepType[] | ((prev: StepType[]) => StepType[])) => void }) => {
   const [key, setKey] = useState(0);
 
   return (
@@ -370,23 +79,32 @@ const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (ste
           title="+ AMRAP"
           style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
           onPress={() => {
-            onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
+            onUpdate(prev => [
+              ...prev,
+              { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } }
+            ]);
             setKey(crr => crr + 1);
           }}
         />
         <OurButton
-          title="+ AMRAP"
+          title="+ Wait"
           style={{ flex: 1, borderRadius: 0 }}
           onPress={() => {
-            onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
+            onUpdate(prev => [
+              ...prev,
+              { type: 'Wait', endTime: 0, counter: { value: 0, history: [] } }
+            ]);
             setKey(crr => crr + 1);
           }}
         />
         <OurButton
-          title="+ AMRAP"
+          title="+ Rest"
           style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
           onPress={() => {
-            onUpdate(JSON.parse(JSON.stringify([...steps, steps[steps.length - 1]])));
+            onUpdate(prev => [
+              ...prev,
+              { type: 'Rest', endTime: 30, counter: { value: 0, history: [] } }
+            ]);
             setKey(crr => crr + 1);
           }}
         />
@@ -395,46 +113,49 @@ const ConfigureSteps = ({ steps, onUpdate }: { steps: StepType[], onUpdate: (ste
   );
 }
 
-const EndGame = ({ steps, onReset }: { steps: StepType[], onReset: () => void }) => (
-  <ScrollView
-    style={{
-      flex: 1,
-    }}
-    contentContainerStyle={{
-      flexDirection: 'column',
-      gap: 10,
-      paddingInline: 50,
-      paddingBlock: 20,
-    }}
-  >
-    <OurButton
-      title="Reset"
-      onPress={onReset}
-    />
-
-    {steps.map((s, i) => (
-      <>
-        <Text>{s.counter.value} reps in {s.endTime} seconds</Text>
-        <LayoutAware key={i} height={100}>
-          {({ ready, ...rest }) => ready && (
-            <Chart
-              {...rest}
-              counter={s.counter}
-              currentTime={s.endTime}
-              endTime={s.endTime}
-            />
-          )}
-        </LayoutAware>
-      </>
-    ))}
-  </ScrollView>
-);
+const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpdate: React.Dispatch<React.SetStateAction<number>> }) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'stretch',
+        justifyContent: 'center',
+        borderRadius: styles.radius,
+        borderWidth: 1,
+        borderColor: styles.secondary,
+        height: 80,
+      }}
+    >
+      <PlusMinus
+        onMinus={() => onUpdate(prev => prev - 1)}
+        onPlus={() => onUpdate(prev => prev + 1)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: styles.fontSize + 4
+            }}
+          >
+            Countdown of {countdown}s
+          </Text>
+        </View>
+      </PlusMinus>
+    </View>
+  )
+}
 
 export default function Index() {
-  const [index, setIndex] = useState(-1);
+  const [index, setIndex] = useState(-2);
+  const [countdown, setCountdown] = useState(3);
   const [steps, setSteps] = useState<StepType[]>([
-    { type: 'AMRAP', countdownSeconds: 3, endTime: 30, counter: { value: 0, history: [] } },
     { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } },
+    { type: 'Rest', endTime: 30, counter: { value: 0, history: [] } },
     { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } },
   ]);
 
@@ -444,9 +165,23 @@ export default function Index() {
     }
     unlockScreenOerientation()
   }, []);
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (index >= 0) {
+        Alert.alert('Hold on!', 'Are you sure you want to go back?', [
+          { text: 'Cancel', onPress: () => null, style: 'cancel' },
+          { text: 'YES', onPress: () => setIndex(-2) },
+        ]);
+      } else {
+        setIndex(-2);
+      }
+      return true;
+    });
+    return () => backHandler.remove();
+  }, [index]);
 
   let content = null;
-  if (index === -1) {
+  if (index === -2) {
     content = (
       <>
         <View style={{
@@ -472,6 +207,11 @@ export default function Index() {
             backgroundColor: styles.background,
           }}
         >
+          <ConfigureCountdown
+            countdown={countdown}
+            onUpdate={setCountdown}
+          />
+
           <ConfigureSteps
             steps={steps}
             onUpdate={setSteps}
@@ -495,14 +235,34 @@ export default function Index() {
         </View>
       </>
     );
+  } else if (index === -1) {
+    content = (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: styles.background,
+        }}
+      >
+        <Countdown
+          time={countdown}
+          onFinish={() => setIndex(prev => prev + 1)}
+        />
+      </View>
+    );
   } else if (index >= steps.length) {
-    content = <EndGame steps={steps} onReset={() => setIndex(-1)} />
+    content = (
+      <EndWod
+        steps={steps}
+        onReset={() => setIndex(-2)}
+      />
+    )
   } else {
     content = (
       <Wod
         key={index}
-        endTime={steps[index].endTime}
-        countdownSeconds={steps[index].countdownSeconds}
+        step={steps[index]}
         onEnd={counter => {
           setSteps(crrSteps => {
             crrSteps[index].counter = counter;
@@ -510,7 +270,7 @@ export default function Index() {
           })
           setIndex(crr => crr + 1)
         }}
-        onStop={() => setIndex(-1)}
+        onStop={() => setIndex(-2)}
       />
     );
   }

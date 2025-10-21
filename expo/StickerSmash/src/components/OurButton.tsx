@@ -1,24 +1,20 @@
-import React, { useState } from "react";
-import { Pressable, Text, ButtonProps, PressableProps } from "react-native";
+import React from "react";
+import { Pressable, Text, PressableProps, ViewStyle } from "react-native";
 import { styles } from "../styles";
 
-const OurButton = ({ children, style, ...props }: React.PropsWithChildren<ButtonProps | PressableProps>) => {
-  const [pressing, setPressing] = useState(false)
-
+const OurButton = ({ children, style, ...props }: React.PropsWithChildren<PressableProps & { title?: string }>) => {
   return (
     <Pressable
-      style={{
-        backgroundColor: pressing ? styles.secondaryDark : styles.secondary,
+      style={({ pressed }) => ({
+        backgroundColor: pressed ? styles.secondaryDark : styles.secondary,
         padding: 10,
         borderRadius: styles.radius,
         justifyContent: 'center',
         alignItems: "center",
         borderWidth: 1,
         borderColor: styles.secondaryDark,
-        ...style,
-      }}
-      onPressIn={() => setPressing(true)}
-      onPressOut={() => setPressing(false)}
+        ...(style as ViewStyle),
+      })}
       {...props}
     >
       <Text
@@ -27,7 +23,9 @@ const OurButton = ({ children, style, ...props }: React.PropsWithChildren<Button
           fontWeight: styles.bold,
           fontSize: styles.fontSize,
         }}
-      >{children || (props as ButtonProps).title}</Text>
+      >
+        {children || props.title}
+      </Text>
     </Pressable>
   );
 }

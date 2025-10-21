@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { StyleProp, View, ViewStyle, useWindowDimensions } from 'react-native';
+import { View, ViewStyle, useWindowDimensions } from 'react-native';
 
 const Slidable = ({ style, children, canSlide, onSlide }: React.PropsWithChildren<{ style: ViewStyle, canSlide: boolean, onSlide: () => void }>) => {
   const [value, setValue] = useState({
