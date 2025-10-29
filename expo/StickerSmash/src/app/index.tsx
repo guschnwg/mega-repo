@@ -7,6 +7,7 @@ import { styles } from '../styles';
 import { OurButton } from "../components/OurButton";
 import { Slidable } from "../components/Slidable";
 import { ConfigureAMRAP } from "../components/configure/AMRAP";
+import { ConfigureEMOM } from "../components/configure/EMOM";
 import { ConfigureRest } from "../components/configure/Rest";
 import { Countdown } from "../components/Countdown";
 import { PlusMinus } from "../components/PlusMinus";
@@ -29,6 +30,7 @@ const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType
       onSlide={onRemove}
     >
       {step.type === 'AMRAP' && <ConfigureAMRAP step={step} onUpdate={onUpdate} />}
+      {step.type === 'EMOM' && <ConfigureEMOM step={step} onUpdate={onUpdate} />}
       {step.type === 'Rest' && <ConfigureRest step={step} onUpdate={onUpdate} />}
       {step.type === 'Wait' && (
         <Text
@@ -86,7 +88,18 @@ const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { cou
           onPress={() => {
             onUpdate(prev => [
               ...prev,
-              { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } }
+              { type: 'AMRAP', config: { time: 30, counter: { value: 0, history: [] } } }
+            ]);
+            setKey(crr => crr + 1);
+          }}
+        />
+        <OurButton
+          title="+ EMOM"
+          style={{ flex: 1, borderRadius: 0 }}
+          onPress={() => {
+            onUpdate(prev => [
+              ...prev,
+              { type: 'EMOM', config: { time: 30, times: 5, counter: { value: 0, max: 10, history: [] } } }
             ]);
             setKey(crr => crr + 1);
           }}
@@ -97,7 +110,7 @@ const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { cou
           onPress={() => {
             onUpdate(prev => [
               ...prev,
-              { type: 'Wait', endTime: 0, counter: { value: 0, history: [] } }
+              { type: 'Wait', config: { time: 10 } }
             ]);
             setKey(crr => crr + 1);
           }}
@@ -108,7 +121,7 @@ const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { cou
           onPress={() => {
             onUpdate(prev => [
               ...prev,
-              { type: 'Rest', endTime: 30, counter: { value: 0, history: [] } }
+              { type: 'Rest', config: { time: 10 } }
             ]);
             setKey(crr => crr + 1);
           }}
@@ -159,9 +172,9 @@ export default function Index() {
   const [index, setIndex] = useState(-2);
   const [countdown, setCountdown] = useState(3);
   const [steps, setSteps] = useState<StepType[]>([
-    { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } },
-    { type: 'Rest', endTime: 30, counter: { value: 0, history: [] } },
-    { type: 'AMRAP', endTime: 30, counter: { value: 0, history: [] } },
+    { type: 'AMRAP', config: { time: 30, counter: { value: 0, history: [] } } },
+    { type: 'Rest', config: { time: 30 } },
+    { type: 'AMRAP', config: { time: 30, counter: { value: 0, history: [] } } },
   ]);
 
   useEffect(() => {
@@ -265,9 +278,9 @@ export default function Index() {
       <Wod
         key={index}
         step={steps[index]}
-        onEnd={counter => {
+        onEnd={step => {
           setSteps(crrSteps => {
-            crrSteps[index].counter = counter;
+            crrSteps[index] = step;
             return crrSteps;
           })
           setIndex(crr => crr + 1)

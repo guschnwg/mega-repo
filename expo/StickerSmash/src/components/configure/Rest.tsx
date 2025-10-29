@@ -4,18 +4,18 @@ import { Text, View } from "react-native";
 import { styles } from '../../styles';
 import { PlusMinus } from "../PlusMinus";
 
-export const ConfigureRest = ({ step, onUpdate }: { step: StepType, onUpdate: (step: StepType) => void }) => {
-  const minutes = Math.floor(step.endTime / 60);
-  const seconds = Math.floor(step.endTime % 60).toString().padStart(2, '0');
+export const ConfigureRest = ({ step, onUpdate }: { step: RestStepType, onUpdate: (step: RestStepType) => void }) => {
+  const minutes = Math.floor(step.config.time / 60);
+  const seconds = Math.floor(step.config.time % 60).toString().padStart(2, '0');
 
   return (
     <PlusMinus
       onMinus={() => {
-        step.endTime -= 15;
+        step.config.time -= 15;
         onUpdate(step);
       }}
       onPlus={() => {
-        step.endTime += 15;
+        step.config.time += 15;
         onUpdate(step);
       }}
     >

@@ -7,32 +7,32 @@ import { LayoutAware } from "../LayoutAware";
 import { Chart } from "../Chart";
 import { styles } from '../../styles';
 
-export const Amrap = ({ startTime, endTime, clockMax, onEnd, onStop }: React.PropsWithChildren<{ startTime?: number, endTime: number, clockMax?: number, onEnd: (counter: CounterType) => void, onStop: () => void }>) => {
-  const begin = (crr: number, counter?: CounterType): TimerType => {
+export const Amrap = ({ time, onEnd, onStop }: { time: number, onEnd: (counter: CounterType) => void, onStop: () => void }) => {
+  const begin = (counter?: CounterType): TimerType => {
     return {
       counter: counter || {
         value: 0,
         history: [],
       },
       prev: Date.now(),
-      crr,
+      crr: 0,
       key: setInterval(() => {
         setTimer(crr => {
-          const time = Date.now();
-          const next = crr.crr + (time - crr.prev);
+          const newTime = Date.now();
+          const next = crr.crr + (newTime - crr.prev);
           let key = crr.key;
-          if (next >= endTime * 1000) {
+          if (next >= time * 1000) {
             clearInterval(crr.key!);
             setTimeout(() => onEnd(crr.counter), 100);
             key = null;
           }
-          return { counter: crr.counter, prev: time, crr: next, key: key };
+          return { counter: crr.counter, prev: newTime, crr: next, key: key };
         })
       }, 10),
     }
   }
 
-  const [timer, setTimer] = useState<TimerType>(() => begin((startTime || 0) * 1000));
+  const [timer, setTimer] = useState<TimerType>(() => begin());
   const dimensions = useWindowDimensions();
 
   const pause = () => {
@@ -49,7 +49,7 @@ export const Amrap = ({ startTime, endTime, clockMax, onEnd, onStop }: React.Pro
   const minutes = timer.crr / 1000 / 60;
   const seconds = (timer.crr / 1000) % 60;
 
-  const timeLeft = endTime - timer.crr / 1000;
+  const timeLeft = time - timer.crr / 1000;
   return (
     <View
       style={{
@@ -90,7 +90,7 @@ export const Amrap = ({ startTime, endTime, clockMax, onEnd, onStop }: React.Pro
           gap: 20,
         }}
       >
-        <Clock current={seconds} max={clockMax || endTime}>
+        <Clock current={seconds} max={time}>
           <Text style={{ fontSize: 48, color: styles.textDark }}>
             {String(Math.floor(minutes)).padStart(2, '0')}
             :
@@ -143,7 +143,7 @@ export const Amrap = ({ startTime, endTime, clockMax, onEnd, onStop }: React.Pro
                   width={width}
                   counter={timer.counter}
                   currentTime={timer.crr}
-                  endTime={endTime}
+                  endTime={time}
                 />
               )
             )}
