@@ -6,6 +6,8 @@ export const LayoutAware = ({ height, children }: { height: number; children: ({
   const ref = useRef<View>(null);
   const [layout, setDimensions] = useState({
     ready: false,
+    x: 0,
+    y: 0,
     width: 0,
     height: 0,
   });
@@ -14,7 +16,7 @@ export const LayoutAware = ({ height, children }: { height: number; children: ({
     // Give some time because sometimes it bugs
     setTimeout(() => {
       ref.current?.measureInWindow((x, y, width, height) => {
-        setDimensions({ ready: true, width, height });
+        setDimensions({ ready: true, x, y, width, height });
       });
     }, 100);
   }, [dimensions]);

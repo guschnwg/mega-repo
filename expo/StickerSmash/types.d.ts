@@ -32,24 +32,42 @@ interface EMOMConfigType {
   times: number
 }
 
+interface SetConfigType {
+  counter: CounterType
+  times: number
+}
+
+enum StepTypesEnum {
+  AMRAP = 'AMRAP',
+  Rest = 'Rest',
+  Wait = 'Wait',
+  EMOM = 'EMOM',
+  Set = 'Set',
+}
+
 type AMRAPStepType = {
-  type: "AMRAP"
+  type: StepTypesEnum.AMRAP
   config: AMRAPConfigType
 }
 
 type RestStepType = {
-  type: "Rest"
+  type: StepTypesEnum.Rest
   config: RestConfigType
 }
 
 type WaitStepType = {
-  type: "Wait"
+  type: StepTypesEnum.Wait
   config: WaitConfigType
 }
 
 type EMOMStepType = {
-  type: "EMOM"
+  type: StepTypesEnum.EMOM
   config: EMOMConfigType
 }
 
-type StepType = AMRAPStepType | RestStepType | WaitStepType | EMOMStepType
+type SetStepType = {
+  type: StepTypesEnum.Set
+  config: SetConfigType
+}
+
+type StepType = AMRAPStepType | RestStepType | WaitStepType | EMOMStepType | SetStepType

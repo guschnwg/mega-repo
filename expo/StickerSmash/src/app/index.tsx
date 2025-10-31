@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, BackHandler, Alert, ScrollView } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { Text, View, BackHandler, Alert, ScrollView, StyleProp, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ScreenOrientation from "expo-screen-orientation"
 
@@ -8,13 +8,73 @@ import { OurButton } from "../components/OurButton";
 import { Slidable } from "../components/Slidable";
 import { ConfigureAMRAP } from "../components/configure/AMRAP";
 import { ConfigureEMOM } from "../components/configure/EMOM";
+import { ConfigureSet } from "../components/configure/Set";
 import { ConfigureRest } from "../components/configure/Rest";
 import { Countdown } from "../components/Countdown";
-import { PlusMinus } from "../components/PlusMinus";
-import { Wod } from "../components/Wod";
+import { RunWod } from "../components/RunWod";
 import { EndWod } from "../components/EndWod";
+import { TextPicker } from "../components/TextPicker";
 
-const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType, canRemove: boolean, onUpdate: (step: StepType) => void, onRemove: () => void }) => {
+enum StepTypesEnum {
+  AMRAP = 'AMRAP',
+  Rest = 'Rest',
+  Wait = 'Wait',
+  EMOM = 'EMOM',
+  Set = 'Set',
+}
+
+const MultiButton = ({ title, options, style, onOpen, onPress }: { title: string, options: string[], style: ViewStyle, onOpen?: () => void, onPress: (option: string) => void }) => {
+  const [open, setOpen] = useState(false);
+
+  // Figure out a overlay instead of the cancel button
+  if (open) {
+    return (
+      <View
+        style={{
+          zIndex: 1,
+          width: '100%',
+        }}
+      >
+        {options.map((option, i) => (
+          <OurButton
+            title={option}
+            style={{
+              ...(i === 0 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : { borderRadius: 0 }),
+              // ...(i !== 0 && i !== options.length - 1 ? { borderRadius: 0 } : {}),
+              // ...(i === options.length - 1 ? { borderTopLeftRadius: 0, borderTopRightRadius: 0 } : {}),
+            }}
+            key={option}
+            onPress={() => {
+              onPress(option);
+              setOpen(false);
+            }}
+          />
+        ))}
+        <OurButton
+          title="Cancel"
+          style={{
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0
+          }}
+          onPress={() => setOpen(false)}
+        />
+      </View>
+    )
+  }
+
+  return (
+    <OurButton
+      title={title}
+      style={style}
+      onPress={() => {
+        onOpen?.();
+        setOpen(true)
+      }}
+    />
+  );
+}
+
+const ConfigureStep = ({ step, canRemove, onSlideStart, onSlideEnd, onUpdate, onRemove }: { step: StepType, canRemove: boolean, onSlideStart?: () => void, onSlideEnd?: () => void, onUpdate: (step: StepType) => void, onRemove: () => void }) => {
   return (
     <Slidable
       style={{
@@ -24,15 +84,18 @@ const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType
         borderRadius: styles.radius,
         borderWidth: 1,
         borderColor: styles.secondary,
-        height: 80,
+        height: 60,
       }}
       canSlide={canRemove}
+      onSlideStart={onSlideStart}
+      onSlideEnd={onSlideEnd}
       onSlide={onRemove}
     >
-      {step.type === 'AMRAP' && <ConfigureAMRAP step={step} onUpdate={onUpdate} />}
-      {step.type === 'EMOM' && <ConfigureEMOM step={step} onUpdate={onUpdate} />}
-      {step.type === 'Rest' && <ConfigureRest step={step} onUpdate={onUpdate} />}
-      {step.type === 'Wait' && (
+      {step.type === StepTypesEnum.AMRAP && <ConfigureAMRAP step={step} onUpdate={onUpdate} />}
+      {step.type === StepTypesEnum.EMOM && <ConfigureEMOM step={step} onUpdate={onUpdate} />}
+      {step.type === StepTypesEnum.Set && <ConfigureSet step={step} onUpdate={onUpdate} />}
+      {step.type === StepTypesEnum.Rest && <ConfigureRest step={step} onUpdate={onUpdate} />}
+      {step.type === StepTypesEnum.Wait && (
         <Text
           style={{
             fontSize: 18,
@@ -47,14 +110,26 @@ const ConfigureStep = ({ step, canRemove, onUpdate, onRemove }: { step: StepType
 
 const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { countdown: number, steps: StepType[], onUpdateCountdown: React.Dispatch<React.SetStateAction<number>>, onUpdate: (steps: StepType[] | ((prev: StepType[]) => StepType[])) => void }) => {
   const [key, setKey] = useState(0);
+  const ref = useRef<ScrollView>(null);
+  const [canScroll, setCanScroll] = useState(true);
+  const [scrolling, setScrolling] = useState(false);
+
+  useEffect(() => {
+    ref.current?.scrollToEnd({ animated: true });
+  }, [key]);
 
   return (
     <ScrollView
       key={key}
+      ref={ref}
       contentContainerStyle={{
-        backgroundColor: styles.background,
+        backgroundColor: canScroll ? styles.background : 'red',
         gap: 10,
       }}
+      scrollEnabled={canScroll}
+      onScrollBeginDrag={() => setScrolling(true)}
+      onScrollEndDrag={() => setScrolling(false)}
+      onScrollAnimationEnd={() => setScrolling(false)}
     >
       <ConfigureCountdown
         countdown={countdown}
@@ -64,7 +139,9 @@ const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { cou
         <ConfigureStep
           key={i}
           step={step}
-          canRemove={steps.length > 1}
+          canRemove={!scrolling && steps.length > 1}
+          onSlideStart={() => setCanScroll(false)}
+          onSlideEnd={() => setCanScroll(true)}
           onUpdate={step => {
             steps[i] = step;
             onUpdate([...steps]);
@@ -77,56 +154,32 @@ const ConfigureSteps = ({ countdown, onUpdateCountdown, steps, onUpdate }: { cou
         />
       ))}
 
-      <View
-        style={{
-          flexDirection: 'row',
+      <MultiButton
+        title="+ Add"
+        options={[StepTypesEnum.AMRAP, StepTypesEnum.EMOM, StepTypesEnum.Rest, StepTypesEnum.Set, StepTypesEnum.Wait]}
+        style={{ flex: 1 }}
+        onOpen={() => {
+          ref.current?.scrollToEnd({ animated: true });
         }}
-      >
-        <OurButton
-          title="+ AMRAP"
-          style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-          onPress={() => {
-            onUpdate(prev => [
-              ...prev,
-              { type: 'AMRAP', config: { time: 30, counter: { value: 0, history: [] } } }
-            ]);
+        onPress={option => {
+          let newStep: StepType | undefined = undefined;
+          if (option === StepTypesEnum.AMRAP) {
+            newStep = { type: StepTypesEnum.AMRAP, config: { time: 30, counter: { value: 0, history: [] } } };
+          } else if (option === StepTypesEnum.EMOM) {
+            newStep = { type: StepTypesEnum.EMOM, config: { time: 30, times: 5, counter: { value: 0, max: 10, history: [] } } };
+          } else if (option === StepTypesEnum.Rest) {
+            newStep = { type: StepTypesEnum.Rest, config: { time: 10 } };
+          } else if (option === StepTypesEnum.Set) {
+            newStep = { type: StepTypesEnum.Set, config: { times: 5, counter: { value: 0, max: 10, history: [] } } };
+          } else if (option === StepTypesEnum.Wait) {
+            newStep = { type: StepTypesEnum.Wait, config: { time: 10 } }
+          }
+          if (newStep) {
+            onUpdate(prev => [...prev, newStep]);
             setKey(crr => crr + 1);
-          }}
-        />
-        <OurButton
-          title="+ EMOM"
-          style={{ flex: 1, borderRadius: 0 }}
-          onPress={() => {
-            onUpdate(prev => [
-              ...prev,
-              { type: 'EMOM', config: { time: 30, times: 5, counter: { value: 0, max: 10, history: [] } } }
-            ]);
-            setKey(crr => crr + 1);
-          }}
-        />
-        <OurButton
-          title="+ Wait"
-          style={{ flex: 1, borderRadius: 0 }}
-          onPress={() => {
-            onUpdate(prev => [
-              ...prev,
-              { type: 'Wait', config: { time: 10 } }
-            ]);
-            setKey(crr => crr + 1);
-          }}
-        />
-        <OurButton
-          title="+ Rest"
-          style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-          onPress={() => {
-            onUpdate(prev => [
-              ...prev,
-              { type: 'Rest', config: { time: 10 } }
-            ]);
-            setKey(crr => crr + 1);
-          }}
-        />
-      </View>
+          }
+        }}
+      />
     </ScrollView>
   );
 }
@@ -141,29 +194,32 @@ const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpda
         borderRadius: styles.radius,
         borderWidth: 1,
         borderColor: styles.secondary,
-        height: 80,
+        height: 60,
       }}
     >
-      <PlusMinus
-        onMinus={() => onUpdate(prev => prev - 1)}
-        onPlus={() => onUpdate(prev => prev + 1)}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+          gap: 5,
+        }}
       >
-        <View
+        <Text
           style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
+            fontSize: styles.fontSize
           }}
         >
-          <Text
-            style={{
-              fontSize: styles.fontSize + 4
-            }}
-          >
-            Countdown of {countdown}s
-          </Text>
-        </View>
-      </PlusMinus>
+          Countdown of
+        </Text>
+        <TextPicker
+          value={countdown}
+          text={`${countdown}s`}
+          possible={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+          onUpdate={onUpdate}
+        />
+      </View>
     </View>
   )
 }
@@ -172,9 +228,15 @@ export default function Index() {
   const [index, setIndex] = useState(-2);
   const [countdown, setCountdown] = useState(3);
   const [steps, setSteps] = useState<StepType[]>([
-    { type: 'AMRAP', config: { time: 30, counter: { value: 0, history: [] } } },
-    { type: 'Rest', config: { time: 30 } },
-    { type: 'AMRAP', config: { time: 30, counter: { value: 0, history: [] } } },
+    { type: StepTypesEnum.AMRAP, config: { time: 30, counter: { value: 0, history: [] } } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
+    { type: StepTypesEnum.AMRAP, config: { time: 30, counter: { value: 0, history: [] } } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
+    { type: StepTypesEnum.Rest, config: { time: 30 } },
   ]);
 
   useEffect(() => {
@@ -203,17 +265,17 @@ export default function Index() {
     content = (
       <>
         <View style={{
-          height: 200,
+          height: 100,
           justifyContent: 'center',
           alignItems: 'center',
         }}>
           <Text
             style={{
-              fontSize: 48,
+              fontSize: 36,
               color: styles.textLight,
             }}
           >
-            WOD
+            New WOD
           </Text>
         </View>
 
@@ -275,7 +337,7 @@ export default function Index() {
     )
   } else {
     content = (
-      <Wod
+      <RunWod
         key={index}
         step={steps[index]}
         onEnd={step => {
