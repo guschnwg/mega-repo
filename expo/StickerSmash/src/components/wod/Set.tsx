@@ -64,8 +64,10 @@ const SetStep = ({
     };
   }, [active, timer.key]);
 
-  const minutes = timer.current / 60000;
-  const seconds = timer.current / 1000;
+  const minutes = timer.current / 1000 / 60;
+  const seconds = timer.current / 1000 % 60;
+
+  console.log(timer.current, minutes, seconds);
 
   return (
     <Pressable

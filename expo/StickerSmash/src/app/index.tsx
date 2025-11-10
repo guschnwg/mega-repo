@@ -97,6 +97,7 @@ const MultiButton = ({
 };
 
 const ConfigureStep = ({
+  index,
   step,
   canRemove,
   onSlideStart,
@@ -104,6 +105,7 @@ const ConfigureStep = ({
   onUpdate,
   onRemove,
 }: {
+  index: number,
   step: StepType;
   canRemove: boolean;
   onSlideStart?: () => void;
@@ -127,6 +129,21 @@ const ConfigureStep = ({
       onSlideEnd={onSlideEnd}
       onSlide={onRemove}
     >
+      <Text
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          backgroundColor: styles.primaryDark,
+          color: styles.textLight,
+          width: 20,
+          textAlign: 'center',
+          borderTopLeftRadius: styles.radius - 1,
+          borderBottomRightRadius: styles.radius,
+        }}
+      >
+        {index}
+      </Text>
       {step.type === StepTypesEnum.AMRAP && (
         <ConfigureAMRAP step={step} onUpdate={onUpdate} />
       )}
@@ -179,7 +196,6 @@ const ConfigureSteps = ({
       key={key}
       ref={ref}
       contentContainerStyle={{
-        // backgroundColor: canScroll ? styles.background : 'red',
         backgroundColor: styles.background,
         gap: 10,
       }}
@@ -192,6 +208,7 @@ const ConfigureSteps = ({
       {steps.map((step, i) => (
         <ConfigureStep
           key={i}
+          index={i + 1}
           step={step}
           canRemove={!scrolling && steps.length > 1}
           onSlideStart={() => setCanScroll(false)}

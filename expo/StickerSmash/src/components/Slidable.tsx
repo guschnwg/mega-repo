@@ -80,6 +80,10 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
 
         event.persist();
         setValue(crr => {
+          if (!crr.validation) {
+            return crr;
+          }
+
           const newValue = event.nativeEvent.pageX;
           const newTime = Date.now();
           const newOffset = newValue - crr.start;
