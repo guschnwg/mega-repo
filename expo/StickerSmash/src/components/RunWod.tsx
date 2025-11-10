@@ -1,12 +1,21 @@
 import React from "react";
 import { View } from "react-native";
 
-import { Amrap } from "./wod/AMRAP";
-import { styles } from '../styles';
-import { Rest } from "./wod/Rest";
-import { Wait } from "./wod/Wait";
+import { WodAmrap } from "./wod/AMRAP";
+import { styles } from "../styles";
+import { WodRest } from "./wod/Rest";
+import { WodWait } from "./wod/Wait";
+import { WodSet } from "./wod/Set";
 
-export const RunWod = ({ step, onEnd, onStop }: { step: StepType, onEnd: (step: StepType) => void, onStop: () => void }) => {
+export const RunWod = ({
+  step,
+  onEnd,
+  onStop,
+}: {
+  step: StepType;
+  onEnd: (step: StepType) => void;
+  onStop: () => void;
+}) => {
   return (
     <View
       style={{
@@ -14,37 +23,46 @@ export const RunWod = ({ step, onEnd, onStop }: { step: StepType, onEnd: (step: 
         backgroundColor: styles.background,
       }}
     >
-      {step.type === 'AMRAP' && (
-        <Amrap
+      {step.type === "AMRAP" && (
+        <WodAmrap
           time={step.config.time}
-          onEnd={counter => {
+          onEnd={(counter) => {
             step.config.counter = counter;
             onEnd(step);
           }}
           onStop={onStop}
         />
       )}
-      {step.type === 'Rest' && (
-        <Rest
+      {step.type === "Rest" && (
+        <WodRest
           step={step}
-          onSkip={value => {
+          onSkip={(value) => {
             step.config.actual = value;
             onEnd(step);
           }}
           onEnd={() => {
             step.config.actual = step.config.time;
-            onEnd(step)
+            onEnd(step);
           }}
         />
       )}
-      {step.type === 'Wait' && (
-        <Wait
-          onEnd={value => {
+      {step.type === "Wait" && (
+        <WodWait
+          onEnd={(value) => {
             step.config.actual = value;
+            onEnd(step);
+          }}
+        />
+      )}
+      {step.type === "Set" && (
+        <WodSet
+          step={step}
+          onEnd={(config) => {
+            step.config = config;
             onEnd(step);
           }}
         />
       )}
     </View>
   );
-}
+};

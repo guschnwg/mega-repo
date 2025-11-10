@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 
-import { styles } from '../../styles';
+import { styles } from "../../styles";
 import { Countdown } from "../Countdown";
 import { OurButton } from "../OurButton";
 
-
-export const Rest = ({ step, onSkip, onEnd }: { step: StepType, onSkip: (value: number) => void, onEnd: () => void }) => {
+export const WodRest = ({
+  step,
+  onSkip,
+  onEnd,
+}: {
+  step: RestStepType;
+  onSkip: (value: number) => void;
+  onEnd: () => void;
+}) => {
   const [startTime] = useState(Date.now());
 
   return (
@@ -22,16 +29,13 @@ export const Rest = ({ step, onSkip, onEnd }: { step: StepType, onSkip: (value: 
       <Text
         style={{
           fontSize: 48,
-          color: styles.textDark
+          color: styles.textDark,
         }}
       >
         Rest time!
       </Text>
 
-      <Countdown
-        time={step.endTime}
-        onFinish={onEnd}
-      />
+      <Countdown time={step.config.time} onFinish={onEnd} />
 
       <OurButton
         title="Skip"
@@ -39,4 +43,4 @@ export const Rest = ({ step, onSkip, onEnd }: { step: StepType, onSkip: (value: 
       />
     </View>
   );
-}
+};

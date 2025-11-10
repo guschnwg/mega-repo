@@ -1,31 +1,34 @@
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
 
-import { styles } from '../styles';
+import { styles } from "../styles";
 import { OurButton } from "../components/OurButton";
 import { LayoutAware } from "../components/LayoutAware";
 import { Chart } from "../components/Chart";
 
-export const EndWod = ({ steps, onReset }: { steps: StepType[], onReset: () => void }) => (
+export const EndWod = ({
+  steps,
+  onReset,
+}: {
+  steps: StepType[];
+  onReset: () => void;
+}) => (
   <ScrollView
     style={{
       flex: 1,
       backgroundColor: styles.background,
     }}
     contentContainerStyle={{
-      flexDirection: 'column',
+      flexDirection: "column",
       gap: 20,
       paddingInline: 50,
       paddingBlock: 20,
     }}
   >
-    <OurButton
-      title="Reset"
-      onPress={onReset}
-    />
+    <OurButton title="Reset" onPress={onReset} />
 
     {steps.map((step, i) => {
-      if (step.type === 'Rest') {
+      if (step.type === "Rest") {
         return (
           <View
             key={i}
@@ -35,15 +38,15 @@ export const EndWod = ({ steps, onReset }: { steps: StepType[], onReset: () => v
           >
             <Text
               style={{
-                textAlign: 'center',
-                fontWeight: 'bold'
+                textAlign: "center",
+                fontWeight: "bold",
               }}
             >
-              Rested for {step.counter.value || step.endTime}s
+              Rested for {step.config.actual || step.config.time}s
             </Text>
           </View>
         );
-      } else if (step.type === 'Wait') {
+      } else if (step.type === "Wait") {
         return (
           <View
             key={i}
@@ -53,37 +56,45 @@ export const EndWod = ({ steps, onReset }: { steps: StepType[], onReset: () => v
           >
             <Text
               style={{
-                textAlign: 'center',
-                fontWeight: 'bold'
+                textAlign: "center",
+                fontWeight: "bold",
               }}
             >
-              Waited for {step.counter.value}s
+              Waited for {step.config.actual || step.config.time}s
             </Text>
+          </View>
+        );
+      } else if (step.type === "AMRAP") {
+        return (
+          <View
+            key={i}
+            style={{
+              gap: 10,
+            }}
+          >
+            <Text>
+              {step.config.counter.value} reps in {step.config.time} seconds
+            </Text>
+
+            <LayoutAware key={i} height={100}>
+              {({ ready, ...rest }) =>
+                ready && (
+                  <Chart
+                    {...rest}
+                    counter={step.config.counter}
+                    currentTime={step.config.time}
+                    endTime={step.config.time}
+                  />
+                )
+              }
+            </LayoutAware>
           </View>
         );
       }
 
       return (
-        <View
-          key={i}
-          style={{
-            gap: 10,
-          }}
-        >
-          <Text>{step.counter.value} reps in {step.endTime} seconds</Text>
-
-          <LayoutAware key={i} height={100}>
-            {({ ready, ...rest }) => ready && (
-              <Chart
-                {...rest}
-                counter={step.counter}
-                currentTime={step.endTime}
-                endTime={step.endTime}
-              />
-            )}
-          </LayoutAware>
-        </View>
-      )
+        <Text key={i}>Not implemented yet {JSON.stringify(step, null, 2)}</Text>
+      );
     })}
   </ScrollView>
 );
