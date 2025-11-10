@@ -1,22 +1,27 @@
 import React from "react";
 import { Pressable, Text } from "react-native";
 
-import { styles } from '../styles';
+import { styles } from "@/src/styles";
 
-export const PressableText = ({ text, onPress }: { text: string | number, onPress: () => void }) => (
+interface PressableTextProps {
+  text: string | number;
+  onPress: () => void;
+}
+
+export const PressableText = ({ text, onPress }: PressableTextProps) => (
   <Pressable
     style={{
       borderRadius: styles.radius,
       borderColor: styles.primary,
       borderWidth: 1,
-      padding: 10,
+      padding: 5,
     }}
     onPress={onPress}
   >
     <Text
       style={{
-        textAlign: 'center',
-        fontSize: 18,
+        textAlign: "center",
+        fontSize: 16,
       }}
     >
       {text}

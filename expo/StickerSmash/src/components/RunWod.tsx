@@ -6,6 +6,7 @@ import { styles } from "../styles";
 import { WodRest } from "./wod/Rest";
 import { WodWait } from "./wod/Wait";
 import { WodSet } from "./wod/Set";
+import { WodEMOM } from "./wod/EMOM";
 
 export const RunWod = ({
   step,
@@ -56,6 +57,15 @@ export const RunWod = ({
       )}
       {step.type === "Set" && (
         <WodSet
+          step={step}
+          onEnd={(config) => {
+            step.config = config;
+            onEnd(step);
+          }}
+        />
+      )}
+      {step.type === "EMOM" && (
+        <WodEMOM
           step={step}
           onEnd={(config) => {
             step.config = config;

@@ -234,9 +234,12 @@ const ConfigureSteps = ({
             newStep = {
               type: StepTypesEnum.EMOM,
               config: {
-                time: 30,
-                times: 5,
-                counter: { value: 0, max: 10, history: [] },
+                counters: [
+                  { time: 30, max: 10, value: 0, history: [] },
+                  { time: 30, max: 10, value: 0, history: [] },
+                  { time: 30, max: 10, value: 0, history: [] },
+                  { time: 30, max: 10, value: 0, history: [] },
+                ],
               },
             };
           } else if (option === StepTypesEnum.Rest) {
@@ -313,34 +316,32 @@ export default function Index() {
   const [countdown, setCountdown] = useState(3);
   const [steps, setSteps] = useState<StepType[]>([
     {
-      type: StepTypesEnum.Set,
+      type: StepTypesEnum.EMOM,
       config: {
         counters: [
-          { max: 10, value: 0, history: [] },
-          { max: 10, value: 0, history: [] },
+          { time: 30, max: 10, value: 0, history: [] },
+          { time: 30, max: 10, value: 0, history: [] },
+          { time: 30, max: 10, value: 0, history: [] },
+          { time: 30, max: 10, value: 0, history: [] },
         ],
-        waits: [],
       },
     },
     {
-      type: StepTypesEnum.Set,
+      type: StepTypesEnum.EMOM,
       config: {
         counters: [
-          { max: 10, value: 0, history: [] },
-          { max: 5, value: 0, history: [] },
+          { time: 30, max: 10, value: 0, history: [] },
+          { time: 30, max: 5, value: 0, history: [] },
         ],
-        waits: [],
       },
     },
     {
-      type: StepTypesEnum.Set,
+      type: StepTypesEnum.EMOM,
       config: {
         counters: [
-          { max: 10, value: 0, history: [] },
-          { max: 5, value: 0, history: [] },
-          { max: 5, value: 0, history: [] },
+          { time: 30, max: 10, value: 0, history: [] },
+          { time: 15, max: 10, value: 0, history: [] },
         ],
-        waits: [],
       },
     },
   ]);

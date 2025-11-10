@@ -6,9 +6,10 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
-import { Clock } from "../Clock";
+
+import { Clock } from "@/src/components/Clock";
 import { styles } from "@/src/styles";
-import { Holdable } from "../Holdable";
+import { Holdable } from "@/src/components/Holdable";
 
 interface WodSetProps {
   step: SetStepType;

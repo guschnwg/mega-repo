@@ -13,7 +13,7 @@ interface ConfigureSetProps {
 export const ConfigureSet = ({ step, onUpdate }: ConfigureSetProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const sameCountSteps = Boolean(
+  const allSame = Boolean(
     step.config.counters.reduce(
       (prev, curr) => (prev !== curr.max ? 0 : curr.max),
       step.config.counters[0].max,
@@ -34,10 +34,15 @@ export const ConfigureSet = ({ step, onUpdate }: ConfigureSetProps) => {
         <TextPicker
           key={index}
           value={counter.max || 0}
-          possible={[5, 10, 15, 20, 25, 30]}
+          possible={[0, 5, 10, 15, 20, 25, 30]}
           onUpdate={(value) => {
-            step.config.counters[index].max = value;
-            onUpdate(step);
+            if (value === 0) {
+              step.config.counters.splice(index, 1);
+              onUpdate(step);
+            } else {
+              step.config.counters[index].max = value;
+              onUpdate(step);
+            }
           }}
         />
       ))}
@@ -89,7 +94,7 @@ export const ConfigureSet = ({ step, onUpdate }: ConfigureSetProps) => {
       }}
       onHold={() => setIsOpen((prev) => !prev)}
     >
-      {sameCountSteps && !isOpen ? SimpleEdit : AdvancedEdit}
+      {allSame && !isOpen ? SimpleEdit : AdvancedEdit}
     </Holdable>
   );
 };

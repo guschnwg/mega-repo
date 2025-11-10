@@ -26,10 +26,10 @@ interface WaitConfigType {
   actual?: number;
 }
 
+type EMOMConfigCounterType = Join<CounterType, { time: number }>;
+
 interface EMOMConfigType {
-  time: number;
-  counter: CounterType;
-  times: number;
+  counters: EMOMConfigCounterType[];
 }
 
 interface SetConfigType {
