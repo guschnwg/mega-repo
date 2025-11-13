@@ -39,6 +39,7 @@ const OurButton = ({
           color: styles.textLight,
           fontWeight: styles.bold,
           fontSize: styles.fontSize,
+          lineHeight: styles.fontSize,
         }}
       >
         {children || props.title}

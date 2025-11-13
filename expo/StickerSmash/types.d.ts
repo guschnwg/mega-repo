@@ -70,9 +70,11 @@ type SetStepType = {
   config: SetConfigType;
 };
 
-type StepType =
+type StepTypes =
   | AMRAPStepType
   | RestStepType
   | WaitStepType
   | EMOMStepType
   | SetStepType;
+
+type StepType = StepTypes & { id: number };

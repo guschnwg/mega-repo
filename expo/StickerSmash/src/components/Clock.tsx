@@ -12,6 +12,12 @@ export function Clock({ current, size = 200, tickness = 4, max, children }: Reac
   const stepSize = size / 50; // IDK to be honest,
   const halfStepSize = stepSize / 2;
 
+  const round = Math.floor(current / max);
+  const color1 = round % 2 === 0 ? styles.secondary : styles.primary;
+  const color2 = round % 2 === 1 ? styles.secondary : styles.primary;
+  const indicatorColor = round % 2 === 0 ? styles.secondaryDark : styles.primaryDark;
+  const normalizedPct = percentage % 1;
+
   return (
     <View
       style={{
@@ -30,7 +36,7 @@ export function Clock({ current, size = 200, tickness = 4, max, children }: Reac
             left: halfSize + (halfSize - halfTickness) * Math.cos(radFromDeg(i)) - halfTickness,
             height: stepSize,
             width: tickness,
-            backgroundColor: i / 360 < percentage ? styles.secondary : styles.primary,
+            backgroundColor: i / 360 < normalizedPct ? color1 : color2,
             transform: [{ rotate: `${i}deg` }]
           }}
         />
@@ -43,7 +49,7 @@ export function Clock({ current, size = 200, tickness = 4, max, children }: Reac
           left: halfSize + (halfSize - halfTickness) * Math.cos(percentageAngle) - halfTickness,
           height: stepSize,
           width: tickness,
-          backgroundColor: styles.secondaryDark,
+          backgroundColor: indicatorColor,
           transform: [{ rotate: `${percentageAngle}rad` }]
         }}
       />

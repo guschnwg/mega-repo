@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { NativeTouchEvent, View, ViewStyle, useWindowDimensions } from 'react-native';
+import { Animated, NativeTouchEvent, Text, View, ViewStyle, useWindowDimensions } from 'react-native';
 
 interface ValueType {
   time: number
@@ -21,6 +21,7 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
     validation: undefined,
   });
   const removed = useRef(false);
+  const fadeAnim = useRef(new Animated.Value(Number(style.minHeight || 0))).current;
   const { width } = useWindowDimensions();
 
   useEffect(() => {
@@ -37,10 +38,32 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
 
   if (value.shouldTrigger) {
     setTimeout(() => {
-      if (!removed.current) onSlide();
+      if (!removed.current) {
+        onSlide();
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start();
+      }
       removed.current = true;
     }, 100);
-    return null;
+
+    return (
+      <Animated.View
+        style={{
+          left: 0,
+          opacity: 1 - value.offset / (width - value.start),
+          backgroundColor: 'red',
+          ...style,
+          minHeight: style.minHeight,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text>🗑️</Text>
+      </Animated.View>
+    )
   }
 
   return (

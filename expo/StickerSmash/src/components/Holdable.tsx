@@ -63,9 +63,9 @@ export const Holdable = ({
   return (
     <Pressable
       style={{
-        ...style,
         borderRadius: styles.radius,
-        backgroundColor: startGesture ? "#ddd" : "transparent",
+        ...style,
+        backgroundColor: startGesture ? "#ddd" : style?.backgroundColor,
       }}
       disabled={disabled}
       onLongPress={(event) => {

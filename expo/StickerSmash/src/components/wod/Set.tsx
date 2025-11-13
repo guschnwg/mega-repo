@@ -10,6 +10,7 @@ import {
 import { Clock } from "@/src/components/Clock";
 import { styles } from "@/src/styles";
 import { Holdable } from "@/src/components/Holdable";
+import { OurButton } from "../OurButton";
 
 interface WodSetProps {
   step: SetStepType;
@@ -67,13 +68,13 @@ const SetStep = ({
   const minutes = timer.current / 1000 / 60;
   const seconds = timer.current / 1000 % 60;
 
-  console.log(timer.current, minutes, seconds);
-
   return (
     <Pressable
       style={{
         height: dimensions.height / 2,
         opacity: active ? 1 : 0.5,
+        backgroundColor: active ? undefined : '#EFEFEF',
+        filter: active ? undefined : [{ blur: 1 }],
         alignItems: "center",
         justifyContent: "center",
         gap: 20,
@@ -97,9 +98,26 @@ const SetStep = ({
         </Text>
       </Clock>
 
-      <Text style={{ fontSize: 48, color: styles.textDark }}>
-        {repTimes.length}/{counter.max}
-      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: 10,
+        }}
+      >
+        <Text style={{ fontSize: 48, color: styles.textDark }}>
+          {repTimes.length}/{counter.max}
+        </Text>
+        <OurButton
+          title="⏭️"
+          onPress={() => {
+            onFinish({
+              ...counter,
+              history: repTimes,
+              value: counter.max!,
+            });
+          }}
+        />
+      </View>
     </Pressable>
   );
 };
@@ -123,7 +141,9 @@ const SetWait = ({
         height: dimensions.height / 2,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "red",
+        backgroundColor: active ? undefined : '#EFEFEF',
+        filter: active ? undefined : [{ blur: 1 }],
+        borderRadius: 0,
       }}
       onHold={() => onWaited(Date.now() - start)}
     >

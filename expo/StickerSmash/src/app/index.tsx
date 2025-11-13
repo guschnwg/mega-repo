@@ -6,14 +6,12 @@ import {
   Alert,
   ScrollView,
   ViewStyle,
-  Vibration,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ScreenOrientation from "expo-screen-orientation";
 
 import { styles } from "../styles";
 import { OurButton } from "../components/OurButton";
-import { Slidable } from "../components/Slidable";
 import { ConfigureAMRAP } from "../components/configure/AMRAP";
 import { ConfigureEMOM } from "../components/configure/EMOM";
 import { ConfigureSet } from "../components/configure/Set";
@@ -22,6 +20,8 @@ import { Countdown } from "../components/Countdown";
 import { RunWod } from "../components/RunWod";
 import { EndWod } from "../components/EndWod";
 import { TextPicker } from "../components/TextPicker";
+import { List } from "../components/List";
+import { iota } from "../utils";
 
 enum StepTypesEnum {
   AMRAP = "AMRAP",
@@ -29,7 +29,7 @@ enum StepTypesEnum {
   Wait = "Wait",
   EMOM = "EMOM",
   Set = "Set",
-}
+};
 
 const MultiButton = ({
   title,
@@ -96,80 +96,125 @@ const MultiButton = ({
   );
 };
 
-const ConfigureStep = ({
-  index,
-  step,
-  canRemove,
-  onSlideStart,
-  onSlideEnd,
-  onUpdate,
-  onRemove,
-}: {
-  index: number,
-  step: StepType;
-  canRemove: boolean;
-  onSlideStart?: () => void;
-  onSlideEnd?: () => void;
-  onUpdate: (step: StepType) => void;
-  onRemove: () => void;
-}) => {
-  return (
-    <Slidable
+const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepType, onUpdate: (step: StepTypes) => void }) => (
+  <>
+    <Text
       style={{
-        flexDirection: "row",
-        alignItems: "stretch",
-        justifyContent: "center",
-        borderRadius: styles.radius,
-        borderWidth: 1,
-        borderColor: styles.secondary,
-        minHeight: 60,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        backgroundColor: styles.primaryDark,
+        color: styles.textLight,
+        width: 20,
+        textAlign: 'center',
+        borderTopLeftRadius: styles.radius - 1,
+        borderBottomRightRadius: styles.radius,
       }}
-      canSlide={canRemove}
-      onSlideStart={onSlideStart}
-      onSlideEnd={onSlideEnd}
-      onSlide={onRemove}
     >
+      {index}
+    </Text>
+    {step.type === StepTypesEnum.AMRAP && (
+      <ConfigureAMRAP step={step} onUpdate={onUpdate} />
+    )}
+    {step.type === StepTypesEnum.EMOM && (
+      <ConfigureEMOM step={step} onUpdate={onUpdate} />
+    )}
+    {step.type === StepTypesEnum.Set && (
+      <ConfigureSet step={step} onUpdate={onUpdate} />
+    )}
+    {step.type === StepTypesEnum.Rest && (
+      <ConfigureRest step={step} onUpdate={onUpdate} />
+    )}
+    {step.type === StepTypesEnum.Wait && (
       <Text
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          backgroundColor: styles.primaryDark,
-          color: styles.textLight,
-          width: 20,
-          textAlign: 'center',
-          borderTopLeftRadius: styles.radius - 1,
-          borderBottomRightRadius: styles.radius,
+          fontSize: 18,
+          textAlign: "center",
+          textAlignVertical: "center",
         }}
       >
-        {index}
+        Wait for input
       </Text>
-      {step.type === StepTypesEnum.AMRAP && (
-        <ConfigureAMRAP step={step} onUpdate={onUpdate} />
-      )}
-      {step.type === StepTypesEnum.EMOM && (
-        <ConfigureEMOM step={step} onUpdate={onUpdate} />
-      )}
-      {step.type === StepTypesEnum.Set && (
-        <ConfigureSet step={step} onUpdate={onUpdate} />
-      )}
-      {step.type === StepTypesEnum.Rest && (
-        <ConfigureRest step={step} onUpdate={onUpdate} />
-      )}
-      {step.type === StepTypesEnum.Wait && (
-        <Text
-          style={{
-            fontSize: 18,
-            textAlign: "center",
-            textAlignVertical: "center",
-          }}
-        >
-          Wait for input
-        </Text>
-      )}
-    </Slidable>
-  );
-};
+    )}
+  </>
+);
+
+const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpdate: (value: number) => void }) => (
+  <View
+    style={{
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: "row",
+      gap: 5,
+    }}
+  >
+    <Text
+      style={{
+        fontSize: styles.fontSize,
+      }}
+    >
+      Countdown of
+    </Text>
+    <TextPicker
+      value={countdown}
+      text={`${countdown}s`}
+      possible={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+      onUpdate={onUpdate}
+    />
+  </View>
+);
+
+const ConfigureAdd = ({ onOpenButton, onNewStep }: { onOpenButton: () => void, onNewStep: (step: StepType) => void }) => (
+  <MultiButton
+    title="+ Add"
+    options={[
+      StepTypesEnum.AMRAP,
+      StepTypesEnum.EMOM,
+      StepTypesEnum.Rest,
+      StepTypesEnum.Set,
+      StepTypesEnum.Wait,
+    ]}
+    style={{ flex: 1 }}
+    onOpen={onOpenButton}
+    onPress={(option) => {
+      let newStep: StepTypes | undefined = undefined;
+      if (option === StepTypesEnum.AMRAP) {
+        newStep = {
+          type: StepTypesEnum.AMRAP,
+          config: { time: 30, counter: { value: 0, history: [] } },
+        };
+      } else if (option === StepTypesEnum.EMOM) {
+        newStep = {
+          type: StepTypesEnum.EMOM,
+          config: {
+            counters: [
+              { time: 30, max: 10, value: 0, history: [] },
+              { time: 30, max: 10, value: 0, history: [] },
+              { time: 30, max: 10, value: 0, history: [] },
+              { time: 30, max: 10, value: 0, history: [] },
+            ],
+          },
+        };
+      } else if (option === StepTypesEnum.Rest) {
+        newStep = { type: StepTypesEnum.Rest, config: { time: 10 } };
+      } else if (option === StepTypesEnum.Set) {
+        newStep = {
+          type: StepTypesEnum.Set,
+          config: {
+            counters: [{ max: 10, value: 0, history: [] }],
+            waits: [],
+          },
+        };
+      } else if (option === StepTypesEnum.Wait) {
+        newStep = { type: StepTypesEnum.Wait, config: { time: 10 } };
+      }
+      if (newStep) {
+        onNewStep({ id: iota(), ...newStep });
+      }
+    }}
+  />
+);
 
 const ConfigureSteps = ({
   countdown,
@@ -183,148 +228,55 @@ const ConfigureSteps = ({
   onUpdate: (steps: StepType[] | ((prev: StepType[]) => StepType[])) => void;
 }) => {
   const [key, setKey] = useState(0);
+  const [onAdd, setOnAdd] = useState(false)
   const ref = useRef<ScrollView>(null);
-  const [canScroll, setCanScroll] = useState(true);
-  const [scrolling, setScrolling] = useState(false);
 
   useEffect(() => {
     ref.current?.scrollToEnd({ animated: true });
-  }, [key]);
+  }, [onAdd]);
 
   return (
-    <ScrollView
+    <List
       key={key}
       ref={ref}
-      contentContainerStyle={{
-        backgroundColor: styles.background,
-        gap: 10,
+      items={[
+        {
+          id: 0,
+          component: <ConfigureCountdown key={0} countdown={countdown} onUpdate={onUpdateCountdown} />
+        },
+        ...steps.map((step, i) => ({
+          id: step.id,
+          component: <ConfigureStep
+            key={step.id}
+            index={i + 1}
+            step={step}
+            onUpdate={(step) => {
+              steps[i] = { id: steps[i].id, ...step };
+              onUpdate([...steps]);
+              setKey((crr) => crr + 1);
+            }}
+          />
+        })),
+        {
+          id: -1,
+          component: (
+            <ConfigureAdd
+              key={-1}
+              onOpenButton={() => ref.current?.scrollToEnd({ animated: true })}
+              onNewStep={newStep => {
+                onUpdate((prev) => [...prev, newStep]);
+                setOnAdd(prev => !prev);
+              }}
+            />
+          )
+        }
+      ]}
+      canRemove={index => steps.length > 1 && index !== 0 && index !== steps.length + 1}
+      onRemove={index => {
+        const actualIndex = index - 1;
+        onUpdate(prev => [...prev.slice(0, actualIndex), ...prev.slice(actualIndex + 1)]);
       }}
-      scrollEnabled={canScroll}
-      onScrollBeginDrag={() => setScrolling(true)}
-      onScrollEndDrag={() => setScrolling(false)}
-      onScrollAnimationEnd={() => setScrolling(false)}
-    >
-      <ConfigureCountdown countdown={countdown} onUpdate={onUpdateCountdown} />
-      {steps.map((step, i) => (
-        <ConfigureStep
-          key={i}
-          index={i + 1}
-          step={step}
-          canRemove={!scrolling && steps.length > 1}
-          onSlideStart={() => setCanScroll(false)}
-          onSlideEnd={() => setCanScroll(true)}
-          onUpdate={(step) => {
-            steps[i] = step;
-            onUpdate([...steps]);
-            setKey((crr) => crr + 1);
-          }}
-          onRemove={() => {
-            Vibration.vibrate(100);
-            onUpdate([...steps.slice(0, i), ...steps.slice(i + 1)]);
-            setKey((crr) => crr + 1);
-            setCanScroll(true);
-          }}
-        />
-      ))}
-
-      <MultiButton
-        title="+ Add"
-        options={[
-          StepTypesEnum.AMRAP,
-          StepTypesEnum.EMOM,
-          StepTypesEnum.Rest,
-          StepTypesEnum.Set,
-          StepTypesEnum.Wait,
-        ]}
-        style={{ flex: 1 }}
-        onOpen={() => {
-          ref.current?.scrollToEnd({ animated: true });
-        }}
-        onPress={(option) => {
-          let newStep: StepType | undefined = undefined;
-          if (option === StepTypesEnum.AMRAP) {
-            newStep = {
-              type: StepTypesEnum.AMRAP,
-              config: { time: 30, counter: { value: 0, history: [] } },
-            };
-          } else if (option === StepTypesEnum.EMOM) {
-            newStep = {
-              type: StepTypesEnum.EMOM,
-              config: {
-                counters: [
-                  { time: 30, max: 10, value: 0, history: [] },
-                  { time: 30, max: 10, value: 0, history: [] },
-                  { time: 30, max: 10, value: 0, history: [] },
-                  { time: 30, max: 10, value: 0, history: [] },
-                ],
-              },
-            };
-          } else if (option === StepTypesEnum.Rest) {
-            newStep = { type: StepTypesEnum.Rest, config: { time: 10 } };
-          } else if (option === StepTypesEnum.Set) {
-            newStep = {
-              type: StepTypesEnum.Set,
-              config: {
-                counters: [{ max: 10, value: 0, history: [] }],
-                waits: [],
-              },
-            };
-          } else if (option === StepTypesEnum.Wait) {
-            newStep = { type: StepTypesEnum.Wait, config: { time: 10 } };
-          }
-          if (newStep) {
-            onUpdate((prev) => [...prev, newStep]);
-            setKey((crr) => crr + 1);
-          }
-        }}
-      />
-    </ScrollView>
-  );
-};
-
-const ConfigureCountdown = ({
-  countdown,
-  onUpdate,
-}: {
-  countdown: number;
-  onUpdate: React.Dispatch<React.SetStateAction<number>>;
-}) => {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "stretch",
-        justifyContent: "center",
-        borderRadius: styles.radius,
-        borderWidth: 1,
-        borderColor: styles.secondary,
-        height: 60,
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "row",
-          gap: 5,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: styles.fontSize,
-          }}
-        >
-          Countdown of
-        </Text>
-        <TextPicker
-          value={countdown}
-          text={`${countdown}s`}
-          possible={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-          onUpdate={onUpdate}
-        />
-      </View>
-    </View>
+    />
   );
 };
 
@@ -333,6 +285,7 @@ export default function Index() {
   const [countdown, setCountdown] = useState(3);
   const [steps, setSteps] = useState<StepType[]>([
     {
+      id: iota(),
       type: StepTypesEnum.EMOM,
       config: {
         counters: [
@@ -340,24 +293,6 @@ export default function Index() {
           { time: 30, max: 10, value: 0, history: [] },
           { time: 30, max: 10, value: 0, history: [] },
           { time: 30, max: 10, value: 0, history: [] },
-        ],
-      },
-    },
-    {
-      type: StepTypesEnum.EMOM,
-      config: {
-        counters: [
-          { time: 30, max: 10, value: 0, history: [] },
-          { time: 30, max: 5, value: 0, history: [] },
-        ],
-      },
-    },
-    {
-      type: StepTypesEnum.EMOM,
-      config: {
-        counters: [
-          { time: 30, max: 10, value: 0, history: [] },
-          { time: 15, max: 10, value: 0, history: [] },
         ],
       },
     },
@@ -396,6 +331,8 @@ export default function Index() {
             height: 100,
             justifyContent: "center",
             alignItems: "center",
+            flexDirection: 'row',
+            gap: 10,
           }}
         >
           <Text
@@ -406,6 +343,20 @@ export default function Index() {
           >
             New WOD
           </Text>
+
+          <OurButton
+            onPress={() => setIndex((crr) => crr + 1)}
+          >
+            <Text
+              style={{
+                fontSize: 36,
+                lineHeight: 36,
+                textAlignVertical: 'center',
+              }}
+            >
+              ‣
+            </Text>
+          </OurButton>
         </View>
 
         <View
@@ -422,22 +373,6 @@ export default function Index() {
             onUpdateCountdown={setCountdown}
             onUpdate={setSteps}
           />
-
-          <OurButton
-            style={{
-              marginTop: "auto",
-              height: 100,
-            }}
-            onPress={() => setIndex((crr) => crr + 1)}
-          >
-            <Text
-              style={{
-                fontSize: 36,
-              }}
-            >
-              START!
-            </Text>
-          </OurButton>
         </View>
       </>
     );
