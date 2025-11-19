@@ -28,3 +28,14 @@ services:
           path: ./pyproject.toml
     stdin_open: true
     tty: true
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: app-ngrok
+    depends_on:
+      - app
+    environment:
+      NGROK_PORT: app:80
+      NGROK_AUTHTOKEN: <TOKEN>
+    command: http --domain=sterling-redfish-game.ngrok-free.app app:80
+    ports:
+      - "4040:4040" # web UI to see the tunnel status
