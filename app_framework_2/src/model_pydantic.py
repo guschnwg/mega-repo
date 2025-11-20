@@ -1,5 +1,5 @@
-from datetime import datetime
 import json
+from datetime import datetime, timezone
 from typing import Any, TypeVar
 
 import pydantic
@@ -17,7 +17,7 @@ class BaseClass(pydantic.BaseModel):
         if list in t or dict in t:
             return json.loads(value)
         if datetime in t:
-            return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f")
+            return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f").astimezone(timezone.utc)
         if bool in t:
             return bool(value)
 
@@ -43,6 +43,6 @@ class BaseClass(pydantic.BaseModel):
         if not data:
             data = []
 
-        return [cls.parse(fields, d) for d in data]
+        return [d for d in [cls.parse(fields, d) for d in data] if d]
 
 BaseClassType = TypeVar('BaseClassType', bound=BaseClass)
