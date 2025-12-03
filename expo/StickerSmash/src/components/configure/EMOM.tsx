@@ -11,8 +11,8 @@ interface ConfigureEMOMProps {
 }
 
 const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
-  const minutes = Math.floor(step.config.counters[0].time / 60);
-  const seconds = Math.floor(step.config.counters[0].time % 60)
+  const minutes = Math.floor(step.config.counters[0].time / 1000 / 60);
+  const seconds = Math.floor(step.config.counters[0].time / 1000 % 60)
     .toString()
     .padStart(2, "0");
 
@@ -32,7 +32,7 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
         possible={[5, 10, 15, 20, 25, 30]}
         text={minutes === 0 ? `${seconds}s` : `${minutes}:${seconds}`}
         onUpdate={(value) => {
-          step.config.counters.forEach((counter) => (counter.time = value));
+          step.config.counters.forEach((counter) => (counter.time = value * 1000));
           onUpdate(step);
         }}
       />
@@ -64,8 +64,8 @@ const AdvancedEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
       }}
     >
       {step.config.counters.map((counter, index) => {
-        const minutes = Math.floor(counter.time / 60);
-        const seconds = Math.floor(counter.time % 60)
+        const minutes = Math.floor(counter.time / 1000 / 60);
+        const seconds = Math.floor(counter.time / 1000 % 60)
           .toString()
           .padStart(2, "0");
 
@@ -93,7 +93,7 @@ const AdvancedEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
               possible={[5, 10, 15, 20, 25, 30]}
               text={minutes === 0 ? `${seconds}s` : `${minutes}:${seconds}`}
               onUpdate={(value) => {
-                counter.time = value;
+                counter.time = value * 1000;
                 onUpdate(step);
               }}
             />
@@ -134,11 +134,6 @@ export const ConfigureEMOM = ({ step, onUpdate }: ConfigureEMOMProps) => {
       keyFn(step.config.counters[0]),
     ),
   );
-
-  // const minutes = Math.floor(step.config.time / 60);
-  // const seconds = Math.floor(step.config.time % 60)
-  //   .toString()
-  //   .padStart(2, "0");
 
   return (
     <Holdable

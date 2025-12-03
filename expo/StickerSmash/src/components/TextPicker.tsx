@@ -4,7 +4,14 @@ import { Picker } from '@react-native-picker/picker';
 
 import { PressableText } from './PressableText';
 
-export function TextPicker<T extends React.Key>({ value, possible, text, onUpdate }: { value: T, possible: T[], text?: string, onUpdate: (value: T) => void }) {
+interface Props<T> {
+  value: T
+  possible: T[]
+  text?: string
+  onUpdate: (value: T) => void
+}
+
+export function TextPicker<T extends React.Key>({ value, possible, text, onUpdate }: Props<T>) {
   const ref = useRef<Picker<T>>(null);
 
   return (

@@ -5,8 +5,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "ANDROID_HOME=/Users/gigigi/Projects/mega-repo/android/sdk expo run:android",
-    "android-release": "ANDROID_HOME=/Users/gigigi/Projects/mega-repo/android/sdk expo run:android --variant release",
+    "android": "ANDROID_HOME=/Users/giovanna/Projects/mega-repo/android/sdk expo run:android",
+    "android-release": "ANDROID_HOME=/Users/giovanna/Projects/mega-repo/android/sdk expo run:android --variant release",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint"

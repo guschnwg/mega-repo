@@ -1,73 +1,94 @@
 import React from "react";
-import { View } from "react-native";
+import { Svg, Circle, Text } from "react-native-svg";
 import { styles } from "../styles";
 
-export function Clock({ current, size = 200, tickness = 4, max, children }: React.PropsWithChildren<{ current: number, size?: number, tickness?: number, max: number }>) {
-  const percentage = current / max;
-  const radFromDeg = (deg: number) => (deg - 180) * (Math.PI / 180);
-  const percentageAngle = radFromDeg(percentage * 360);
+interface Props {
+  current: number
+  size?: number
+  tickness?: number
+  max: number
+  label?: string
+  ticks?: number[]
+}
 
-  const halfSize = size / 2;
-  const halfTickness = tickness / 2;
-  const stepSize = size / 50; // IDK to be honest,
-  const halfStepSize = stepSize / 2;
+export function Clock({ current, size = 200, tickness = 4, max, label, ticks = [] }: Props) {
+  const dashArray = size * 3;
+  const offset = (current / max) % 1;
+  const dashOffset = Math.floor(dashArray - offset * dashArray);
+  const fontSize = size / 6;
 
   const round = Math.floor(current / max);
   const color1 = round % 2 === 0 ? styles.secondary : styles.primary;
   const color2 = round % 2 === 1 ? styles.secondary : styles.primary;
   const indicatorColor = round % 2 === 0 ? styles.secondaryDark : styles.primaryDark;
-  const normalizedPct = percentage % 1;
+  const tickColor = round % 2 === 0 ? styles.secondaryDark : styles.primaryDark;
 
   return (
-    <View
-      style={{
-        height: size,
-        width: size,
-        borderRadius: halfSize,
-        position: 'relative',
-      }}
+    <Svg
+      width={size}
+      height={size}
+      style={{ transform: [{ rotate: '-90deg' }] }}
     >
-      {[...Array(180).keys()].map(v => v * 2).reverse().map(i => (
-        <View
-          key={i}
-          style={{
-            position: 'absolute',
-            top: halfSize + (halfSize - halfStepSize) * Math.sin(radFromDeg(i)) - halfStepSize,
-            left: halfSize + (halfSize - halfTickness) * Math.cos(radFromDeg(i)) - halfTickness,
-            height: stepSize,
-            width: tickness,
-            backgroundColor: i / 360 < normalizedPct ? color1 : color2,
-            transform: [{ rotate: `${i}deg` }]
-          }}
-        />
-      ))}
-
-      <View
-        style={{
-          position: 'absolute',
-          top: halfSize + (halfSize - halfStepSize) * Math.sin(percentageAngle) - halfStepSize,
-          left: halfSize + (halfSize - halfTickness) * Math.cos(percentageAngle) - halfTickness,
-          height: stepSize,
-          width: tickness,
-          backgroundColor: indicatorColor,
-          transform: [{ rotate: `${percentageAngle}rad` }]
-        }}
+      <Circle
+        r={size / 2 - tickness / 2}
+        cx={size / 2}
+        cy={size / 2}
+        fill="transparent"
+        stroke={color2}
+        strokeWidth={tickness}
       />
+      <Circle
+        r={size / 2 - tickness / 2}
+        cx={size / 2}
+        cy={size / 2}
+        stroke={indicatorColor}
+        strokeWidth={tickness}
+        strokeLinecap="butt"
+        strokeDashoffset={dashOffset}
+        fill="transparent"
+        strokeDasharray={dashArray}
+      />
+      <Circle
+        r={size / 2 - tickness / 2}
+        cx={size / 2}
+        cy={size / 2}
+        stroke={color1}
+        strokeWidth={tickness}
+        strokeLinecap="butt"
+        strokeDashoffset={dashOffset + 3}
+        fill="transparent"
+        strokeDasharray={dashArray}
+      />
+      {ticks.map(t => {
+        const angle = t / max * Math.PI * 2;
 
-      <View
-        style={{
-          position: 'absolute',
-          top: stepSize,
-          left: tickness,
-          height: size - stepSize * 2,
-          width: size - tickness * 2,
-          borderRadius: halfTickness - size,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {children}
-      </View>
-    </View>
-  );
+        const x = (size / 2 - tickness / 2) * Math.cos(angle);
+        const y = (size / 2 - tickness / 2) * Math.sin(angle);
+
+        return (
+          <Circle
+            key={t}
+            r={tickness / 2}
+            cx={size / 2 + x}
+            cy={size / 2 + y}
+            fill={tickColor}
+          />
+        );
+      })}
+      {label && (
+        <Text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          alignmentBaseline="middle"
+          fill={styles.textDark}
+          fontSize={fontSize}
+          fontWeight="bold"
+          transform={`rotate(90) translate(0, -${size - fontSize / 8})`}
+        >
+          {label}
+        </Text>
+      )}
+    </Svg >
+  )
 }

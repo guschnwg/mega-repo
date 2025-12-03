@@ -23,24 +23,41 @@ export const WodRest = ({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: styles.background,
-        gap: 50,
       }}
     >
-      <Text
+      <View
         style={{
-          fontSize: 48,
-          color: styles.textDark,
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        Rest time!
-      </Text>
+        <Countdown time={step.config.time} onFinish={onEnd} />
+      </View>
 
-      <Countdown time={step.config.time} onFinish={onEnd} />
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 20,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 48,
+            color: styles.textDark,
+            textAlign: "center",
+          }}
+        >
+          Rest time!
+        </Text>
 
-      <OurButton
-        title="Skip"
-        onPress={() => onSkip((Date.now() - startTime) / 1000)}
-      />
+        <OurButton
+          title="Skip"
+          onPress={() => onSkip(Date.now() - startTime)}
+        />
+      </View>
     </View>
   );
 };

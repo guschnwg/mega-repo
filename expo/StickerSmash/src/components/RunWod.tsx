@@ -1,34 +1,45 @@
 import React from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 
-import { WodAmrap } from "./wod/AMRAP";
-import { styles } from "../styles";
-import { WodRest } from "./wod/Rest";
-import { WodWait } from "./wod/Wait";
-import { WodSet } from "./wod/Set";
-import { WodEMOM } from "./wod/EMOM";
+import { WodAmrap } from "@/src/components/wod/AMRAP";
+import { WodRest } from "@/src/components/wod/Rest";
+import { WodWait } from "@/src/components/wod/Wait";
+import { WodSet } from "@/src/components/wod/Set";
+import { WodEMOM } from "@/src/components/wod/EMOM";
+import { styles } from "@/src/styles";
+import { Header } from "./Header";
 
-export const RunWod = ({
-  step,
-  onEnd,
-  onStop,
-}: {
+interface Props {
   step: StepType;
   onEnd: (step: StepType) => void;
   onStop: () => void;
-}) => {
+}
+
+export const RunWod = ({ step, onEnd, onStop, }: Props) => {
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: styles.background,
+        gap: 50,
       }}
     >
+      <Header>
+        <Text
+          style={{
+            fontSize: 36,
+            color: styles.textLight,
+          }}
+        >
+          {step.type}
+        </Text>
+      </Header>
+
       {step.type === "AMRAP" && (
         <WodAmrap
-          time={step.config.time}
-          onEnd={(counter) => {
-            step.config.counter = counter;
+          step={step}
+          onEnd={(config) => {
+            step.config = config;
             onEnd(step);
           }}
           onStop={onStop}

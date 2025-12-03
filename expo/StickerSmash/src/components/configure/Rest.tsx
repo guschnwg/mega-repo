@@ -5,8 +5,8 @@ import { styles } from '../../styles';
 import { TextPicker } from "../TextPicker";
 
 export const ConfigureRest = ({ step, onUpdate }: { step: RestStepType, onUpdate: (step: RestStepType) => void }) => {
-  const minutes = Math.floor(step.config.time / 60);
-  const seconds = Math.floor(step.config.time % 60).toString().padStart(2, '0');
+  const minutes = Math.floor(step.config.time / 1000 / 60);
+  const seconds = Math.floor(step.config.time / 1000 % 60).toString().padStart(2, '0');
 
   return (
     <View
@@ -31,7 +31,7 @@ export const ConfigureRest = ({ step, onUpdate }: { step: RestStepType, onUpdate
         possible={[5, 10, 15, 20, 25, 30]}
         text={minutes === 0 ? `${seconds}s` : `${minutes}:${seconds}`}
         onUpdate={value => {
-          step.config.time = value;
+          step.config.time = value * 1000;
           onUpdate(step);
         }}
       />

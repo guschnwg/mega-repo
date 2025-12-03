@@ -1,152 +1,221 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Pressable, Text, View } from "react-native";
-import { Clock } from "../Clock";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { ScrollView, Text, useWindowDimensions, View } from "react-native";
+
+import { Clock } from "@/src/components/Clock";
 import { styles } from "@/src/styles";
+import { Timer } from "@/src/components/Timer";
+import { OurButton } from "@/src/components/OurButton";
+import { ScrollCenter } from "@/src/components/ScrollCenter";
 
 interface WodEMOMProps {
   step: EMOMStepType;
   onEnd: (config: EMOMConfigType) => void;
 }
 
-const EMOMStep = ({
-  counter,
-  onEnd,
-}: {
+interface EMOMStepProps {
   counter: EMOMConfigCounterType;
   onEnd: (counter: EMOMConfigCounterType) => void;
-}) => {
-  const [timer, setTimer] = useState<{
-    key: number | null;
-    start: number;
-    current: number;
-  }>({
-    key: null,
-    start: 0,
-    current: 0,
-  });
+}
 
+interface EMOMCounterLabelProps {
+  isPast: boolean
+  counter: EMOMConfigCounterType
+}
+
+const EMOMCounterLabel = ({ isPast, counter }: EMOMCounterLabelProps) => {
+  if (!isPast) {
+    return (
+      <View
+        style={{ flexDirection: 'column', alignItems: 'center' }}
+      >
+        <Text
+          style={{
+            color: styles.primary,
+          }}
+        >
+          {counter.max} reps
+        </Text>
+        <Text>{counter.time / 1000}s</Text>
+      </View>
+    );
+  }
+
+  if (counter.value === counter.max) {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+        }}
+      >
+        <View
+          style={{ flexDirection: 'column', alignItems: 'center' }}
+        >
+          <Text
+            style={{
+              color: styles.primary,
+            }}
+          >
+            {counter.value} reps
+          </Text>
+          <View
+            style={{ flexDirection: 'row' }}
+          >
+            <Text
+              style={{
+                color: styles.primary,
+              }}
+            >
+              {(counter.history[counter.value - 1] / 1000).toFixed(1)}s
+            </Text>
+            <Text>/{counter.time / 1000}s</Text>
+          </View>
+        </View>
+      </View>
+    );
+  } else {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+        }}
+      >
+        <View
+          style={{ flexDirection: 'column', alignItems: 'center' }}
+        >
+          <Text
+            style={{
+              color: styles.primary,
+            }}
+          >
+            {counter.value - counter.max} reps
+          </Text>
+          <Text>{counter.time / 1000}s</Text>
+        </View>
+      </View>
+    );
+  }
+}
+
+const EMOMStep = ({ counter, onEnd }: EMOMStepProps) => {
   const [count, setCount] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const ref = useRef(false);
 
-  useEffect(() => {
-    if (!timer.key) {
-      setTimer((prev) => ({
-        ...prev,
-        start: Date.now(),
-        key: setInterval(() => {
-          setTimer((prev) => ({
-            ...prev,
-            current: Date.now() - prev.start,
-          }));
-        }, 100),
-      }));
-    }
-
-    return () => {
-      if (timer.key) {
-        clearInterval(timer.key);
-      }
-    };
-  }, [timer.key]);
-
-  const minutes = timer.current / 60000;
-  const seconds = timer.current / 1000;
-
-  if (timer.current / 1000 > counter.time && !ref.current) {
-    ref.current = true;
-    setTimeout(() => {
-      onEnd({
-        ...counter,
-        history,
-        value: count,
-      });
-    }, 100);
-  }
+  const shouldVibrate = useCallback((prev: { start: number, current: number }, next: { start: number, current: number }) => {
+    const prevDelta = prev.current - prev.start;
+    const nextDelta = next.current - next.start;
+    return nextDelta > (counter.time - 5000) && Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000);
+  }, [counter.time]);
 
   return (
-    <Pressable
-      style={{
-        height: 300,
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-      disabled={count === counter.max}
-      onPress={() => {
-        setCount((prev) => prev + 1);
-        setHistory((prev) => [...prev, timer.current]);
-      }}
-    >
-      <Clock size={300} current={timer.current / 1000} max={counter.time}>
-        <Text
-          style={{
-            fontSize: 48,
-          }}
-        >
-          {count}/{counter.max}
-        </Text>
-
-        <Text style={{ fontSize: 48, color: styles.textDark }}>
-          {String(Math.floor(minutes)).padStart(2, "0")}:
-          {String(Math.floor(seconds)).padStart(2, "0")}
-        </Text>
-      </Clock>
-    </Pressable>
-  );
+    <>
+      <Timer
+        shouldVibrate={shouldVibrate}
+        onChange={(next) => {
+          const actualCurrentMs = next.current - next.start;
+          if (actualCurrentMs > counter.time && !ref.current) {
+            ref.current = true;
+            setTimeout(() => {
+              onEnd({
+                ...counter,
+                history,
+                value: count,
+              });
+            }, 100);
+          }
+        }}
+      >
+        {(start, current, minutes, seconds) => (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: styles.background,
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Clock
+                current={current - start}
+                max={counter.time}
+                size={300}
+                tickness={12}
+                ticks={history}
+                label={`${String(Math.floor(minutes)).padStart(2, "0")}:${String(Math.floor(seconds)).padStart(2, "0")}`}
+              />
+            </View>
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 20,
+              }}
+            >
+              {counter.max === count ? (
+                <Text
+                  style={{
+                    fontSize: styles.fontSize * 2,
+                  }}
+                >
+                  Rest time!
+                </Text>
+              ) : (
+                <View
+                  style={{
+                    gap: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: styles.fontSize * 2,
+                    }}
+                  >
+                    {counter.max - count} reps to go
+                  </Text>
+                  <OurButton
+                    title="+ REP"
+                    disabled={count === counter.max}
+                    style={{
+                      height: 80,
+                      width: 80,
+                      borderRadius: 50,
+                    }}
+                    onPress={() => {
+                      setCount((prev) => prev + 1);
+                      setHistory((prev) => [...prev, current - start]);
+                    }}
+                  />
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+      </Timer>
+    </>
+  )
 };
 
 export const WodEMOM = ({ step, onEnd }: WodEMOMProps) => {
   const [current, setCurrent] = useState(0);
   const [counters, setCounters] = useState(step.config.counters);
+  const dimensions = useWindowDimensions();
+  const itemSize = dimensions.width / 5;
 
   return (
     <View
       style={{
         flex: 1,
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 20,
       }}
     >
-      <View
-        style={{
-          gap: 10,
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        {counters.map((counter, index) => (
-          <View
-            key={index}
-            style={{
-              opacity: current === index ? 1 : 0.5,
-            }}
-          >
-            <Clock
-              size={60}
-              current={
-                (counter.history[counter.history.length - 1] || 0) / 1000
-              }
-              max={counter.time}
-            >
-              <Text
-                style={{
-                  textAlign: "center",
-                  textAlignVertical: "center",
-                }}
-              >
-                {counter.value
-                  ? `${counter.value} in ${(counter.history[counter.history.length - 1] / 1000).toFixed(1)}s`
-                  : `${counter.max} in ${counter.time}s`}
-              </Text>
-            </Clock>
-          </View>
-        ))}
-      </View>
       <EMOMStep
         key={current}
         counter={counters[current]}
@@ -160,6 +229,40 @@ export const WodEMOM = ({ step, onEnd }: WodEMOMProps) => {
           }
         }}
       />
-    </View>
+
+      <View
+        style={{
+          height: 100,
+        }}
+      >
+        <ScrollCenter
+          current={current}
+          width={dimensions.width}
+          itemSize={itemSize}
+        >
+          {counters.map((counter, index) => (
+            <View
+              key={index}
+              style={{
+                flexDirection: 'column',
+                alignItems: 'center',
+                opacity: current === index ? 1 : 0.5,
+                width: itemSize,
+                transform: [{ scale: index === current ? 1 : 0.7 }],
+              }}
+            >
+              <Text>
+                Set {index + 1}
+              </Text>
+
+              <EMOMCounterLabel
+                isPast={index < current}
+                counter={counter}
+              />
+            </View>
+          ))}
+        </ScrollCenter>
+      </View>
+    </View >
   );
 };

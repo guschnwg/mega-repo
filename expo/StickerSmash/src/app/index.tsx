@@ -8,7 +8,6 @@ import {
   ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as ScreenOrientation from "expo-screen-orientation";
 
 import { styles } from "../styles";
 import { OurButton } from "../components/OurButton";
@@ -22,6 +21,7 @@ import { EndWod } from "../components/EndWod";
 import { TextPicker } from "../components/TextPicker";
 import { List } from "../components/List";
 import { iota } from "../utils";
+import { Header } from "../components/Header";
 
 enum StepTypesEnum {
   AMRAP = "AMRAP",
@@ -158,9 +158,9 @@ const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpda
     </Text>
     <TextPicker
       value={countdown}
-      text={`${countdown}s`}
+      text={`${countdown / 1000}s`}
       possible={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-      onUpdate={onUpdate}
+      onUpdate={(value) => onUpdate(value * 1000)}
     />
   </View>
 );
@@ -182,22 +182,22 @@ const ConfigureAdd = ({ onOpenButton, onNewStep }: { onOpenButton: () => void, o
       if (option === StepTypesEnum.AMRAP) {
         newStep = {
           type: StepTypesEnum.AMRAP,
-          config: { time: 30, counter: { value: 0, history: [] } },
+          config: { time: 30000, counter: { value: 0, history: [] } },
         };
       } else if (option === StepTypesEnum.EMOM) {
         newStep = {
           type: StepTypesEnum.EMOM,
           config: {
             counters: [
-              { time: 30, max: 10, value: 0, history: [] },
-              { time: 30, max: 10, value: 0, history: [] },
-              { time: 30, max: 10, value: 0, history: [] },
-              { time: 30, max: 10, value: 0, history: [] },
+              { time: 30000, max: 10, value: 0, history: [] },
+              { time: 30000, max: 10, value: 0, history: [] },
+              { time: 30000, max: 10, value: 0, history: [] },
+              { time: 30000, max: 10, value: 0, history: [] },
             ],
           },
         };
       } else if (option === StepTypesEnum.Rest) {
-        newStep = { type: StepTypesEnum.Rest, config: { time: 10 } };
+        newStep = { type: StepTypesEnum.Rest, config: { time: 10000 } };
       } else if (option === StepTypesEnum.Set) {
         newStep = {
           type: StepTypesEnum.Set,
@@ -207,7 +207,7 @@ const ConfigureAdd = ({ onOpenButton, onNewStep }: { onOpenButton: () => void, o
           },
         };
       } else if (option === StepTypesEnum.Wait) {
-        newStep = { type: StepTypesEnum.Wait, config: { time: 10 } };
+        newStep = { type: StepTypesEnum.Wait, config: { time: 10000 } };
       }
       if (newStep) {
         onNewStep({ id: iota(), ...newStep });
@@ -281,29 +281,24 @@ const ConfigureSteps = ({
 };
 
 export default function Index() {
-  const [index, setIndex] = useState(-2);
-  const [countdown, setCountdown] = useState(3);
-  const [steps, setSteps] = useState<StepType[]>([
-    {
-      id: iota(),
-      type: StepTypesEnum.EMOM,
-      config: {
-        counters: [
-          { time: 30, max: 10, value: 0, history: [] },
-          { time: 30, max: 10, value: 0, history: [] },
-          { time: 30, max: 10, value: 0, history: [] },
-          { time: 30, max: 10, value: 0, history: [] },
-        ],
-      },
-    },
-  ]);
+  const [index, setIndex] = useState(5);
+  const [countdown, setCountdown] = useState(3000);
+  const [steps, setSteps] = useState<StepType[]>(
+    [{ "id": 7841375933, "type": "AMRAP", "config": { "time": 5000, "counter": { "value": 27, "history": [444, 608, 759, 908, 1059, 1242, 1575, 1725, 1891, 2058, 2240, 2407, 2574, 2739, 2890, 3073, 3223, 3372, 3539, 3705, 3872, 4022, 4187, 4321, 4504, 4654, 4821] } } }, { "id": 7841375934, "type": "EMOM", "config": { "counters": [{ "time": 5000, "max": 5, "value": 5, "history": [746, 946, 1146, 1346, 1978] }, { "time": 5000, "max": 5, "value": 2, "history": [997, 1147] }, { "time": 5000, "max": 5, "value": 0, "history": [] }, { "time": 5000, "max": 5, "value": 0, "history": [] }] } }, { "id": 7841375936, "type": "Rest", "config": { "time": 10000, "actual": 4824 } }, { "id": 7841375937, "type": "Set", "config": { "counters": [{ "max": 5, "value": 5, "history": [1180, 1695, 2028, 2795, 3410] }, { "max": 5, "value": 5, "history": [] }, { "max": 5, "value": 5, "history": [6920, 7617, 7951, 8134, 8467] }], "waits": [3578, 1296, 1577] } }, { "id": 7841375938, "type": "Wait", "config": { "time": 10000, "actual": 5106 } }]
+  );
+  const [ongoingSteps, setOngoingSteps] = useState<StepType[]>(
+    [{ "id": 7841375933, "type": "AMRAP", "config": { "time": 5000, "counter": { "value": 27, "history": [444, 608, 759, 908, 1059, 1242, 1575, 1725, 1891, 2058, 2240, 2407, 2574, 2739, 2890, 3073, 3223, 3372, 3539, 3705, 3872, 4022, 4187, 4321, 4504, 4654, 4821] } } }, { "id": 7841375934, "type": "EMOM", "config": { "counters": [{ "time": 5000, "max": 5, "value": 5, "history": [746, 946, 1146, 1346, 1978] }, { "time": 5000, "max": 5, "value": 2, "history": [997, 1147] }, { "time": 5000, "max": 5, "value": 0, "history": [] }, { "time": 5000, "max": 5, "value": 0, "history": [] }] } }, { "id": 7841375936, "type": "Rest", "config": { "time": 10000, "actual": 4824 } }, { "id": 7841375937, "type": "Set", "config": { "counters": [{ "max": 5, "value": 5, "history": [1180, 1695, 2028, 2795, 3410] }, { "max": 5, "value": 5, "history": [] }, { "max": 5, "value": 5, "history": [6920, 7617, 7951, 8134, 8467] }], "waits": [3578, 1296, 1577] } }, { "id": 7841375938, "type": "Wait", "config": { "time": 10000, "actual": 5106 } }]
+  );
 
-  useEffect(() => {
-    const unlockScreenOerientation = async () => {
-      await ScreenOrientation.unlockAsync();
-    };
-    unlockScreenOerientation();
-  }, []);
+  const startWod = () => {
+    setOngoingSteps(JSON.parse(JSON.stringify(steps)));
+    setIndex(-1);
+  }
+
+  const resetWod = () => {
+    setIndex(-2);
+  }
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -311,10 +306,10 @@ export default function Index() {
         if (index >= 0) {
           Alert.alert("Hold on!", "Are you sure you want to go back?", [
             { text: "Cancel", onPress: () => null, style: "cancel" },
-            { text: "YES", onPress: () => setIndex(-2) },
+            { text: "YES", onPress: () => resetWod() },
           ]);
         } else {
-          setIndex(-2);
+          resetWod();
         }
         return true;
       },
@@ -326,15 +321,7 @@ export default function Index() {
   if (index === -2) {
     content = (
       <>
-        <View
-          style={{
-            height: 100,
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: 'row',
-            gap: 10,
-          }}
-        >
+        <Header>
           <Text
             style={{
               fontSize: 36,
@@ -345,7 +332,7 @@ export default function Index() {
           </Text>
 
           <OurButton
-            onPress={() => setIndex((crr) => crr + 1)}
+            onPress={startWod}
           >
             <Text
               style={{
@@ -357,7 +344,7 @@ export default function Index() {
               ‣
             </Text>
           </OurButton>
-        </View>
+        </Header>
 
         <View
           style={{
@@ -381,38 +368,61 @@ export default function Index() {
       <View
         style={{
           flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
           backgroundColor: styles.background,
+          gap: 10,
         }}
       >
-        <Countdown
-          time={countdown}
-          onFinish={() => setIndex((prev) => prev + 1)}
-        />
+        <Header>
+          <Text
+            style={{
+              fontSize: 36,
+              color: styles.textLight,
+            }}
+          >
+            Are you ready?
+          </Text>
+        </Header>
+
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Countdown
+            time={countdown}
+            onFinish={() => setIndex(0)}
+          />
+        </View>
       </View>
     );
   } else if (index >= steps.length) {
-    content = <EndWod steps={steps} onReset={() => setIndex(-2)} />;
+    content = <EndWod steps={ongoingSteps} onReset={resetWod} />;
   } else {
     content = (
       <RunWod
         key={index}
-        step={steps[index]}
+        step={ongoingSteps[index]}
         onEnd={(step) => {
-          setSteps((crrSteps) => {
+          setOngoingSteps((crrSteps) => {
             crrSteps[index] = step;
             return crrSteps;
           });
           setIndex((crr) => crr + 1);
         }}
-        onStop={() => setIndex(-2)}
+        onStop={resetWod}
       />
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: styles.primary }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: styles.primary
+      }}
+    >
       {content}
     </SafeAreaView>
   );

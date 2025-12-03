@@ -4,13 +4,13 @@ import {
   Text,
   useWindowDimensions,
   ScrollView,
-  Pressable,
 } from "react-native";
 
 import { Clock } from "@/src/components/Clock";
 import { styles } from "@/src/styles";
-import { Holdable } from "@/src/components/Holdable";
-import { OurButton } from "../OurButton";
+import { OurButton } from "@/src/components/OurButton";
+import { ScrollCenter } from "@/src/components/ScrollCenter";
+import { Timer } from "@/src/components/Timer";
 
 interface WodSetProps {
   step: SetStepType;
@@ -19,146 +19,134 @@ interface WodSetProps {
 
 const SetStep = ({
   counter,
-  active,
   onFinish,
 }: {
   counter: CounterType;
-  active: boolean;
   onFinish: (counter: CounterType) => void;
 }) => {
-  const [timer, setTimer] = useState<{
-    key: number | null;
-    start: number;
-    current: number;
-  }>({
-    key: null,
-    start: 0,
-    current: 0,
-  });
-  const dimensions = useWindowDimensions();
-  const [repTimes, setRepTimes] = useState<number[]>([]);
-
-  useEffect(() => {
-    if (!active) {
-      if (timer.key) {
-        clearInterval(timer.key);
-        setTimer((prev) => ({ ...prev, key: null }));
-      }
-    } else {
-      if (!timer.key) {
-        setTimer((prev) => ({
-          ...prev,
-          start: Date.now(),
-          key: setInterval(() => {
-            setTimer((prev) => ({
-              ...prev,
-              current: Date.now() - prev.start,
-            }));
-          }, 100),
-        }));
-      }
-    }
-    return () => {
-      if (timer.key) {
-        clearInterval(timer.key);
-      }
-    };
-  }, [active, timer.key]);
-
-  const minutes = timer.current / 1000 / 60;
-  const seconds = timer.current / 1000 % 60;
+  const [count, setCount] = useState(0);
+  const [history, setHistory] = useState<number[]>([]);
 
   return (
-    <Pressable
-      style={{
-        height: dimensions.height / 2,
-        opacity: active ? 1 : 0.5,
-        backgroundColor: active ? undefined : '#EFEFEF',
-        filter: active ? undefined : [{ blur: 1 }],
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 20,
-      }}
-      disabled={!active}
-      onPress={() => {
-        setRepTimes((prev) => [...prev, timer.current]);
-        if (repTimes.length + 1 === counter.max) {
-          onFinish({
-            ...counter,
-            history: repTimes,
-            value: counter.max,
-          });
-        }
-      }}
-    >
-      <Clock current={timer.current / 1000} max={60}>
-        <Text style={{ fontSize: 48, color: styles.textDark }}>
-          {String(Math.floor(minutes)).padStart(2, "0")}:
-          {String(Math.floor(seconds)).padStart(2, "0")}
-        </Text>
-      </Clock>
+    <Timer>
+      {(start, current, minutes, seconds) => {
+        return (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: styles.background,
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Clock
+                current={current - start}
+                max={60000}
+                size={300}
+                tickness={12}
+                ticks={history}
+                label={`${String(Math.floor(minutes)).padStart(2, "0")}:${String(Math.floor(seconds)).padStart(2, "0")}`}
+              />
+            </View>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 10,
-        }}
-      >
-        <Text style={{ fontSize: 48, color: styles.textDark }}>
-          {repTimes.length}/{counter.max}
-        </Text>
-        <OurButton
-          title="⏭️"
-          onPress={() => {
-            onFinish({
-              ...counter,
-              history: repTimes,
-              value: counter.max!,
-            });
-          }}
-        />
-      </View>
-    </Pressable>
-  );
+            <View
+              style={{
+                gap: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: styles.fontSize * 2,
+                }}
+              >
+                {count} reps
+              </Text>
+              <OurButton
+                title="+ REP"
+                style={{
+                  height: 80,
+                  width: 80,
+                  borderRadius: 50,
+                }}
+                onPress={() => {
+                  if (count + 1 === counter.max) {
+                    onFinish({
+                      ...counter,
+                      history: [...history, current - start],
+                      value: count + 1,
+                    });
+                  } else {
+                    setCount(prev => prev + 1);
+                    setHistory((prev) => [...prev, current - start]);
+                  }
+                }}
+                onLongPress={() => {
+                  onFinish({
+                    ...counter,
+                    history,
+                    value: counter.max!,
+                  });
+                }}
+              />
+            </View>
+          </View>
+        )
+      }}
+    </Timer>
+  )
 };
 
 const SetWait = ({
-  active,
   onWaited,
 }: {
-  active: boolean;
-  onWaited: (time: number) => void;
+  onWaited: (time: number) => void
 }) => {
-  const dimensions = useWindowDimensions();
-  const [start] = useState(Date.now());
-
   return (
-    <Holdable
-      time={1000}
-      disabled={!active}
-      indicator={true}
-      style={{
-        height: dimensions.height / 2,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: active ? undefined : '#EFEFEF',
-        filter: active ? undefined : [{ blur: 1 }],
-        borderRadius: 0,
+    <Timer>
+      {(start, current, minutes, seconds) => {
+        return (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: styles.background,
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Clock
+                current={current - start}
+                max={60000}
+                size={300}
+                tickness={12}
+                label={`${String(Math.floor(minutes)).padStart(2, "0")}:${String(Math.floor(seconds)).padStart(2, "0")}`}
+              />
+            </View>
+
+            <OurButton
+              title="Let's go"
+              onPress={() => onWaited(Date.now() - start)}
+            />
+          </View>
+        )
       }}
-      onHold={() => onWaited(Date.now() - start)}
-    >
-      <Text
-        style={{
-          fontSize: 24,
-          textAlign: "center",
-          textAlignVertical: "center",
-        }}
-      >
-        Wait!!!!
-      </Text>
-      <Text>Hold to continue</Text>
-    </Holdable>
-  );
+    </Timer>
+  )
 };
 
 export const WodSet = ({ step, onEnd }: WodSetProps) => {
@@ -167,6 +155,7 @@ export const WodSet = ({ step, onEnd }: WodSetProps) => {
   const dimensions = useWindowDimensions();
   const [current, setCurrent] = useState(0);
   const ref = useRef<ScrollView | null>(null);
+  const itemSize = dimensions.width / 5;
 
   useEffect(() => {
     ref.current?.scrollTo({
@@ -177,74 +166,109 @@ export const WodSet = ({ step, onEnd }: WodSetProps) => {
   }, [ref, current, dimensions]);
 
   return (
-    <ScrollView
-      ref={ref}
+    <View
       style={{
         flex: 1,
-        flexDirection: "column",
       }}
-      scrollEnabled={false}
     >
       <View
         style={{
-          height: dimensions.height / 4,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
+          flex: 1,
         }}
       >
-        <Text style={{ fontSize: 24 }}>
-          Sets of{" "}
-          {counters
-            .slice(0, -1)
-            .map((c) => c.max)
-            .join(", ")}{" "}
-          and {counters[counters.length - 1].max}
-        </Text>
-      </View>
-      {counters.map((counter, index) => (
-        <React.Fragment key={index}>
+        {current % 1 === 0 ? (
           <SetStep
-            key={index}
-            counter={counter}
-            active={current === index}
+            key={current}
+            counter={counters[current]}
             onFinish={(updated) => {
               setCounters((prev) => {
-                prev[index] = updated;
+                prev[current] = updated;
                 return [...prev];
               });
-              if (current + 1 === counters.length) {
+              setCurrent((prev) => prev + 0.5);
+            }}
+          />
+        ) : (
+          <SetWait
+            key={current}
+            onWaited={(time) => {
+              if (current > counters.length - 1) {
                 onEnd({
                   ...step.config,
                   counters,
-                  waits,
+                  waits: [...waits, time],
                 });
               } else {
+                setWaits((prev) => [...prev, time]);
                 setCurrent((prev) => prev + 0.5);
               }
             }}
           />
-          {index !== counters.length - 1 && (
-            <SetWait
-              active={current === index + 0.5}
-              onWaited={(time) => {
-                setCurrent((prev) => prev + 0.5);
-                setWaits((prev) => [...prev, time]);
-              }}
-            />
-          )}
-        </React.Fragment>
-      ))}
+        )}
+      </View>
+
       <View
         style={{
-          height: dimensions.height / 4,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
+          height: 100,
         }}
       >
-        <Text style={{ fontSize: 24 }}>The End</Text>
+        <ScrollCenter
+          current={current * 2}
+          width={dimensions.width}
+          itemSize={itemSize}
+        >
+          {counters.map((counter, index) => (
+            <React.Fragment key={index}>
+              <View
+                style={{
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  opacity: current === index ? 1 : 0.5,
+                  width: itemSize,
+                  transform: [{ scale: current === index ? 1 : 0.7 }],
+                }}
+              >
+                <Text>
+                  Set {index + 1}
+                </Text>
+                <Text>
+                  {counter.max} reps
+                </Text>
+              </View>
+
+              {index !== counters.length - 1 ? (
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    opacity: current === index + 0.5 ? 1 : 0.5,
+                    width: itemSize,
+                    transform: [{ scale: current === index + 0.5 ? 1 : 0.7 }],
+                  }}
+                >
+                  <Text>
+                    Wait
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    opacity: current === index + 0.5 ? 1 : 0.5,
+                    width: itemSize,
+                    transform: [{ scale: current === index + 0.5 ? 1 : 0.7 }],
+                  }}
+                >
+                  <Text>
+                    Complete
+                  </Text>
+                </View>
+              )}
+            </React.Fragment>
+          ))}
+        </ScrollCenter>
       </View>
-    </ScrollView>
+    </View>
   );
 };
