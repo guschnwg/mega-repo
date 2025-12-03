@@ -1,10 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  useWindowDimensions,
-  ScrollView,
-} from "react-native";
+import { View, Text, useWindowDimensions, ScrollView } from "react-native";
 
 import { Clock } from "@/src/components/Clock";
 import { styles } from "@/src/styles";
@@ -42,8 +37,8 @@ const SetStep = ({
             <View
               style={{
                 flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Clock
@@ -59,8 +54,8 @@ const SetStep = ({
             <View
               style={{
                 gap: 20,
-                flexDirection: 'row',
-                alignItems: 'center',
+                flexDirection: "row",
+                alignItems: "center",
               }}
             >
               <Text
@@ -85,7 +80,7 @@ const SetStep = ({
                       value: count + 1,
                     });
                   } else {
-                    setCount(prev => prev + 1);
+                    setCount((prev) => prev + 1);
                     setHistory((prev) => [...prev, current - start]);
                   }
                 }}
@@ -99,17 +94,13 @@ const SetStep = ({
               />
             </View>
           </View>
-        )
+        );
       }}
     </Timer>
-  )
+  );
 };
 
-const SetWait = ({
-  onWaited,
-}: {
-  onWaited: (time: number) => void
-}) => {
+const SetWait = ({ onWaited }: { onWaited: (time: number) => void }) => {
   return (
     <Timer>
       {(start, current, minutes, seconds) => {
@@ -125,8 +116,8 @@ const SetWait = ({
             <View
               style={{
                 flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Clock
@@ -143,10 +134,10 @@ const SetWait = ({
               onPress={() => onWaited(Date.now() - start)}
             />
           </View>
-        )
+        );
       }}
     </Timer>
-  )
+  );
 };
 
 export const WodSet = ({ step, onEnd }: WodSetProps) => {
@@ -221,48 +212,40 @@ export const WodSet = ({ step, onEnd }: WodSetProps) => {
             <React.Fragment key={index}>
               <View
                 style={{
-                  flexDirection: 'column',
-                  alignItems: 'center',
+                  flexDirection: "column",
+                  alignItems: "center",
                   opacity: current === index ? 1 : 0.5,
                   width: itemSize,
                   transform: [{ scale: current === index ? 1 : 0.7 }],
                 }}
               >
-                <Text>
-                  Set {index + 1}
-                </Text>
-                <Text>
-                  {counter.max} reps
-                </Text>
+                <Text>Set {index + 1}</Text>
+                <Text>{counter.max} reps</Text>
               </View>
 
               {index !== counters.length - 1 ? (
                 <View
                   style={{
-                    flexDirection: 'column',
-                    alignItems: 'center',
+                    flexDirection: "column",
+                    alignItems: "center",
                     opacity: current === index + 0.5 ? 1 : 0.5,
                     width: itemSize,
                     transform: [{ scale: current === index + 0.5 ? 1 : 0.7 }],
                   }}
                 >
-                  <Text>
-                    Wait
-                  </Text>
+                  <Text>Wait</Text>
                 </View>
               ) : (
                 <View
                   style={{
-                    flexDirection: 'column',
-                    alignItems: 'center',
+                    flexDirection: "column",
+                    alignItems: "center",
                     opacity: current === index + 0.5 ? 1 : 0.5,
                     width: itemSize,
                     transform: [{ scale: current === index + 0.5 ? 1 : 0.7 }],
                   }}
                 >
-                  <Text>
-                    Complete
-                  </Text>
+                  <Text>Complete</Text>
                 </View>
               )}
             </React.Fragment>

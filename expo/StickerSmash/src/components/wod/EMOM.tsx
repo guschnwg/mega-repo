@@ -18,16 +18,14 @@ interface EMOMStepProps {
 }
 
 interface EMOMCounterLabelProps {
-  isPast: boolean
-  counter: EMOMConfigCounterType
+  isPast: boolean;
+  counter: EMOMConfigCounterType;
 }
 
 const EMOMCounterLabel = ({ isPast, counter }: EMOMCounterLabelProps) => {
   if (!isPast) {
     return (
-      <View
-        style={{ flexDirection: 'column', alignItems: 'center' }}
-      >
+      <View style={{ flexDirection: "column", alignItems: "center" }}>
         <Text
           style={{
             color: styles.primary,
@@ -44,12 +42,10 @@ const EMOMCounterLabel = ({ isPast, counter }: EMOMCounterLabelProps) => {
     return (
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: "row",
         }}
       >
-        <View
-          style={{ flexDirection: 'column', alignItems: 'center' }}
-        >
+        <View style={{ flexDirection: "column", alignItems: "center" }}>
           <Text
             style={{
               color: styles.primary,
@@ -57,9 +53,7 @@ const EMOMCounterLabel = ({ isPast, counter }: EMOMCounterLabelProps) => {
           >
             {counter.value} reps
           </Text>
-          <View
-            style={{ flexDirection: 'row' }}
-          >
+          <View style={{ flexDirection: "row" }}>
             <Text
               style={{
                 color: styles.primary,
@@ -76,12 +70,10 @@ const EMOMCounterLabel = ({ isPast, counter }: EMOMCounterLabelProps) => {
     return (
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: "row",
         }}
       >
-        <View
-          style={{ flexDirection: 'column', alignItems: 'center' }}
-        >
+        <View style={{ flexDirection: "column", alignItems: "center" }}>
           <Text
             style={{
               color: styles.primary,
@@ -94,18 +86,27 @@ const EMOMCounterLabel = ({ isPast, counter }: EMOMCounterLabelProps) => {
       </View>
     );
   }
-}
+};
 
 const EMOMStep = ({ counter, onEnd }: EMOMStepProps) => {
   const [count, setCount] = useState(0);
   const [history, setHistory] = useState<number[]>([]);
   const ref = useRef(false);
 
-  const shouldVibrate = useCallback((prev: { start: number, current: number }, next: { start: number, current: number }) => {
-    const prevDelta = prev.current - prev.start;
-    const nextDelta = next.current - next.start;
-    return nextDelta > (counter.time - 5000) && Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000);
-  }, [counter.time]);
+  const shouldVibrate = useCallback(
+    (
+      prev: { start: number; current: number },
+      next: { start: number; current: number },
+    ) => {
+      const prevDelta = prev.current - prev.start;
+      const nextDelta = next.current - next.start;
+      return (
+        nextDelta > counter.time - 5000 &&
+        Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000)
+      );
+    },
+    [counter.time],
+  );
 
   return (
     <>
@@ -137,8 +138,8 @@ const EMOMStep = ({ counter, onEnd }: EMOMStepProps) => {
             <View
               style={{
                 flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Clock
@@ -153,8 +154,8 @@ const EMOMStep = ({ counter, onEnd }: EMOMStepProps) => {
             <View
               style={{
                 flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
+                alignItems: "center",
+                justifyContent: "center",
                 gap: 20,
               }}
             >
@@ -170,8 +171,8 @@ const EMOMStep = ({ counter, onEnd }: EMOMStepProps) => {
                 <View
                   style={{
                     gap: 20,
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                   }}
                 >
                   <Text
@@ -201,7 +202,7 @@ const EMOMStep = ({ counter, onEnd }: EMOMStepProps) => {
         )}
       </Timer>
     </>
-  )
+  );
 };
 
 export const WodEMOM = ({ step, onEnd }: WodEMOMProps) => {
@@ -244,16 +245,14 @@ export const WodEMOM = ({ step, onEnd }: WodEMOMProps) => {
             <View
               key={index}
               style={{
-                flexDirection: 'column',
-                alignItems: 'center',
+                flexDirection: "column",
+                alignItems: "center",
                 opacity: current === index ? 1 : 0.5,
                 width: itemSize,
                 transform: [{ scale: index === current ? 1 : 0.7 }],
               }}
             >
-              <Text>
-                Set {index + 1}
-              </Text>
+              <Text>Set {index + 1}</Text>
 
               <EMOMCounterLabel
                 isPast={index < current}
@@ -263,6 +262,6 @@ export const WodEMOM = ({ step, onEnd }: WodEMOMProps) => {
           ))}
         </ScrollCenter>
       </View>
-    </View >
+    </View>
   );
 };

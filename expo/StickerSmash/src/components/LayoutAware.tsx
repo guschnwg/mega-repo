@@ -1,7 +1,21 @@
 import React, { useRef, useState, useLayoutEffect } from "react";
 import { useWindowDimensions, View } from "react-native";
 
-export const LayoutAware = ({ height, children }: { height: number; children: ({ ready, height, width }: { ready: boolean; height: number; width: number; }) => React.ReactNode; }) => {
+export const LayoutAware = ({
+  height,
+  children,
+}: {
+  height: number;
+  children: ({
+    ready,
+    height,
+    width,
+  }: {
+    ready: boolean;
+    height: number;
+    width: number;
+  }) => React.ReactNode;
+}) => {
   const dimensions = useWindowDimensions();
   const ref = useRef<View>(null);
   const [layout, setDimensions] = useState({
@@ -26,7 +40,7 @@ export const LayoutAware = ({ height, children }: { height: number; children: ({
       ref={ref}
       style={{
         height,
-        alignSelf: 'stretch',
+        alignSelf: "stretch",
       }}
     >
       {children(layout)}

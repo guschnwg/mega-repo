@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useReducer, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useReducer,
+  useRef,
+} from "react";
 import { Text, View } from "react-native";
 
 import { Clock } from "@/src/components/Clock";
@@ -13,11 +19,17 @@ interface CountdownProps {
 export function Countdown({ time, onFinish }: CountdownProps) {
   const ref = useRef(false);
 
-  const shouldVibrate = useCallback((prev: { start: number, current: number }, next: { start: number, current: number }) => {
-    const prevDelta = prev.current - prev.start;
-    const nextDelta = next.current - next.start;
-    return Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000);
-  }, []);
+  const shouldVibrate = useCallback(
+    (
+      prev: { start: number; current: number },
+      next: { start: number; current: number },
+    ) => {
+      const prevDelta = prev.current - prev.start;
+      const nextDelta = next.current - next.start;
+      return Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000);
+    },
+    [],
+  );
 
   return (
     <Timer
@@ -45,6 +57,6 @@ export function Countdown({ time, onFinish }: CountdownProps) {
           />
         );
       }}
-    </Timer >
-  )
+    </Timer>
+  );
 }

@@ -1,11 +1,21 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState } from "react";
 
-import { ScrollView, Vibration } from 'react-native';
+import { ScrollView, Vibration } from "react-native";
 
-import { styles } from '@/src/styles';
-import { Slidable } from '@/src/components/Slidable';
+import { styles } from "@/src/styles";
+import { Slidable } from "@/src/components/Slidable";
 
-export function List<T extends { id: number, component: ReactNode }>({ ref, items, canRemove, onRemove }: { ref: React.Ref<ScrollView>, items: T[], canRemove: (index: number) => boolean, onRemove: (index: number) => void }) {
+export function List<T extends { id: number; component: ReactNode }>({
+  ref,
+  items,
+  canRemove,
+  onRemove,
+}: {
+  ref: React.Ref<ScrollView>;
+  items: T[];
+  canRemove: (index: number) => boolean;
+  onRemove: (index: number) => void;
+}) {
   const [canScroll, setCanScroll] = useState(true);
   const [scrolling, setScrolling] = useState(false);
 
@@ -44,5 +54,5 @@ export function List<T extends { id: number, component: ReactNode }>({ ref, item
         </Slidable>
       ))}
     </ScrollView>
-  )
-};
+  );
+}

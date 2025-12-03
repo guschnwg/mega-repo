@@ -23,18 +23,18 @@ export const EndWod = ({
   >
     <Header
       style={{
-        justifyContent: 'space-between',
+        justifyContent: "space-between",
         paddingInline: 20,
       }}
     >
       <View
         style={{
-          flexDirection: 'column'
+          flexDirection: "column",
         }}
       >
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: "row",
             gap: 10,
           }}
         >
@@ -51,10 +51,10 @@ export const EndWod = ({
             title="✏️"
             titleStyle={{
               fontSize: 12,
-              transform: 'scaleX(-1)'
+              transform: "scaleX(-1)",
             }}
             variant="secondary-inverted"
-            onPress={() => { }}
+            onPress={() => {}}
           />
         </View>
         <Text
@@ -63,7 +63,8 @@ export const EndWod = ({
             color: styles.textLight,
           }}
         >
-          {new Date().toLocaleDateString(undefined, { dateStyle: 'long' })} at {new Date().toLocaleTimeString(undefined, { timeStyle: "short" })}
+          {new Date().toLocaleDateString(undefined, { dateStyle: "long" })} at{" "}
+          {new Date().toLocaleTimeString(undefined, { timeStyle: "short" })}
         </Text>
       </View>
 
@@ -135,8 +136,16 @@ export const EndWod = ({
                 gap: 10,
               }}
             >
-              <Text style={{ textAlign: 'center' }}>
-                <Text style={{ fontWeight: 'bold' }}>AMRAP</Text> of <Text style={{ fontWeight: 'bold' }}>{step.config.counter.value}</Text> reps in <Text style={{ fontWeight: 'bold' }}>{step.config.time / 1000}</Text>s
+              <Text style={{ textAlign: "center" }}>
+                <Text style={{ fontWeight: "bold" }}>AMRAP</Text> of{" "}
+                <Text style={{ fontWeight: "bold" }}>
+                  {step.config.counter.value}
+                </Text>{" "}
+                reps in{" "}
+                <Text style={{ fontWeight: "bold" }}>
+                  {step.config.time / 1000}
+                </Text>
+                s
               </Text>
 
               <LayoutAware height={100}>
@@ -157,12 +166,13 @@ export const EndWod = ({
         }
         if (step.type === "EMOM") {
           const groupsOf = 3;
-          const countersGrouped: EMOMConfigCounterType[][] = step.config.counters.reduce((agg, crr, idx) => {
-            const aggIdx = Math.floor(idx / groupsOf);
-            agg[aggIdx] = agg[aggIdx] || []
-            agg[aggIdx].push(crr)
-            return agg
-          }, []);
+          const countersGrouped: EMOMConfigCounterType[][] =
+            step.config.counters.reduce((agg, crr, idx) => {
+              const aggIdx = Math.floor(idx / groupsOf);
+              agg[aggIdx] = agg[aggIdx] || [];
+              agg[aggIdx].push(crr);
+              return agg;
+            }, []);
           return (
             <View
               key={i}
@@ -170,7 +180,9 @@ export const EndWod = ({
                 gap: 10,
               }}
             >
-              <Text style={{ fontWeight: 'bold', textAlign: 'center' }}>EMOM</Text>
+              <Text style={{ fontWeight: "bold", textAlign: "center" }}>
+                EMOM
+              </Text>
 
               <View
                 style={{
@@ -184,15 +196,42 @@ export const EndWod = ({
                       style={{
                         gap: 10,
                         flex: 1,
-                        flexDirection: 'row',
+                        flexDirection: "row",
                       }}
                     >
                       {counters.map((counter, j) => (
-                        <Text key={j} style={{ flex: 1, textAlign: 'center' }}>
-                          <Text style={{ fontWeight: 'bold', color: counter.value !== counter.max ? 'red' : undefined }}>{counter.value === counter.max ? counter.value : counter.value - counter.max}</Text> reps in <Text style={{ fontWeight: 'bold' }}>{counter.time / 1000}</Text>s
+                        <Text
+                          key={j}
+                          style={{ flex: 1, textAlign: "center" }}
+                        >
+                          <Text
+                            style={{
+                              fontWeight: "bold",
+                              color:
+                                counter.value !== counter.max
+                                  ? "red"
+                                  : undefined,
+                            }}
+                          >
+                            {counter.value === counter.max
+                              ? counter.value
+                              : counter.value - counter.max}
+                          </Text>{" "}
+                          reps in{" "}
+                          <Text style={{ fontWeight: "bold" }}>
+                            {counter.time / 1000}
+                          </Text>
+                          s
                         </Text>
                       ))}
-                      {[...Array(groupsOf - counters.length).keys()].map((k, i) => <View key={i} style={{ flex: 1 }} />)}
+                      {[...Array(groupsOf - counters.length).keys()].map(
+                        (k, i) => (
+                          <View
+                            key={i}
+                            style={{ flex: 1 }}
+                          />
+                        ),
+                      )}
                     </View>
                     <LayoutAware height={100}>
                       {({ ready, width, height }) =>
@@ -200,7 +239,7 @@ export const EndWod = ({
                           <View
                             style={{
                               gap: 10,
-                              flexDirection: 'row',
+                              flexDirection: "row",
                             }}
                           >
                             {counters.map((counter, j) => (
@@ -208,11 +247,15 @@ export const EndWod = ({
                                 key={j}
                                 style={{
                                   height: height,
-                                  width: width / groupsOf - 10 * (groupsOf - 1) / 3,
+                                  width:
+                                    width / groupsOf -
+                                    (10 * (groupsOf - 1)) / 3,
                                 }}
                               >
                                 <Chart
-                                  width={width / groupsOf - 10 * (groupsOf - 1) / 3}
+                                  width={
+                                    width / groupsOf - (10 * (groupsOf - 1)) / 3
+                                  }
                                   height={height}
                                   counter={counter}
                                   currentTime={counter.time}
@@ -233,12 +276,15 @@ export const EndWod = ({
         }
         if (step.type === "Set") {
           const groupsOf = 3;
-          const countersGrouped: CounterType[][] = step.config.counters.reduce((agg, crr, idx) => {
-            const aggIdx = Math.floor(idx / groupsOf);
-            agg[aggIdx] = agg[aggIdx] || []
-            agg[aggIdx].push(crr)
-            return agg
-          }, [] as CounterType[][]);
+          const countersGrouped: CounterType[][] = step.config.counters.reduce(
+            (agg, crr, idx) => {
+              const aggIdx = Math.floor(idx / groupsOf);
+              agg[aggIdx] = agg[aggIdx] || [];
+              agg[aggIdx].push(crr);
+              return agg;
+            },
+            [] as CounterType[][],
+          );
           return (
             <View
               key={i}
@@ -246,7 +292,9 @@ export const EndWod = ({
                 gap: 10,
               }}
             >
-              <Text style={{ fontWeight: 'bold', textAlign: 'center' }}>Set</Text>
+              <Text style={{ fontWeight: "bold", textAlign: "center" }}>
+                Set
+              </Text>
 
               <View
                 style={{
@@ -260,15 +308,35 @@ export const EndWod = ({
                       style={{
                         gap: 10,
                         flex: 1,
-                        flexDirection: 'row',
+                        flexDirection: "row",
                       }}
                     >
                       {counters.map((counter, j) => (
-                        <Text key={j} style={{ flex: 1, textAlign: 'center' }}>
-                          <Text style={{ fontWeight: 'bold' }}>{counter.value}</Text> reps in <Text style={{ fontWeight: 'bold' }}>{!counter.history.length ? '?' : counter.history[counter.history.length - 1] / 1000}</Text>s
+                        <Text
+                          key={j}
+                          style={{ flex: 1, textAlign: "center" }}
+                        >
+                          <Text style={{ fontWeight: "bold" }}>
+                            {counter.value}
+                          </Text>{" "}
+                          reps in{" "}
+                          <Text style={{ fontWeight: "bold" }}>
+                            {!counter.history.length
+                              ? "?"
+                              : counter.history[counter.history.length - 1] /
+                                1000}
+                          </Text>
+                          s
                         </Text>
                       ))}
-                      {[...Array(groupsOf - counters.length).keys()].map((k, i) => <View key={i} style={{ flex: 1 }} />)}
+                      {[...Array(groupsOf - counters.length).keys()].map(
+                        (k, i) => (
+                          <View
+                            key={i}
+                            style={{ flex: 1 }}
+                          />
+                        ),
+                      )}
                     </View>
                     <LayoutAware height={100}>
                       {({ ready, width, height }) =>
@@ -276,7 +344,7 @@ export const EndWod = ({
                           <View
                             style={{
                               gap: 10,
-                              flexDirection: 'row',
+                              flexDirection: "row",
                             }}
                           >
                             {counters.map((counter, j) => (
@@ -284,14 +352,24 @@ export const EndWod = ({
                                 key={j}
                                 style={{
                                   height: height,
-                                  width: width / groupsOf - 10 * (groupsOf - 1) / 3,
+                                  width:
+                                    width / groupsOf -
+                                    (10 * (groupsOf - 1)) / 3,
                                 }}
                               >
                                 <Chart
-                                  width={width / groupsOf - 10 * (groupsOf - 1) / 3}
+                                  width={
+                                    width / groupsOf - (10 * (groupsOf - 1)) / 3
+                                  }
                                   height={height}
                                   counter={counter}
-                                  endTime={counter.history ? counter.history[counter.history.length - 1] * 1.1 : 0}
+                                  endTime={
+                                    counter.history
+                                      ? counter.history[
+                                          counter.history.length - 1
+                                        ] * 1.1
+                                      : 0
+                                  }
                                   absoluteMax
                                 />
                               </View>
@@ -308,9 +386,11 @@ export const EndWod = ({
         }
 
         return (
-          <Text key={i}>Not implemented yet {JSON.stringify(step, null, 2)}</Text>
+          <Text key={i}>
+            Not implemented yet {JSON.stringify(step, null, 2)}
+          </Text>
         );
       })}
-    </ScrollView >
-  </View >
+    </ScrollView>
+  </View>
 );

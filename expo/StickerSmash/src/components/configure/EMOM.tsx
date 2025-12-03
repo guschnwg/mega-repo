@@ -13,7 +13,7 @@ interface ConfigureEMOMProps {
 
 const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
   const minutes = Math.floor(step.config.counters[0].time / 1000 / 60);
-  const seconds = Math.floor(step.config.counters[0].time / 1000 % 60)
+  const seconds = Math.floor((step.config.counters[0].time / 1000) % 60)
     .toString()
     .padStart(2, "0");
 
@@ -31,13 +31,17 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
         style={{
           fontSize: styles.fontSize,
         }}
-      >reps in</Text>
+      >
+        reps in
+      </Text>
       <TextPicker
         value={step.config.counters[0].time || 0}
         possible={[5, 10, 15, 20, 25, 30]}
         text={minutes === 0 ? `${seconds}s` : `${minutes}:${seconds}`}
         onUpdate={(value) => {
-          step.config.counters.forEach((counter) => (counter.time = value * 1000));
+          step.config.counters.forEach(
+            (counter) => (counter.time = value * 1000),
+          );
           onUpdate(step);
         }}
       />
@@ -45,7 +49,9 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
         style={{
           fontSize: styles.fontSize,
         }}
-      >for</Text>
+      >
+        for
+      </Text>
       <TextPicker
         value={step.config.counters.length}
         possible={[1, 2, 3, 4, 5, 6]}
@@ -60,7 +66,9 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
         style={{
           fontSize: styles.fontSize,
         }}
-      >times</Text>
+      >
+        times
+      </Text>
     </>
   );
 };
@@ -78,7 +86,7 @@ const AdvancedEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
     >
       {step.config.counters.map((counter, index) => {
         const minutes = Math.floor(counter.time / 1000 / 60);
-        const seconds = Math.floor(counter.time / 1000 % 60)
+        const seconds = Math.floor((counter.time / 1000) % 60)
           .toString()
           .padStart(2, "0");
 
@@ -166,9 +174,15 @@ export const ConfigureEMOM = ({ step, onUpdate }: ConfigureEMOMProps) => {
       onHold={() => setIsOpen((prev) => !prev)}
     >
       {allSame && !isOpen ? (
-        <SimpleEdit step={step} onUpdate={onUpdate} />
+        <SimpleEdit
+          step={step}
+          onUpdate={onUpdate}
+        />
       ) : (
-        <AdvancedEdit step={step} onUpdate={onUpdate} />
+        <AdvancedEdit
+          step={step}
+          onUpdate={onUpdate}
+        />
       )}
     </Holdable>
   );

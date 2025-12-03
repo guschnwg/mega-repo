@@ -1,28 +1,39 @@
 import React, { useRef } from "react";
 
-import { Picker } from '@react-native-picker/picker';
+import { Picker } from "@react-native-picker/picker";
 
-import { PressableText } from './PressableText';
+import { PressableText } from "./PressableText";
 
 interface Props<T> {
-  value: T
-  possible: T[]
-  text?: string
-  onUpdate: (value: T) => void
+  value: T;
+  possible: T[];
+  text?: string;
+  onUpdate: (value: T) => void;
 }
 
-export function TextPicker<T extends React.Key>({ value, possible, text, onUpdate }: Props<T>) {
+export function TextPicker<T extends React.Key>({
+  value,
+  possible,
+  text,
+  onUpdate,
+}: Props<T>) {
   const ref = useRef<Picker<T>>(null);
 
   return (
     <>
       <Picker
         ref={ref}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         selectedValue={value}
         onValueChange={onUpdate}
       >
-        {possible.map(i => <Picker.Item key={i} label={String(i)} value={i} />)}
+        {possible.map((i) => (
+          <Picker.Item
+            key={i}
+            label={String(i)}
+            value={i}
+          />
+        ))}
       </Picker>
 
       <PressableText
@@ -30,5 +41,5 @@ export function TextPicker<T extends React.Key>({ value, possible, text, onUpdat
         onPress={() => ref.current?.focus()}
       />
     </>
-  )
+  );
 }

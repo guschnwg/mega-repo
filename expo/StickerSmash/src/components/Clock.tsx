@@ -3,15 +3,22 @@ import { Svg, Circle, Text } from "react-native-svg";
 import { styles } from "../styles";
 
 interface Props {
-  current: number
-  size?: number
-  tickness?: number
-  max: number
-  label?: string
-  ticks?: number[]
+  current: number;
+  size?: number;
+  tickness?: number;
+  max: number;
+  label?: string;
+  ticks?: number[];
 }
 
-export function Clock({ current, size = 200, tickness = 4, max, label, ticks = [] }: Props) {
+export function Clock({
+  current,
+  size = 200,
+  tickness = 4,
+  max,
+  label,
+  ticks = [],
+}: Props) {
   const dashArray = size * 3;
   const offset = (current / max) % 1;
   const dashOffset = Math.floor(dashArray - offset * dashArray);
@@ -20,14 +27,15 @@ export function Clock({ current, size = 200, tickness = 4, max, label, ticks = [
   const round = Math.floor(current / max);
   const color1 = round % 2 === 0 ? styles.secondary : styles.primary;
   const color2 = round % 2 === 1 ? styles.secondary : styles.primary;
-  const indicatorColor = round % 2 === 0 ? styles.secondaryDark : styles.primaryDark;
+  const indicatorColor =
+    round % 2 === 0 ? styles.secondaryDark : styles.primaryDark;
   const tickColor = round % 2 === 0 ? styles.secondaryDark : styles.primaryDark;
 
   return (
     <Svg
       width={size}
       height={size}
-      style={{ transform: [{ rotate: '-90deg' }] }}
+      style={{ transform: [{ rotate: "-90deg" }] }}
     >
       <Circle
         r={size / 2 - tickness / 2}
@@ -59,8 +67,8 @@ export function Clock({ current, size = 200, tickness = 4, max, label, ticks = [
         fill="transparent"
         strokeDasharray={dashArray}
       />
-      {ticks.map(t => {
-        const angle = t / max * Math.PI * 2;
+      {ticks.map((t) => {
+        const angle = (t / max) * Math.PI * 2;
 
         const x = (size / 2 - tickness / 2) * Math.cos(angle);
         const y = (size / 2 - tickness / 2) * Math.sin(angle);
@@ -89,6 +97,6 @@ export function Clock({ current, size = 200, tickness = 4, max, label, ticks = [
           {label}
         </Text>
       )}
-    </Svg >
-  )
+    </Svg>
+  );
 }

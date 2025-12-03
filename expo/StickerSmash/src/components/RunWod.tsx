@@ -15,7 +15,7 @@ interface Props {
   onStop: () => void;
 }
 
-export const RunWod = ({ step, onEnd, onStop, }: Props) => {
+export const RunWod = ({ step, onEnd, onStop }: Props) => {
   return (
     <View
       style={{

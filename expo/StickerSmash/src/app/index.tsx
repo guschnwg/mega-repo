@@ -29,7 +29,7 @@ enum StepTypesEnum {
   Wait = "Wait",
   EMOM = "EMOM",
   Set = "Set",
-};
+}
 
 const MultiButton = ({
   title,
@@ -96,7 +96,15 @@ const MultiButton = ({
   );
 };
 
-const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepType, onUpdate: (step: StepTypes) => void }) => (
+const ConfigureStep = ({
+  index,
+  step,
+  onUpdate,
+}: {
+  index: number;
+  step: StepType;
+  onUpdate: (step: StepTypes) => void;
+}) => (
   <View
     style={{
       flex: 1,
@@ -107,13 +115,13 @@ const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepTyp
   >
     <Text
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
         backgroundColor: styles.primaryDark,
         color: styles.textLight,
         width: 20,
-        textAlign: 'center',
+        textAlign: "center",
         borderTopLeftRadius: styles.radius - 1,
         borderBottomRightRadius: styles.radius,
       }}
@@ -121,16 +129,28 @@ const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepTyp
       {index}
     </Text>
     {step.type === StepTypesEnum.AMRAP && (
-      <ConfigureAMRAP step={step} onUpdate={onUpdate} />
+      <ConfigureAMRAP
+        step={step}
+        onUpdate={onUpdate}
+      />
     )}
     {step.type === StepTypesEnum.EMOM && (
-      <ConfigureEMOM step={step} onUpdate={onUpdate} />
+      <ConfigureEMOM
+        step={step}
+        onUpdate={onUpdate}
+      />
     )}
     {step.type === StepTypesEnum.Set && (
-      <ConfigureSet step={step} onUpdate={onUpdate} />
+      <ConfigureSet
+        step={step}
+        onUpdate={onUpdate}
+      />
     )}
     {step.type === StepTypesEnum.Rest && (
-      <ConfigureRest step={step} onUpdate={onUpdate} />
+      <ConfigureRest
+        step={step}
+        onUpdate={onUpdate}
+      />
     )}
     {step.type === StepTypesEnum.Wait && (
       <Text
@@ -147,7 +167,13 @@ const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepTyp
   </View>
 );
 
-const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpdate: (value: number) => void }) => (
+const ConfigureCountdown = ({
+  countdown,
+  onUpdate,
+}: {
+  countdown: number;
+  onUpdate: (value: number) => void;
+}) => (
   <View
     style={{
       flex: 1,
@@ -176,7 +202,13 @@ const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpda
   </View>
 );
 
-const ConfigureAdd = ({ onOpenButton, onNewStep }: { onOpenButton: () => void, onNewStep: (step: StepType) => void }) => (
+const ConfigureAdd = ({
+  onOpenButton,
+  onNewStep,
+}: {
+  onOpenButton: () => void;
+  onNewStep: (step: StepType) => void;
+}) => (
   <MultiButton
     title="+ Add"
     options={[
@@ -239,7 +271,7 @@ const ConfigureSteps = ({
   onUpdate: (steps: StepType[] | ((prev: StepType[]) => StepType[])) => void;
 }) => {
   const [key, setKey] = useState(0);
-  const [onAdd, setOnAdd] = useState(false)
+  const [onAdd, setOnAdd] = useState(false);
   const ref = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -253,20 +285,28 @@ const ConfigureSteps = ({
       items={[
         {
           id: 0,
-          component: <ConfigureCountdown key={0} countdown={countdown} onUpdate={onUpdateCountdown} />
+          component: (
+            <ConfigureCountdown
+              key={0}
+              countdown={countdown}
+              onUpdate={onUpdateCountdown}
+            />
+          ),
         },
         ...steps.map((step, i) => ({
           id: step.id,
-          component: <ConfigureStep
-            key={step.id}
-            index={i + 1}
-            step={step}
-            onUpdate={(step) => {
-              steps[i] = { id: steps[i].id, ...step };
-              onUpdate([...steps]);
-              setKey((crr) => crr + 1);
-            }}
-          />
+          component: (
+            <ConfigureStep
+              key={step.id}
+              index={i + 1}
+              step={step}
+              onUpdate={(step) => {
+                steps[i] = { id: steps[i].id, ...step };
+                onUpdate([...steps]);
+                setKey((crr) => crr + 1);
+              }}
+            />
+          ),
         })),
         {
           id: -1,
@@ -274,18 +314,23 @@ const ConfigureSteps = ({
             <ConfigureAdd
               key={-1}
               onOpenButton={() => ref.current?.scrollToEnd({ animated: true })}
-              onNewStep={newStep => {
+              onNewStep={(newStep) => {
                 onUpdate((prev) => [...prev, newStep]);
-                setOnAdd(prev => !prev);
+                setOnAdd((prev) => !prev);
               }}
             />
-          )
-        }
+          ),
+        },
       ]}
-      canRemove={index => steps.length > 1 && index !== 0 && index !== steps.length + 1}
-      onRemove={index => {
+      canRemove={(index) =>
+        steps.length > 1 && index !== 0 && index !== steps.length + 1
+      }
+      onRemove={(index) => {
         const actualIndex = index - 1;
-        onUpdate(prev => [...prev.slice(0, actualIndex), ...prev.slice(actualIndex + 1)]);
+        onUpdate((prev) => [
+          ...prev.slice(0, actualIndex),
+          ...prev.slice(actualIndex + 1),
+        ]);
       }}
     />
   );
@@ -294,21 +339,17 @@ const ConfigureSteps = ({
 export default function Index() {
   const [index, setIndex] = useState(5);
   const [countdown, setCountdown] = useState(3000);
-  const [steps, setSteps] = useState<StepType[]>(
-    [{ "id": 7841375933, "type": "AMRAP", "config": { "time": 5000, "counter": { "value": 27, "history": [444, 608, 759, 908, 1059, 1242, 1575, 1725, 1891, 2058, 2240, 2407, 2574, 2739, 2890, 3073, 3223, 3372, 3539, 3705, 3872, 4022, 4187, 4321, 4504, 4654, 4821] } } }, { "id": 7841375934, "type": "EMOM", "config": { "counters": [{ "time": 5000, "max": 5, "value": 5, "history": [746, 946, 1146, 1346, 1978] }, { "time": 5000, "max": 5, "value": 2, "history": [997, 1147] }, { "time": 5000, "max": 5, "value": 0, "history": [] }, { "time": 5000, "max": 5, "value": 0, "history": [] }] } }, { "id": 7841375936, "type": "Rest", "config": { "time": 10000, "actual": 4824 } }, { "id": 7841375937, "type": "Set", "config": { "counters": [{ "max": 5, "value": 5, "history": [1180, 1695, 2028, 2795, 3410] }, { "max": 5, "value": 5, "history": [] }, { "max": 5, "value": 5, "history": [6920, 7617, 7951, 8134, 8467] }], "waits": [3578, 1296, 1577] } }, { "id": 7841375938, "type": "Wait", "config": { "time": 10000, "actual": 5106 } }]
-  );
-  const [ongoingSteps, setOngoingSteps] = useState<StepType[]>(
-    [{ "id": 7841375933, "type": "AMRAP", "config": { "time": 5000, "counter": { "value": 27, "history": [444, 608, 759, 908, 1059, 1242, 1575, 1725, 1891, 2058, 2240, 2407, 2574, 2739, 2890, 3073, 3223, 3372, 3539, 3705, 3872, 4022, 4187, 4321, 4504, 4654, 4821] } } }, { "id": 7841375934, "type": "EMOM", "config": { "counters": [{ "time": 5000, "max": 5, "value": 5, "history": [746, 946, 1146, 1346, 1978] }, { "time": 5000, "max": 5, "value": 2, "history": [997, 1147] }, { "time": 5000, "max": 5, "value": 0, "history": [] }, { "time": 5000, "max": 5, "value": 0, "history": [] }] } }, { "id": 7841375936, "type": "Rest", "config": { "time": 10000, "actual": 4824 } }, { "id": 7841375937, "type": "Set", "config": { "counters": [{ "max": 5, "value": 5, "history": [1180, 1695, 2028, 2795, 3410] }, { "max": 5, "value": 5, "history": [] }, { "max": 5, "value": 5, "history": [6920, 7617, 7951, 8134, 8467] }], "waits": [3578, 1296, 1577] } }, { "id": 7841375938, "type": "Wait", "config": { "time": 10000, "actual": 5106 } }]
-  );
+  const [steps, setSteps] = useState<StepType[]>([]);
+  const [ongoingSteps, setOngoingSteps] = useState<StepType[]>([]);
 
   const startWod = () => {
     setOngoingSteps(JSON.parse(JSON.stringify(steps)));
     setIndex(-1);
-  }
+  };
 
   const resetWod = () => {
     setIndex(-2);
-  }
+  };
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -342,14 +383,12 @@ export default function Index() {
             New WOD
           </Text>
 
-          <OurButton
-            onPress={startWod}
-          >
+          <OurButton onPress={startWod}>
             <Text
               style={{
                 fontSize: 36,
                 lineHeight: 36,
-                textAlignVertical: 'center',
+                textAlignVertical: "center",
               }}
             >
               ‣
@@ -395,8 +434,8 @@ export default function Index() {
         <View
           style={{
             flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center'
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Countdown
@@ -407,7 +446,12 @@ export default function Index() {
       </View>
     );
   } else if (index >= steps.length) {
-    content = <EndWod steps={ongoingSteps} onReset={resetWod} />;
+    content = (
+      <EndWod
+        steps={ongoingSteps}
+        onReset={resetWod}
+      />
+    );
   } else {
     content = (
       <RunWod
@@ -429,7 +473,7 @@ export default function Index() {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: styles.primary
+        backgroundColor: styles.primary,
       }}
     >
       {content}

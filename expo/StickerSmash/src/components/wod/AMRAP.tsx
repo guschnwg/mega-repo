@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { Text, View } from "react-native";
 
-import { Timer } from '@/src/components/Timer';
+import { Timer } from "@/src/components/Timer";
 import { Clock } from "../Clock";
 import { OurButton } from "../OurButton";
 import { styles } from "../../styles";
@@ -17,11 +17,20 @@ export const WodAmrap = ({ step, onEnd, onStop }: WodAmrapProps) => {
   const [history, setHistory] = useState<number[]>([]);
   const ref = useRef(false);
 
-  const shouldVibrate = useCallback((prev: { start: number, current: number }, next: { start: number, current: number }) => {
-    const prevDelta = prev.current - prev.start;
-    const nextDelta = next.current - next.start;
-    return nextDelta > (step.config.time - 5000) && Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000);
-  }, [step.config.time]);
+  const shouldVibrate = useCallback(
+    (
+      prev: { start: number; current: number },
+      next: { start: number; current: number },
+    ) => {
+      const prevDelta = prev.current - prev.start;
+      const nextDelta = next.current - next.start;
+      return (
+        nextDelta > step.config.time - 5000 &&
+        Math.floor(prevDelta / 1000) !== Math.floor(nextDelta / 1000)
+      );
+    },
+    [step.config.time],
+  );
 
   return (
     <View
@@ -47,7 +56,7 @@ export const WodAmrap = ({ step, onEnd, onStop }: WodAmrapProps) => {
                   ...step.config.counter,
                   value: count,
                   history,
-                }
+                },
               });
             }, 100);
           }
@@ -56,9 +65,9 @@ export const WodAmrap = ({ step, onEnd, onStop }: WodAmrapProps) => {
         {(start, current, minutes, seconds) => (
           <View
             style={{
-              flexDirection: 'column',
+              flexDirection: "column",
               gap: 20,
-              alignItems: 'center'
+              alignItems: "center",
             }}
           >
             <Clock
@@ -72,8 +81,8 @@ export const WodAmrap = ({ step, onEnd, onStop }: WodAmrapProps) => {
             <View
               style={{
                 gap: 20,
-                flexDirection: 'row',
-                alignItems: 'center',
+                flexDirection: "row",
+                alignItems: "center",
               }}
             >
               <Text
@@ -100,7 +109,7 @@ export const WodAmrap = ({ step, onEnd, onStop }: WodAmrapProps) => {
         )}
       </Timer>
     </View>
-  )
+  );
   // const begin = (crr?: number, counter?: CounterType): TimerType => {
   //   return {
   //     counter: counter || {

@@ -1,18 +1,38 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Animated, NativeTouchEvent, Text, View, ViewStyle, useWindowDimensions } from 'react-native';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Animated,
+  NativeTouchEvent,
+  Text,
+  View,
+  ViewStyle,
+  useWindowDimensions,
+} from "react-native";
 
 interface ValueType {
-  time: number
-  start: number
-  offset: number
-  shouldTrigger: boolean
+  time: number;
+  start: number;
+  offset: number;
+  shouldTrigger: boolean;
   validation?: {
-    passed: boolean
-    nativeEvent: NativeTouchEvent
-  }
+    passed: boolean;
+    nativeEvent: NativeTouchEvent;
+  };
 }
 
-const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide }: React.PropsWithChildren<{ style: ViewStyle, canSlide: boolean, onSlideStart?: () => void, onSlideEnd?: () => void, onSlide: () => void }>) => {
+const Slidable = ({
+  style,
+  children,
+  canSlide,
+  onSlideStart,
+  onSlideEnd,
+  onSlide,
+}: React.PropsWithChildren<{
+  style: ViewStyle;
+  canSlide: boolean;
+  onSlideStart?: () => void;
+  onSlideEnd?: () => void;
+  onSlide: () => void;
+}>) => {
   const [value, setValue] = useState<ValueType>({
     time: 0,
     start: 0,
@@ -21,7 +41,9 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
     validation: undefined,
   });
   const removed = useRef(false);
-  const fadeAnim = useRef(new Animated.Value(Number(style.minHeight || 0))).current;
+  const fadeAnim = useRef(
+    new Animated.Value(Number(style.minHeight || 0)),
+  ).current;
   const { width } = useWindowDimensions();
 
   useEffect(() => {
@@ -54,16 +76,16 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
         style={{
           left: 0,
           opacity: 1 - value.offset / (width - value.start),
-          backgroundColor: 'red',
+          backgroundColor: "red",
           ...style,
           minHeight: style.minHeight,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Text>🗑️</Text>
       </Animated.View>
-    )
+    );
   }
 
   return (
@@ -73,7 +95,7 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
         opacity: 1 - value.offset / (width - value.start),
         ...style,
       }}
-      onTouchStart={event => {
+      onTouchStart={(event) => {
         event.persist();
         setValue({
           time: Date.now(),
@@ -86,13 +108,17 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
           },
         });
       }}
-      onTouchMove={event => {
+      onTouchMove={(event) => {
         if (!canSlide) return;
         if (!value.validation) return;
         if (!value.validation.passed) {
           const newEvent = event.nativeEvent;
-          const deltaX = Math.abs(newEvent.pageX - value.validation.nativeEvent.pageX);
-          const deltaY = Math.abs(newEvent.pageY - value.validation.nativeEvent.pageY);
+          const deltaX = Math.abs(
+            newEvent.pageX - value.validation.nativeEvent.pageX,
+          );
+          const deltaY = Math.abs(
+            newEvent.pageY - value.validation.nativeEvent.pageY,
+          );
           if (deltaX <= 10) return;
           if (deltaX <= deltaY * 3) return;
         }
@@ -102,7 +128,7 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
         }
 
         event.persist();
-        setValue(crr => {
+        setValue((crr) => {
           if (!crr.validation) {
             return crr;
           }
@@ -114,8 +140,10 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
           const velocity = changeOffset / (newTime - crr.time);
 
           const thirdWidth = width / 3;
-          const tooFastAndOverThreshold = (newOffset > thirdWidth && velocity > 3);
-          const kindaOutOfBounds = crr.start < 2 * thirdWidth && newValue > width - 50;
+          const tooFastAndOverThreshold =
+            newOffset > thirdWidth && velocity > 3;
+          const kindaOutOfBounds =
+            crr.start < 2 * thirdWidth && newValue > width - 50;
           const shouldTrigger = tooFastAndOverThreshold || kindaOutOfBounds;
 
           return {
@@ -126,9 +154,9 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
             validation: {
               passed: true,
               nativeEvent: crr.validation!.nativeEvent,
-            }
+            },
           };
-        })
+        });
       }}
       onTouchEnd={() => {
         onSlideEnd?.();
@@ -138,6 +166,6 @@ const Slidable = ({ style, children, canSlide, onSlideStart, onSlideEnd, onSlide
       {children}
     </View>
   );
-}
+};
 
 export { Slidable };

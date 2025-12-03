@@ -42,7 +42,10 @@ const Indicator = ({
   }, [start, time]);
 
   return (
-    <Clock current={value} max={time}>
+    <Clock
+      current={value}
+      max={time}
+    >
       {children}
     </Clock>
   );
@@ -102,7 +105,10 @@ export const Holdable = ({
       }}
     >
       {indicator ? (
-        <Indicator start={startDate} time={time}>
+        <Indicator
+          start={startDate}
+          time={time}
+        >
           {children}
         </Indicator>
       ) : (

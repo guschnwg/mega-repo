@@ -1,23 +1,25 @@
-import React from 'react'
-import { View, Text } from 'react-native'
+import React from "react";
+import { View, Text } from "react-native";
 
 import { Stack } from "expo-router";
 
 import { Clock } from "@/src/components/Clock";
 
-class ErrorBoundary extends React.Component<React.PropsWithChildren, { error: Error | null }> {
-  state = { error: null }
+class ErrorBoundary extends React.Component<
+  React.PropsWithChildren,
+  { error: Error | null }
+> {
+  state = { error: null };
 
   static getDerivedStateFromError(error: Error) {
-    return { error }
+    return { error };
   }
 
-  componentDidCatch(error: Error, info: { componentStack: string }) {
-  }
+  componentDidCatch(error: Error, info: { componentStack: string }) {}
 
   resetError: () => void = () => {
-    this.setState({ error: null })
-  }
+    this.setState({ error: null });
+  };
 
   render() {
     if (this.state.error) {
@@ -27,7 +29,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, { error: Er
 
           <Text>{JSON.stringify(this.state.error, null, 2)}</Text>
         </View>
-      )
+      );
     }
 
     return this.props.children;

@@ -1,13 +1,18 @@
-import React, { useEffect, useRef } from "react"
-import { ScrollView } from "react-native"
+import React, { useEffect, useRef } from "react";
+import { ScrollView } from "react-native";
 
 interface Props {
-  current: number
-  width: number
-  itemSize: number
+  current: number;
+  width: number;
+  itemSize: number;
 }
 
-export const ScrollCenter = ({ current, width, itemSize, children }: React.PropsWithChildren<Props>) => {
+export const ScrollCenter = ({
+  current,
+  width,
+  itemSize,
+  children,
+}: React.PropsWithChildren<Props>) => {
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -22,11 +27,11 @@ export const ScrollCenter = ({ current, width, itemSize, children }: React.Props
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
         flexDirection: "row",
-        alignItems: 'center',
+        alignItems: "center",
         paddingInline: width / 2 - itemSize / 2,
       }}
     >
       {children}
     </ScrollView>
-  )
-}
+  );
+};

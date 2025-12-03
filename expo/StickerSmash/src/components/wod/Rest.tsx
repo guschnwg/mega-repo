@@ -28,18 +28,21 @@ export const WodRest = ({
       <View
         style={{
           flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <Countdown time={step.config.time} onFinish={onEnd} />
+        <Countdown
+          time={step.config.time}
+          onFinish={onEnd}
+        />
       </View>
 
       <View
         style={{
           flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
           gap: 20,
         }}
       >

@@ -17,23 +17,32 @@ const OurButton = ({
   variant = "primary",
   ...props
 }: React.PropsWithChildren<
-  PressableProps & { title?: string; onPressIn?: PressableProps["onPressIn"], titleStyle?: TextStyle, variant?: "primary" | "secondary" | "primary-inverted" | "secondary-inverted" }
+  PressableProps & {
+    title?: string;
+    onPressIn?: PressableProps["onPressIn"];
+    titleStyle?: TextStyle;
+    variant?:
+      | "primary"
+      | "secondary"
+      | "primary-inverted"
+      | "secondary-inverted";
+  }
 >) => {
   return (
     <Pressable
       style={({ pressed }) => ({
         backgroundColor: (function () {
           if (variant === "primary") {
-            return pressed ? styles.secondaryDark : styles.secondary
+            return pressed ? styles.secondaryDark : styles.secondary;
           }
           if (variant === "secondary") {
-            return pressed ? styles.primaryDark : styles.primary
+            return pressed ? styles.primaryDark : styles.primary;
           }
           if (variant === "primary-inverted") {
-            return pressed ? styles.secondary : styles.secondaryDark
+            return pressed ? styles.secondary : styles.secondaryDark;
           }
           if (variant === "secondary-inverted") {
-            return pressed ? styles.primary : styles.primaryDark
+            return pressed ? styles.primary : styles.primaryDark;
           }
           return "red";
         })(),
@@ -44,16 +53,16 @@ const OurButton = ({
         borderWidth: 1,
         borderColor: (function () {
           if (variant === "primary") {
-            return styles.secondaryDark
+            return styles.secondaryDark;
           }
           if (variant === "secondary") {
-            return styles.primaryDark
+            return styles.primaryDark;
           }
           if (variant === "primary-inverted") {
-            return styles.secondaryDark
+            return styles.secondaryDark;
           }
           if (variant === "secondary-inverted") {
-            return styles.primaryDark
+            return styles.primaryDark;
           }
           return "red";
         })(),
@@ -66,11 +75,14 @@ const OurButton = ({
       {...props}
     >
       <Text
-        style={[{
-          color: styles.textLight,
-          fontWeight: styles.bold,
-          fontSize: styles.fontSize,
-        }, titleStyle]}
+        style={[
+          {
+            color: styles.textLight,
+            fontWeight: styles.bold,
+            fontSize: styles.fontSize,
+          },
+          titleStyle,
+        ]}
       >
         {children || props.title}
       </Text>

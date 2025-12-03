@@ -21,8 +21,8 @@ export const WodWait = ({ onEnd }: { onEnd: (time: number) => void }) => {
           <View
             style={{
               flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Clock
@@ -30,15 +30,15 @@ export const WodWait = ({ onEnd }: { onEnd: (time: number) => void }) => {
               max={60000}
               size={300}
               tickness={12}
-              label={`${String(Math.floor(minutes)).padStart(2, '0')}:${String(Math.floor(seconds)).padStart(2, '0')}`}
+              label={`${String(Math.floor(minutes)).padStart(2, "0")}:${String(Math.floor(seconds)).padStart(2, "0")}`}
             />
           </View>
 
           <View
             style={{
               flex: 1,
-              alignItems: 'center',
-              justifyContent: 'center',
+              alignItems: "center",
+              justifyContent: "center",
               gap: 20,
             }}
           >
