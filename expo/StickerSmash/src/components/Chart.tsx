@@ -107,7 +107,6 @@ export const Chart = ({ showGridHint = false, absoluteMax = false, height: _heig
 
       {counter.history.map((h, i) => {
         const left = width * h / endTime;
-        console.log(left, width, h);
         return (
           <View
             key={`${h}-${i}`}

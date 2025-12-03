@@ -4,6 +4,7 @@ import { Text, View } from "react-native";
 import { TextPicker } from "../TextPicker";
 import { OurButton } from "../OurButton";
 import { Holdable } from "../Holdable";
+import { styles } from "@/src/styles";
 
 interface ConfigureSetProps {
   step: SetStepType;
@@ -29,7 +30,13 @@ export const ConfigureSet = ({ step, onUpdate }: ConfigureSetProps) => {
         alignItems: "center",
       }}
     >
-      <Text>Reps of</Text>
+      <Text
+        style={{
+          fontSize: styles.fontSize,
+        }}
+      >
+        Reps of
+      </Text>
       {step.config.counters.map((counter, index) => (
         <TextPicker
           key={index}
@@ -70,7 +77,13 @@ export const ConfigureSet = ({ step, onUpdate }: ConfigureSetProps) => {
           onUpdate(step);
         }}
       />
-      <Text>sets of</Text>
+      <Text
+        style={{
+          fontSize: styles.fontSize,
+        }}
+      >
+        sets of
+      </Text>
       <TextPicker
         value={step.config.counters[0].max || 0}
         possible={[5, 10, 15, 20, 25, 30]}
@@ -79,7 +92,13 @@ export const ConfigureSet = ({ step, onUpdate }: ConfigureSetProps) => {
           onUpdate(step);
         }}
       />
-      <Text>reps</Text>
+      <Text
+        style={{
+          fontSize: styles.fontSize,
+        }}
+      >
+        reps
+      </Text>
     </>
   );
 

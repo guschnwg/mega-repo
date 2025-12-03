@@ -97,7 +97,14 @@ const MultiButton = ({
 };
 
 const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepType, onUpdate: (step: StepTypes) => void }) => (
-  <>
+  <View
+    style={{
+      flex: 1,
+      borderRadius: styles.radius,
+      borderWidth: 1,
+      borderColor: styles.secondary,
+    }}
+  >
     <Text
       style={{
         position: 'absolute',
@@ -128,15 +135,16 @@ const ConfigureStep = ({ index, step, onUpdate }: { index: number, step: StepTyp
     {step.type === StepTypesEnum.Wait && (
       <Text
         style={{
-          fontSize: 18,
+          fontSize: styles.fontSize,
           textAlign: "center",
           textAlignVertical: "center",
+          flex: 1,
         }}
       >
         Wait for input
       </Text>
     )}
-  </>
+  </View>
 );
 
 const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpdate: (value: number) => void }) => (
@@ -147,6 +155,9 @@ const ConfigureCountdown = ({ countdown, onUpdate }: { countdown: number, onUpda
       alignItems: "center",
       flexDirection: "row",
       gap: 5,
+      borderRadius: styles.radius,
+      borderWidth: 1,
+      borderColor: styles.secondary,
     }}
   >
     <Text
@@ -349,8 +360,6 @@ export default function Index() {
         <View
           style={{
             flex: 1,
-            padding: 10,
-            gap: 10,
             backgroundColor: styles.background,
           }}
         >

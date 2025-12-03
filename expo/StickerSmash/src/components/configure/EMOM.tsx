@@ -4,6 +4,7 @@ import { Text, View } from "react-native";
 import { TextPicker } from "@/src/components/TextPicker";
 import { Holdable } from "@/src/components/Holdable";
 import { OurButton } from "../OurButton";
+import { styles } from "@/src/styles";
 
 interface ConfigureEMOMProps {
   step: EMOMStepType;
@@ -26,7 +27,11 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
           onUpdate(step);
         }}
       />
-      <Text>reps in</Text>
+      <Text
+        style={{
+          fontSize: styles.fontSize,
+        }}
+      >reps in</Text>
       <TextPicker
         value={step.config.counters[0].time || 0}
         possible={[5, 10, 15, 20, 25, 30]}
@@ -36,7 +41,11 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
           onUpdate(step);
         }}
       />
-      <Text>for</Text>
+      <Text
+        style={{
+          fontSize: styles.fontSize,
+        }}
+      >for</Text>
       <TextPicker
         value={step.config.counters.length}
         possible={[1, 2, 3, 4, 5, 6]}
@@ -47,7 +56,11 @@ const SimpleEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
           onUpdate(step);
         }}
       />
-      <Text>times</Text>
+      <Text
+        style={{
+          fontSize: styles.fontSize,
+        }}
+      >times</Text>
     </>
   );
 };
@@ -87,7 +100,13 @@ const AdvancedEdit = ({ step, onUpdate }: ConfigureEMOMProps) => {
                 onUpdate(step);
               }}
             />
-            <Text>reps in</Text>
+            <Text
+              style={{
+                fontSize: styles.fontSize,
+              }}
+            >
+              reps in
+            </Text>
             <TextPicker
               value={counter.time || 0}
               possible={[5, 10, 15, 20, 25, 30]}

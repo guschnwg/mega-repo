@@ -179,9 +179,8 @@ export const EndWod = ({
                 }}
               >
                 {countersGrouped.map((counters, i) => (
-                  <>
+                  <React.Fragment key={i}>
                     <View
-                      key={i}
                       style={{
                         gap: 10,
                         flex: 1,
@@ -226,7 +225,7 @@ export const EndWod = ({
                         )
                       }
                     </LayoutAware>
-                  </>
+                  </React.Fragment>
                 ))}
               </View>
             </View>
@@ -256,9 +255,8 @@ export const EndWod = ({
                 }}
               >
                 {countersGrouped.map((counters, i) => (
-                  <>
+                  <React.Fragment key={i}>
                     <View
-                      key={i}
                       style={{
                         gap: 10,
                         flex: 1,
@@ -302,7 +300,7 @@ export const EndWod = ({
                         )
                       }
                     </LayoutAware>
-                  </>
+                  </React.Fragment>
                 ))}
               </View>
             </View>

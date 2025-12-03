@@ -14,6 +14,7 @@ export function List<T extends { id: number, component: ReactNode }>({ ref, item
       ref={ref}
       contentContainerStyle={{
         backgroundColor: styles.background,
+        padding: 10,
         gap: 10,
       }}
       scrollEnabled={canScroll}
@@ -28,9 +29,6 @@ export function List<T extends { id: number, component: ReactNode }>({ ref, item
             flexDirection: "row",
             alignItems: "stretch",
             justifyContent: "center",
-            borderRadius: styles.radius,
-            borderWidth: 1,
-            borderColor: styles.secondary,
             minHeight: 60,
           }}
           canSlide={!scrolling && canRemove(idx)}
