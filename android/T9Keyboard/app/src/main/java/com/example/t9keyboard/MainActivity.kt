@@ -15,8 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.example.t9keyboard.ui.theme.T9KeyboardTheme
 
 class MainActivity : ComponentActivity() {
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -26,8 +24,8 @@ class MainActivity : ComponentActivity() {
             T9KeyboardTheme {
                 Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 50.dp)) {
                     Text("HI")
-                    Greeting(
-                        name = name.value,
+                    TextField(
+                        value = name.value,
                         onValueChange = { name.value = it }
                     )
                     Text(name.value)
@@ -37,9 +35,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, onValueChange: (String) -> Unit) {
-    TextField(value = name, onValueChange = onValueChange)
 }

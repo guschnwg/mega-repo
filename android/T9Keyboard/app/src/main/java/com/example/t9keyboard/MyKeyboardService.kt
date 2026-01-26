@@ -6,29 +6,52 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.inputmethodservice.InputMethodService
 import android.media.MediaPlayer
-import android.media.RingtoneManager
+import android.media.SoundPool
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.speech.tts.TextToSpeech
-import android.transition.Visibility
-import android.view.MotionEvent
 import android.view.View
+import android.view.inputmethod.ExtractedTextRequest
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.example.t9keyboard.ui.theme.Purple40
+import com.example.t9keyboard.ui.theme.Purple80
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,51 +61,44 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.Timer
 import java.util.logging.Logger
-import kotlin.concurrent.scheduleAtFixedRate
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 class MyKeyboardService : InputMethodService(), RecognitionListener {
-    private var speechRecognizer: SpeechRecognizer? = null
-    private var wantsToListen = false
-    private var isListening = false
+    private var wantsToSpeak by mutableStateOf(false)
+    private var isListening by mutableStateOf(false)
+    private var modifierActive by mutableStateOf(false)
+    private var spokenText by mutableStateOf("")
 
+
+    private var isComposing = false
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+    private var stopComposeJob: Job? = null
 
-    private lateinit var rootView: View
-    private lateinit var keySymbols: Button
-    private lateinit var keyABC: Button
-    private lateinit var keyDEF: Button
-    private lateinit var keyGHI: Button
-    private lateinit var keyJKL: Button
-    private lateinit var keyMNO: Button
-    private lateinit var keyPQRS: Button
-    private lateinit var keyTUV: Button
-    private lateinit var keyWXYZ: Button
-    private lateinit var keySpace: Button
-    private lateinit var keyMic: Button
-    private lateinit var keysGroup: View
-    private lateinit var textRecognitionView: TextView
-    private lateinit var textRecognitionGroup: View
-    private lateinit var loadingView: TextView
+    private lateinit var soundPool: SoundPool
+    private var soundId: Int = 0
 
-
-    private var cursorPosition: Int = 0
-    private var isComposing = false
-    private var job: Job? = null
-
-    private var shouldVibrate = true
-
-    private var deleteTimer: Timer? = null
-
+    private var speechRecognizer: SpeechRecognizer? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val owners = ImeOwners()
 
     //
 
     override fun onCreate() {
         super.onCreate()
+
+        owners.onCreate()
+        val decor = window?.window?.decorView
+        val content = window?.window?.findViewById<View>(android.R.id.content)
+        decor?.applyOwners(owners)
+        content?.applyOwners(owners)
+
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer?.setRecognitionListener(this)
+
+        soundPool = SoundPool.Builder().setMaxStreams(10).build()
+        soundId = soundPool.load(this, R.raw.water_drop, 1)
     }
 
     override fun onDestroy() {
@@ -90,148 +106,82 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
         speechRecognizer?.destroy()
         speechRecognizer = null
         serviceJob.cancel()
+        owners.onDestroy()
         super.onDestroy()
     }
 
     //
 
     override fun onCreateInputView(): View {
-        rootView = layoutInflater.inflate(R.layout.keyboard_view, null)
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
-            val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.updatePadding(bottom = nav.bottom + 15)
-            insets
-        }
+        return ComposeView(this).apply {
+            applyOwners(owners)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
 
-        keySymbols = rootView.findViewById(R.id.keySymbols)
-        keySymbols.setOnClickListener(keyListener(keySymbols, ",.?!"))
-        keyABC = rootView.findViewById(R.id.keyABC)
-        keyABC.setOnClickListener(keyListener(keyABC, "ABC"))
-        keyDEF = rootView.findViewById(R.id.keyDEF)
-        keyDEF.setOnClickListener(keyListener(keyDEF, "DEF"))
-        keyGHI = rootView.findViewById(R.id.keyGHI)
-        keyGHI.setOnClickListener(keyListener(keyGHI, "GHI"))
-        keyJKL = rootView.findViewById(R.id.keyJKL)
-        keyJKL.setOnClickListener(keyListener(keyJKL, "JKL"))
-        keyMNO = rootView.findViewById(R.id.keyMNO)
-        keyMNO.setOnClickListener(keyListener(keyMNO, "MNO"))
-        keyPQRS = rootView.findViewById(R.id.keyPQRS)
-        keyPQRS.setOnClickListener(keyListener(keyPQRS, "PQRS"))
-        keyTUV = rootView.findViewById(R.id.keyTUV)
-        keyTUV.setOnClickListener(keyListener(keyTUV, "TUV"))
-        keyWXYZ = rootView.findViewById(R.id.keyWXYZ)
-        keyWXYZ.setOnClickListener(keyListener(keyWXYZ, "WXYZ"))
-
-        keySpace = rootView.findViewById(R.id.keySpace)
-        keySpace.setOnClickListener {
-            vibrate()
-            finishText()
-            currentInputConnection.commitText(" ", 1)
-        }
-
-        val delete = rootView.findViewById<Button>(R.id.keyDelete)
-        delete.setOnTouchListener { _, event ->
-            when (event?.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    deleteTimer?.cancel()
-                    deleteTimer = Timer()
-                    deleteTimer?.scheduleAtFixedRate(0, 200, {
+            setContent {
+                This(
+                    wantsToSpeak = wantsToSpeak,
+                    isListening = isListening,
+                    spokenText = spokenText,
+                    modifierActive = modifierActive,
+                    onMicClick = {
+                        vibrate(false)
+                        wantsToSpeak = !wantsToSpeak
+                        spokenText = ""
+                        if (wantsToSpeak) {
+                            startSpeechToText()
+                        } else {
+                            stopSpeechToText()
+                        }
+                    },
+                    onDeleteClick = {
                         vibrate()
                         finishText()
                         currentInputConnection.deleteSurroundingText(1, 0)
-                    })
-                    true
-                }
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> {
-                    deleteTimer?.cancel()
-                    deleteTimer = null
-                    true
-                }
-
-                else -> false
+                    },
+                    onKeyClick = { id ->
+                        when (id) {
+                            "keySymbols" -> keyPress(",.?!")
+                            "keyABC" -> keyPress("ABC")
+                            "keyDEF" -> keyPress("DEF")
+                            "keyGHI" -> keyPress("GHI")
+                            "keyJKL" -> keyPress("JKL")
+                            "keyMNO" -> keyPress("MNO")
+                            "keyPQRS" -> keyPress("PQRS")
+                            "keyTUV" -> keyPress("TUV")
+                            "keyWXYZ" -> keyPress("WXYZ")
+                            "keySpace" -> {
+                                vibrate()
+                                composeText(" ")
+                                finishText()
+                            }
+                            "keyLeft" -> moveCursor(-1)
+                            "keyRight" -> moveCursor(+1)
+                        }
+                    },
+                    onModifierClick = {
+                        modifierActive = !modifierActive
+                    },
+                )
             }
         }
-
-        val keyLeft = rootView.findViewById<Button>(R.id.keyLeft)
-        keyLeft.setOnClickListener {
-            vibrate()
-            finishText()
-            this.currentInputConnection.setSelection(cursorPosition - 1, cursorPosition - 1)
-        }
-
-        val keyRight = rootView.findViewById<Button>(R.id.keyRight)
-        keyRight.setOnClickListener {
-            vibrate()
-            finishText()
-            this.currentInputConnection.setSelection(cursorPosition + 1, cursorPosition + 1)
-        }
-
-        keyMic = rootView.findViewById(R.id.keyMic)
-        keyMic.setOnClickListener {
-            vibrate(false)
-            if (isListening) {
-                wantsToListen = false
-                stopSpeechToText()
-            } else {
-                wantsToListen = true
-                startSpeechToText()
-            }
-        }
-
-        keysGroup = rootView.findViewById(R.id.keysGroup)
-        textRecognitionGroup = rootView.findViewById(R.id.textRecognitionGroup)
-        textRecognitionView = rootView.findViewById(R.id.textRecognitionView)
-        loadingView = rootView.findViewById(R.id.loading)
-
-        return rootView
-    }
-
-    override fun onUpdateSelection(
-        oldSelStart: Int,
-        oldSelEnd: Int,
-        newSelStart: Int,
-        newSelEnd: Int,
-        candidatesStart: Int,
-        candidatesEnd: Int
-    ) {
-        super.onUpdateSelection(
-            oldSelStart,
-            oldSelEnd,
-            newSelStart,
-            newSelEnd,
-            candidatesStart,
-            candidatesEnd
-        )
-
-        cursorPosition = newSelStart
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         Logger.getGlobal().info("onFinishInputView")
-        wantsToListen = false
+        wantsToSpeak = false
         stopSpeechToText()
         super.onFinishInputView(finishingInput)
     }
 
-//    override fun onWindowHidden() {
-//        Logger.getGlobal().info("onWindowHidden")
-//        super.onWindowHidden()
-//    }
-
-
     fun vibrate(withSound: Boolean = true) {
-        if (!shouldVibrate) return
-
-        val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
         val vibrator = vibratorManager.defaultVibrator
         if (vibrator.hasVibrator()) {
             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
         }
 
         if (withSound) {
-            val mp = MediaPlayer.create(this, R.raw.water_drop);
-            mp.start()
+            soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
         }
     }
 
@@ -239,31 +189,44 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
 
     fun finishText() {
         isComposing = !currentInputConnection.finishComposingText()
+        if (modifierActive) {
+            modifierActive = false
+        }
     }
 
     fun composeText(text: String) {
         isComposing = currentInputConnection.setComposingText(text, 1)
-        job?.cancel()
-        job = serviceScope.launch {
+        stopComposeJob?.cancel()
+        stopComposeJob = serviceScope.launch {
             delay(500)
             finishText()
         }
     }
 
-    fun keyListener(key: Button, possible: String): View.OnClickListener {
-        key.text = possible
-        return View.OnClickListener {
-            vibrate()
-            val existingText = currentInputConnection.getTextBeforeCursor(1, 0).toString()
-            if (isComposing && possible.contains(existingText)) {
-                val index = possible.indexOf(existingText)
-                val next = possible[(index + 1) % possible.length]
-                composeText(next.toString())
-            } else {
-                isComposing = !currentInputConnection.finishComposingText()
-                composeText(possible[0].toString())
-            }
+    fun keyPress(possible: String) {
+        vibrate()
+
+        val actualPossible = if (modifierActive) possible else possible.lowercase()
+
+        val existingText = currentInputConnection.getTextBeforeCursor(1, 0).toString()
+        if (isComposing && actualPossible.contains(existingText)) {
+            val index = actualPossible.indexOf(existingText)
+            val next = actualPossible[(index + 1) % actualPossible.length]
+            composeText(next.toString())
+        } else {
+            isComposing = !currentInputConnection.finishComposingText()
+            composeText(actualPossible[0].toString())
         }
+    }
+
+    fun moveCursor(offset: Int) {
+        val ic = currentInputConnection ?: return
+
+        val extracted = ic.getExtractedText(ExtractedTextRequest(), 0)
+        val cursor = extracted?.selectionEnd ?: return
+
+        vibrate()
+        ic.setSelection(cursor + offset, cursor + offset)
     }
 
     //
@@ -286,7 +249,7 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
     fun startSpeechToText() {
         if (!ensureMicPermissionOrOpenSettings()) return
         if (!SpeechRecognizer.isRecognitionAvailable(this)) return
-        if (!wantsToListen) return
+        if (!wantsToSpeak) return
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(
@@ -298,44 +261,30 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
         }
         speechRecognizer?.startListening(intent)
 
-        keysGroup.visibility = View.GONE
-        textRecognitionGroup.visibility = View.VISIBLE
         isListening = true
-        loadingView.visibility = View.VISIBLE
-        rotateInfinite(loadingView)
-
-        textRecognitionView.text = "Speak!"
     }
 
     fun stopSpeechToText() {
         isListening = false
 
         speechRecognizer?.stopListening()
-        loadingView.visibility = View.INVISIBLE
-        loadingView.animate().cancel()
-        loadingView.rotation = 0f
-        keysGroup.visibility = View.VISIBLE
-        textRecognitionGroup.visibility = View.GONE
     }
 
+    //
+
     override fun onPartialResults(partialResults: Bundle?) {
-        if (textRecognitionView.text == "Speak!") {
-            textRecognitionView.text = ""
-        }
         val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         Logger.getGlobal().info("onPartialResults $matches")
         val text = matches?.firstOrNull() ?: return
-        textRecognitionView.text = text
+        spokenText = text
     }
 
     override fun onResults(results: Bundle) {
         val list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         val best = list?.firstOrNull().orEmpty()
-        currentInputConnection.commitText(best, 1)
+        currentInputConnection.commitText("$best ", 1)
         handler.postDelayed({ startSpeechToText() }, 200)
     }
-
-    //
 
     override fun onError(error: Int) {
         val message = when (error) {
@@ -360,23 +309,110 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
     override fun onBufferReceived(buffer: ByteArray?) {}
     override fun onEvent(eventType: Int, params: Bundle?) {}
     override fun onRmsChanged(rmsdB: Float) {}
+}
 
-    //
+@Composable
+fun This(
+    wantsToSpeak: Boolean = false,
+    isListening: Boolean = false,
+    spokenText: String = "",
+    modifierActive: Boolean = false,
+    onMicClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onKeyClick: (id: String) -> Unit,
+    onModifierClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .background(Purple40)
+            .padding(
+                top = 10.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 10.dp,
+            )
+            .padding(horizontal = 10.dp)
+    ) {
+        MicLoadingDeleteRow(
+            wantsToSpeak = wantsToSpeak,
+            isListening = isListening,
+            spokenText = spokenText,
+            modifierActive = modifierActive,
+            onMicClick = onMicClick,
+            onDeleteClick = onDeleteClick,
+            onModifierClick = onModifierClick
+        )
 
-    fun rotateInfinite(view: View, duration: Long = 1000L) {
-        fun loop() {
-            view.animate()
-                .rotationBy(360f)
-                .setDuration(duration)
-                .withEndAction {
-                    if (view.isAttachedToWindow) {
-                        loop()
-                    }
-                }
-                .start()
+        if (!wantsToSpeak) {
+            Spacer(modifier = Modifier.size(10.dp))
+
+            KeysGroup(onKeyClick = onKeyClick)
         }
-        loop()
     }
+}
 
+@Composable
+@Preview
+fun Preview1() {
+    This(
+        wantsToSpeak = false,
+        false,
+        "",
+        false,
+        {},
+        {},
+        onKeyClick = {},
+        onModifierClick = {},
+    )
+}
+
+@Composable
+@Preview
+fun Preview15() {
+    This(
+        wantsToSpeak = false,
+        false,
+        "",
+        true,
+        {},
+        {},
+        onKeyClick = {},
+        onModifierClick = {},
+    )
+}
+
+@Composable
+@Preview
+fun Preview2() {
+    This(
+        wantsToSpeak = true,
+        isListening = false,
+        onMicClick = {},
+        onDeleteClick = {},
+        onKeyClick = {},
+        onModifierClick = {})
+}
+
+@Composable
+@Preview
+fun Preview3() {
+    This(
+        wantsToSpeak = true,
+        isListening = true,
+        onMicClick = {},
+        onDeleteClick = {},
+        onKeyClick = {},
+        onModifierClick = {})
+}
+
+@Composable
+@Preview
+fun Preview4() {
+    This(
+        wantsToSpeak = true,
+        isListening = true,
+        spokenText = "Hello",
+        onMicClick = {},
+        onDeleteClick = {},
+        onKeyClick = {},
+        onModifierClick = {})
 }
 
