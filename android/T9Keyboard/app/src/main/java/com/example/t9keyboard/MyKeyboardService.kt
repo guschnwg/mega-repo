@@ -1,13 +1,12 @@
 package com.example.t9keyboard
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.inputmethodservice.InputMethodService
-import android.media.MediaPlayer
 import android.media.SoundPool
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,39 +18,32 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.view.View
 import android.view.inputmethod.ExtractedTextRequest
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.t9keyboard.ui.theme.Purple40
-import com.example.t9keyboard.ui.theme.Purple80
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -59,15 +51,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
-import java.util.Timer
 import java.util.logging.Logger
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 
 class MyKeyboardService : InputMethodService(), RecognitionListener {
     private var wantsToSpeak by mutableStateOf(false)
     private var isListening by mutableStateOf(false)
-    private var modifierActive by mutableStateOf(false)
+    private var modifierActive by mutableStateOf(true)
     private var spokenText by mutableStateOf("")
 
 
@@ -112,6 +106,11 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
 
     //
 
+    override fun onWindowShown() {
+        modifierActive = true
+        super.onWindowShown()
+    }
+
     override fun onCreateInputView(): View {
         return ComposeView(this).apply {
             applyOwners(owners)
@@ -151,6 +150,7 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
                             "keyWXYZ" -> keyPress("WXYZ")
                             "keySpace" -> {
                                 vibrate()
+                                finishText()
                                 composeText(" ")
                                 finishText()
                             }
@@ -161,6 +161,12 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
                     onModifierClick = {
                         modifierActive = !modifierActive
                     },
+                    onSymbolSelect = { symbol ->
+                        vibrate()
+                        finishText()
+                        composeText(symbol)
+                        finishText()
+                    }
                 )
             }
         }
@@ -174,14 +180,18 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
     }
 
     fun vibrate(withSound: Boolean = true) {
-        val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        val vibrator = vibratorManager.defaultVibrator
-        if (vibrator.hasVibrator()) {
-            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-        }
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator = vibratorManager.defaultVibrator
+            if (vibrator.hasVibrator()) {
+                vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            }
 
-        if (withSound) {
-            soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+            if (withSound) {
+                soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+            }
+        } else {
+            TODO("VERSION.SDK_INT < S")
         }
     }
 
@@ -320,31 +330,44 @@ fun This(
     onMicClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onKeyClick: (id: String) -> Unit,
-    onModifierClick: () -> Unit
+    onModifierClick: () -> Unit,
+    onSymbolSelect: (symbol: String) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .background(Purple40)
-            .padding(
-                top = 10.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 10.dp,
+    var symbolsShown by remember { mutableStateOf(false) }
+
+    Box {
+        Column(
+            modifier = Modifier
+                .background(Purple40)
+                .padding(
+                    top = 10.dp,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 10.dp,
+                )
+                .padding(horizontal = 10.dp)
+                .alpha(if (symbolsShown) 0.2f else 1f)
+        ) {
+            MicLoadingDeleteRow(
+                wantsToSpeak = wantsToSpeak,
+                isListening = isListening,
+                spokenText = spokenText,
+                modifierActive = modifierActive,
+                onMicClick = onMicClick,
+                onDeleteClick = onDeleteClick,
+                onModifierClick = onModifierClick,
             )
-            .padding(horizontal = 10.dp)
-    ) {
-        MicLoadingDeleteRow(
-            wantsToSpeak = wantsToSpeak,
-            isListening = isListening,
-            spokenText = spokenText,
-            modifierActive = modifierActive,
-            onMicClick = onMicClick,
-            onDeleteClick = onDeleteClick,
-            onModifierClick = onModifierClick
-        )
 
-        if (!wantsToSpeak) {
-            Spacer(modifier = Modifier.size(10.dp))
+            if (!wantsToSpeak) {
+                Spacer(modifier = Modifier.size(10.dp))
 
-            KeysGroup(onKeyClick = onKeyClick)
+                KeysGroup(
+                    symbolsShown = symbolsShown,
+                    uppercase = modifierActive,
+                    onKeyClick = onKeyClick,
+                    onSymbolsToggle = { state ->
+                        symbolsShown = state
+                    }
+                )
+            }
         }
     }
 }
@@ -361,6 +384,7 @@ fun Preview1() {
         {},
         onKeyClick = {},
         onModifierClick = {},
+        onSymbolSelect = {}
     )
 }
 
@@ -376,6 +400,7 @@ fun Preview15() {
         {},
         onKeyClick = {},
         onModifierClick = {},
+        onSymbolSelect = {}
     )
 }
 
@@ -388,7 +413,9 @@ fun Preview2() {
         onMicClick = {},
         onDeleteClick = {},
         onKeyClick = {},
-        onModifierClick = {})
+        onModifierClick = {},
+        onSymbolSelect = {}
+    )
 }
 
 @Composable
@@ -400,7 +427,9 @@ fun Preview3() {
         onMicClick = {},
         onDeleteClick = {},
         onKeyClick = {},
-        onModifierClick = {})
+        onModifierClick = {},
+        onSymbolSelect = {}
+    )
 }
 
 @Composable
@@ -413,6 +442,8 @@ fun Preview4() {
         onMicClick = {},
         onDeleteClick = {},
         onKeyClick = {},
-        onModifierClick = {})
+        onModifierClick = {},
+        onSymbolSelect = {}
+    )
 }
 

@@ -1,6 +1,7 @@
 package com.example.t9keyboard
 
 import android.icu.number.IntegerWidth
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
@@ -29,19 +30,19 @@ fun KeyButton(
     onClick: () -> Unit,
     fontSize: TextUnit = 30.sp,
     width: Dp = 100.dp,
-    modifier: Modifier = Modifier.Companion,
     active: Boolean = false
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier
+        modifier = Modifier
             .width(width)
             .height(50.dp),
         contentPadding = PaddingValues(0.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (active) Pink80 else Purple80
+            containerColor = if (active) Purple40 else Purple80,
         ),
+        border = BorderStroke(1.dp, if (active) Purple80 else Purple80)
     ) {
         Text(text = text, fontSize = fontSize)
     }
@@ -49,7 +50,7 @@ fun KeyButton(
 
 @Preview
 @Composable
-fun _PreviewKeyButton() {
+fun PreviewKeyButton() {
     Column {
         KeyButton("WZYX", {})
         KeyButton("WZYX", {}, fontSize = 20.sp)
