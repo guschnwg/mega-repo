@@ -20,6 +20,7 @@ import android.view.View
 import android.view.inputmethod.ExtractedTextRequest
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,8 +56,10 @@ import java.util.logging.Logger
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 
 class MyKeyboardService : InputMethodService(), RecognitionListener {
     private var wantsToSpeak by mutableStateOf(false)
@@ -138,27 +141,7 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
                         finishText()
                         currentInputConnection.deleteSurroundingText(1, 0)
                     },
-                    onKeyClick = { id ->
-                        when (id) {
-                            "keySymbols" -> keyPress(",.?!")
-                            "keyABC" -> keyPress("ABC")
-                            "keyDEF" -> keyPress("DEF")
-                            "keyGHI" -> keyPress("GHI")
-                            "keyJKL" -> keyPress("JKL")
-                            "keyMNO" -> keyPress("MNO")
-                            "keyPQRS" -> keyPress("PQRS")
-                            "keyTUV" -> keyPress("TUV")
-                            "keyWXYZ" -> keyPress("WXYZ")
-                            "keySpace" -> {
-                                vibrate()
-                                finishText()
-                                composeText(" ")
-                                finishText()
-                            }
-                            "keyLeft" -> moveCursor(-1)
-                            "keyRight" -> moveCursor(+1)
-                        }
-                    },
+                    onKeyClick = { possible -> keyPress(possible) },
                     onModifierClick = {
                         modifierActive = !modifierActive
                     },
@@ -167,7 +150,8 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
                         finishText()
                         composeText(symbol)
                         finishText()
-                    }
+                    },
+                    onPositionChange = { offset -> moveCursor(offset) },
                 )
             }
         }
@@ -330,7 +314,8 @@ fun This(
     onDeleteClick: () -> Unit,
     onKeyClick: (id: String) -> Unit,
     onModifierClick: () -> Unit,
-    onSymbolSelect: (symbol: String) -> Unit
+    onSymbolSelect: (symbol: String) -> Unit,
+    onPositionChange: (offset: Int) -> Unit,
 ) {
     var symbolsShown by remember { mutableStateOf(false) }
 
@@ -343,9 +328,9 @@ fun This(
                     bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 10.dp,
                 )
                 .padding(horizontal = 10.dp)
-                .alpha(if (symbolsShown) 0.2f else 1f)
         ) {
             MicLoadingDeleteRow(
+                modifier = Modifier.alpha(if (symbolsShown) 0.2f else 1f),
                 wantsToSpeak = wantsToSpeak,
                 isListening = isListening,
                 spokenText = spokenText,
@@ -364,8 +349,23 @@ fun This(
                     onKeyClick = onKeyClick,
                     onSymbolsToggle = { state ->
                         symbolsShown = state
-                    }
+                    },
+                    onSymbolSelect = onSymbolSelect
                 )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 2.dp)
+                    .alpha(if (symbolsShown) 0.2f else 1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                KeyButton("👈", { onPositionChange(-1) }, 20.sp)
+                Spacer(Modifier.width(20.dp))
+                KeyButton("␣", { onSymbolSelect(" ") }, 20.sp)
+                Spacer(Modifier.width(20.dp))
+                KeyButton("👉", { onPositionChange(+1) }, 20.sp)
             }
         }
     }
@@ -383,7 +383,8 @@ fun Preview1() {
         {},
         onKeyClick = {},
         onModifierClick = {},
-        onSymbolSelect = {}
+        onSymbolSelect = {},
+        onPositionChange = {},
     )
 }
 
@@ -399,7 +400,8 @@ fun Preview15() {
         {},
         onKeyClick = {},
         onModifierClick = {},
-        onSymbolSelect = {}
+        onSymbolSelect = {},
+        onPositionChange = {},
     )
 }
 
@@ -413,7 +415,8 @@ fun Preview2() {
         onDeleteClick = {},
         onKeyClick = {},
         onModifierClick = {},
-        onSymbolSelect = {}
+        onSymbolSelect = {},
+        onPositionChange = {},
     )
 }
 
@@ -427,7 +430,8 @@ fun Preview3() {
         onDeleteClick = {},
         onKeyClick = {},
         onModifierClick = {},
-        onSymbolSelect = {}
+        onSymbolSelect = {},
+        onPositionChange = {},
     )
 }
 
@@ -442,7 +446,8 @@ fun Preview4() {
         onDeleteClick = {},
         onKeyClick = {},
         onModifierClick = {},
-        onSymbolSelect = {}
+        onSymbolSelect = {},
+        onPositionChange = {},
     )
 }
 
