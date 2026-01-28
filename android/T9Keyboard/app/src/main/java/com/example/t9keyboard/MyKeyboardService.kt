@@ -108,6 +108,7 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
 
     override fun onWindowShown() {
         modifierActive = true
+        soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
         super.onWindowShown()
     }
 
@@ -173,7 +174,6 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
-        Logger.getGlobal().info("onFinishInputView")
         wantsToSpeak = false
         stopSpeechToText()
         super.onFinishInputView(finishingInput)
@@ -198,10 +198,10 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
     //
 
     fun finishText() {
-        isComposing = !currentInputConnection.finishComposingText()
-        if (modifierActive) {
+        if (modifierActive && isComposing) {
             modifierActive = false
         }
+        isComposing = !currentInputConnection.finishComposingText()
     }
 
     fun composeText(text: String) {
@@ -217,14 +217,13 @@ class MyKeyboardService : InputMethodService(), RecognitionListener {
         vibrate()
 
         val actualPossible = if (modifierActive) possible else possible.lowercase()
-
         val existingText = currentInputConnection.getTextBeforeCursor(1, 0).toString()
         if (isComposing && actualPossible.contains(existingText)) {
             val index = actualPossible.indexOf(existingText)
             val next = actualPossible[(index + 1) % actualPossible.length]
             composeText(next.toString())
         } else {
-            isComposing = !currentInputConnection.finishComposingText()
+            finishText()
             composeText(actualPossible[0].toString())
         }
     }
