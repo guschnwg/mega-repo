@@ -1,4 +1,4 @@
-setup:
+setup-zed:
 	rm -rf .pio
 	which platformio || brew install platformio
 	pio project init

@@ -35,8 +35,8 @@
 
 Button2 btn(BUTTON_1);
 TouchClass touch;
-const char *ssid = "CAZINHA2G";
-const char *password = "Will2020Mu*";
+const char *ssid = "CAMILESTE LTDA";
+const char *password = "emirina123";
 uint8_t *framebuffer = NULL;
 Rect_t area = epd_full_screen();
 WebServer server(80);
@@ -130,7 +130,7 @@ void full_clear_screen() {
 
 void update_from_dontpad() {
   String url = "https://api.dontpad.com/"
-               "30628459679428488.body.json?lastModified=1743178756559";
+               "camileste.body.json?lastModified=0&session-token=2a376b92c8baacba12e7";
 
   HTTPClient http;
   http.begin(url);
@@ -139,9 +139,26 @@ void update_from_dontpad() {
   if (httpCode > 0) { // Check for the returning code
     String payload = http.getString();
 
-    int cursor_x = 300;
-    int cursor_y = 200;
-    writeln(font, (char *)payload.c_str(), &cursor_x, &cursor_y, framebuffer);
+    int bodyStart = payload.indexOf("\"body\":\"") + 8;
+    int bodyEnd = payload.indexOf("\"", bodyStart);
+    String body = payload.substring(bodyStart, bodyEnd);
+
+    int cursor_x = 0;
+    int cursor_y = 100;
+    int lineStart = 0;
+    int newline;
+    while ((newline = body.indexOf("\\n", lineStart)) != -1) {
+      String line = body.substring(lineStart, newline);
+      cursor_x = 0;
+      writeln(font, (char *)line.c_str(), &cursor_x, &cursor_y, framebuffer);
+      cursor_y += 30;
+      lineStart = newline + 2;
+    }
+    String last = body.substring(lineStart);
+    if (last.length() > 0) {
+      cursor_x = 0;
+      writeln(font, (char *)last.c_str(), &cursor_x, &cursor_y, framebuffer);
+    }
   } else {
     Serial.println("Error on HTTP request " + String(httpCode));
   }
